@@ -2,6 +2,7 @@ from anygui.backends import *
 __all__ = anygui.__all__
 
 from Tkinter import * # A bit risky
+from operator import truth
 import re, Tkinter, os
 
 # Figure out proper setting for Tk's "exportselection" option.
@@ -253,7 +254,7 @@ class ToggleButtonMixin(ComponentMixin):
 
     def _ensure_state(self):
         if self._tk_comp is not None:
-            self._var.set(self.on)
+            self._var.set(truth(self.on))
 
     def _ensure_created(self):
         result = ComponentMixin._ensure_created(self)
