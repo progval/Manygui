@@ -16,6 +16,9 @@ Short-term Objectives/FIXMEs [mlh]
 * Use a fixed set of attributes (or something similar)?
   Remove blocked names?
 
+* Find a general scheme for event setup and calling rawModify from
+  backend wrappers
+
 * Rewrite AbstractApplication; clear up prodding issue
 
 * Clear up _foo issue
