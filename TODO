@@ -13,6 +13,9 @@ Goals for version 0.1:
 * Make new Windows invisible until event loop is entered
   or re-entered, e.g. after a callback
 
+* Add basic one-level "shrink-wrapping" of windows
+  (May be postponed)
+
 Goals for version 0.2:
 ----------------------
 

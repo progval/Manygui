@@ -2,12 +2,11 @@ Developers:
 -----------
 
 Magnus Lie Hetland          admin, core, javagui, tkgui, wxgui
-Thomas Heller               core, wxgui, mswgui*
+Thomas Heller               core, wxgui, mswgui
 Alex Martelli               dhtmlgui*
 Matthew Schinckel           beosgui
 Kalle Svensson              gtkgui
 Joe Knapka                  tkgui
-Just van Rossum             macgui*
 Shanky Tiwari               pyqtgui*, javagui
 David Mertz                 cursesgui*
 
@@ -27,3 +26,4 @@ Samuele Pedroni
 Dmitry Samosseiko
 Amardeep Singh
 Niki Spahiev
+Just van Rossum
