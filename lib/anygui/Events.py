@@ -23,7 +23,7 @@ registry   = {}, {}, {}, {}
 sources = {}
 
 import time
-from Utils import WeakMethod, HashableWeakRef
+from Weakrefs import WeakMethod, HashableWeakRef
 ref = HashableWeakRef
 
 def locators(event, weak=0):
