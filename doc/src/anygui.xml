@@ -1192,6 +1192,16 @@
       <para>For information about the order in which event handlers
       are called, see <code>link</code>, above.</para>
 
+      <para><strong>Important:</strong> Due to the current semantics
+      of the <code>any</code> value, using it in <code>send</code> may
+      not be a good idea, since the result might not be what you
+      expect. For instance, calling <code>send(any, any)</code> will
+      only activate event handlers which have been linked to the value
+      <code>any</code> as both source and event, not to "event
+      handlers with any source and any event". This may change in
+      future releases. The current behaviour of <code>send</code> with
+      <code>any</code> is consistent with <code>unlink</code>.</para>
+
       <para><apiname>unlink</apiname>(<var>source</var>,
       [<var>event</var>,] <var>handler</var>)</para>
 
@@ -1288,6 +1298,16 @@
       methods. These will be described with the individual classes
       below.</para>
 
+      <para>[[@@@ intro para]]</para>
+
+      <para><apiname>set</apiname>(...)</para>
+
+      <para>[[@@@]]</para>
+
+      <para><apiname>modify</apiname>(...)</para>
+
+      <para>[[@@@]]</para>
+
       <para><apiname>update</apiname>()</para>
       
       <para>When an attribute of a <code>Component</code> (or
@@ -1379,7 +1399,11 @@
       the <code>update</code> method of the <code>Attrib</code> object
       is called automatically.</para>
 
-      <!-- document the value attribute -->
+      <para>All models have a <code>value</code> attribute, which
+      contains a "simple" version of its state (such as a number for
+      <code>NumberModel</code>, a list for <code>ListModel</code>,
+      etc.) Assigning to this attribute is a simple way of modifying
+      the model in place.</para>
 
       <para><strong>class Application</strong></para>
 
@@ -1463,14 +1487,18 @@
     
       <para><strong>class CheckBox</strong></para>
 
-      <!-- @@@ see listbox? -->
-
       <para><code>CheckBox</code> is a kind of button, and thus will
       also generate <code>'click'</code> and <code>'default'</code>
       events when clicked. But in addition, each <code>CheckBox</code>
       has a Boolean attribute <code>on</code>, which is toggled each
       time the box is clicked. The state of the <code>CheckBox</code>
       can be altered by assigning to this attribute.</para>
+
+      <para>The <code>on</code> property will be automatically
+      modified (as per the MVC mechanism) when the user clicks the
+      <code>CheckBox</code>. This will also cause the
+      <code>CheckBox</code> to <code>send</code> a <code>click</code>
+      and a <code>default</code>event.</para>
     
       <para>The <code>on</code> attribute is a useful place to use a
       <code>BooleanModel</code>.</para>
@@ -1518,13 +1546,13 @@
 
       <para>A layout manager is responsible for setting the
       <code>geometry</code> properties of a set of components when
-      their parent <code>Frame</code> changes shape. <!-- A layout
-      manager should subclass <code>LayoutManager</code>, and then
-      implement the following methods: --> The default
+      their parent <code>Frame</code> changes shape. The default
       <code>LayoutManager</code> (and the only one supplied with the
       current release) is the <code>Placer</code> (see below).
       </para>
 
+      <!-- Implementing your own LayoutManager... -->
+      
       <para><strong>Note:</strong> Although Anygui &shortversion;
       comes only with this layout manager, more will appear in the
       future.</para>
@@ -1540,7 +1568,8 @@
       <para>The <code>selection</code> property will be automatically
       modified (as per the MVC mechanism) when the user makes a
       selection. This will also cause the <code>ListBox</code> to
-      <code>send</code> a <code>select</code> event.</para>
+      <code>send</code> a <code>select</code> and a
+      <code>default</code>event.</para>
 
       <para><strong>class Model</strong></para>
 
@@ -1737,7 +1766,7 @@
   <section>
     <title>Anygui License</title>
 
-    <para>Copyright &copy; 2001 &copyrightholders;.</para>
+    <para>Copyright &copy; 2001, 2002 &copyrightholders;.</para>
 
     <para>Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
