@@ -458,8 +458,8 @@ class WindowWrapper(ComponentWrapper):
 ################################################################
 
 class Application(AbstractApplication, wxApp):
-    def __init__(self):
-        AbstractApplication.__init__(self)
+    def __init__(self, **kwds):
+        AbstractApplication.__init__(self, **kwds)
         wxApp.__init__(self, 0)
         
     def OnInit(self):
