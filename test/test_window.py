@@ -10,7 +10,7 @@ win = MyWindow(title="A Standard Window",
                width=220, height = 45)
 app.add(win)
 
-def new_window(**kw):
+def new_window(event):
     win = Window(title='Yay, another window!')
 
     # Test for flashing (should not be visible):

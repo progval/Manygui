@@ -20,13 +20,13 @@ But they're cute, and they're cuddly, and they're ready to please.
 
 # FIXME: Change names -- text area used instead of label
 
-def init_field(**kw):
+def init_field(event):
     global ta, lbl
     ta.text = the_text
     ta.selection = (23,30)
     update_label()
 
-def update_label(**kw):
+def update_label(event):
     global ta, lbl
     sel = ta.selection
     text = ta.text

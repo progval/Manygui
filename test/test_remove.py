@@ -4,10 +4,10 @@ app = Application()
 win = Window(width = 100, height = 100)
 app.add(win)
 
-def add_btn(**kws):
+def add_btn(event):
     win.add(b2)
 
-def remove_btn(**kws):
+def remove_btn(event):
     win.remove(b2)
 
 b = Button(geometry=(10,10,50,32),text="Add")

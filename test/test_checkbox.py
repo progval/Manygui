@@ -3,7 +3,7 @@ from anygui.Utils import log
 
 app = Application()
 
-def report(**kw):
+def report(event):
     log("Check box set to", box.on)
 
 win = Window(width = 140, height = 90)

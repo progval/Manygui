@@ -11,7 +11,10 @@ app.add(win)
 cvs = Canvas(size=win.size)
 win.add(cvs)
 
-def click(x, y, **kw):
+#def click(x, y, **kw):
+def click(e):
+    x = e.x
+    y = e.y
     log('[Mouse clicked at (%i, %i)]' % (x, y))
     if 30 <= x <= 100 and 30 <= y <= 100:
         log('Yay! You clicked the round rect!')

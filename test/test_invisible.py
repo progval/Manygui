@@ -13,7 +13,7 @@ w1.add(lab)
 w2 = Window(title='This Window is visible', size=(200, 100))
 app.add(w2)
 
-def show(**kw):
+def show(*args, **kw):
     w1.visible = 1
 
 b = Button(text='Show other window', position=(5, 5),

@@ -2,10 +2,12 @@
 ''' Event framework for Anygui.
 
     Magnus Lie Hetland 2001-11-26
+
+    2002-02-12: Modified send() to send a single event object to the
+                event handlers.
 '''
 
 TODO = '''
-    - Add tags
     - Fix optional arguments/use of kwdargs in place of positionals etc.
 '''
 
@@ -26,12 +28,13 @@ __all__ = '''
 import time
 from References import ref, mapping
 registry = mapping()
-from Utils import IdentityStack
+from Utils import IdentityStack, Bunch
 source_stack = IdentityStack()
 
 class Internal: pass
 any  = Internal()
-void = Internal()
+
+class Event(Bunch): pass
 
 #def link(source, event, handler,  weak=0, loop=0):
 def link(*args, **kwds):
@@ -85,12 +88,12 @@ def lookup(source, event):
 def send(source, event='default', loop=0, **kw):
     'Call the appropriate event handlers with the supplied arguments. \
     As a side-effect, dead handlers are removed from the candidate lists.'
-    args = {'source': source, 'event': event}
+    args = {'source': source, 'event': event, 'time': time.time()}
     args.update(kw)
+    args.setdefault('dict', args)
     source_stack.append(source)
     try:
         results = []
-        args.setdefault('time', time.time())
         for handlers in lookup(source, event):
             live_handlers = []
             for r in handlers:
@@ -102,7 +105,7 @@ def send(source, event='default', loop=0, **kw):
                         if not loop and not r.loop \
                            and obj in source_stack: continue
                     handler = r()
-                    result = handler(**args)
+                    result = handler(Event(**args))
                     if result is not None: results.append(result)
             handlers[:] = live_handlers
         if results: return results
@@ -112,8 +115,11 @@ def send(source, event='default', loop=0, **kw):
 class Sender:
     def __init__(self, event):
         self.event = event
-    def __call__(self, source, event, **kwds):
-        send(source, self.event, **kwds)
+    def __call__(self, event):
+        args = event.dict.copy()
+        del args['source']
+        del args['event']
+        send(event.source, self.event, **args)
         
 def sender(event='default'):
     return Sender(event)

@@ -1,13 +1,13 @@
 from anygui import *
 from anygui.Utils import log
 
-def init_field(**kw):
+def init_field(event):
     global tf, lbl
     tf.text = 'This is a TextField test.'
     tf.selection = (10,19)
     update_label()
 
-def update_label(**kw):
+def update_label(event):
     global tf, lbl
     sel = tf.selection
     text = tf.text
@@ -15,7 +15,7 @@ def update_label(**kw):
                '[' + text[sel[0]:sel[1]] + ']' + \
                 text[sel[1]:]
 
-def print_contents(**kw):
+def print_contents(event):
     global tf
     log('Enter was pressed. Field contents:', tf.text)
 

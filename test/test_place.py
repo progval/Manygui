@@ -10,13 +10,13 @@ TestView = BigTestView = View = Button
 #import pdb
 #import sys
 
-def pushed_it(**kw):
+def pushed_it(event):
     log("Button pushed.")
 
-def checked_it(**kw):
+def checked_it(event):
     log("Check boxes changed to:", cb1.on, cb2.on)
 
-def option_chosen(**kw):
+def option_chosen(event):
     log("Hoopy option %d chosen" % rg.value)
 
 def main():

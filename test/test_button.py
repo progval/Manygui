@@ -8,7 +8,7 @@ g_y = 150
 win = Window(width = 110, height = 210)
 app.add(win)
 
-def say_hello(**kw):
+def say_hello(event):
     log("Hello, world!")
     global g_y
     btn = Button(opt, y = g_y, text="New")

@@ -33,7 +33,7 @@ for p in people:
         mask = mask >> 1
 
 # Callbacks
-def chmod(**kw):
+def chmod(event):
     mode, mask = 0, 256
     for p in people:
         for t in types:
@@ -43,7 +43,7 @@ def chmod(**kw):
     os.chmod(filename, mode)
     sys.exit()
 
-def exit(**kw): sys.exit()
+def exit(event): sys.exit()
 
 opt = Options(y=140, width=80, height=25)
 

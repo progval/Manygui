@@ -42,7 +42,7 @@ def doAgain(*args,**kws):
     l1.text = "Your move..."
 
 def makeMove(btn):
-    def do_move(btn=btn,**kws):
+    def do_move(event, btn=btn):
         doMove(btn)
     return do_move
 

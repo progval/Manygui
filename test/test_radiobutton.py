@@ -3,7 +3,7 @@ from anygui.Utils import log
 
 app = Application()
 
-def report(**kw):
+def report(event):
     log("Radio button clicked")
     btn.on = not btn.on
 

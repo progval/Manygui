@@ -11,7 +11,7 @@ cng = Button(text='Change')
 
 cmps = btn, cbx, rbn, lbl
 
-def change(**kw):
+def change(event):
     for cmp in cmps:
         cmp.text = 'After'
 

@@ -1,7 +1,7 @@
 """
 >>> from anygui.Events import *
 >>> class Test:
-...     def handle(self, **kw):
+...     def handle(self, event):
 ...         print 'Handled!'
 ...
 
@@ -72,9 +72,9 @@ Handled!
 
 Wrapper functions:
 
->>> def wrapper_test(obj, **kw):
+>>> def wrapper_test(obj, event):
 ...     print '<wrapper>'
-...     obj.handle()
+...     obj.handle(event)
 ...     print '</wrapper>'
 ...
 >>> s = Test()
@@ -88,11 +88,11 @@ Handled!
 Return values from event handlers:
 
 >>> s = Test()
->>> def handler1(**kw): return 1
+>>> def handler1(event): return 1
 ...
->>> def handler2(**kw): return 2
+>>> def handler2(event): return 2
 ...
->>> def handler3(**kw): return 3
+>>> def handler3(event): return 3
 ...
 >>> link(s, 'return-values', handler1)
 >>> link(s, 'return-values', handler2)
@@ -102,7 +102,7 @@ Return values from event handlers:
 
 Globbing:
 
->>> def globbed_handler(**kw):
+>>> def globbed_handler(event):
 ...     print 'Here I am!'
 ...
 >>> link(any, any, globbed_handler)
@@ -120,7 +120,7 @@ Here I am!
 
 Exception handling:
 
->>> def faulty_handler(**kw):
+>>> def faulty_handler(event):
 ...     print 1/0
 ...
 >>> s = Test()
@@ -136,7 +136,7 @@ Relaying with sender wrapper:
 
 >>> src = 'foo'
 >>> link(src, sender('relayed_event'))
->>> def relayed_event_handler(**kwds):
+>>> def relayed_event_handler(event):
 ...     print 'Caught relayed_event'
 >>> link(any, 'relayed_event', relayed_event_handler)
 >>> send(src)

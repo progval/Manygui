@@ -199,5 +199,8 @@ class DefaultEventMixin:
             link(self, self._default_event, self._default_event_handler,
                  weak=1, loop=1)
 
-    def _default_event_handler(self, event, source, **kw):
-        send(self, 'default', **kw)
+    def _default_event_handler(self, event):
+        args = event.dict.copy()
+        del args['source']
+        del args['event']
+        send(self, 'default', **args)

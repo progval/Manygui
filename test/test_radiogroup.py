@@ -6,11 +6,11 @@ labels = ["Banana", "Chocolate", "Strawberry"]
 grp = RadioGroup()
 grp1 = RadioGroup()
 
-def report(**kw):
+def report(event):
     log(grp.value)
     log(labels[grp.value], "selected (%d)" % grp.value)
 
-def report1(**kw):
+def report1(event):
     log(labels[grp1.value], "selected (%d)" % grp1.value)
     
 app = Application()

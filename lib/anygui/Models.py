@@ -27,8 +27,8 @@ class Assignee:
 
 class Model(Attrib, Assignee):
 
-    def refresh(self, **kwds):
-        self.send(**kwds)
+    def refresh(self, event):
+        self.send(**event.dict)
 
     def __init__(self, *arg, **kw):
         Assignee.__init__(self)

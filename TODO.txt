@@ -156,3 +156,5 @@ Smaller issues:
 
 * Add idle events, to facilitate "weaving" with other periodic tasks
   without using threads.
+
+* Add tags to the event system.

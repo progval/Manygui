@@ -9,15 +9,15 @@ win = Window(width = 110, height = 210)
 app.add(win)
 newbtn = None
 
-def printit1(**ignore_kwds):
+def printit1(event):
     return
     log('printit1:',newbtn.text)
 
-def printit2(**ignore_kwds):
+def printit2(event):
     return
     log('printit2:',newbtn.text)
 
-def say_hello(**kw):
+def say_hello(event):
     #log("Hello, world!")
     global newbtn
     if newbtn is None:

@@ -9,6 +9,8 @@
 
 <!-- TODO: - Add special tags for API reference
            - Add script for version
+           - Describe new send() behaviour -- no longer uses **kwds, but event object;
+             (Add this description to the tutorial as well).
 
      Remember to keep backend-list up to date
 -->
