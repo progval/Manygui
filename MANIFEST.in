@@ -7,3 +7,4 @@ include README
 include TODO
 include VERSION
 include doc/anygui.*
+include demo/*
