@@ -191,7 +191,8 @@ def setLogFile(fileobj):
 def logFlush():
     _logger.flush()
 
-def logTraceback(n):
+def logTraceback(n,label=None):
+    if label is not None: _logger._f.write(label+': ')
     import traceback
     traceback.print_exc(n,_logger._f)
 
