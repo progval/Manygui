@@ -101,7 +101,7 @@ Return values from event handlers:
 '''
 
 if __name__ == "__main__":
-    print "If you want detailed output, use \"python test_messages.py -v\"."
+    print "If you want detailed output, use \"python test_events.py -v\"."
     print "No output after this line indicates success."
     import doctest, test_events
     doctest.testmod(test_events)
