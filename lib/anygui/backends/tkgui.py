@@ -98,7 +98,6 @@ class ComponentWrapper(Wrapper):
         if not self.widget: return
         if not self.visible: return
         self.widget.place(width=width)
-        self.widget.update_idletasks()
 
     def setHeight(self, height):
         if not self.widget: return
