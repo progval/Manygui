@@ -17,7 +17,7 @@
 
   <author>Magnus Lie Hetland</author>
 
-  <date>December 6th, 2001</date>
+  <date>...</date>
 
   <section>
     <title>Introduction</title>
@@ -249,6 +249,8 @@
   <section>
     <title>Using Anygui</title>
 
+    <para>[To be rewritten shortly]</para>
+
     <para><emphasis>Note</emphasis>: For some examples of working
     <name>Anygui</name> code, see the <code>test</code> directory of
     the distribution.</para>
@@ -366,7 +368,7 @@
 	<line>app.run()</line>
       </codelisting>
 
-      <!-- New visibility defaults; show()/hide() removed -->
+      <!-- New visibility defaults; show()/hide() removed...? -->
  
       <para>The problem with this code is that the window would be
       invisible. At the time of creation, windows are hidden, so that
@@ -922,9 +924,10 @@
     <section>
       <title>Classes</title>
        
-      <!-- TODO: Add Placer/LayoutManager stuff -->
-
       <para><strong>Base Classes and Common Behaviour</strong></para>
+
+      <!-- Add info about update() and the assignee protocol, if
+      adopted; models... -->
 
       <para>All components are subclasses of corresponding abstract
       components which implement behaviour common to all the
@@ -1016,6 +1019,8 @@
       time the box is clicked. The state of the <code>CheckBox</code>
       can be altered by assigning to this attribute.</para>
     
+      <!-- model stuff -->
+
       <para><strong>class Frame</strong></para>
   
       <para><code>Frame</code> is a component which can contain other
@@ -1030,17 +1035,28 @@
       will be added.</para>
 
       <para>The <code>opts</code> parameter containes an
-      <code>Options</code> object (see below)</para>
-
-      <para>[layout, layout managers, layout property]</para>
+      <code>Options</code> object (see below) which gives information
+      about how the object should be laid out. These options can be
+      overridden with keyword arguments, and all this information will
+      be passed to the <code>LayougManager</code> (see below) of the
+      <code>Frame</code>, if any. This <code>LayougManager</code> is
+      stored in the <code>layoug</code> property.</para>
 
       <para><strong>class Label</strong></para>
 
-      <para>[Under construction]</para>
+      <para>A <code>Label</code> is a simple component which displays
+      a string of text. (<code>Label</code> can only handle one line
+      of text.)</para>
       
       <para><strong>class LayoutManager</strong></para>
 
-      <para>[Generic functionality, Placer as default]</para>
+      <para>A layout manager is responsible for setting the
+      <code>geometry</code> properties of a set of components when
+      their parent <code>Frame</code> changes shape. A layout manager
+      should subclass <code>LayougManager</code>, and then implement
+      the following methods:</para>
+
+      <!-- placer as default -->
 
       <para><strong>class ListBox</strong></para>
       
@@ -1048,15 +1064,73 @@
 
       <para><strong>class Options</strong></para>
       
-      <para>[Under construction]</para>
-            
+      <para><code>Options</code> is a very simple class. It is simply
+      used to store a bunch of named values; basically a dictionary
+      with a different syntax. (For more information about the
+      <name>bunch</name> class, see
+      <url>http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52308</url>.)</para>
+           
+      <para>You can set the attributes of an <code>Options</code>
+      object and then supply it as an optional first parameter to the
+      constructors of widgets:</para>
+
+      <codelisting>
+	<line>opt = Options()</line>
+	<line>opt.width = 100</line>
+	<line>opt.height = 50</line>
+	<line>opt.x = 10</line>
+	<line>btn = Button(opt, y=10)</line>
+	<line>lbl = Label(opt, y=70)</line>
+      </codelisting>
+
+      <para>Here <code>btn</code> and <code>lbl</code> will have the
+      same <code>width</code>, <code>height</code>, and <code>x</code>
+      attributes, but differing <code>y</code> attributes.</para>
+
+      <para>You can also set the attributes of an <code>Options</code>
+      object through its constructur, just like with
+      components:</para>
+
+      <codelisting>
+	<line>opt = Options(width=100, height=50, x=10)</line>
+      </codelisting>
+      
+      <para><code>Options</code> objects can also be used when
+      supplying arguments to the <code>add</code> method of
+      <code>Frame</code>:</para>
+
+      <codelisting>
+	<line># Assuming a Placer LayoutManager:</line>
+	<line>opt = Options(left=10, right=10, hstretch=1)</line>
+	<line>win.add(lbl, opt, top=10)</line>
+	<line>win.add(btn, opt, top=(lbl,10))</line>
+      </codelisting>
+
       <para><strong>class RadioButton</strong></para>
       
-      <para>[Under construction]</para>
+      <para>A <code>RadioButton</code> is a toggle button, just like
+      <code>CheckBox</code>, with slightly different appearance, and
+      with the difference that it belongs to a
+      <code>RadioGroup</code>. Only one <code>RadioButton</code> can
+      be active (have its <code>on</code> attribute be a true Boolean
+      value)in the <code>RadioGroup</code> at one time, so when one is
+      clicked or programmatically turned on, the others are
+      automatically switched off by the <code>RadioGroup</code>. Each
+      <code>RadioButton</code> also has a <code>value</code>
+      attribute, which should be unique within its
+      <code>RadioGroup</code>. When one <code>RadioButton</code> is
+      active, the <code>value</code> attribute of its
+      <code>RadioGroup</code> is automatically set to that of the
+      active <code>RadioButton</code>. The <code>RadioGroup</code> of
+      a <code>RadioButton</code> is set by assigning the
+      <code>RadioGroup</code> to the <code>group</code> attribute of
+      the <code>RadioButton</code>. Setting the <code>value</code>
+      attribute of the <code>RadioGroup</code> will automatically
+      activate the correct <code>RadioButton</code>.</para>
       
       <para><strong>class RadioGroup</strong></para>
       
-      <para>[Under construction]</para>
+      <para>See <code>RadioButton</code> above.</para>
           
       <para><strong>class TextArea</strong></para>
 
@@ -1068,7 +1142,51 @@
         
       <para><strong>class Window</strong></para>
 
-      <para>[Under construction]</para>
+      <para>A window, plain and simple. <code>Window</code> is a type
+      of <code>Frame</code>, so you can add components to it and set
+      its <code>layout</code> property etc.</para>
+
+      <para>One part of <code>Window</code>'s behaviour separates it
+      from the other component classes. When you create a
+      <code>Window</code> object, it's "closed"; it won't show up on
+      your screen, even it has <code>visible=1</code> (which it has by
+      default). To make it appear, you'll have to call the following
+      method:</para>
+
+      <para><apiname>open</apiname>()</para>
+
+      <para>Opens a <code>Window</code> after it has been created. If
+      the <code>Window</code>'s <code>visible</code> attribute is
+      false, the <code>Window</code> will still be invisible;
+      otherwise it will appear on the screen.</para>
+
+      <para>The <code>open</code> method is called on all windows by
+      the <code>Application</code> object when you call its
+      <code>run</code> method, so you only have to call
+      <code>open</code> explicitly if you create new windows after
+      your program has started running.</para>
+
+      <para><strong>Rationale</strong>: The reason for this method is
+      to avoid so-called "flashing". If a <code>Window</code>
+      automatically appeared when created and you wanted to hide it
+      while you added components to it, it would momentarily "flash"
+      on the screen. One way of avoiding this would be to supply
+      <code>visible=0</code> to the constructor, but then you would
+      have to do that with every <code>Window</code> you created. To
+      fix this, visibility might default to false, but then you would
+      have to explicitly show every window you created. With the
+      current solution, you only have to explicitly open those windows
+      you create after the program has started running. So why
+      couldn't the <code>Application</code> object automatically show
+      all <code>Window</code>s when you started your program? Because
+      you might want to hide some of them while showing others. Using
+      a separate method for opening the windows allows you to do
+      so.</para>
+
+      <para><strong>Note</strong>: This behaviour may change in future
+      releases.</para>
+
+      <!-- hide/show -->
 
     </section>
 
@@ -1080,13 +1198,23 @@
     <para>For an overview of known bugs in the current release, see
     the file <code>KNOWN_BUGS</code> found in the distribution.</para>
 
+    <!--
+
+    <para>To find out which backends pass which tests in the current
+    CVS version, take a look at the file <code>status.txt</code> in
+    the CVS directory <code>nondist/admin</code>, available from
+    <url>http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/anygui/nondist/admin/status.txt</url>.</para>
+
+    -->
+
   </section>
 
   <section>
     <title>Plans for Future Releases</title>
 
     <para>For an overview of future plans, see the <code>TODO</code>
-    file found in the distribution.</para>
+    file found in the distribution. Some plans are also described in
+    the IRFCs (<url>http://anygui.sf.net/irfc</url>).</para>
 
   </section>
 

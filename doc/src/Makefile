@@ -12,7 +12,7 @@ clean:
 	rm -f *.aux *.toc *.log *~
 
 distclean: clean
-	rm -f ../*.html ../*.pdf ../*.ps *.tex ../*.txt
+	rm -f ../*.html ../*.pdf ../*.ps *.tex ../*.txt temp.xml
 
 ../anygui.pdf: anygui.tex anygui.sty
 	pdflatex anygui
@@ -22,17 +22,20 @@ distclean: clean
 ../anygui.ps: ../anygui.pdf
 	pdf2ps ../anygui.pdf ../anygui.ps
 
-anygui.tex: anygui.xml min2tex.xsl
-	xalan -IN anygui.xml -XSL min2tex.xsl -OUT anygui.tex
+anygui.tex: temp.xml min2tex.xsl
+	xalan -IN temp.xml -XSL min2tex.xsl -OUT anygui.tex
 
-../anygui.html: anygui.xml min2html.xsl
-	xalan -IN anygui.xml -XSL min2html.xsl -OUT anygui.html
+../anygui.html: temp.xml min2html.xsl
+	xalan -IN temp.xml -XSL min2html.xsl -OUT anygui.html
 	mv anygui.html ..
 
-anygui.lynx.html: anygui.xml min2lynx.xsl
-	xalan -IN anygui.xml -XSL min2lynx.xsl -OUT anygui.lynx.html
+anygui.lynx.html: temp.xml min2lynx.xsl
+	xalan -IN temp.xml -XSL min2lynx.xsl -OUT anygui.lynx.html
 
 ../anygui.txt: anygui.lynx.html
 	lynx -dump -nolist anygui.lynx.html > anygui.txt
 	rm anygui.lynx.html
 	mv anygui.txt ..
+
+temp.xml: anygui.xml
+	python insertdate.py anygui.xml > temp.xml
