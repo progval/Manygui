@@ -20,8 +20,8 @@ class Assignee:
         push = getattr(object, 'push', None)
         if push is not None:
             self.names.append(name)
-            self.objects.append(object)
-            link(object.proxy, self.eventUpdate)
+            self.objects.append(object.wrapper)
+            link(object, self.eventUpdate)
 
     def eventUpdate(self, event):
         val = self.getValue()

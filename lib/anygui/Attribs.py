@@ -54,11 +54,11 @@ class Attrib:
         # ===== FOR MODELS ===== #
         if name.startswith('install') and name.endswith('Model'):
             def metaInstall(model):
-                self.installModel(self.wrapper, uncapitalizeAttribute(name[7:-5]), model)
+                self.installModel(self, uncapitalizeAttribute(name[7:-5]), model)
             return metaInstall
         if name.startswith('remove') and name.endswith('Model'):
             def metaRemove():
-                self.removeModel(self.wrapper, uncapitalizeAttribute(name[6:-5]))
+                self.removeModel(self, uncapitalizeAttribute(name[6:-5]))
             return metaRemove
         # === END FOR MODELS === #
 
