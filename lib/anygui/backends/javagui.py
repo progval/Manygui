@@ -17,7 +17,7 @@ class ComponentMixin:
     _java_container = None
     _java_id = None
     _java_style = 0
-    
+
     def _is_created(self):
         return self._java_comp is not None
 
@@ -48,6 +48,8 @@ class ComponentMixin:
                                       self._y,
                                       self._width,
                                       self._height)
+	    if self._java_comp.layout:
+                self._java_comp.validate()
 
     def _ensure_visibility(self):
         if self._java_comp:
