@@ -273,8 +273,8 @@
 
       <para><strong>Note:</strong> In <name>Mac OS</name> 9,
       <name>Anygui</name> (using <name>Tkinter</name>) works with with
-      <name>Python Classic</name> but not with <name>Python
-      Carbon</name>, which seems to be having problems with
+      <name>Python Classic</name> and recent versions of <name>Python
+      Carbon</name>, but older versions have problems with
       <name>Tkinter</name>.</para>
 
     </section>
