@@ -140,44 +140,78 @@ class JavaGUILayoutManager(awt.LayoutManager):
 
 ################################################################
 
+class JavaCanvasWrapper(awt.Canvas):
+
+    def __init__(self):
+        awt.Canvas.__init__(self)
+        self.background = awt.Color.white
+
+    def paint(self, g2):
+        img = self.canvas._offscreen
+        h = img.height
+        w = img.width
+        g2.drawImage(img, 0, 0, w, h, self)        
+
 class Canvas(ComponentMixin, AbstractCanvas):
 
     # TODO: Implement native versions of other drawing methods,
     #       e.g. Béziers etc.
     
-    # FIXME: Needs to be invalidated when resized...
+    # FIXME: Needs to be invalidated when resized,
+    #        while retaining the graphics...
     
-    _java_class = awt.Canvas # Right wrt. swing?
+    _java_class = JavaCanvasWrapper
     _img_type = awt.image.BufferedImage.TYPE_INT_RGB
+    _path_type = awt.geom.GeneralPath.WIND_EVEN_ODD
 
     def __init__(self, *args, **kwds):
         AbstractCanvas.__init__(self, *args, **kwds)
         self.clear()
-        
-    def paint(g):
-        pass # Draw the offscreen thingy
+
+    def _ensure_created(self):
+        result = ComponentMixin._ensure_created(self)
+        self._java_comp.canvas = self
+        return result
 
     def clear(self):
-        self._offscreen = awt.image.BufferedImage(self._width,
+        img = awt.image.BufferedImage(self._width,
                                                   self._height,
                                                   self._img_type)
+        g2 = img.createGraphics()
+        w, h = img.width, img.height
+        rect = awt.geom.Rectangle2D.Double(0, 0, w, h)
+        p = g2.getPaint()
+        g2.setPaint(awt.Color.white)
+        g2.fill(rect)
+        g2.setPaint(p)
+        self._offscreen = img
 
     def drawPolygon(self, pointlist,
                     edgeColor=None, edgeWidth=None, fillColor=None, closed=0):
+        if edgeColor is None:
+            edgeColor = self.defaultLineColor
+        if edgeWidth is None:
+            edgeWidth = self.defaultLineWidth
+        #if fillColor is None:
+        #    fillColor = self.defaultFillColor
         g2 = self._offscreen.createGraphics()
-        polygon = awt.GeneralPath(awt.GeneralPath.WIND_EVEN_ODD, len(pointlist/2))
+        
+        g2.setStroke(awt.BasicStroke(edgeWidth))
+        c = edgeColor
+        g2.setPaint(awt.Color(c.red, c.green, c.blue))
+        
+        polygon = awt.geom.GeneralPath(self._path_type, int(len(pointlist)/2))
         polygon.moveTo(*pointlist[0])
         for pt in pointlist[1:]:
             polygon.lineTo(*pt)
         if closed:
             polygon.closePath()
-        # FIXME: Set edge color/edge width
         g2.draw(polygon)
-        if fillColor is not None:
-            # FIXME: Set fill color
-            g2.fill(polygon)
-        self.repaint()
 
+        if fillColor is not None: # FIXME: Correct behaviour? Check Sping specs
+            c = fillColor
+            g2.setPaint(awt.Color(c.red, c.green, c.blue))
+            g2.fill(polygon)
           
 ################################################################
 
