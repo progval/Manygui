@@ -197,3 +197,6 @@ Smaller issues:
 * Use default constructor arguments instead of Defaults module?
 
 * Add rectangle properties (like those of Pygame) to components?
+
+* Add support for other curses-like modules, like Fredrik Lundh's
+  Console?
