@@ -11,7 +11,7 @@ class AbstractComponent(Attrib, DefaultEventMixin):
     to the boundaries of its container.
     """
 
-    # AMLC20011212: note most _ensure_* methods are now auto-called via
+    # AMLAC20011212: note most _ensure_* methods are now auto-called via
     # Attrib's mechanisms (except _ensure_created and _ensure_destroyed!)
     # so the _ensure_* calls are commented out here and in fact several
     # of the getters/setters (except those for geometry, probably) can
