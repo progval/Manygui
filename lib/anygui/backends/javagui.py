@@ -249,8 +249,8 @@ class Label(ComponentMixin, AbstractLabel):
             #text = text.replace('\r', '<br>')
             #text = '<html>' + text + '</html>'
             self._java_comp.text = text
-            self.horizontalAlignment = swing.SwingConstants.LEFT # FIXME: Wrong place
-            self.verticalAlignment = swing.SwingConstants.TOP # FIXME: Wrong place
+            self._java_comp.horizontalAlignment = swing.SwingConstants.LEFT # FIXME: Wrong place
+            self._java_comp.verticalAlignment = swing.SwingConstants.TOP # FIXME: Wrong place
 
 ################################################################
 
@@ -342,21 +342,19 @@ class Button(ComponentMixin, AbstractButton):
         self._java_comp.actionPerformed = self._java_clicked
 
     def _java_clicked(self, evt):
-        #self.do_action()
         send(self, 'click')
 
 class ToggleButtonMixin(ComponentMixin):
 
     def _ensure_state(self):
         if self._java_comp is not None:
-            self._java_comp.selected = self.on
+            self._java_comp.selected = self._on
     
     def _java_clicked(self, evt):
         val = self._java_comp.selected
-        if val == self.on:
+        if val == self._on:
             return
         self.on = val
-        #self.do_action()
         send(self, 'click')
 
 class CheckBox(ToggleButtonMixin, AbstractCheckBox):
@@ -370,16 +368,16 @@ class CheckBox(ToggleButtonMixin, AbstractCheckBox):
 class RadioButton(ToggleButtonMixin, AbstractRadioButton):
     _java_class = swing.JRadioButton
     _text = "JRadioButton"
+
+    # FIXME: Add click handler which interacts with RadioGroup
     
     def _ensure_created(self):
-        # The groups is stored in self._group... But what is that?
         #if self._group and 0 == self._group._items.index(self):
         return ToggleButtonMixin._ensure_created(self)
 
     def _ensure_events(self):
         # FIXME: Again, straight from Button...
         self._java_comp.actionPerformed = self._java_clicked
-        #EVT_RADIOBUTTON(self._java_comp, self._java_id, self._java_clicked)
 
 ################################################################
 
@@ -414,12 +412,11 @@ class TextField(ComponentMixin, AbstractTextField):
             self._java_comp.focusLost = self._java_focus_lost
 
     def _java_enterkey(self, event):
-        #self.do_action()
         send(self, 'enterkey')
 
     def _java_focus_lost(self, event):
-        if self.text != self._java_comp.text:
-            self.text = self._java_comp.text
+        if self._text != self._java_comp.text:
+            self._text = self._java_comp.text
 
 class ScrollableTextArea(swing.JPanel):
     # Replacement for swing.JTextArea
@@ -496,7 +493,7 @@ class TextArea(ComponentMixin, AbstractTextArea):
             self._java_comp._jtextarea.focusLost = self._java_focus_lost
 
     def _java_focus_lost(self, event):
-        self.text = self._java_comp.getText()
+        self._text = self._java_comp.getText()
 
 ################################################################
 
