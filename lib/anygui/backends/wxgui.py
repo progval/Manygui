@@ -103,7 +103,8 @@ class ListBox(ComponentMixin, AbstractListBox):
 
     def _ensure_selection(self):
         if self._wx_comp:
-            self._wx_comp.SetSelection(self._selection) # Does not cause an event
+            if self._wx_comp.Number() > 0:
+                self._wx_comp.SetSelection(self._selection) # Does not cause an event
 
     def _ensure_events(self):
         if self._wx_comp:
