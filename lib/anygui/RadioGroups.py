@@ -22,7 +22,7 @@ class RadioGroup(Attrib, Defaults.RadioGroup, DefaultEventMixin):
             self._value = value
             for item in self._items:
                 item._update_state()
-        send(self, 'select', loop=1)
+        send(self, 'select')
 
     def add(self, buttons):
         for btn in buttons:
