@@ -17,10 +17,6 @@ Tentative release date: December 10th, 2001
 
 * Resolve the single-line/multi-line Label issue
 
-* Add support for __delattr__ (in the form of _del_foobar)
-  in Mixins.Attrib, and make sure it's used where applicable
-  in the various modules.
-
 * Only import weakrefs when necessary, to allow programs not
   using them to run in earlier versions of Python/Jython
 
@@ -32,6 +28,10 @@ Tentative release date: February 28th, 2002
   the core), simplify the backend API, and reduce coupling
   between core and backends (having only the bare necessities
   actually _in_ the backends)
+
+* Add support for __delattr__ (in the form of _del_foobar)
+  in Mixins.Attrib, and make sure it's used where applicable
+  in the various modules.
 
 * Add a dialog class
 
@@ -75,10 +75,5 @@ Smaller issues:
 ---------------
 
 * Add support for borders?
-
-* Make new Windows invisible until event loop is entered
-  or re-entered, e.g. after a callback
-  (Currently works, more or less "by default", but isn't
-  properly designed/implemented.)
 
 * Add .txt endings to README etc.
