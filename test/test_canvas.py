@@ -2,9 +2,8 @@ from anygui import *
 from anygui.Utils import log
 from anygui.Colors import *
 
-# Only javagui implements this so far:
-#from anygui.backends.javagui import Canvas
-from anygui.backends.tkgui import Canvas
+# Not all backends support this -- it is not a part of 0.1:
+from anygui import Canvas
 
 app = Application()
 win = Window(size=(300,300))
@@ -22,8 +21,9 @@ link(cvs, 'click', click)
 # Taken from http://piddle.sourceforge.net/sample1.html
 
 cvs.defaultLineColor = Color(0.7,0.7,1.0)    # light blue
-cvs.drawLines(map(lambda i:(i*10,0,i*10,300), range(30)))
-cvs.drawLines(map(lambda i:(0,i*10,300,i*10), range(30)))
+if not backend() in 'text curses'.split():
+    cvs.drawLines(map(lambda i:(i*10,0,i*10,300), range(30)))
+    cvs.drawLines(map(lambda i:(0,i*10,300,i*10), range(30)))
 cvs.defaultLineColor = black         
 
 cvs.drawLine(10, 200, 20, 190, color=red)
