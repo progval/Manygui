@@ -9,8 +9,8 @@ from Utils import generic_hash
 # - Add callbacks to CallableReference
 # - Reimplement RefValueList
 
-def ref(obj, weak, plain=0):
-    if not plain and is_callable(obj):
+def ref(obj, weak, _plain=0):
+    if not _plain and is_callable(obj):
         return CallableReference(obj, weak)
     if weak:
         return WeakReference(obj)
@@ -48,6 +48,7 @@ class Reference(Hashable):
         self.hash = generic_hash(obj)
     def __call__(self):
         return self.deref(self.obj)
+    __eq__ = ref_is
 
 class WeakReference(Reference):
     def ref(self, obj, cb):
@@ -56,16 +57,12 @@ class WeakReference(Reference):
         return weakref.ref(obj, cb)
     def deref(self, obj):
         return obj()
-    def __eq__(self,other):
-        return ref_is(self.obj,other.obj)
 
 class StrongReference(Reference):
     def ref(self, obj, cb):
         return obj
     def deref(self, obj):
         return obj
-    def __eq__(self,other):
-        return self.obj is other.obj
 
 class CallableWrapper:
     def __init__(self, obj, func):
@@ -106,10 +103,10 @@ class CallableReference(Hashable):
         self.hash = hash((obj, func))
 
         if obj is not None:
-            obj = ref(obj, weak, plain=1)
+            obj = ref(obj, weak, _plain=1)
         self.obj = obj
         
-        self.func = ref(func, weak, plain=1)
+        self.func = ref(func, weak, _plain=1)
 
     def is_dead(self):
         return self.obj is not None and self.obj() is None \
@@ -123,6 +120,7 @@ class CallableReference(Hashable):
         return CallableWrapper(obj, func)
 
     def __eq__(self,other):
+        if self.__class__ != other.__class__: return 0
         return (ref_is(self.obj,other.obj) and
                 ref_is(self.func,other.func))
 
