@@ -1,9 +1,13 @@
-from anygui.Exceptions import UnimplementedMethod
-from anygui.Components import Component
-from anygui import Defaults
+from Components import Component
+from anygui import Defaults, backendModule
 
 class Label(Component, Defaults.Label):
 
+    def wrapperFactory(self):
+        return backendModule().LabelWrapper(self)
+
+
+'''
     _original_text = Defaults.Label._text
 
     def _get_text(self):
@@ -39,3 +43,4 @@ class Label(Component, Defaults.Label):
 
     #def _ensure_color(self):
     #    raise UnimplementedMethod, (self, "_ensure_color")
+'''

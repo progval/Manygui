@@ -1,6 +1,21 @@
 # Curses magic implemented on a dumb terminal.
+
 from anygui.backends import *
-__all__ = anygui.__all__
+
+__all__ = '''
+
+  Application
+  ButtonWrapper
+  WindowWrapper
+  LabelWrapper
+
+'''.split()
+
+################################################################
+
+# Cut for 0.2.
+#from anygui.backends import *
+#__all__ = anygui.__all__
 
 import anygui.backends.txtutils.scr_text as scr_text
 import anygui.backends.txtutils.txtgui as txtgui

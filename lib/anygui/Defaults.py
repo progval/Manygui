@@ -63,6 +63,22 @@ class Window:
         'title': 'Untitled'
         }
 
+class Label:
+    state = {
+        'text': 'Label',
+        'x': 0,
+        'y': 0,
+        'width': 100,
+        'height': 15,
+        'hmove': 0,
+        'vmove': 0,
+        'hstretch': 0,
+        'vstretch': 0,
+        'visible': 1,
+        'enabled': 1,
+        }
+#_list_attributes(Label)
+
 # FIXME: Should be improved -- base new placement on top window etc.
 
 winX, winY = 0, 0
@@ -102,20 +118,6 @@ class CheckBox:
     _visible = 1
     _enabled = 1
 _list_attributes(CheckBox)
-
-class Label:
-    _text = 'Label'
-    _x = 0
-    _y = 0
-    _width = 100
-    _height = 15
-    _hmove = 0
-    _vmove = 0
-    _hstretch = 0
-    _vstretch = 0
-    _visible = 1
-    _enabled = 1
-_list_attributes(Label)
 
 class ListBox:
     _text = 'ListBox'

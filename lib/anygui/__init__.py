@@ -37,7 +37,7 @@ from anygui.Windows          import Window
 from anygui.Buttons          import Button
 #from anygui.Canvases         import Canvas
 #from anygui                  import Colors
-#from anygui.Labels           import Label
+from anygui.Labels           import Label
 #from anygui.CheckBoxes       import CheckBox
 #from anygui.RadioButtons     import RadioButton
 #from anygui.RadioGroups      import RadioGroup
@@ -58,6 +58,7 @@ __all__ = """
   Button
   Options
   Window
+  Label
   any
   application
   backend

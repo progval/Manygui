@@ -5,6 +5,7 @@ __all__ = '''
   Application
   ButtonWrapper
   WindowWrapper
+  LabelWrapper
 
 '''.split()
 
@@ -105,6 +106,14 @@ class ButtonWrapper(ComponentWrapper):
 
     def widgetFactory(self, *args, **kwds):
         return Tkinter.Button(*args, **kwds)
+
+    def setText(self, text):
+        self.widget.configure(text=text)
+
+class LabelWrapper(ComponentWrapper):
+
+    def widgetFactory(self,*args,**kws):
+        return Tkinter.Label(*args,**kws)
 
     def setText(self, text):
         self.widget.configure(text=text)

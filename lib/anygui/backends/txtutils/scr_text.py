@@ -2,7 +2,7 @@
 
 import os
 
-_debug_messages = 0
+_debug_messages = 1
 if _debug_messages:
     _f = open("txt.txt","w")
 
@@ -14,7 +14,6 @@ def dbg(*msg):
     _f.flush()
 
 
-from anygui.Utils import flatten
 from string import join
 import operator as op
 
@@ -40,7 +39,7 @@ _ox=0
 _oy=0
 
 try:
-    _xsize,_ysize=map(int,os.environ['ANYGUI_SCREENSIZE'].split('x'))
+    _xsize,_ysize=map(int,os.environ['SCREENSIZE'].split('x'))
     _ysize -= 1 # Leave room for the prompt line.
 except KeyError:
     try:
