@@ -3,23 +3,26 @@
 
 # FIXME: The "if widget" stuff doesn't seem quite consistent. [mlh]
 
-try:
-    # Anygui specific imports
-    from anygui.backends import *
-    from anygui.Applications import AbstractApplication
-    from anygui.Wrappers import AbstractWrapper
-    from anygui.Events import *
-    from anygui.Windows import Window
-    from anygui import application
-    from anygui.Menus import Menu, MenuCommand, MenuCheck, MenuSeparator
+#try:
+# Anygui specific imports
+from anygui.backends import *
 
-    # qtgui specific imports
-    import sys
-    from weakref import ref as wr
-    from qt import *
-except:
-    import traceback
-    traceback.print_exc()
+# FIXME: The following shouldn't be necessary [mlh]
+from anygui.Applications import AbstractApplication
+from anygui.Wrappers import AbstractWrapper
+from anygui.Events import *
+from anygui.Windows import Window
+from anygui import application
+from anygui.Menus import Menu, MenuCommand, MenuCheck, MenuSeparator
+# END FIXME
+
+# qtgui specific imports
+import sys
+from weakref import ref as wr
+from qt import *
+#except:
+#    import traceback
+#    traceback.print_exc()
 
 #==============================================================#
 # Exports
