@@ -1,36 +1,62 @@
+"""
+beosgui.py is a backend for Anygui, using Bethon 0.5 (BeOS API wrappers).
 
+Developed by Matthew Schinckel <matt@null.net>
+"""
+
+TODO = '''
+#==========================================================================#
+# TODO List
+
+. Fix Command-Q Quitting Bug (again).
+. Create List/Scroll View wrappers. [DONE]
+. Create Text-based wrappers. [DONE]
+. Check Frame wrapper.
+. Fix RadioGroup problems.
+. Create FileDialog / AboutDialog.
+. Create Menus.
+. Figure out sizes/placement stuff. *****
+. Remove/Improve Comments.
+. Refactor where possible.
+. Run Tests, Report.
+
+'''
+
+#==========================================================================#
+# Anygui Imports
+
+# Import Anygui infrastructure.
 from anygui.backends import *
-__all__ = anygui.__all__
+from anygui.Applications import AbstractApplication
+from anygui.Wrappers import AbstractWrapper
+from anygui.Events import *
+from anygui.Exceptions import Error
+from anygui.Utils import log
+from anygui import application
+# End Anygui imports.
 
-#################################################################
+#==========================================================================#
+# Bethon Imports
 
 # All Bethon modules are imported.  Not all are used.
-
-import BAlert, BApplication
-import BButton
-import BCheckBox, BControl
+import BAlert, BAppFileInfo, BApplication
+import BBitmap, BBox, BButton
+import BCheckBox, BControl, BColorControl
+import BDirectory
+import BEntry
 import BFile, BFilePanel, BFont
-import BListItem, BListView
-import BMenuBar, BMenuItem, BMenu, BMessage
+import BHandler
+import BInvoker
+import BListItem, BListView, BLocker, BLooper
+import BMenuBar, BMenuItem, BMenu, BMessage, BMessageRunner, BMimeType
+import BNode, BNodeInfo
 import BOutlineListView
 import BPath, BPopUpMenu
-import BRadioButton
-import BScrollBar, BScrollView, BSeparatorItem, BSlider, BStatusBar, BStringItem, BStringView
+import BRadioButton, BRoster
+import BScrollBar, BScrollView, BSeparatorItem, BSerialPort, BSlider, BStatable, BStatusBar, BStringItem, BStringView
 import BTab, BTabView, BTextControl, BTextView
 import BView, BVolume
 import BWindow
-
-"""
-
-Not used list...:-)
-
- BControl, BFile, BFilePanel, BFont, BListItem,
- BMenuBar, BMenuItem, BMenu, BOutlineListView, BPath,
- BPopUpMenu, BScrollBar, BSeparatorItem, BSlider,
- BStatusBar, BTab, BTabView, BView, BVolume
- 
-"""
-# BeOS constants B_<stuff>
 
 from AppKit import *
 from SupportKit import *
@@ -38,491 +64,757 @@ from InterfaceKit import *
 from StorageKit import *
 
 ACTION = 6666 # BMessage value
-               
-#################################################################
 
-class WrapThis:
-    """Binds instance with BeOS API object.  Objects
-that support this operation can call Python bound methods from
-their virtual function ``hooks'', so things like MessageReceived()
-work in Python.  Stolen blatantly from Donn."""
+# End backend API imports.
 
-    def wrap(self, this):
-        self._beos_comp = this
-        self._beos_comp.bind(self)
+#==========================================================================#
+# What's In Here?
 
-    def sub_wrap(self, this):
-        # For widgets with scrollbox surrounding them.
-        self._beos_sub = this
-        self._beos_sub.bind(self)
+__all__ = '''
 
-#################################################################
+  Application
+  ButtonWrapper
+  WindowWrapper
+  LabelWrapper
+  TextFieldWrapper
+  TextAreaWrapper
+  ListBoxWrapper
+  FrameWrapper
+  RadioButtonWrapper
+  CheckBoxWrapper
+  MenuBarWrapper
+  MenuWrapper
+  MenuCommandWrapper
+  MenuCheckWrapper
+  MenuSeparatorWrapper
 
-class ComponentMixin(WrapThis):
-    "Base class for all components."
-        
-    _beos_comp = None
-    _beos_sub = None
+'''.split()
+
+# temporary version...
+__all__ = '''
+
+  Application
+  ButtonWrapper
+  WindowWrapper
+  LabelWrapper
+  TextFieldWrapper
+  TextAreaWrapper
+  ListBoxWrapper
+  FrameWrapper
+  RadioButtonWrapper
+  CheckBoxWrapper
+  GroupBoxWrapper
+'''.split()
+
+#==========================================================================#
+# Base Class for all widgets
+
+class ComponentWrapper(AbstractWrapper):
     _beos_id = 0
     _beos_style = None
     _beos_msg = None
-    _beos_clicked = None
-    _lost_focus = None
     _beos_mode = B_FOLLOW_LEFT + B_FOLLOW_TOP
     _beos_flags = B_WILL_DRAW + B_NAVIGABLE
-
+    
     _init_args = None
-    	
-    def _ensure_created(self):
-        if not self._is_created():
+    
+    """
+    The ComponentWrapper class should abstract away all behavior
+    that (nearly) all backend widgets perform similarly. Normally,
+    this will include geometry and visibility management, and in some
+    cases widget creation can be handled here as well (see wxgui.py
+    for example).
+    """
+    
+    def __init__(self, *args, **kwds):
+        """
+        Common widget wrapper initialization code. The main thing that
+        we would normally do here is set any backend-specific
+        attribute constraints.
+        
+        Whenever the application code alters a widget proxy, the front end
+        will "push" any changed widget attributes into the backend by
+        calling the wrapper.set<Attribute>(self,new_value) method for any
+        attribute that changes. The setContraints() method allows the
+        backend to specify the order in which the set<Attribute>()
+        method calls are made, by specifying the order in which attribute
+        names are set. The constraints set here are just examples.
+        However, it is almost certainly a good idea to ensure that
+        'container' is set before any other attribute, so at minimum
+        you should call "self.setConstraints('container')" here.
+        """
+        AbstractWrapper.__init__(self, *args, **kwds)
+
+        # 'container' before everything, then geometry.
+        self.setConstraints('container','x','y','width','height')
+
+        # addConstraint(self,before,after) adds a constraint that attribute
+        # 'before' must be set before 'after', when both appear in the
+        # same push operation. An attempt to set mutually contradictory
+        # constraints will result in an exception.
+        self.addConstraint('geometry', 'visible')
+
+    def widgetFactory(self,*args,**kws):
+        """
+        Create and return the backend widget for this wrapper.
+        The value returned will be immediately assigned to self.widget
+        by the Anygui framework; henceforth you should refer to self.widget.
+        """
+        if hasattr(self.proxy.container,'wrapper'):
+            parent = self.proxy.container.wrapper._getContainer()
+        else:
+            parent = None
+        if self._beos_class is None:
+            raise NotImplementedError, 'Not Implemented in beosgui yet'
+        else:
             self._beos_id = str(self._beos_id)
-            self._ensure_visibility()
-            self._ensure_events()
-            self._ensure_geometry()
             if self._init_args is None:
+                self._beos_bounds = self.getGeometry()
+                self._text = self.proxy.state['text']
                 self._init_args = (self._beos_bounds,
-                                   str(self._beos_id),
+                                   self._beos_id,
                                    self._text,
                                    self._beos_msg,
                                    self._beos_mode,
                                    self._beos_flags)
-            self.wrap(self._beos_class(*self._init_args))
-            self._ensure_geometry()
-            #print self._beos_class, self._beos_id
-            self._ensure_enabled_state()
-            if self._container is not None:
-                self._container._ensure_created()
-                self._container._beos_comp.AddChild(self._beos_comp)
-            ComponentMixin._beos_id += 1 # Gives each component a unique id
-            self._finish_creation()
-            return 1
-        return 0
-    
-    def _ensure_destroyed(self):
-        if self._beos_comp:
-            if self._container:
-                self._container._beos_remove(self)
-            self._beos_comp = None
+            widget = self._beos_class(*self._init_args)
+            print widget
+            print '\t', widget.Frame()
+            print '\t', self._beos_bounds
+            ComponentWrapper._beos_id += 1
+            return widget
+
+    def enterMainLoop(self): # ...
+        """ enterMainLoop() is called when the application event loop is
+        started for the first time. """
+        #self.proxy.push()
+        #if self.widget is None: return
+        #self.widget.show()
+
+    def destroy(self):
+        """
+        destroy() is called when the application needs to destroy the
+        native widget. You can also call it within the wrapper code if
+        you need to destroy your native widget for some reason. 
+        """
+        #self.widget = DummyWidget()
+        self.widget = None
+        #raise NotImplementedError, 'should be implemented by subclasses'
+
+    # From here on, all methods in this class are getters and setters.
+    # Setters must be implemented; they are called automatically in
+    # response to application-code manipulation of the associated
+    # proxy object, and perform the required magic on self.widget
+    # to implement the change.
+    #
+    # Getters need not be implemented unless the backend requires
+    # special handling, or if the attribute in question can be changed
+    # by user actions as well as by application code. Getters are
+    # called automatically during proxy attribute access, if they
+    # exist; otherwise the last value set in the proxy is returned.
+    # This file provides empty getter definitions for those attributes
+    # that will nearly always require special handling for get
+    # operations.
+    #
+    # The setters and getters here are a typical example of
+    # attribute handling that's common to all of a backend's
+    # widgets. For example, getGeometry() and setGeometry() work
+    # the same for any backend widget, thus they're included
+    # here in the common wrapper base class.
+    #
+    # Note that you must implement all the setter and getter
+    # methods in this file in order for your backend to work
+    # properly!
+
+    def setContainer(self,container):
+        """
+        setContainer() is called whenever the proxy's container (the
+        Frame or top-level Window) in which the widget will appear is
+        set. It's called implicitly when a widget is added to a
+        container via the container.add(widget) method.
+
+        In most backends, you'll call self.create() here in order to
+        actually create the backend widget. create() is a template
+        method that calls self.widgetFactory() to create the widget,
+        and then performs some bookkeeping for the wrapper.
+
+        When the widget is removed from its container, setContainer()
+        will be called with container==None; you must handle that case
+        correctly, whatever that means for your backend.
+        """
         
-    def _is_created(self):
-        return self._beos_comp is not None
-    
-    def _ensure_events(self):
-        #if self._action:
-        #    print self._action
-        self._beos_msg = BMessage.BMessage(ACTION)              # Create a BMessage instance
-        self._beos_msg.AddString('self_id', str(self._beos_id)) # Add the id of the object
-    
-    def _ensure_geometry(self):
-        self._beos_bounds = (float(self._x),
-                float(self._y),
-                float(self._width+ self._x),
-                float(self._height+self._y))
-
-    def _ensure_visibility(self):
-        if self._beos_comp:
-            if self._visible:
-                if self._beos_comp.IsHidden():
-                    self._beos_comp.Show()
-            else:
-                if self._beos_comp.IsHidden():
-                    pass # Don't Hide stuff twice...
-                else:
-                    self._beos_comp.Hide()
+        if self.widget is None:
+            # If the container has changed, and there's already a native
+            # widget, it may be necessary to take special action here.
+            pass
+        # Be sure to handle any backend container/contents protocol
+        # here!
+        # ...
         
-    def _ensure_enabled_state(self):
-        pass
+        if container is not None:
+            parent = container.wrapper.widget
+            self.create(parent)
+            parent.AddChild(self.widget)
+        else:
+            if self.widget is not None:
+                self.widget.Window().RemoveChild(self.widget)
 
-    def _get_beos_text(self):
-        # helper function for creation
-        # returns the text required for creation.
-        # This may be the _text property, or _title, ...,
-        # depending on the subclass
-        return self._text
+        # Ensure native widget is brought up to date wrt the proxy
+        # state.
+        #self.proxy.push(blocked=['container'])
+        #raise NotImplementedError, 'should be implemented by subclasses'
 
-    def _ensure_text(self):
-        pass
+    def setGeometry(self,x,y,width,height):
+        """ Set the native widget's geometry. Note that we call
+        self.noWidget() here to see if the wrapper has a native widget
+        to manage. You should probably use this idiom at the start of
+        all setter and getter methods, unless you have a very good
+        reason not to. """
+        if self.widget is None: return
+        self.widget.MoveTo(float(x), float(y))
+        self.widget.ResizeTo(float(width), float(height))
+        
+    def getGeometry(self):
+        """ Get the native widget's geometry as an (x,y,w,h) tuple.
+        Since the geometry can be changed by the user dragging the
+        window frame, you must implement this method. """
+        if self.widget is None:
+            return (self.proxy.state['x'],
+                    self.proxy.state['y'],
+                    self.proxy.state['width'],
+                    self.proxy.state['height'])
+        return self.widget.Frame()
 
-#################################################################
+    def setVisible(self,visible):
+        """ Set/get the native widget's visibility. """
+        if self.widget is None: return
+        if visible:
+            if self.widget.IsHidden():
+                self.widget.Show()
+        else:
+            if not self.widget.IsHidden():
+                self.widget.Hide()
 
-class Label(ComponentMixin, AbstractLabel):
-    """Designed for single lines of text only."""
+    def setEnabled(self,enabled):
+        """ Set/get the native widget's enabled/disabled state. """
+        if self.widget is None: return
+        self.widget.SetEnabled(enabled)
+        #raise NotImplementedError, 'should be implemented by subclasses'
+
+    def setText(self,text):
+        """ Set/get the text associated with the widget. This might be
+        window title, frame caption, label text, entry field text,
+        or whatever.
+        """
+        if self.widget is None: return
+        raise NotImplementedError, 'should be implemented by subclasses'
+
+#==========================================================================#
+# Label
+
+class LabelWrapper(ComponentWrapper):
+    """
+    Wraps a backend "label" widget - static text.
+    You may need to implement setText() here.
+    """
     _beos_class = BStringView.BStringView
     _beos_flags = B_WILL_DRAW
-    _text = "BStringItem"
+    _text = "BStringView"
     
-    def _ensure_created(self):
-        self._ensure_geometry()
-        self._beos_id = str(self._beos_id)
+    def widgetFactory(self,*args,**kws):
+        self._beos_bounds = self.getGeometry()
+        self._text = self.proxy.state['text']
         self._init_args = (self._beos_bounds,
-                           self._beos_id,
-                           self._text,
-                           self._beos_mode,
-                           self._beos_flags)
-        result = ComponentMixin._ensure_created(self)
-        self._ensure_text()
-        return result
+                           str(self._beos_id),
+                           str(self._text),
+                           int(self._beos_mode),
+                           int(self._beos_flags))
+        return ComponentWrapper.widgetFactory(self,*args,**kws)
     
-    def _ensure_text(self):
-        if self._beos_comp:
-            pass
-            #self._beos_comp.LockLooper()
-            self._beos_comp.SetText(str(self._text))
-            #self._beos_comp.UnlockLooper()
-            self._ensure_geometry()
-            #self._beos_comp.ResizeToPreferred()
-    
-    def _ensure_events(self):
+    def setText(self, text):
+        if self.widget is None: return
+        self.widget.SetText(text)
+        
+    def widgetSetUp(self):
         pass
+    
+#==========================================================================#
+# ListBox
 
-##################################################################
+class ListBoxWrapper(ComponentWrapper):
+    """
+    Wraps a backend listbox.
 
-class ListBox(ComponentMixin, AbstractListBox):
+    At the moment, Anygui supports only single-select mode.
+    """
+    _beos_class = BScrollView.BScrollView
     _beos_sub_class = BListView.BListView
     _beos_type = B_SINGLE_SELECTION_LIST
     _beos_mode = B_WILL_DRAW + B_NAVIGABLE + B_FRAME_EVENTS #+ B_FOLLOW_ALL_SIDES #??
-    _beos_class = BScrollView.BScrollView
-    _beos_flags = 0
-    _horizontal = 0
-    _vertical = 1
     _beos_border = B_FANCY_BORDER
+    _beos_flags = 0
+    _h_scroll = 0
+    _v_scroll = 1
+    _beos_sub = None
     
-    def _ensure_created(self):
-        self._beos_id = str(self._beos_id)
-        self._ensure_geometry()
-        if self._beos_sub is None:
-            self.sub_wrap(self._beos_sub_class(self._beos_bounds,
-                                         self._beos_id,
-                                         self._beos_type,
-                                         self._beos_mode,
-                                         self._beos_flags))
-            self._init_args = (self._beos_id,
+    def widgetFactory(self,*args,**kwds):
+        self._beos_bounds = list(self.getGeometry())
+        self._beos_bounds[3] -= 15
+        self._beos_bounds[2] *= 1.4
+        self._beos_bounds = tuple(self._beos_bounds)
+        self._beos_sub = self._beos_sub_class(self._beos_bounds,
+                                              str(self._beos_id)+"_sub",
+                                              self._beos_type,
+                                              self._beos_mode,
+                                              self._beos_flags)
+        self._init_args = (str(self._beos_id),
                            self._beos_sub,
                            self._beos_mode,
                            self._beos_flags,
-                           self._horizontal,
-                           self._vertical,
+                           self._h_scroll,
+                           self._v_scroll,
                            self._beos_border)
-            result = ComponentMixin._ensure_created(self)
-            self._ensure_items()
-            self._ensure_selection()
-            self._ensure_events()
-            return result
-    
-    def _ensure_geometry(self):
-        self._beos_bounds = (float(self._x),
-                float(self._y),
-                float(self._width+ self._x-15),
-                float(self._height+self._y))
+        return ComponentWrapper.widgetFactory(self,*args,**kwds)
+
+    def setItems(self,items):
+        """
+        Set the contents of the listbox widget. 'items' is a list of
+        strings, or of str()-able objects.
+        """
+        if self._beos_sub is None: return
+        self._beos_sub.MakeEmpty()
+        for item in items:
+            self._beos_sub.AddItem(BStringItem.BStringItem(str(item)))
+
+    def getItems(self):
+        """
+        Return ths listbox contents, in order, as a list of strings.
+        """
+        if self._beos_sub is None: return
+        return self._beos_sub.Items()
         
-    def _backend_selection(self):
-        if self._beos_comp:
-            return self._beos_sub.CurrentSelection()
-            
-    def _ensure_items(self):
-        if self._beos_comp:
-            self._beos_sub.MakeEmpty()
-            for item in self._items:
-                self._beos_sub.AddItem(BStringItem.BStringItem(str(item)))
-    
-    def _ensure_selection(self):
-        return # Select() crashes.
-        if self._beos_comp:
-            self._beos_sub.Select(self._selection)
-    
-    #def _ensure_events(self):
-    #    "For double-click."
-    #    if self._beos_comp:
-    #        ComponentMixin._ensure_events(self)
-    #        self._beos_sub.SetInvocationMessage(self._beos_msg)
 
-    # BeOS hook function
-    def SelectionChanged(self):
-        """Might be replaced by InvocationMessage."""
-        send(self, 'select')
-    
-            
-###################################################################
+    def setSelection(self,selection):
+        """
+        Set the selection. 'selection' is an integer indicating the
+        item to be selected.
+        """
+        if self._beos_sub is None: return
+        self._beos_sub.Select(selection)
 
-class Button(ComponentMixin, AbstractButton):
+    def getSelection(self):
+        """
+        Return the selected listbox item index as an integer.
+        """
+        if self._beos_sub is None: return
+        return self._beos_sub.CurrentSelection()
+
+    def widgetSetUp(self):
+        """
+        widgetSetUp() is called by the Anygui framework immediately after
+        the native widget has been created and assigned to self.widget.
+        The most common use of widgetSetUp() is to register any event
+        handlers necessary to deal with user actions.
+
+        The ListBox widget requires that an Anygui 'select' event be
+        fired whenever the user selects an item of the listbox.
+        self._select() sends the event, so here you should associate
+        the back-end's selection event with the self._select method.
+        """
+        self.setItems(self.proxy.state['items'])
+        self.setSelection(self.proxy.state['selection'])
+        self._beos_sub.bind(self)
+        # Select
+        self._beos_msg = BMessage.BMessage(ACTION)
+        self._beos_msg.AddString('self_id', str(self._beos_id))
+        self._beos_msg.AddString('event', 'select')
+        self._beos_sub.SetSelectionMessage(self._beos_msg)
+        # Invoke (Double Click)
+        self._beos_msg = BMessage.BMessage(ACTION)
+        self._beos_msg.AddString('self_id', str(self._beos_id))
+        self._beos_msg.AddString('event', 'invoke')
+        self._beos_sub.SetInvocationMessage(self._beos_msg)
+
+    def _select(self,*args):
+        """
+        Send an Anygui 'select' event when the user clicks or otherwise
+        selects a listbox item. Note that the source of the event is
+        self.proxy, not self; that's because application code only
+        knows about proxies, not wrappers, so the source of the Anygui
+        event must be a proxy.
+        """
+        send(self.proxy,'select')
+    
+    #def SelectionChanged(self):
+    #    send(self.proxy, 'select')
+
+#==========================================================================#
+# Canvas
+
+#class CanvasWrapper(ComponentWrapper):
+# Fix me!
+#    _twclass = tw.Canvas
+
+#==========================================================================#
+# Button
+
+class ButtonWrapper(ComponentWrapper):
+    """
+    Wraps a backend command-button widget - the kind you click
+    on to initiate an action, eg "OK", "Cancel", etc.
+    """
+    
     _beos_class = BButton.BButton
     
-    def _ensure_text(self):
-        if self._beos_comp:
-    	    self._beos_comp.SetLabel(str(self._text))
+    def setText(self,text):
+        if self.widget is None: return
+        self.widget.SetLabel(str(text))
 
-    def _ensure_enabled_state(self):
-        if self._beos_comp:
-            self._beos_comp.SetEnabled(self._enabled)
+    def widgetSetUp(self):
+        """
+        Register a backend event handler to call self.click when
+        the user clicks the button.
+        """
+        #print self._beos_bounds
+        #self.setGeometry(*self._beos_bounds)
+        #print self.widget.Frame()
     
-    def _beos_clicked(self):
-        send(self, 'click')
+    def widgetFactory(self,*args,**kwds):
+        self._beos_msg = BMessage.BMessage(ACTION)
+        self._beos_msg.AddString('self_id', str(self._beos_id))
+        self._beos_msg.AddString('event', 'click')
+        return ComponentWrapper.widgetFactory(self,*args,**kwds)        
 
+    def _click(self,*args,**kws):
+        send(self.proxy,'click')
 
-class ToggleButtonMixin(ComponentMixin):
+#==========================================================================#
+# Base Class for 'State' buttons
 
-    def _ensure_state(self):
-        if self._beos_comp is not None:
-            self._beos_comp.SetValue(self.on)
+class ToggleButtonMixin(ButtonWrapper):
+    """
+    Checkboxes and radio buttons often have common behavior that can
+    be abstracted away; on the other hand, sometimes they don't.
+    Consider this an example only.
 
-    def _ensure_enabled_state(self):
-        if self._beos_comp:
-            self._beos_comp.SetEnabled(self._enabled)
-            
-    def _get_on(self):
-        return self._beos_comp.Value()
-    
-       
-    def _beos_clicked(self):
-        val = self._get_on()
-        send(self, 'click')
-        if val == self._on:
-            return
-        self.modify(on=val)
+    They also should generate 'click' events, so we'll just inherit
+    ButtonWrapper here to get the event setup code. Your backend
+    may not permit this, however; do what needs to be done.
+    """
+
+    def getOn(self):
+        """ Return the button's state: 1 for checked, 0 for not. """
+        if self.widget is None: return
+        return self.widget.Value()
+
+    def setOn(self,on):
+        """ Set the button's state. """
+        if self.widget is None: return
+        self.widget.SetValue(on)
         
+#==========================================================================#
+# CheckBox
 
-     
-class CheckBox(ToggleButtonMixin, AbstractCheckBox):
+class CheckBoxWrapper(ToggleButtonMixin):
+    """
+    Usually ToggleButtonMixin completely handles the CheckBox
+    behavior, but in case it doesn't, you may need to write some
+    code here.
+    """
     _beos_class = BCheckBox.BCheckBox
 
+#==========================================================================#
+# Radio Button
 
-class RadioButton(ToggleButtonMixin, AbstractRadioButton):
-    _beos_class = BRadioButton.BRadioButton
-    
-    def _beos_clicked(self):
-        if self.group is not None:
-            self.group.modify(value=self.value)
-        send(self, 'click')
-
-
-class RadioGroup(RadioGroup):
-    _beos_class = BView.BView 
-    """ FIXME: forces all buttons into the one group.
-               Selecting a button from another group
-               has the same effect as choosing the button 
-               in that position in the first group.
+class RadioButtonWrapper(ToggleButtonMixin):
     """
-    def _get_value(self):
-        value = 0
-        for item in self._items:
-            if item._beos_class == BRadioButton.BRadioButton:
-                if item._beos_comp.Value() == B_CONTROL_ON:
-                    return value
-            value += 1
+    Radio buttons are a pain. Only one member of an RB "group" may be
+    active at a time. Anygui provides the RadioGroup front-end
+    class, which takes care of querying the state of radiobuttons
+    and setting their state in a mutually exclusive manner.
+    However, many backends also enforce this mutual exclusion,
+    which means that things can get complicated. The RadioGroup
+    class is implemented in as non-intrusive a way as possible,
+    but it can be a challenge to arrange for them to act in
+    the correct way, backend-wise. Look at the other backend
+    implementations for some clues.
+
+    In the case where a backend implements radiobuttons as a simple
+    visual variant of checkboxes with no mutual-exclusion behavior,
+    this class already does everything you need; just create the
+    proper backend widget in RadioButtonWrapper.widgetFactory(). You
+    can usually fake that kind of backend implementation by playing
+    tricks with the backend's mutual-exclusion mechanism. For example,
+    create a tiny frame to encapsulate the backend radiobutton, if
+    your backend enforces mutual exclusion on a per-frame basis.
+    """
+    groupMap = {}
+    _beos_class = BRadioButton.BRadioButton
+
+    def setGroup(self,group):
+        if group is None:
+            return
+        if self.proxy not in group._items:
+            group._items.append(self.proxy)
+
+#==========================================================================#
+# Base Class for Text Widgets
+
+class TextControlMixin:
+    """
+    Single-line entry fields and multiline text controls usually
+    have a lot of common behavior that can be abstracted away. Do
+    that here.
+    """
+    def widgetSetUp(self):
+        """
+        Arrange for a press of the "Enter" key to call self._return.
+        """
+        if self._beos_sub is None:
+            self._beos_sub = self.widget.TextView()
+        self.setEditable(self.proxy.state['editable'])
+
+    def setText(self,text):
+        """ Set/get the text associated with the widget. This might be
+        window title, frame caption, label text, entry field text,
+        or whatever.
+        """
+        if self.widget is None: return
+        try:
+            self.widget.SetText(text)
+        except:
+            pass
+        if self._beos_sub is None: return
+        self._beos_sub.SetText(text)
+
+    def getText(self):
+        """
+        Fetch the widget's associated text. You *must* implement this
+        to get the text from the native widget; the default getText()
+        from ComponentWrapper (almost) certainly won't work.
+        """
+        if self.widget is None: return
+        try:
+            return self.widget.Text()
+        except:
+            pass
+        if self._beos_sub is None: return
+        return self._beos_sub.Text()
+
+    def getSelection(self):
+        if self._beos_sub is None: return
+        return self._beos_sub.GetSelection()
     
-    def add(self, buttons):
-        for btn in buttons:
-            btn.group = self
+    def setSelection(self, selection):
+        if self._beos_sub is None: return
+        start, end = selection
+        self._beos_sub.Select(start,end)
     
-'''
-class RadioGroup(ComponentMixin, Attrib, Action):
-    """Needs lots of work."""
-    _beos_class = BView.BView
-    _beos_bounds = (0.0,0.0,260.0,150.0)
-    _items = None
-    _value = None
-    _container = None
+    def setEditable(self, editable):
+        if self._beos_sub is None: return
+        self._beos_sub.MakeEditable(editable)
+        try:
+            self.widget.SetEnabled(editable)
+        except:
+            pass
 
-    def __init__(self, items=[], **kw):
-        Attrib.__init__(self, **kw)
-        self.modify(_items=[])
-        self.add(items)
+#==========================================================================#
+# TextField
 
-    def _get_value(self):
-        return self._value
-
-    def _set_value(self, value):
-        if self._value != value:
-            self.modify(_value=value)
-            for item in self._items:
-                item._update_state()
-            self._beos_clicked()
-
-    def add(self, buttons):
-        if buttons and (self._beos_comp is None):
-            self._ensure_created()
-        for btn in buttons:
-            btn.group = self
-            if btn._beos_comp is None:
-                btn._ensure_created()
-            self._beos_comp.AddChild(btn._beos_comp)
-            #self._beos_comp.ResizeToPreferred()
-
-    def remove(self, buttons):
-        for btn in buttons:
-            if btn in self._items:
-                btn.group = None
-        
-    def _ensure_created(self):
-        self._beos_id = str(self._beos_id)
-        #print application()
-        self._init_args = (self._beos_bounds,
-                           self._beos_id,
-                           self._beos_mode,
-                           self._beos_flags)
-        return ComponentMixin._ensure_created(self)
-        
- '''           
-#################################################################
-
-#class TextComponentMixin(ComponentMixin, AbstractTextComponent):
-#    _text = ''
-    
-class TextField(ComponentMixin, AbstractTextField):
+class TextFieldWrapper(TextControlMixin,ComponentWrapper):
+    """
+    Wraps a native single-line entry field.
+    """
     _beos_class = BTextControl.BTextControl
-    _label = None 
+    _beos_label = None
+    _beos_sub = None
     
-    def _ensure_created(self):
-        self._beos_id = str(self._beos_id)
-        self._ensure_events()
-        self._ensure_geometry()
+    def widgetFactory(self,*args,**kwds):
+        self._beos_bounds = self.getGeometry()
+        self._text = self.proxy.state['text']
+        self._beos_msg = BMessage.BMessage(ACTION)
+        self._beos_msg.AddString('self_id', str(self._beos_id))
+        self._beos_msg.AddString('event', 'enterkey')
         self._init_args = (self._beos_bounds,
-                           self._beos_id,
-                           self._label, # !!!
+                           str(self._beos_id),
+                           self._beos_label, # Currently None
                            self._text,
                            self._beos_msg,
                            self._beos_mode,
                            self._beos_flags)
-        result = ComponentMixin._ensure_created(self)
-        self._ensure_editable()
-        self._ensure_enabled_state()
-        self._ensure_text()
-        return result
-    
-    def _backend_text(self):
-        if self._beos_comp:
-            return self._beos_comp.Text()
-    
-    def _backend_selection(self):
-        if self._beos_comp:
-             return self._beos_comp.TextView().GetSelection()
-    
-    def _ensure_selection(self):
-        if self._beos_comp:
-            start, end = self._selection
-            self._beos_comp.TextView().Select(start, end)
-            
-    def _ensure_text(self):
-        if self._beos_comp:
-            self._beos_comp.SetText(str(self.text))
+        return ComponentWrapper.widgetFactory(self,*args,**kwds)        
 
-    def _ensure_editable(self):
-        if self._beos_comp:
-            self._beos_comp.TextView().MakeEditable(self._editable)
-    
-    def _ensure_enabled_state(self):
-        if self._beos_comp:
-            self._beos_comp.SetEnabled(self._enabled)
-    
-    def _lost_focus(self):
-        self.modify(text=self._beos_comp.Text())
-    
-    def _beos_clicked(self):
-        send(self, 'enterkey')
+    def _return(self,*args,**kws):
+        send(self.proxy, 'enterkey')
 
+#==========================================================================#
+# TextArea
 
-class TextArea(ComponentMixin, AbstractTextArea):
+class TextAreaWrapper(TextControlMixin,ComponentWrapper):
+    """
+    Wraps a native multiline text area. If TextControlMixin works
+    for your backend, you shouldn't need to change anything here.
+    """
     _beos_class = BScrollView.BScrollView
     _beos_sub_class = BTextView.BTextView
-    _horizontal = 0
-    _vertical = 1
     _beos_border = B_FANCY_BORDER
+    _h_scroll = 0
+    _v_scroll = 1
+    _beos_sub = None
     
-    def _ensure_created(self):
-        self._focus = 0
-        self._beos_id = str(self._beos_id)
-        self._ensure_geometry()
-        if self._beos_sub is None:
-            self.sub_wrap(self._beos_sub_class(self._beos_bounds,
-                           self._beos_id,
-                           (0.0,0.0,self._beos_bounds[2], self._beos_bounds[3]),
-                           self._beos_mode,
-                           self._beos_flags))
-            self._init_args = (self._beos_id,
+    def widgetFactory(self,*args,**kwds):
+        self._beos_bounds = list(self.getGeometry())
+        #self._beos_bounds[3] /= 2
+        self._beos_bounds[2] *= 2.28
+        self._beos_bounds = tuple(self._beos_bounds)
+        self._beos_sub = self._beos_sub_class(self._beos_bounds,
+                                              str(self._beos_id)+"_sub",
+                                              (0.0,0.0,self._beos_bounds[2],self._beos_bounds[3]),
+                                              self._beos_mode,
+                                              self._beos_flags)
+        self._init_args = (str(self._beos_id),
                            self._beos_sub,
                            self._beos_mode,
                            self._beos_flags,
-                           self._horizontal,
-                           self._vertical,
+                           self._h_scroll,
+                           self._v_scroll,
                            self._beos_border)
-        result = ComponentMixin._ensure_created(self)
-        self._ensure_editable()
-        self._ensure_enabled_state()
-        self._ensure_text()
-        return result
+        return ComponentWrapper.widgetFactory(self,*args,**kwds)
+
+
+
+
+#==========================================================================#
+# Base Class for Container Widgets
+
+class ContainerMixin:
+    """
+    Frames - that is, widgets whose job is to visually group
+    other widgets - often have a lot of behavior in common
+    with top-level windows. Abstract that behavior here.
+    """
+
+    def setContainer(self,container):
+        """
+        Most backends create native widgets when the front-end
+        widget is added to a container. That means that containers
+        must recursively ensure that their contents are created
+        when they are added to a higher-level container. For
+        example, a Frame being added to a Window must ensure
+        that all of its contents are created and updated to
+        match the front-end state. The easiest way to handle
+        that is to simply call all of the contents'
+        setContainer() methods.
+        """
+        if self.widget is None:
+            self.destroy()
+        if container is None:
+            #self.widget.parent = None
+            return
+
+        # Ensure this container's widget is created.
+        self.create()
+
+        # Add self to the back-end container in the proper way.  This
+        # operation will be different for frames and top-level
+        # windows, so we call a method to handle it.
+        self.addToContainer(container)
+
+        # Ensure geometry, etc are up to date.
+        self.proxy.push(blocked=['container'])
+
+        # Ensure all contents are created.
+        for comp in self.proxy.contents:
+            comp.container = self.proxy
+
+    def getGeometry(self):
+        """ Get the native widget's geometry as an (x,y,w,h) tuple.
+        Since the geometry can be changed by the user dragging the
+        window frame, you must implement this method. """
+        if self.widget is None:
+            return (self.proxy.state['x'],
+                    self.proxy.state['y'],
+                    self.proxy.state['width'],
+                    self.proxy.state['height'])
+        return self.widget.Frame()
             
-    def _ensure_text(self):
-        if self._beos_comp:
-            self._beos_sub.SetText(self.text)
+    def _getContainer(self): return self.widget
     
-    def _ensure_selection(self):
-        if self._beos_comp:
-            start, end = self._selection
-            self._beos_sub.Select(start, end)
-
-    def _ensure_geometry(self):
-        self._beos_bounds = (float(self._x),
-                float(self._y),
-                float(self._width+ self._x-15),
-                float(self._height+self._y))
+    def setEnabled(self, enabled): pass
     
-    def _backend_selection(self):
-        if self._beos_comp:
-            start, end = self._beos_sub.GetSelection()
-            return (start, end)
+#==========================================================================#
+# GroupBox
+
+class GroupBoxWrapper(ContainerMixin, ComponentWrapper):
+
+    _beos_class = BBox.BBox
+    _beos_mode = B_FOLLOW_LEFT + B_FOLLOW_TOP
+    _beos_flags = B_WILL_DRAW + B_FRAME_EVENTS + B_NAVIGABLE_JUMP
+    _beos_border = B_FANCY_BORDER
     
-    def _backend_text(self):
-        if self._beos_comp:
-            return self._beos_sub.Text()
-            
-    def _ensure_editable(self):
-        if self._beos_comp:
-            self._beos_sub.MakeEditable(self._editable)
-
-    def _lost_focus(self):
-        self.modify(text=self._beos_sub.Text())
+    def widgetFactory(self, *args, **kwds):
+        self._beos_bounds = self.getGeometry()
+        self._init_args = (self._beos_bounds,
+                           str(self._beos_id),
+                           self._beos_mode,
+                           self._beos_flags,
+                           self._beos_border)
+        return ComponentWrapper.widgetFactory(self,*args,**kwds)
     
-    def MakeFocus(self, focus=1):
-        self._beos_sub.MakeFocus(focus)
-        if not focus:
-            self._lost_focus()        
+    def addToContainer(self,container):
+        if self.widget is None: return
+        if container is None: return
+        container.wrapper.widget.AddChild(self.widget)
+    
+    def setText(self, text):
+        if self.widget is None: return
+        self.widget.SetLabel(text)
+        
+    def widgetSetUp(self):
+        title = self.proxy.state['text']
+        #self.widget.SetLabel(title)
+    
+    def setupChildWidgets(self):
+        for component in self.proxy.contents:
+            component.container = self.proxy
 
-#################################################################
 
-class Frame(ComponentMixin, AbstractFrame):
+#==========================================================================#
+# Frame - BROKEN
+
+class FrameWrapper(ContainerMixin,ComponentWrapper):
+
     _beos_class = BView.BView
     
-    def _ensure_created(self):
-        self._beos_id = str(self._beos_id)
-        self._ensure_geometry()
+    def widgetFactory(self,*args,**kwds):
+        self._beos_bounds = self.getGeometry()
         self._init_args = (self._beos_bounds,
-                           self._beos_id,
+                           str(self._beos_id),
                            self._beos_mode,
                            self._beos_flags)
-        result = ComponentMixin._ensure_created(self)
-        for item in self._contents:
-            if item._beos_comp is None:
-                item._ensure_created()
-        self._ensure_visibility()
-        return result
+        return ComponentWrapper.widgetFactory(self,*args,**kwds)
+
+    #def __init__(self,*args,**kws):
+    #    ComponentWrapper.__init__(self,*args,**kws)
+
+    def addToContainer(self,container):
+        """
+        Add the Frame to its back-end container (another
+        Frame or a Window).
+        """
+        #container.wrapper.widget.add(self.widget)
+        #print container.wrapper.widget
+        #raise NotImplementedError, 'should be implemented by subclasses'
     
-    def _ensure_visibility(self):
-        if self._beos_comp:
-            if self._visible:
-                if self._beos_comp.IsHidden():
-                    self._beos_comp.Show()
-            else:
-                if self._beos_comp.IsHidden():
-                    pass # Don't Hide stuff twice...
-                else:
-                    self._beos_comp.Hide()
-        
-    def _beos_add(self, object):
-        self._beos_comp.AddChild(object._beos_comp)
+#==========================================================================#
+# Window
 
-
-class Window(ComponentMixin, AbstractWindow):
-    _beos_class = BWindow.BWindow
+class WindowWrapper(ContainerMixin,ComponentWrapper):
+    """
+    Wraps a top-level window frame.
+    """
+    
+    _beos_class  = BWindow.BWindow
     _beos_style = B_TITLED_WINDOW                       # See below for other styles
     _beos_flags = B_WILL_DRAW
     _beos_workspaces = B_CURRENT_WORKSPACE              # or B_ALL_WORKSPACES
@@ -535,130 +827,199 @@ class Window(ComponentMixin, AbstractWindow):
                      'other' : B_UNTYPED_WINDOW
                    }
     _focus = None
+    _title = "Anygui Window"
     
-    def _ensure_created(self):
-        if self._beos_comp is None:
-            self._ensure_style()
-            self._ensure_title()
-            self._ensure_geometry()
-            self.wrap(self._beos_class(
-                      self._beos_bounds,
-                      self._title,
-                      self._beos_style,
-                      self._beos_flags,
-                      self._beos_workspaces))
-            for item in self._contents:
-                item._ensure_created()
-            self._ensure_geometry()
-            self._ensure_visibility()
-            self._finish_creation()
-                  
-    def _ensure_title(self):
-        if self._beos_comp:
-            self._beos_comp.SetTitle(self._title)
+    def widgetFactory(self,*args,**kwds):
+        self._beos_bounds = self.getGeometry()
+        if self.proxy.state.has_key('title'):
+            self._title = self.proxy.state['title']
+        self._init_args = (self._beos_bounds,
+                           self._title,
+                           self._beos_style,
+                           self._beos_flags,
+                           self._beos_workspaces)        
+        return ComponentWrapper.widgetFactory(self,*args,**kwds)
+        
+    def setTitle(self,title):
+        if self.widget is None: return
+        self.widget.SetTitle(title)
     
-    def _ensure_visibility(self):
-        if self._beos_comp:
-            self._beos_comp.Minimize(not self._visible)
+    def setText(self,text):
+        if self.widget is None: return
+        pass # text is not the Title !
     
-    def _ensure_geometry(self):
-        self._beos_bounds = (float(self._x)+10.0,     # Because these are inside
-                             float(self._y)+30.0,     # values, not outside!
-                             float(self._width), 
-                             float(self._height))
-        if self._beos_comp:
-            self._beos_comp.MoveTo(self._beos_bounds[0], self._beos_bounds[1])
-            self._beos_comp.ResizeTo(self._beos_bounds[2], self._beos_bounds[3])
+    def setEnabled(self,enabled):
+        if self.widget is None: return
+        self.widget.Minimize(not enabled)
+
+    def addToContainer(self,container):
+        """
+        Add self to the backend application, if required.
+        """
+        pass
+        
+    def widgetSetUp(self):
+        """
+        Arrange for self.resize() to be called whenever the user
+        interactively resizes the window.
+        """
+        self.widget.bind(self) # Make QuitRequested/MessageReceived work!!!
+
+    def resize(self,dw,dh):
+        """
+        Inform the proxy of a resize event. The proxy then takes care of
+        laying out the container contents. Don't change this method,
+        just call it from an event handler.
+        """
+        self.proxy.resized(dw, dh)
+
+    def setContainer(self,container):
+        if not application().isRunning(): return
+        if container is None: pass
+        if self.widget is None: self.create(container)
+        self.proxy.push(blocked=['container'])
+        # Ensure contents are properly created.
+        for comp in self.proxy.contents:
+            comp.container = self.proxy
     
-    def _ensure_style(self):
-        if self._beos_comp:
-            self._beos_comp.SetType(self._beos_styles[self._style])
+    def setGeometry(self,x,y,width,height):
+        if self.widget is None: return
+        self.widget.MoveTo(float(x)+10,float(y)+30)
+        self.widget.ResizeTo(float(width),float(height))
+
+    def getGeometry(self):
+        """ Get the native widget's geometry as an (x,y,w,h) tuple.
+        Since the geometry can be changed by the user dragging the
+        window frame, you must implement this method. """
+        if self.widget is None:
+            return (self.proxy.state['x'],
+                    self.proxy.state['y'],
+                    self.proxy.state['width']+self.proxy.state['x'],
+                    self.proxy.state['height']+self.proxy.state['y'])
+        return self.widget.Frame()
+
+    def setVisible(self,visible):
+        """ Set/get the native widget's visibility. """
+        if self.widget is None: return
+        self.widget.Minimize(not visible)
+        
+    def destroy(self):
+        self.Quit()
     
-    def _beos_close_handler(self):
-        #print "Destroy!"
-        self.destroy()
-        if self._beos_comp:
-            self._beos_comp = None
+    def enterMainLoop(self):
+        pass
+
+    # BeOS Hook Functions
     
     def QuitRequested(self):
         """
         This BeOS hook function is called whenever a quit type action is requested.
         Currently sends a Quit message to the app if it is the last window.
         """
-        self._beos_close_handler()
         if BApplication.be_app.CountWindows() == 1:
             BApplication.be_app.PostMessage(B_QUIT_REQUESTED)
         return 1
+    
+    def FrameResized(self, width, height):
+        dw = width - self.proxy.state['width']
+        dh = height - self.proxy.state['height']
+        self.resize(dw,dh)
+    
+    def FrameMoved(self, origin):
+        pass
+        
+    def MenusBeginning(self):
+        pass
 
+    def MenusEnded(self):
+        pass
+    
     def MessageReceived(self, msg):
-        """
-        BeOS hook function - this function is called whenever a BMessage is received.
-        The msg.what value tells us what type of BMessage it is.
-        If the message is the right type, find the id of the object that created it, and
-        call _beos_clicked() and _beos_lost_focus if applicable.
-        """
         if msg.what == ACTION:
-            #print "Received"
             id = msg.FindString('self_id')
-            for item in self._contents:
-                if item._beos_id == id:
-                    if item._beos_clicked:    # Bit of a hack?
-                        item._beos_clicked()
-                        pass
-                    if item._lost_focus:
-                        item._lost_focus()
+            action = msg.FindString('event')
+            #print id, action
+            #print self.proxy.state
+            for item in self.proxy.state['contents']:
+                if item.wrapper._beos_id == id:
+                    send(item.wrapper.proxy,action)
+#==========================================================================#
+# AboutDialog
 
-    def _ensure_title(self):
-        if self._beos_comp:
-            self._beos_comp.SetTitle(self._title)
-        
-    def _beos_add(self, object):
-        self._beos_comp.AddChild(object._beos_comp)
+ABOUT_TEXT="""
+The purpose of the Anygui project is to create an easy-to-use, simple, \
+and generic module for making graphical user interfaces in Python. \
+Its main feature is that it works transparently with many different \
+GUI packages on most platforms.
+"""
+
+class AboutDialog:
     
-    def _beos_remove(self, object):
-        self._beos_comp.RemoveChild(object._beos_comp)
-        
-    def remove(self, object):
-        if object in self._contents:
-            self._beos_remove(object)
-        AbstractWindow.remove(self, object)
-        
-    
-###################################################################
-
-class Application(WrapThis, AbstractApplication):
-    _beos_running = 0
-
     def __init__(self):
-        "Every application needs a constructor code.  What should this be?"
-        AbstractApplication.__init__(self)
-        self.wrap(BApplication.BApplication('application/python'))
-            
-    def ReadyToRun(self):
-        for win in self._windows:
-            win._beos_comp.Show()
-                
-    def OnInit(self):
-        return 1
+        self.alert = BAlert.BAlert("About Anygui", self.ABOUT_TEXT, "OK", B_INFO_ALERT)
+        self.wrapper = "AboutDialog"
     
-    def RefsReceived(self, msg):
-        "BeOS hook function called when files dropped on our icon"
-        # Don't know if this will work, since we don't really have an icon!
-        print msg.refs
-            
-    def AboutRequested(self):
-        about = BAlert.BAlert("About", __doc__, "Dismiss")
-        about.Go()
     
+    
+    
+
+#==========================================================================#
+# Application
+
+class Application(BApplication.BApplication, AbstractApplication):
+    """
+    Wraps a backend Application object (or implements one from
+    scratch if necessary).
+    """
+    
+    _beos_class = BApplication.BApplication # Needs to be subclassed to work!
+    _beos_running = 0
+    _beos_sig = "application/python"
+    about = None
+
+    def __init__(self,**kwds):
+        BApplication.BApplication.__init__(self, self._beos_sig)
+        AbstractApplication.__init__(self,**kwds)
+        self._running = 1
+
     def add(self, win):
         AbstractApplication.add(self, win)
-        #win._ensure_created()
         if self._beos_running:
-            win._beos_comp.Show()
+            if win.wrapper is "Alert":
+                win.alert.Go()
+            if win.wrapper.widget is None:
+                win.wrapper.create()
+            win.wrapper.widget.Show()
         
-    def _mainloop(self):
+    def OnInit(self):
+        return 1
+
+    def internalRun(self):
+        """
+        Do whatever is necessary to start your backend's event-
+        handling loop.
+        """
         self._beos_running = 1
-        self._beos_comp.Run()
+        BApplication.be_app.Run()
+
+    # BeOS Hook Functions
+    
+    def AboutRequested(self):
+        if self.about is None:
+            self.about = BAlert.BAlert("About", __doc__, "Dismiss")
+        self.about.Go()
+        
+    def ArgvRecieved(self, argc, argv):
+        pass
+ 
+    def ReadyToRun(self):
+        for win in self._windows:
+            if win.wrapper is "AboutDialog":
+                self.about = win.alert
+            else:
+                win.wrapper.widget.Show()
+                win.wrapper.widget.Minimize(not win.wrapper.proxy.state['visible'])
 
     def QuitRequested(self):
+        self.about = None
         return 1
