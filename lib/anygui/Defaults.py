@@ -35,7 +35,7 @@ class CheckBox:
 
 class Frame:
 
-    _text = 'Frame'
+    _text = 'Frame' # Hardly needed...
     _x = 0
     _y = 0
     _width = 400
