@@ -1,3 +1,6 @@
+The from anygui.backends.foogui import * solution doesn't really work
+as described in the docs...
+
 In wxgui, RadioButtons need to have a group when they are created -
 otherwise they won't work properly. Thus they cannot be moved from
 RadioGroup to RadioGroup.
