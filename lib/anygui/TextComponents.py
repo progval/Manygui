@@ -1,4 +1,5 @@
 from anygui.Components import AbstractComponent
+from anygui.Exceptions import UnimplementedMethod
 
 class AbstractTextComponent(AbstractComponent):
 
