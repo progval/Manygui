@@ -13,6 +13,8 @@
      Remember to keep backend-list up to date
 -->
 
+<!-- container attribute -->
+
 <document version="&longversion;">
 
   <title>Anygui: Generic GUI for Python</title>

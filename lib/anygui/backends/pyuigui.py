@@ -21,16 +21,22 @@ __all__ = '''
 
 import pyui
 from anygui.Applications import AbstractApplication
+from anygui.Events import *
+from anygui import application
 
 wrappers = []
 
 class Application(AbstractApplication):
+
+    running = 0
     
     def run(self):
+        
+        self.running = 1
         not_done = 1
 
         pyui.init(800, 600, fullscreen=1)
-        
+
         for wrapper in wrappers:
             wrapper.prod()
         
@@ -82,10 +88,15 @@ class Wrapper:
     def __init__(self, proxy):
         if not self in wrappers: wrappers.append(self)
         self.proxy = proxy
+        if application().running:
+            self.prod()
 
     def prod(self):
-        self.widget.destroy()
-        self._prod()
+        try: assert self.widget.isDummy()
+        except: pass
+        else:
+            self.widget.destroy()
+            self._prod()
         self.proxy.refresh()
 
     def destroy(self):
@@ -95,12 +106,13 @@ class Wrapper:
     def set(self, **kwds):
         # Should be more "intelligent":
         for key, val in kwds.iteritems():
-            setter = getattr(self, 'set'+key.capitalize(), None)
+            setter = getattr(self, 'set'+key[1:].capitalize(), None)
             if setter: setter(val)
 
 class ComponentWrapper(Wrapper):
 
     _x, _y, _width, _height = 0, 0, 0, 0
+    _enabled = 1 # HACK
 
     def setX(self, x):
         self._x = x
@@ -124,10 +136,13 @@ class ComponentWrapper(Wrapper):
         self.widget.setShow(visible)
 
     def setEnabled(self, enabled):
-        pass # What is PyUI equivalent?
+        # What is PyUI equivalent?
+        # HACK:
+        self._enabled = enabled
 
-    def setParent(self, parent):
-        widget = getattr(parent, 'widget', None)
+    def setContainer(self, container):
+        wrapper = getattr(container, '_dependant', None)
+        widget = getattr(wrapper, 'widget', None)
         if widget is not None:
             try: assert self.widget.isDummy()
             except:
@@ -137,11 +152,11 @@ class ComponentWrapper(Wrapper):
 class ButtonWrapper(ComponentWrapper):
 
     def _handler(self, evt):
-        # TODO: Add call to send()
-        pass
+        if self._enabled: # HACK
+            send(self.proxy, 'click')
 
     def _prod(self):
-        self.widget = pyui.widgets.Button('Button', self._handler)        
+        self.widget = pyui.widgets.Button('Button', self._handler)
 
     def setText(self, text):
         self.widget.setText(text)
@@ -157,100 +172,7 @@ class WindowWrapper(ComponentWrapper):
     def setTitle(self, title):
         self.widget.setTitle(title)
 
-    def setParent(self, parent):
+    def setContainer(self, container):
         pass # Perhaps allow adding to application object...
-
-
-def test():
-
-    class Component:
-        
-        attributes = '''
-        x
-        y
-        width
-        height
-        visible
-        enabled
-        parent
-        '''.split()
-
-        # Defaults
-        visible = 1
-        enabled = 1
-        parent = None
-        
-        def __init__(self):
-            self._create_wrapper()
-            
-        def refresh(self):
-            kwds = {}
-            for attribute in self.attributes:
-                value = getattr(self, attribute)
-                kwds[attribute] = value
-            self.wrapper.set(**kwds)
-            
-
-    class Window(Component):
-
-        attributes = Component.attributes + ['title']
-        
-        def __init__(self):
-            Component.__init__(self)
-            self.contents = []
-            
-        def refresh(self):
-            Component.refresh(self)
-            for child in self.contents:
-                child.refresh()
-        
-        def add(self, child):
-            if not child in self.contents:
-                self.contents.append(child)
-                child.parent = self.wrapper
-                child.refresh()
-
-        def _create_wrapper(self):
-            self.wrapper = WindowWrapper(self)
-
-
-    class Button(Component):
-
-        attributes = Component.attributes + ['text']
-        
-        def _create_wrapper(self):
-            self.wrapper = ButtonWrapper(self)
-
-    
-    win = Window()
-    win.x = 50
-    win.y = 50
-    win.width = 300
-    win.height = 200
-    win.title = 'Testing'
-    win.refresh() # Not needed with Attrib mixin
-
-    btn = Button()
-    btn.x = 10
-    btn.y = 10
-    btn.width = 100
-    btn.height = 50
-    btn.text = 'Click me'
-    btn.refresh()
-
-    win.add(btn)
-
-    win2 = Window()
-    win2.x = 150
-    win2.y = 150
-    win2.width = 300
-    win2.height = 200
-    win2.title = 'Testing 2'
-    win2.refresh() # Not needed with Attrib mixin
-
-    # app.add(win, win2)...
-
-    app = Application()
-    app.run()
 
 if __name__ == '__main__': test()

@@ -3,6 +3,7 @@
 from Exceptions import SetAttributeError, GetAttributeError, UnimplementedMethod, InternalError
 from Events import link, send
 
+'''
 # One key responsibility of class Mixins.Attrib is dealing with
 # methods called set* in backend wrappers.
 
@@ -64,6 +65,7 @@ def topological_sort(items, constraints):
         for follower in followers.get(item,{}).keys():
             nleaders[follower] -= 1
     return result
+'''
 
 class Attrib:
     """Attrib: mix-in class to support attribute getting & setting.
@@ -95,7 +97,7 @@ class Attrib:
     Method modify has the same interface as set (to modify potentially
     more than one attribute at once) but uses modattr rather than setattr.
 
-
+    # REWRITE:
     Attrib also supplies a default refresh method, which calls all the
     relevant methods named set* in the connected _dependant object if
     flag _inhibit_refresh is false.  In this release, all set* are
@@ -111,7 +113,7 @@ class Attrib:
     """
 
     _dependant = None
-    _all_setters = []           # no set* called until Attrib.__init__
+    #_all_setters = []           # no set* called until Attrib.__init__
     _inhibit_refresh = 0        # default Attribs are always refresh-enabled
 
     def __setattr__(self, name, value):
@@ -188,10 +190,10 @@ class Attrib:
 
     def __init__(self, *args, **kwds):
         # _all_setters must be computed exactly once per concrete class
-        if self._dependant is not None:
-            klass = self._dependant.__class__
-            if not klass.__dict__.has_key('_all_setters'):
-                klass.__dict__['_all_setters'] = _get_all_setters(klass)
+        #if self._dependant is not None:
+        #    klass = self._dependant.__class__
+        #    if not klass.__dict__.has_key('_all_setters'):
+        #        klass.__dict__['_all_setters'] = _get_all_setters(klass)
 
         """
         # handle explicit-attributes -- currently [pre 0.1 beta] disabled
@@ -209,8 +211,14 @@ class Attrib:
 
     def refresh(self, **ignore_kw):
         if self._inhibit_refresh: return
-        for setter_name in self._all_setters:
-            getattr(self, ensure_name)()
+        # Temporary hack:
+        attributes = [name for name in dir(self) if name[0] == '_']
+        state = {}
+        for name in attributes:
+            state[name] = getattr(self, name)
+        self._dependant.set(**state)
+        #for setter_name in self._all_setters:
+        #    getattr(self, ensure_name)()
 
 
 class DefaultEventMixin:

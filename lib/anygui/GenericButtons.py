@@ -1,7 +1,12 @@
 from anygui.Exceptions import UnimplementedMethod
 from anygui.Components import Component
+import anygui
 
 class GenericButton(Component):
+
+    def __init__(self, *args, **kwds):
+        self._dependant = anygui._backend.ButtonWrapper(self)
+        Component.__init__(self, *args, **kwds)
 
     def _get_text(self):
         return self._text

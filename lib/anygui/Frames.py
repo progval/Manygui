@@ -41,7 +41,7 @@ class Frame(Component, Defaults.Frame):
             # _set_container() adds component to self._contents.
             # layout manager may have already called it, though.
             if component not in self._contents:
-                component._set_container(self)
+                component.container = self
 
         # Inform the layout manager, if any.
         if self._layout:
@@ -50,7 +50,7 @@ class Frame(Component, Defaults.Frame):
     def remove(self, component):
         "If the given component is among the contents of this Frame, removes it."
         if component in self._contents:
-            component._set_container(None)
+            component.container = None
             self.layout.remove(component)
             self.layout.resized(0,0)
 
@@ -72,16 +72,10 @@ class Frame(Component, Defaults.Frame):
 
     def _add(self, comp):
         self._contents.append(comp)
-        if self._is_created():
-            comp.ensure_created()
-            # Redundant:
-            #if comp.ensure_created():
-            #    comp._finish_creation()
 
     def _remove(self, comp):
         try:
             self._contents.remove(comp)
-            comp.destroy()
         except ValueError:
             pass
 
@@ -90,7 +84,8 @@ class Frame(Component, Defaults.Frame):
             self._layout._container = None
             ct = self._contents
             for item in ct:
-                self._remove(item)
+                #self._remove(item)
+                self.remove(item)
         self._layout = lo
         lo._container = self
 

@@ -25,6 +25,7 @@ class Component(Attrib, DefaultEventMixin):
         self.layout_data = LayoutData()
         DefaultEventMixin.__init__(self)
         Attrib.__init__(self, *args, **kw)
+        self._finish_creation() # ...
 
     def destroy(self):
         self._set_container(None)
@@ -35,7 +36,7 @@ class Component(Attrib, DefaultEventMixin):
             self._finish_creation()
 
     def _finish_creation(self):
-        self._ensure_events()
+        #self._ensure_events()
         self._inhibit_refresh = 0
         self.refresh()
 
@@ -161,7 +162,7 @@ class Component(Attrib, DefaultEventMixin):
             self.geometry = (self._x + dx, self._y + dy,
                              self._width + dw, self._height + dh)
 
-    # backend api
+    # backend api (Outdated)
 
     def _is_created(self):
         raise UnimplementedMethod, (self, "_is_created")
