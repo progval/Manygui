@@ -454,7 +454,7 @@
       called <emphasis>views</emphasis> since they are ways of viewing
       the underlying state, which is called a
       <emphasis>model</emphasis>. In the current version of
-      <name>Anygui</name> (&longversion) there are three types of
+      <name>Anygui</name> (&longversion;) there are three types of
       model:</para>
 
       <para><code>BooleanModel</code>: This represents a Boolean value
