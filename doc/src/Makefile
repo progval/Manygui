@@ -37,5 +37,5 @@ anygui.lynx.html: temp.xml min2lynx.xsl
 	rm anygui.lynx.html
 	mv anygui.txt ..
 
-temp.xml: anygui.xml
+temp.xml: anygui.xml api_reference.xml copyrightholders.xml installation.xml introduction.xml using_anygui.xml
 	python insertdate.py anygui.xml > temp.xml
