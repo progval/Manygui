@@ -3,6 +3,9 @@ Remaining objectives for version 0.1:
 -------------------------------------
 Tentative release date: December 10th, 2001
 
+* Make sure all widgets support _ensure_text etc. in all
+  backends
+
 * Simplify the widget API by detaching models, using
   signals
 

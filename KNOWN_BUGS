@@ -1,5 +1,10 @@
 RadioGroups don't work properly in Jython.
 
+Some widgets (e.g. buttons) in some backends (e.g.
+mswgui) don't support _ensure_text (and possibly
+other attributes), so their text can't be changed
+on the fly.
+
 test_references.py and test_events don't work in Jython
 2.1b1. (References and Events should still work, though...)
 
