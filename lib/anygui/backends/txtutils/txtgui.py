@@ -23,6 +23,8 @@ SCROLL_LEFT=951
 SCROLL_RIGHT=952
 SCROLL_UP=953
 SCROLL_DOWN=954
+SELECT_BEGIN_EVENT=955
+SELECT_END_EVENT=956
 
 # Map of character codes to names.
 _charnames = {ord(' '):'space',
@@ -40,6 +42,8 @@ _charnames = {ord(' '):'space',
               SCROLL_UP:'ESC-uparrow',
               SCROLL_DOWN:'ESC-downarrow',
               WINMENU_EVENT:'ESC-w',
+              SELECT_BEGIN_EVENT:'ESC-s',
+              SELECT_END_EVENT:'ESC-e',
               1:'^A',
               2:'^B',
               3:'^C',
@@ -105,7 +109,7 @@ def _add_to_focus_list(comp):
     _all_components.append(comp)
 
 def _remove_from_focus_list(comp):
-    _scr.dbg("Removing from focus list",comp,'\n')
+    #_scr.dbg("Removing from focus list",comp,'\n')
     if _focus_control is comp:
         _app._change_focus()
     if _focus_control is comp:
@@ -166,6 +170,14 @@ class ComponentMixin:
     _event_map = {}
     _event_range_map = {}
 
+    def _get_control_help(self):
+        helpstr = ""
+        if hasattr(self,"_help"):
+            helpstr = helpstr + self._help + '\n\n'
+        if type(self.__class__.__doc__) == type(""):
+            helpstr = helpstr + self.__class__.__doc__
+        return helpstr
+
     def _get_event_help(self):
         items = []
         evmap = self._event_map
@@ -185,7 +197,7 @@ class ComponentMixin:
                     c = str(ch)
             if doc is not None:
                 item = c+": "+str(doc)
-                items.append(item)
+                items += item.split('\n')
                 items.append(' ')
         try:
             if self._container:
@@ -679,6 +691,7 @@ class TextMixin(ComponentMixin):
         self._cur_pos=(1,1)
         self._cur_line = 0
         self._cur_col = 0
+        self._curs_selection = (0,0)
 
     def _ensure_editable(self):
         #_scr.dbg("ENSURING EDITABLE",self)
@@ -704,9 +717,24 @@ class TextMixin(ComponentMixin):
             tx,ty = self._cur_pos
             _scr.move_cursor(x+tx,y+ty)
 
+    def _ensure_selection(self):
+        st,en = self._selection
+        self._curs_selection = (st,en)
+
+    def _backend_selection(self):
+        _scr.dbg("BACKEND_SELECTION",self._curs_selection)
+        return self._curs_selection
+
+    def _ensure_editable(self):
+        pass
+
+    def _backend_text(self):
+        return self._text
+
     ### Event handlers ###
     def _backspace(self,ev):
         """Erase character before cursor."""
+        if not self._editable: return
         if self._tpos < 1: return 1
         self.modify(text=self._text[:self._tpos-1] + self._text[self._tpos:])
         self._tpos -= 1
@@ -715,6 +743,7 @@ class TextMixin(ComponentMixin):
 
     def _insert(self,ev):
         """Insert character before cursor."""
+        if not self._editable: return
         if not chr(ev) in string.printable:
             return 0
         self.modify(text=self._text[:self._tpos] + chr(ev) + self._text[self._tpos:])
@@ -751,6 +780,30 @@ class TextMixin(ComponentMixin):
         self._move_line(-1)
         return 1
 
+    def _select_start(self,ev):
+        """Set the start of the selection to the current
+        cursor location."""
+        st,en = self._curs_selection
+        _scr.dbg("SELECTION START 1:",st,en)
+        st = self._tpos
+        if en<st: en = st
+        self._curs_selection=(st,en)
+        _scr.dbg("SELECTION START:",st,en)
+        self._redraw()
+        return 1
+
+    def _select_end(self,ev):
+        """Set the end of the selection to the current
+        cursor location."""
+        st,en = self._curs_selection
+        _scr.dbg("SELECTION END 1:",st,en)
+        en = self._tpos
+        if en<st: st = en
+        self._curs_selection=(st,en)
+        _scr.dbg("SELECTION END:",st,en)
+        self._redraw()
+        return 1
+
     _event_map = {BACKSPACE:_backspace,
                   8:_backspace, #^H
                   DOWN_ARROW:_down_line,
@@ -758,6 +811,8 @@ class TextMixin(ComponentMixin):
                   #27:_change_focus,
                   LEFT_ARROW:_back,
                   RIGHT_ARROW:_fwd,
+                  SELECT_BEGIN_EVENT:_select_start,
+                  SELECT_END_EVENT:_select_end,
                   15:ComponentMixin._ignore_event
                   }
     _event_range_map = {(8,255):_insert}
@@ -842,18 +897,6 @@ class TextMixin(ComponentMixin):
         self._cur_col = col
         return line,col
 
-    def _ensure_editable(self):
-        pass
-
-    def _ensure_selection(self):
-        pass
-
-    def _backend_text(self):
-        return self._text
-
-    def _backend_selection(self):
-        return 0,0
-
 class TextField(TextMixin, AbstractTextField):
 
     def __init__(self,*args,**kws):
@@ -882,9 +925,13 @@ class Frame(ContainerMixin, AbstractFrame):
         self.modify(text="")
 
 class Window(ContainerMixin, AbstractWindow):
+    """To move or resize a window, use Esc-W to open
+the window menu, then type h,j,k, or l to move, and
+H,J,K, or L to resize."""
 
     _needs_container = 0
     _texty = 0
+    _use_text = 0
 
     def __init__(self,*args,**kws):
         ContainerMixin.__init__(self,*args,**kws)
@@ -907,6 +954,7 @@ class Window(ContainerMixin, AbstractWindow):
         self._addstr(2,0,self._title)
 
     def _ensure_title(self):
+        #_scr.dbg("TITLE",self._title)
         #self._redraw()
         pass
 
@@ -1041,17 +1089,16 @@ class HelpWindow(Window):
 
     def _populate_lb(self,lb):
         """Add docstrings for _prev_ctrl event handlers to lb."""
-        items = []
+        items = ["---------------------------------------------------------------------",
+                 "This is txtgui, the text/curses binding for Anygui.",
+                 ""]
         if self._prev_ctrl:
-            items += ["The current control is a "+self._prev_ctrl.__class__.__name__+";",
-                     "it responds to the following key bindings:",""]
+            cls = self._prev_ctrl.__class__.__name__
+            items += ["The current control is a "+cls+".",""]
+            items += self._prev_ctrl._get_control_help().split('\n')
+            items += ["","This " + cls +" responds to the following key bindings:",""]
             items += self._prev_ctrl._get_event_help()
-        items += ["",
-                  "---------------------------------------------------------------------",
-                  "This is txtgui, the text/curses binding for Anygui.",
-                  "",
-                  
-                  "You can get this context-sensitive help screen at",
+        items += ["You can get this context-sensitive help screen at",
                   "any time by typing ESC-?. You can exit the",
                   "application by typing ESC, followed by the word",
                   "'quit' in lower-case, or by closing all the",
@@ -1126,6 +1173,9 @@ _escape_sequence_map = {
 
     # Convert ESC-Return into Return, for textgui's benefit.
     (ord('\n'),):ord('\n'),
+
+    (ord('s'),):SELECT_BEGIN_EVENT,
+    (ord('e'),):SELECT_END_EVENT,
 
     }
 

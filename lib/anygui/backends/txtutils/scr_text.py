@@ -30,6 +30,7 @@ SCR_LRCORNER = ord('+')
 
 ATTR_NORMAL = 0
 ATTR_UNDERLINE = 0
+ATTR_SELECTED = 0
 
 # Screen buffer.
 _xsize=80

@@ -1,7 +1,7 @@
 # Curses magic...
 import curses
 
-_debug_messages = 1
+_debug_messages = 0
 if _debug_messages:
     _f = open("curses.txt","w")
 
@@ -12,6 +12,7 @@ _oy=0
 
 ATTR_NORMAL = curses.A_NORMAL
 ATTR_UNDERLINE = curses.A_UNDERLINE
+ATTR_SELECTED = curses.A_STANDOUT
 
 def dbg(*msg):
     if not _debug_messages: return
