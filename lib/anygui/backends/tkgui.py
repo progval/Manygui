@@ -284,6 +284,8 @@ class ScrollableTextArea(Tkinter.Frame):
         self._yscrollbar.config(command=self._textarea.yview)
         self._xscrollbar.config(command=self._textarea.xview)
 
+    def bind(self,*args,**kw):
+        self._textarea.bind(*args,**kw)
 
     def config(self, **kw):
         self._textarea.config(**kw)
@@ -323,7 +325,65 @@ class TextArea(ComponentMixin, AbstractTextArea):
         result = ComponentMixin._ensure_created(self)
         if result:
             self._tk_comp.config(wrap=NONE) #, wrap=WORD)
+            self._tk_comp.bind("<Key>",self._keybinding)
+            self._tk_comp.bind("<KeyPress-Control_L>",self._ctldown)
+            self._tk_comp.bind("<KeyRelease-Control_L>",self._ctlup)
+            self._tk_comp.bind("<KeyPress-Alt_L>",self._altdown)
+            self._tk_comp.bind("<KeyRelease-Alt_L>",self._altup)
+            self._tk_comp.bind("<KeyPress-Shift_L>",self._shiftdown)
+            self._tk_comp.bind("<KeyRelease-Shift_L>",self._shiftup)
+            self._tk_comp.bind("<Key-Insert>",self._insertbinding)
+            self._tk_comp.bind("<Key-Up>",self._arrowbinding)
+            self._tk_comp.bind("<Key-Down>",self._arrowbinding)
+            self._tk_comp.bind("<Key-Left>",self._arrowbinding)
+            self._tk_comp.bind("<Key-Right>",self._arrowbinding)
+            self._ctl = 0
+            self._alt = 0
+            self._shift = 0
         return result
+
+    # Track modifier key state.
+    def _ctldown(self,ev):
+        self._ctl = 1
+    def _ctlup(self,ev):
+        self._ctl = 0
+    def _altdown(self,ev):
+        self._alt = 1
+    def _altup(self,ev):
+        self._alt = 0
+    def _shiftdown(self,ev):
+        self._shift = 1
+    def _shiftup(self,ev):
+        self._shift = 0
+
+    def _keybinding(self,ev):
+        """ This method binds all keys, and causes them to be
+        ignored when _editable is not set. """
+        if self._editable:
+            return None
+        else:
+            # This is truly horrid. Please add appropriate
+            # code for Mac platform, someone.
+            if (ev.char == "\x03") or (ev.char == "c" and self._alt):
+                # DON"T ignore this key: it's a copy operation.
+                return None
+            return "break"
+
+    def _insertbinding(self,ev):
+        if self._editable:
+            return None
+        if self._ctl:
+            # Allow copy.
+            return None
+        return "break"
+
+    def _arrowbinding(self,ev):
+        if self._editable:
+            return None
+        if self._shift:
+            # Allow selection.
+            return None
+        return "break"
 
     def _backend_text(self):
         if self._tk_comp:
@@ -369,12 +429,7 @@ class TextArea(ComponentMixin, AbstractTextArea):
             self._tk_comp.tag_add('sel', '1.0 + %s char' % start, '1.0 + %s char' % end)
 
     def _ensure_editable(self):
-        if self._tk_comp:
-            if self._editable:
-                state = NORMAL
-            else:
-                state = DISABLED
-            self._tk_comp.config(state=state)
+        pass
 
 ################################################################
 
