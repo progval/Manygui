@@ -21,9 +21,6 @@ from anygui.Wrappers import AbstractWrapper, DummyWidget, isDummy
 from anygui.Events import *
 from anygui import application
 
-#ButtonWrapper = 1
-TextFieldWrapper = 1
-TextAreaWrapper = 3
 ListBoxWrapper = 4
 RadioButtonWrapper = 5
 CheckBoxWrapper = 6
@@ -208,7 +205,6 @@ class ButtonWrapper(ComponentWrapper):
         # LOWORD(wParam): id of menu item, control, or accelerator
         if (wParam >> 16) == win32con.BN_CLICKED:
             #self.do_action()
-            print "SENDING"
             send(self.proxy, 'click')
 
 ##################################################################
@@ -334,8 +330,9 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
 ### IMPORTANT NOTE: Until the 'copy-paste' structure has been
 ### fixed (e.g. with a common superclass), fixes in one of these
 ### text classes should probably also be done in the other.
+'''
 
-class TextField(ComponentMixin, AbstractTextField):
+class TextFieldWrapper(ComponentWrapper):
     _wndclass = "EDIT"
     #_text = "mswTextField"
     _win_style = win32con.ES_NOHIDESEL | win32con.ES_AUTOHSCROLL | \
@@ -348,57 +345,52 @@ class TextField(ComponentMixin, AbstractTextField):
     def _from_native(self, text):
         return text.replace('\r\n', '\n')
 
-    def _backend_text(self):
-        if self.widget:
-            return self._from_native(win32gui.GetWindowText(self.widget))
+    def getText(self):
+        if self.noWidget(): return
+        return self._from_native(win32gui.GetWindowText(self.widget))
 
-    #def _set_text(self, text):
-    #    if self.widget:
-    #        win32gui.SetWindowText(self.widget, self._to_native(text))
+    def setText(self, text):
+        if self.noWidget(): return
+        if text == self.getText(): return
+        win32gui.SetWindowText(self.widget, self._to_native(text))
 
-    def _backend_selection(self):
+    def getSelection(self):
         #log("TextField._backend_selection")
-        if self.widget:
-            result = win32gui.SendMessage(self.widget,
-                                          win32con.EM_GETSEL,
-                                          0, 0)
-            start, end = result & 0xFFFF, result >> 16
-            #log("    start,end=%s,%s"%(start,end))
-            # under windows, the natice widget contains
-            # CRLF line separators
-            text = self.text
-            start -= text[:start].count('\n')
-            end -= text[:end].count('\n')
-            return start, end
+        if self.noWidget(): return
+        result = win32gui.SendMessage(self.widget,
+                                      win32con.EM_GETSEL,
+                                      0, 0)
+        start, end = result & 0xFFFF, result >> 16
+        #log("    start,end=%s,%s"%(start,end))
+        # under windows, the natice widget contains
+        # CRLF line separators
+        text = self.getText()
+        start -= text[:start].count('\n')
+        end -= text[:end].count('\n')
+        return start, end
             
-    def _ensure_text(self):
-        if self.widget:
-            # avoid recursive updates
-            if str(self._text) != self._backend_text():
-                win32gui.SetWindowText(self.widget, self._to_native(str(self._text)))
-        
-    def _ensure_selection(self):
+    def setSelection(self,selection):
         #log("TextField._ensure_selection")
-        if self.widget:
-            start, end = self._selection
-            text = self.text
-            start += text[:start].count('\n')
-            end += text[:end].count('\n')
-            #log("    start,end=%s,%s"%(start,end))
-            win32gui.SendMessage(self.widget,
-                                 win32con.EM_SETSEL,
-                                 start, end)
+        if self.noWidget(): return
+        start, end = selection
+        text = self.getText()
+        start += text[:start].count('\n')
+        end += text[:end].count('\n')
+        #log("    start,end=%s,%s"%(start,end))
+        win32gui.SendMessage(self.widget,
+                             win32con.EM_SETSEL,
+                             start, end)
 
-    def _ensure_editable(self):
-        if self.widget:
-            if self._editable:
-                win32gui.SendMessage(self.widget,
-                                     win32con.EM_SETREADONLY,
-                                     0, 0)
-            else:
-                win32gui.SendMessage(self.widget,
-                                     win32con.EM_SETREADONLY,
-                                     1, 0)
+    def setEditable(self,editable):
+        if self.noWidget(): return
+        if editable:
+            win32gui.SendMessage(self.widget,
+                                 win32con.EM_SETREADONLY,
+                                 0, 0)
+        else:
+            win32gui.SendMessage(self.widget,
+                                 win32con.EM_SETREADONLY,
+                                 1, 0)
 
 ##    def _ensure_events(self):
 ##        if self.widget:
@@ -407,25 +399,18 @@ class TextField(ComponentMixin, AbstractTextField):
 ##    def _msw_enterkey(self, event):
 ##        self.do_action()
 
-    def _get_msw_text(self):
-        # return the text required for creation
-        return self._to_native(str(self._text))
-
     def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
-        # HIWORD(wParam): notification code
-        if (wParam >> 16) == win32con.EN_KILLFOCUS:
-            self.modify(selection=self._backend_selection())
-            self.modify(text=self._backend_text())
-
+        pass
 
 # FIXME: Inheriting TextField overrides TextArea defaults.
 #        This is a temporary fix. (mlh20011222)
-import anygui.Defaults # Deleted at the end of the module [xyzzy42]
-class TextArea(anygui.Defaults.TextArea, TextField, AbstractTextArea):
-    _win_style = TextField._win_style | win32con.ES_MULTILINE | \
+class TextAreaWrapper(TextFieldWrapper):
+    _win_style = TextFieldWrapper._win_style | win32con.ES_MULTILINE | \
                  win32con.ES_AUTOVSCROLL | win32con.ES_WANTRETURN
 
 ##################################################################
+
+'''
 
 class ContainerMixin(ComponentMixin):
     def __init__(self):
