@@ -2,6 +2,8 @@
 #   Exceptions.py - GUI exception classes
 #
 
+# FIXME: Remove unused exceptions. Clean up code.
+
 class Cancel(Exception):
     """Exception raised when user cancels an operation."""
     pass
@@ -23,7 +25,9 @@ class InternalError(Error):
     def __str__(self):
         return "%s: Internal error: %s" % (self.obj, self.mess)
 
-class UnimplementedMethod(Error):
+class SyncError(Exception): pass
+
+class UnimplementedMethod(Error): # Use NotImplementedError instead
     """The method should have been implemented."""
     def __init__(self, obj, meth_name):
         self.obj = obj

@@ -1,7 +1,7 @@
 from anygui.Exceptions import UnimplementedMethod
-from anygui.GenericButtons import GenericButton
+from anygui.Components import Component
 
-class ToggleButton(GenericButton):
+class ToggleButton(Component):
 
     _on = 0
 

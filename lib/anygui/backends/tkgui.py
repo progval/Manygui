@@ -1,5 +1,5 @@
-from anygui.backends import *
-__all__ = anygui.__all__
+#from anygui.backends import *
+#__all__ = anygui.__all__
 
 from Tkinter import * # A bit risky
 from operator import truth

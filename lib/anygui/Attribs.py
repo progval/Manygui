@@ -1,5 +1,8 @@
 from Events import link, send
 
+# FIXME: Add mechanism for internal attributes (not in state[]). Use
+# _foo naming convention? :I
+
 class Attrib:
     # TODO: Add new docstring (see below for old one)
 
@@ -14,11 +17,11 @@ class Attrib:
     def __setattr__(self, name, value):
         if name == 'state':
             self.__dict__[name] = value
-        else: self.set(name=value)
+        else: self.set(**{name: value})
 
     def __getattr__(self, name):
-        if name == 'state':
-            raise AttributeError()
+        if name == 'state' or not self.state.has_key(name):
+            raise AttributeError
         return self.state[name]
 
     def set(self, *args, **kwds):
@@ -66,8 +69,9 @@ def modattr(obj, name, value):
         except:
             # no in-place mod, so, just set it (bind or re-bind)
             # Use rawSet() if available:
-            setter = getattr('rawSet', obj, None)
-            if callable(setter): setter(name=value)
+            setter = getattr(obj, 'rawSet', None)
+            if callable(setter):
+                setter(**{name: value})
             else: setattr(obj, name, value)
             return
     # in-place modification has succeeded, alert the old_value (if
