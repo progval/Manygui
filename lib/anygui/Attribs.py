@@ -17,12 +17,21 @@ class Attrib:
     def __setattr__(self, name, value):
         if name == 'state' or name[0] == '_':
             self.__dict__[name] = value
-        else: self.set(**{name: value})
+        else:
+            self.set(**{name: value})
 
     def __getattr__(self, name):
-        if name == 'state' or not self.state.has_key(name):
-            raise AttributeError, name
-        return self.state[name]
+        if name[0] == '_': raise AttributeError, name
+        try:
+            parts = self._aggregates[name]
+            result = []
+            for i in xrange(len(parts)):
+                result.append(getattr(self, parts[i]))
+            return tuple(result)
+        except KeyError:
+            if name == 'state' or not self.state.has_key(name):
+                raise AttributeError, name
+            return self.state[name]
 
     def set(self, *args, **kwds):
         names = self.rawSet(*args, **kwds)
@@ -31,13 +40,20 @@ class Attrib:
     def rawSet(self, *args, **kwds):
         names = []
         for key, val in optsAndKwdsItems(args, kwds):
-            old_val = getattr(self, key, None)
-            try: old_val.removed(self, key)
-            except: pass
-            self.state[key] = val
-            try: val.assigned(self, key)
-            except: pass
-            names.append(key)
+            try:
+                parts = self._aggregates[key]
+                values = val
+            except KeyError:
+                parts = [key]
+                values = [val]
+            for part, value in zip(parts, values):
+                old_val = getattr(self, part, None)
+                try: old_val.removed(self, part)
+                except: pass
+                self.state[part] = value
+                try: val.assigned(self, part)
+                except: pass
+                names.append(part)
         return names
 
     def modify(self, *args, **kwds):

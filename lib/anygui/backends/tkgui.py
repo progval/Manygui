@@ -109,6 +109,9 @@ class ComponentWrapper(Wrapper):
         if not visible: self.widget.place_forget()
         # Other case handled by geometric setters
 
+    def clickHandler(self):
+        send(self.proxy, 'click')
+
     # Hm. This method is perhaps a bit hackish? :-)
     # Clean up the parent/dummy code?
     # (Hm. Creation is put here, but descruction directly in remove...?)
@@ -117,6 +120,7 @@ class ComponentWrapper(Wrapper):
         try: assert parent.isDummy()
         except (AttributeError, AssertionError):
             self.widget = self.widgetFactory(parent)
+            self.widget.configure(command=self.clickHandler) # Move elsewhere...
             self.proxy.sync(blocked=['container'])
 
 class ButtonWrapper(ComponentWrapper):

@@ -11,7 +11,7 @@ win = MyWindow(title="A Standard Window",
 app.add(win)
 
 def new_window(event):
-    win = Window(title='Yay, another window!')
+    win = Window(title='Yay, another window!', x=100, y=100)
 
     # Test for flashing (should not be visible):
     for i in range(5):
@@ -22,7 +22,6 @@ def new_window(event):
     app.add(win)
     
 btn = Button(text='Create new window', size=(200,25), x=10, y=10)
-#btn = Button(text='Create new window', width=200, height=25, x=10, y=10)
 link(btn, new_window)
 win.add(btn)
 

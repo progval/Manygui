@@ -15,6 +15,7 @@ class AbstractApplication(Attrib):
     def refresh(self, **ignore): pass
     
     def __init__(self):
+        Attrib.__init__(self)
         self._windows = []
         anygui._application = self
 

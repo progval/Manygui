@@ -12,8 +12,8 @@ class Menu(Attrib):
     _inhibit_refresh = 1         # See Component for explanation
     
     def __init__(self, *args, **kwds):
-        self._items = []
         Attrib.__init__(self, *args, **kwds)
+        self._items = []
 
     def add(self, items, options=None, **kwds):
         # Current version ignores options/kwds

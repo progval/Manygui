@@ -1,6 +1,7 @@
 
 # Currently not working (and bloating terribly :P)
 
+'''
 class IllegalState(Exception): pass
 class CannotCalculate(Exception): pass
 class ValueUnchanged(Exception): pass
@@ -239,3 +240,4 @@ class RuleEngine:
             raise CannotCalculate
         if oldValue == newValue: raise ValueUnchanged
         return newValue
+'''

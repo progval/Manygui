@@ -17,9 +17,9 @@ space = 10
 #    klass.explicit_attributes = klass.__dict__.keys()
 
 class Button:
+    _default_event = 'click'
     state = {
         'text': 'Button',
-        'default_event': 'click',
         'x': 0,
         'y': 0,
         'width': 80,

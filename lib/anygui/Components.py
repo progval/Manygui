@@ -2,12 +2,12 @@ from anygui.Proxies import Proxy
 from anygui.Events import DefaultEventMixin
 from anygui.Exceptions import SyncError
 from anygui.LayoutManagers import LayoutData
-from anygui.Rules import RuleEngine
+#from anygui.Rules import RuleEngine
 
-rules = RuleEngine()
-rules.define('position = x, y')
-rules.define('size = width, height')
-rules.define('geometry = x, y, width, height')
+#rules = RuleEngine()
+#rules.define('position = x, y')
+#rules.define('size = width, height')
+#rules.define('geometry = x, y, width, height')
 
 
 class Component(Proxy, DefaultEventMixin):
@@ -17,6 +17,12 @@ class Component(Proxy, DefaultEventMixin):
     rectangular region of screen space defined by its x, y, width and
     height properties.  It may be contained within another Component.
     """
+
+    _aggregates = {
+        'position': ('x', 'y'),
+        'size': ('width', 'height'),
+        'geometry': ('x', 'y', 'width', 'height')
+        }
     
     def __init__(self, *args, **kw):
         DefaultEventMixin.__init__(self)
@@ -46,10 +52,11 @@ class Component(Proxy, DefaultEventMixin):
         these requirements are broken, a SyncError is raised.
         """
         # FIXME: Should use modify() etc...
-        rules.sync(self.state, names)
+        #rules.sync(self.state, names)
 
     def blockedNames(self):
         """
         Blocks all aggregates from being passed to the backend.
         """
-        return ['position', 'size', 'geometry']
+        #return ['position', 'size', 'geometry']
+        return []

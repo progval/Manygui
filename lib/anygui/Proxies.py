@@ -5,8 +5,9 @@ class Proxy(Attrib):
     # TBD: Add docstring for class
 
     def __init__(self, *args, **kwds):
-        self.rawSet(wrapper=self.wrapperFactory())
         Attrib.__init__(self, *args, **kwds)
+        self.rawSet(wrapper=self.wrapperFactory())
+        self.sync() # @@@ Hm...
 
     def wrapperFactory(self):
         """
@@ -43,6 +44,10 @@ class Proxy(Attrib):
             the backend either.
           
         """
+        # FIXME: Acceptable?
+        try: self.wrapper
+        except AttributeError: return
+
         self.internalSync(names)
         state = {}
         try: blocked = kwds['blocked']
@@ -84,7 +89,10 @@ class Proxy(Attrib):
         around to handle them anyway. The Proxy implementation simply
         calls the corresponding method in the backend Wrapper.
         """
-        self.wrapper.enableEvent(event)
+        # FIXME: try/except not really acceptable... (Create backlog?
+        # Rearrange __init__ stuff to avoid loop?
+        try: self.wrapper.enableEvent(event)
+        except AttributeError: pass
 
     def destroy(self):
         """
