@@ -3,6 +3,14 @@ from anygui.Exceptions import UnimplementedMethod
 from anygui.Models import ListModel
 from UserList import UserList
 
+class AnyguiList(UserList):
+
+    def __init__(self,items=[]):
+        UserList.__init__(self,items)
+
+    def _set_value(self,items):
+        self.data = items
+
 class AbstractListBox(AbstractComponent):
 
     _items = () # FIXME: Remove?
@@ -24,7 +32,7 @@ class AbstractListBox(AbstractComponent):
             self._model.remove_view(self)
         self._model = model
         self._model.add_view(self) # FIXME: Should get all state at this point (?)
-        self._items = UserList(model)
+        self._items = AnyguiList(model)
         self._ensure_items()
 
     def model_changed(self, target, change):
