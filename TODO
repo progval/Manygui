@@ -9,7 +9,7 @@ Tentative release date: December 10th, 2001
   mechanism
 
 * Simplify the widget API by detaching models, using
-  signals. (Also fix "value" vs "on" in ToggleButtons)
+  signals
 
 * Adjust defaults, and improve window staggering
 
@@ -33,7 +33,7 @@ Tentative release date: February 28th, 2002
 
 * Add menus (including popup menus?)
 
-* Add full event system, based on signal()
+* Add full event system, based on messaging mechanism
 
 * Add a grid-based layout mechanism
   (May require minimum_size and preferred_size properties)
