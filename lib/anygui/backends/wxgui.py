@@ -28,13 +28,14 @@ class ComponentMixin:
                 parent = None
             if self._wx_id is None:
                 self._wx_id = NewId()
-            if self._wx_class == wxListBox: # FIXME: Hack
-                frame = self._wx_class(parent,
-                                       self._wx_id)
-            else:
+            if hasattr(self, '_get_wx_text'):
                 frame = self._wx_class(parent,
                                        self._wx_id,
                                        self._get_wx_text(),
+                                       style=self._wx_style)
+            else:
+                frame = self._wx_class(parent,
+                                       self._wx_id,
                                        style=self._wx_style)
             self._wx_comp = frame
             return 1
@@ -46,7 +47,7 @@ class ComponentMixin:
     def _ensure_geometry(self):
         if self._wx_comp:
             self._wx_comp.SetPosition((self._x, self._y))
-            self._wx_comp.SetClientSize((self._width, self._height))
+            self._wx_comp.SetSize((self._width, self._height))
 
     def _ensure_visibility(self):
         if self._wx_comp:
@@ -61,13 +62,6 @@ class ComponentMixin:
             self._wx_comp.Destroy()
             self._wx_comp = None
 
-    def _get_wx_text(self):
-        # helper function for creation
-        # returns the text required for creation.
-        # This may be the _text property, or _title, ...,
-        # depending on the subclass
-        return self._text
-
 ################################################################
 
 class Label(ComponentMixin, AbstractLabel):
@@ -81,18 +75,15 @@ class Label(ComponentMixin, AbstractLabel):
         if self._wx_comp:
             self._wx_comp.SetLabel(self._text)
 
+    def _get_wx_text(self):
+        # return the text required for creation
+        return self._text
+
 ################################################################
 
 class ListBox(ComponentMixin, AbstractListBox):
     _wx_class = wxListBox
     _wx_style = wxLB_SINGLE # FIXME: Not used... But default?
-
-    def _ensure_geometry(self):
-        if self._wx_comp:
-            self._wx_comp.SetPosition((self._x, self._y))
-            # Make up for border insets:
-            # FIXME: Shouldn't be hard-coded like this...
-            self._wx_comp.SetClientSize((self._width-6, self._height-6))
 
     def _backend_selection(self):
         if self._wx_comp:
@@ -107,9 +98,6 @@ class ListBox(ComponentMixin, AbstractListBox):
     def _ensure_selection(self):
         if self._wx_comp:
             self._wx_comp.SetSelection(self._selection) # Does not cause an event
-
-    def _get_wx_text(self):
-        return '' # Shouldn't be necessary
 
     def _ensure_events(self):
         if self._wx_comp:
@@ -130,6 +118,11 @@ class Button(ComponentMixin, AbstractButton):
     def _wx_clicked(self, evt):
         self.do_action()
 
+    def _get_wx_text(self):
+        # return the text required for creation
+        return self._text
+
+
 class ToggleButtonMixin(ComponentMixin):
 
     def _ensure_state(self):
@@ -142,6 +135,11 @@ class ToggleButtonMixin(ComponentMixin):
             return
         self._on = val
         self.do_action()
+
+    def _get_wx_text(self):
+        # return the text required for creation
+        return self._text
+
 
 class CheckBox(ToggleButtonMixin, AbstractCheckBox):
     _wx_class = wxCheckBox
@@ -172,14 +170,6 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
 class TextField(ComponentMixin, AbstractTextField):
     _wx_class = wxTextCtrl
 
-    def _ensure_geometry(self):
-        if self._wx_comp:
-            self._wx_comp.SetPosition((self._x, self._y))
-            # Make up for border insets:
-            # FIXME: Shouldn't be hard-coded like this...
-            self._wx_comp.SetClientSize((self._width-6, self._height-6))
-
-
     def _backend_text(self):
         if self._wx_comp:
             return self._wx_comp.GetValue()
@@ -208,19 +198,16 @@ class TextField(ComponentMixin, AbstractTextField):
     def _wx_enterkey(self, event):
         self.do_action()
 
+    def _get_wx_text(self):
+        # return the text required for creation
+        return self._text
+
+
 # FIXME: 'Copy-Paste' inheritance... TA and TF could have a common wx
 # superclass. The only differences are the _wx_style and event handling.
 class TextArea(ComponentMixin, AbstractTextArea):
     _wx_class = wxTextCtrl
     _wx_style = wxTE_MULTILINE | wxHSCROLL
-
-    def _ensure_geometry(self):
-        if self._wx_comp:
-            self._wx_comp.SetPosition((self._x, self._y))
-            # Make up for border insets and scrollbars:
-            # FIXME: Shouldn't be hard-coded like this...
-            self._wx_comp.SetClientSize((self._width-23, self._height-23))
-
 
     def _backend_text(self):
         if self._wx_comp:
@@ -243,11 +230,22 @@ class TextArea(ComponentMixin, AbstractTextArea):
         if self._wx_comp:
             self._wx_comp.SetEditable(self._editable)
 
+    def _get_wx_text(self):
+        # return the text required for creation
+        return self._text
+
 ################################################################
 
 class Window(ComponentMixin, AbstractWindow):
     _wx_class = wxFrame
     _wx_style = wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE
+
+    def _ensure_geometry(self):
+        # override this to set the CLIENT size (not the window size)
+        # to take account for title bar, borders and so on.
+        if self._wx_comp:
+            self._wx_comp.SetPosition((self._x, self._y))
+            self._wx_comp.SetClientSize((self._width, self._height))
 
     def _ensure_created(self):
         result = ComponentMixin._ensure_created(self)
@@ -276,6 +274,7 @@ class Window(ComponentMixin, AbstractWindow):
         self.resized(dw, dh)
 
     def _get_wx_text(self):
+        # return the text required for creation
         return self._title
 
 ################################################################
