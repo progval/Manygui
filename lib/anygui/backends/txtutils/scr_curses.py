@@ -22,7 +22,7 @@ def addstr(x,y,ch,n=0,attr=curses.A_NORMAL):
     if n == 0: n = len(ch)
     n = min(n,len(ch))
     for xx in range(0,n):
-        addch(y,x+xx,ord(ch[xx]))
+        addch(y,x+xx,ord(ch[xx]),attr)
 
 def erase(x,y,w,h):
     dbg("Erasing %s,%s,%s,%s"%(x,y,w,h))
@@ -40,14 +40,14 @@ def erase(x,y,w,h):
         line = line[:-1]
     _scr.addstr(ey-1,x,line)
 
-def addch(y,x,ch):
+def addch(y,x,ch,attr=ATTR_NORMAL):
     if x<0 or y<0 or x>=_xsize or y>=_ysize:
         return
     if x==_xsize-1 and y==_ysize-1:
         # Can't address lower-right corner?
         return
     try:
-        _scr.addch(y,x,ch)
+        _scr.addch(y,x,ch,attr)
     except:
         dbg("Exception addch",x,y)
 

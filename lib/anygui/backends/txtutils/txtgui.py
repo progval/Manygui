@@ -93,9 +93,10 @@ class ComponentMixin:
     _border = 1 # For debugging.
     _visible = 1
     _needs_container = 0
-    _title = "curses"
+    _title = "txtgui"
     _gets_focus = 1
-    _text = "curses"
+    _text = "txtgui"
+    _use_text = 1
     _textx = 1
     _texty = 1
     _tiny_LLCORNER = ord('<')
@@ -118,7 +119,6 @@ class ComponentMixin:
 
     def _set_focus(self,val):
         global _focus_control
-        _scr.dbg("Setting focus",self,self._gets_focus,self._visible,self._curses_created,_in_focus_purview(self))
         if val:
             _focus_control = self
             if self._gets_focus and self._visible and self._curses_created \
@@ -212,7 +212,8 @@ class ComponentMixin:
             self._draw_contents()
             ety = self._effective_texty()
             _scr.dbg("ety ",ety,self,self._height*self._vert_scale)
-            self._addstr(self._textx,ety,self._text)
+            if self._use_text:
+                self._addstr(self._textx,ety,self._text)
 
     def _erase(self):
         if not self._curses_created: return
@@ -388,7 +389,56 @@ class Label(ComponentMixin, AbstractLabel):
         self._LRCORNER = ord(' ')
 
 class ListBox(ComponentMixin, AbstractListBox):
-    pass
+
+    _use_text = 0
+
+    def __init__(self,*args,**kws):
+        ComponentMixin.__init__(self,*args,**kws)
+        AbstractListBox.__init__(self,*args,**kws)
+    
+    def _ensure_items(self):
+        pass
+
+    def _ensure_selection(self):
+        pass
+
+    def _backend_selection(self):
+        return self._selection
+
+    def _draw_contents(self):
+        lh = self._screen_height()-2
+        start = 0
+        if lh<len(self._items):
+            start = self._selection - lh + 1
+            if start<0: start = 0
+
+        x=2;y=1
+        for ii in range(start,len(self._items)):
+            item = str(self._items[ii])
+            if self._selection == ii:
+                self._addstr(x-1,y,'>')
+            self._addstr(x,y,item)
+            y+=1
+            if y>lh: return
+
+    def _event_handler(self,ev):
+        if ev == ord('j'):
+            self._selection += 1
+            if self._selection >= len(self._items):
+                self._selection = 0
+            self._redraw()
+            return 1
+        if ev == ord('k'):
+            self._selection -= 1
+            if self._selection < 0:
+                self._selection = len(self._items)-1
+            self._redraw()
+            return 1
+        if ev == ord(' '):
+            send(self,'select')
+            return 1
+        return 0
+
 
 class Button(ComponentMixin, AbstractButton):
 
