@@ -22,7 +22,7 @@ from anygui.Applications import AbstractApplication
 from anygui.Wrappers import AbstractWrapper
 from anygui.Events import *
 from anygui import application
-from anygui.Utils import log, setLogFile, logTraceback
+from anygui.Utils import log, setLogFile
 
 ################################################################
 from ctypes import CDLL, _DLLS, _DynFunction, CFunction, c_string, Structure, WinError, byref, GetLastError
@@ -35,7 +35,7 @@ def _from_native(text):
     return text.replace('\r\n', '\n')
 
 class WinDLL(CDLL):
-    
+
     def __getattr__(self, name):
         try:
             func = _DynFunction(name, self)
@@ -207,9 +207,9 @@ WS_VSCROLL=0x200000
 PBM_SETPOS=WM_USER+2
 PBM_SETRANGE=WM_USER+1
 
-_verbose=0
-if _verbose:
-    setLogFile('/tmp/dbg.txt')
+#_verbose=0
+#if _verbose:
+#   setLogFile('/tmp/dbg.txt')
 
 class t_rect(Structure):
     _fields_=(('left','i'),('top','i'),('right','i'),('bottom','i'))
@@ -263,7 +263,7 @@ class ComponentWrapper(AbstractWrapper):
         return widget
 
     def widgetSetUp(self):
-        if _verbose: log('widgetSetup',str(self))
+        #if _verbose: log('widgetSetup',str(self))
         self.proxy.container.wrapper.widget_map[self.widget] = self
         SendMessage(self.widget,
                     WM_SETFONT,
@@ -272,7 +272,7 @@ class ComponentWrapper(AbstractWrapper):
         self.setVisible(1)
 
     def internalProd(self):
-        if _verbose: log('internalProd',str(self))
+        #if _verbose: log('internalProd',str(self))
         self.proxy.push(blocked=['container'])
 
     def getGeometry(self):
@@ -283,17 +283,15 @@ class ComponentWrapper(AbstractWrapper):
         w = r-l
         h = b-t
 
-        if _verbose: log(str(self),'getGeometry',l,t,w,h)
+        #if _verbose: log(str(self),'getGeometry',l,t,w,h)
         try:
             p = t_point()
             p.x, p.y = l,t
             ScreenToClient(self.proxy.container.wrapper.widget,byref(p))
             l,t = p.x, p.y
-            if _verbose: log('   -->', l,t,w,h)
+            #if _verbose: log('  -->', l,t,w,h)
         except AttributeError:
             pass
-        except:
-            logTraceback(None)
         return l,t,w,h
 
     def setX(self,x):
@@ -328,13 +326,13 @@ class ComponentWrapper(AbstractWrapper):
 
     def setGeometry(self,x,y,width,height):
         if self.widget:
-            if _verbose: log(str(self),'setGeometry', x,y,width,height)
+            #if _verbose: log(str(self),'setGeometry', x,y,width,height)
             SetWindowPos(self.widget, 0, x, y, width, height, SWP_NOACTIVATE | SWP_NOZORDER)
             UpdateWindow(self.widget)
 
     def setVisible(self,visible):
         if self.widget:
-            if _verbose: log(str(self),'setVisible', visible, self.widget)
+            #if _verbose: log(str(self),'setVisible', visible, self.widget)
             ShowWindow(self.widget, visible and SW_SHOWNORMAL or SW_HIDE)
 
     def setEnabled(self,enabled):
@@ -356,7 +354,7 @@ class ComponentWrapper(AbstractWrapper):
 
     def setText(self,text):
         if not self.widget: return
-        if _verbose: log("%s.SetWindowText('%s'(%s)) hwnd=%s(%s) self=%s" % (self.__class__.__name__,text,type(text),self.widget,type(self.widget),str(self)))
+        #if _verbose: log("%s.SetWindowText('%s'(%s)) hwnd=%s(%s) self=%s" % (self.__class__.__name__,text,type(text),self.widget,type(self.widget),str(self)))
         SetWindowText(self.widget,c_string(_to_native(text)))
 
     def _getText(self):
@@ -550,7 +548,7 @@ class ContainerMixin:
         self.widget_map = {} # maps child window handles to instances
 
     def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
-        if _verbose: log("ContainerMixin _WM_COMMAND called for %s"%self)
+        #if _verbose: log("ContainerMixin _WM_COMMAND called for %s"%self)
         # lParam: handle of control (or NULL, if not from a control)
         # HIWORD(wParam): notification code
         # LOWORD(wParam): id of menu item, control, or accelerator
@@ -558,15 +556,12 @@ class ContainerMixin:
             app = application()
             child_window = self.widget_map[lParam]
         except KeyError:
-            if _verbose: log("NO SUCH CHILD WINDOW %s"%lParam)
+            #if _verbose: log("NO SUCH CHILD WINDOW %s"%lParam)
             # we receive (when running test_textfield.py)
             # EN_CHANGE (0x300) and EN_UPDATE (0x400) notifications
             # here even before the call to CreateWindow returns.
             return -1
-        except:
-            logTraceback(None)
-            return -1
-        if _verbose: log("Dispatching to child %s"%child_window)
+        #if _verbose: log("Dispatching to child %s"%child_window)
         return child_window._WM_COMMAND(hwnd, msg, wParam, lParam)
 
 class FrameWrapper(ComponentWrapper,ContainerMixin):
@@ -612,15 +607,15 @@ class Resource:
                 self._handle = LoadImage(0,c_string(fn),
                     IMAGE_BITMAP,0,0,LR_DEFAULTSIZE|LR_LOADFROMFILE)
             except:
-                logTraceback(None)
                 log(WinError())
+                raise
 
     def handle(self):
         if not self._handle:
             if self.inline:
                 import zlib, base64, tempfile, os
                 fn = tempfile.mktemp(self.suffix)
-                if _verbose: log('resource:','fn',fn,'kind',self.kind)
+                #if _verbose: log('resource:','fn',fn,'kind',self.kind)
                 open(fn,'wb').write(zlib.decompress(base64.decodestring(self.text)))
                 try:
                     self._fn2handle(fn)
@@ -628,7 +623,7 @@ class Resource:
                     os.remove(fn)
             else:
                 self._fn2handle(self.text)
-        if _verbose: log('resource:','-->',self._handle)
+        #if _verbose: log('resource:','-->',self._handle)
         return self._handle
 
     def __del__(self):
@@ -646,17 +641,17 @@ class ImageWrapper(ComponentWrapper):
 
     def _WM_PAINT(self, hwnd, msg, wParam, lParam):
         if not self.widget: return -1
-        if _verbose: log('Image _WM_PAINT self.__dict__',self.__dict__)
+        #if _verbose: log('Image _WM_PAINT self.__dict__',self.__dict__)
         r = ComponentWrapper._WM_PAINT(self, hwnd, msg, wParam, lParam)
         self.draw()
         return r
 
     def draw(self,*arg,**kw):
-        if _verbose: log('Image.draw',self.widget,self._image)
+        #if _verbose: log('Image.draw',self.widget,self._image)
         if not self.widget or not self._image: return
         dc = GetDC(self.widget)
         memdc = gdi32.CreateCompatibleDC(dc)
-        if _verbose: log('Image.draw dc, memdc',dc,memdc)
+        #if _verbose: log('Image.draw dc, memdc',dc,memdc)
         old = gdi32.SelectObject(memdc,self._image.handle())
         gdi32.BitBlt(dc,0,0,self.proxy.width,self.proxy.height,memdc,0,0,0x00CC0020)
         gdi32.SelectObject(memdc,old)
@@ -688,12 +683,12 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
         l,t,r,b = r.left, r.top, r.right, r.bottom
         w = r-l-self._extraWidth
         h = b-t-self._extraHeight
-        if _verbose: log(str(self),'getGeometry WindowWrapper:', l,t,w,h)
+        #if _verbose: log(str(self),'getGeometry WindowWrapper:', l,t,w,h)
         return l,t,w,h
 
     def setGeometry(self,x,y,width,height):
         if not self.widget: return
-        if _verbose: log('WindowWrapper: setGeometry',str(self),self.widget,x,y,width,height,self._extraWidth,self._extraHeight)
+        #if _verbose: log('WindowWrapper: setGeometry',str(self),self.widget,x,y,width,height,self._extraWidth,self._extraHeight)
         # take account for title bar and borders
         SetWindowPos(self.widget,
                      0,
@@ -724,17 +719,17 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
         return ComponentWrapper.getText(self)
 
     def widgetSetUp(self):
-        if _verbose: log('Windowwrapper widgetSetup',str(self),'application()',application(),'isRunning()',application().isRunning(),'widget',getattr(self,'widget',None))
+        #if _verbose: log('Windowwrapper widgetSetup',str(self),'application()',application(),'isRunning()',application().isRunning(),'widget',getattr(self,'widget',None))
         application().widget_map[self.widget] = self
         SendMessage(self.widget, WM_SETFONT, self._hfont, 0)
 
     def internalProd(self):
-        if _verbose: log('internalProd',str(self))
+        #if _verbose: log('internalProd',str(self))
         self.proxy.push(blocked=['container'])
 
     def _WM_SIZE(self, hwnd, msg, wParam, lParam):
         w, h = lParam & 0xFFFF, lParam >> 16
-        if _verbose: log('WindowWrapper: _WM_SIZE _width,_height,w,h=',self._width,self._height,w,h,)
+        #if _verbose: log('WindowWrapper: _WM_SIZE _width,_height,w,h=',self._width,self._height,w,h,)
         if self._width==0 and self._height==0:
             # This will be the case when the widget is first
             # created. We need to ensure the contents get
@@ -745,7 +740,7 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
         else:
             dw = w - self._width
             dh = h - self._height
-        if _verbose: log('dw,dh=',dw,dh)
+        #if _verbose: log('dw,dh=',dw,dh)
 
         self._width = w
         self._height = h
@@ -758,7 +753,7 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
         return 0
 
     def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
-        if _verbose: log('WindowWrapper: _WM_COMMAND',str(self),hwnd,msg,wParam,lParam)
+        #if _verbose: log('WindowWrapper: _WM_COMMAND',str(self),hwnd,msg,wParam,lParam)
         return ContainerMixin._WM_COMMAND(self, hwnd, msg, wParam, lParam)
 
 ################################################################
@@ -798,13 +793,13 @@ class Application(AbstractApplication):
     def __init__(self):
         global _app
         if not _app:
-            if _verbose: log('Application.__init__:start',str(self))
+            #if _verbose: log('Application.__init__:start',str(self))
             AbstractApplication.__init__(self)
             if not self._wndclass: self._register_class()
             WindowWrapper._wndclass = self._wndclass
             FrameWrapper._wndclass = self._wndclass
             _app = self
-            if _verbose: log('Application.__init__:end',str(self))
+            #if _verbose: log('Application.__init__:end',str(self))
 
     def __str__(self):
         return '<%s.Application 0x%s>' % (__file__,id(self))
@@ -813,7 +808,7 @@ class Application(AbstractApplication):
         return _app is not None
 
     def _register_class(self):
-        if _verbose: log('Application._register_class:start',str(self))
+        #if _verbose: log('Application._register_class:start',str(self))
         class WINDOWPROC(CFunction):
             _types_ = "iiii"
             _stdcall_ = 1
@@ -846,27 +841,23 @@ class Application(AbstractApplication):
             pass # class does not exist
         self.__class__._wndclass = RegisterClass(byref(wc))
 ##        assert self.__class__._wndclass, "RegisterClass --> %s" % WinError()
-        if _verbose: log('Application._register_class:end',str(self))
+        #if _verbose: log('Application._register_class:end',str(self))
 
     def _wndproc(self, hwnd, msg, wParam, lParam):
-        if _verbose: log("%s._wndproc called with %s,%s,%s,%s"%(self.__class__.__name__,hex(hwnd),hex(msg),hex(wParam),hex(lParam)))
+        #if _verbose: log("%s._wndproc called with %s,%s,%s,%s"%(self.__class__.__name__,hex(hwnd),hex(msg),hex(wParam),hex(lParam)))
         try:
             window = self.widget_map[hwnd]
         except:
-            if _verbose: log("\tNO WINDOW TO DISPATCH???")
+            #if _verbose: log("\tNO WINDOW TO DISPATCH???")
             return DefWindowProc(hwnd, msg, wParam, lParam)
-        try:
-            _dispatch = self._dispatch.get(msg,_dispatch_DEFAULT)
-            x = _dispatch(window,hwnd,msg,wParam,lParam)
-        except:
-            if _verbose: logTraceback(None,'_wndproc.1')
-            x = -1
-        if _verbose: log("\tdispatch %s to %s %s\n" % (_dispatch.__name__[9:],window.__class__.__name__,window),"\t ==>",x)
+        _dispatch = self._dispatch.get(msg,_dispatch_DEFAULT)
+        x = _dispatch(window,hwnd,msg,wParam,lParam)
+        #if _verbose: log("\tdispatch %s to %s %s\n" % (_dispatch.__name__[9:],window.__class__.__name__,window),"\t ==>",x)
         return x
 
 
     def internalRun(self):
-        if _verbose: log('internalRun:Begin',str(self))
+        #if _verbose: log('internalRun:Begin',str(self))
         class MSG(Structure):
             _fields_ = (
                 ('hwnd','i'),
@@ -880,52 +871,28 @@ class Application(AbstractApplication):
 
         msg = MSG()
         while GetMessage(byref(msg), 0, 0, 0):
-            try:
-                if _verbose: log('internalRun: loopstart',msg)
-                TranslateMessage(byref(msg))
-                DispatchMessage(byref(msg))
-                if _verbose: log('internalRun: loopend')
-            except:
-                logTraceback(None)
-        if _verbose: log('internalRun: finish')
+            TranslateMessage(byref(msg))
+            DispatchMessage(byref(msg))
+        #if _verbose: log('internalRun: finish')
 
     def internalRemove(self):
         if not self._windows:
-            if _verbose: log('PostQuitMessage(0)')
+            #if _verbose: log('PostQuitMessage(0)')
             PostQuitMessage(0)
             global _app
             _app = None
 
-if  1 and _verbose:
-    n = 0
-    from inspect import isclass, ismethod, getmembers
-    def makeTBWrap(C,methodname):
-        import new
-        global n
-        oldmethodname = '_%d_tbWrap_%s' % (n,methodname)
-        oldmethod = getattr(C,methodname)
-        S = []
-        s = S.append
-        s('def %s(self,*A,**K):' % methodname)
-        s('\ttry:')
-        s('\t\treturn self.%s(*A,**K)' % oldmethodname)
-        s('\texcept:')
-        s('\t\tfrom anygui.Utils import logTraceback')
-        s('\t\tlogTraceback(None,\'[%s.%s]\')' % (C.__name__,methodname))
-        s('\t\traise')
-        s('setattr(C,oldmethodname,oldmethod)')
-        s('setattr(C,methodname,new.instancemethod(%s,None,C))' % methodname)
-        exec '\n'.join(S) + '\n' in locals()
-        n += 1
-
-    for a in __all__:
-        C = globals()[a]
-        if isclass(C):
-            M = []
-            m = M.append
-            for methodname,method in getmembers(C):
-                if ismethod(method): m(methodname)
-            for methodname in M: makeTBWrap(C,methodname)
+#if 1 and _verbose:
+#   try:
+#       import tbwrap
+#       from inspect import isclass
+#       from anygui.Utils import _logger
+#       for a in __all__:
+#           C = globals()[a]
+#           if isclass(C):
+#               tbwrap.tracebackWrap(C,out=_logger._f)
+#   except ImportError:
+#       pass
 
 ################################################################
 if __name__ == '__main__':
