@@ -13,7 +13,7 @@ for line in fileinput.input():
     format = '<date>%B %%i%%s, %Y</date>'
     datestring = time.strftime(format)
     day = time.localtime()[2]
-    ending = endings[day]
+    ending = endings[day-1]
     datestring %= (day, ending)
     pattern = '<date>.*?</date>'
     print re.sub(pattern, datestring, line),

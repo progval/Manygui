@@ -9,6 +9,8 @@
 
 <!-- TODO: - Add special tags for API reference
            - Add script for version
+
+     Remember to keep backend-list up to date
 -->
 
 <document version="&longversion;">
@@ -910,18 +912,29 @@
       prefix such as <code>wx</code> for <code>wxgui</code>, or
       <code>tk</code> for <code>tkgui</code>. For a full list of
       available backends, see the section "Making Sure You Have a GUI
-      Backend" above. If none of the backends you supplied work,
-      <name>Anygui</name> will continue searching through the other
-      backends for a viable alternative.</para>
+      Backend" above. Only the backends in this list will be tried; if
+      you don't set <code>ANYGUI_WISHLIST</code>, then the following
+      is the default:</para>
 
-      <!--
-      Document the star symbol and the new semantics.
-      -->
+      <!-- Keep this up to date! -->
 
-      <!--
-      Document default order.
-      Documentation synch problem?
-      -->
+      <codelisting>
+	<line>'msw gtk java wx tk beos qt curses text'</line>
+      </codelisting>
+
+      <para>If you insert an asterisk in the wishlist, it will be
+      interpreted as "the rest of the backends, in default order". So,
+      for instance,</para>
+
+      <codelisting>
+	<line>ANYGUI_WISHLIST='tk wx * text curses'</line>
+      </codelisting>
+
+      <para>is equivalent to</para>
+
+      <codelisting>
+	<line>ANYGUI_WISHLIST='tk wx msq gtk java beos qt text curses'</line>
+      </codelisting>
 
       <para>Example:</para>
 
