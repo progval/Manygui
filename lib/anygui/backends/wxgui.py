@@ -23,7 +23,7 @@ class ComponentMixin:
     def _ensure_created(self):
         if self._wx_comp is None:
             if self._container is not None:
-                parent = self._container._wx_comp
+                parent = self._container._get_panel()
             else:
                 parent = None
             if self._wx_id is None:
@@ -40,6 +40,9 @@ class ComponentMixin:
             self._wx_comp = frame
             return 1
         return 0
+
+    def _get_panel(self):
+        return self._wx_comp
 
     def _ensure_events(self):
         pass
@@ -239,6 +242,7 @@ class TextArea(ComponentMixin, AbstractTextArea):
 class Window(ComponentMixin, AbstractWindow):
     _wx_class = wxFrame
     _wx_style = wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE
+    _wx_frame = None
 
     def _ensure_geometry(self):
         # override this to set the CLIENT size (not the window size)
@@ -247,10 +251,17 @@ class Window(ComponentMixin, AbstractWindow):
             self._wx_comp.SetPosition((self._x, self._y))
             self._wx_comp.SetClientSize((self._width, self._height))
 
+    def _get_panel(self):
+        return self._wx_frame
+    
     def _ensure_created(self):
         result = ComponentMixin._ensure_created(self)
         if result:
-            self._wx_comp.SetAutoLayout(1)
+            # Controls should be contained in a wxPanel (which
+            # is itself contained in the wxFrame)
+            # Be sure to specify style=0 and not wxTAB_TRAVERSAL
+            self._wx_frame = wxPanel(self._wx_comp, NewId(),
+                                     style=0)
         return result
     
     def _ensure_events(self):
@@ -267,6 +278,7 @@ class Window(ComponentMixin, AbstractWindow):
 
     def _wx_size_handler(self, evt):
         w, h = evt.GetSize()
+        self._wx_frame.SetSize((w, h))
         dw = w - self._width
         dh = h - self._height
         self._width = w
