@@ -189,7 +189,6 @@ class Label(ComponentMixin, AbstractLabel):
     #_width = 100 # auto ?
     #_height = 32 # auto ?
     _tk_class = Tkinter.Label
-    _text = "tkLabel"
     _tk_style = LEFT
 
     def _ensure_text(self):
@@ -275,7 +274,6 @@ class ListBox(ComponentMixin, AbstractListBox):
 
 class Button(ComponentMixin, AbstractButton):
     _tk_class = Button
-    _text = "tkButton"
 
     def _ensure_events(self):
         if self._tk_comp:
@@ -310,7 +308,6 @@ class ToggleButtonMixin(ComponentMixin):
 
 class CheckBox(ToggleButtonMixin, AbstractCheckBox):
     _tk_class = Checkbutton
-    _text = "tkCheckbutton"
 
     def _tk_clicked(self):
         self.on = not self.on # FIXME: ??
@@ -318,7 +315,6 @@ class CheckBox(ToggleButtonMixin, AbstractCheckBox):
 
 class RadioButton(ToggleButtonMixin, AbstractRadioButton):
     _tk_class = Radiobutton
-    _text = "tkRadiobutton"
 
     def _tk_clicked(self):
         if self.group is not None:

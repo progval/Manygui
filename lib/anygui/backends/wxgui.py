@@ -198,7 +198,7 @@ class TextField(ComponentMixin, AbstractTextField):
         EVT_KILL_FOCUS(self._wx_comp, self._wx_killfocus)
 
     def _wx_killfocus(self, event):
-        self.on = self._wx_comp.GetValue()
+        self._text = self._wx_comp.GetValue()
 
     def _wx_enterkey(self, event):
         send(self, 'enterkey')
@@ -258,7 +258,7 @@ class TextArea(ComponentMixin, AbstractTextArea):
         EVT_KILL_FOCUS(self._wx_comp, self._wx_killfocus)
 
     def _wx_killfocus(self, event):
-        self.text = self._wx_comp.GetValue()
+        self._text = self._wx_comp.GetValue()
 
     def _get_wx_text(self):
         # return the text required for creation
