@@ -73,6 +73,7 @@ class ComponentWrapper(AbstractWrapper):
 
     def widgetSetUp(self):
         self.proxy.container.wrapper.widget_map[self.widget] = self
+        self.proxy.push(blocked=['container'])
         win32gui.SendMessage(self.widget,
                              win32con.WM_SETFONT,
                              self._hfont,
