@@ -20,6 +20,9 @@ The only methods that should be explicitly called by the Proxy are:
 
 """
 
+# TODO: Add attribute dependencies, i.e. (text -> selection) etc.
+# Fix use of dir() to get attributes/methods... ("Broken" until 2.2)
+
 class AbstractWrapper:
 
     """
