@@ -92,7 +92,10 @@ Objectives for version 0.2:
 
 * Integrate an "event path" notion into the event framework,
   facilitating the use of callbacks in containers to react to events
-  from child components.
+  from child components, possibly through a "group" class which
+  functions as an event-relaying container.
+
+* Add a progress bar widget.
 
 Objectives for version 0.3:
 ---------------------------
