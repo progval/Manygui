@@ -102,7 +102,6 @@ class ComponentWrapper(Wrapper):
             # Widget doesn't support -state
             pass
 
-
 class ButtonWrapper(ComponentWrapper):
 
     def clickHandler(self): 
@@ -142,6 +141,7 @@ class TkTextMixin:
         self.shift = 0
         self.editable = 1
         widget.bind("<Key>", self.keybinding)
+        widget.bind("<KeyRelease>",self.updateProxy)
         widget.bind("<KeyPress-Control_L>", self.ctldown)
         widget.bind("<KeyRelease-Control_L>", self.ctlup)
         widget.bind("<KeyPress-Alt_L>", self.altdown)
@@ -177,6 +177,7 @@ class TkTextMixin:
         """ This method binds all keys, and causes them to be
         ignored when _editable is not set. """
         if self.editable:
+            self.updateProxy()
             return None
         else:
             # This is truly horrid. Please add appropriate
@@ -197,7 +198,7 @@ class TkTextMixin:
 
     def arrowbinding(self,ev):
         # This method's sole reason for existence is to allow arrows
-        # to work even when _editable is false.
+        # to work even when self.editable is false.
         return None
 
 class TextFieldWrapper(ComponentWrapper,TkTextMixin):
@@ -210,11 +211,18 @@ class TextFieldWrapper(ComponentWrapper,TkTextMixin):
     def updateProxy(self,*args,**kws):
         # Inform proxy of text change by the user.
         self.proxy.rawModify(text=self.widget.get())
+        if self.widget.select_present():
+            start = self.widget.index('sel.first')
+            end = self.widget.index('sel.last')
+        else:
+            start = end = self.widget.index('insert')
+        self.proxy.rawModify(selection=(start,end))
 
     def setText(self,text):
         disabled=0
         if self.widget.cget('state') != Tkinter.NORMAL:
             self.widget.configure(state=Tkinter.NORMAL)
+            disabled=1
         self.widget.delete(0,Tkinter.END)
         self.widget.insert(0,text)
         if disabled:
@@ -222,6 +230,9 @@ class TextFieldWrapper(ComponentWrapper,TkTextMixin):
 
     def setEditable(self,editable):
         self.editable=editable
+
+    def setSelection(self,selection):
+        self.widget.selection_range(*selection)
 
 class FrameWrapper(ComponentWrapper):
 
