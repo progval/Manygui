@@ -70,3 +70,52 @@ class Action:
     def do_action(self):
         if self._action:
             return self._action(*self._action_args, **self._action_kwds)
+
+class Observable:
+    """
+    Models can use this to get registration+notification abilities.
+    """
+
+    def __init__(self):
+        self.views = []
+
+    def add_view(self,view,callback=None):
+        """
+        Add <view> to the list of views to be notified when the model changes.
+        If <callback> is supplied, it must be a string naming a method of the
+        view object to call. Otherwise view.notify() will be called with the
+        model and any additional arguments the model chooses to pass. DO NOT
+        pass a code object in <callback>.
+        """
+        self.views.append((weakref.ref(view),callback))
+
+    def remove_view(self,view):
+        """
+        Remove <view> from the list of views to be notified. Since we keep
+        weak references to views here, it should rarely if ever be
+        necessary to call this explicitly.
+        """
+        def notview(v,view=view): return (v[0]() is not view)
+        self.views = filter(notview,self.views)
+
+    def notify_views(self,*args,**kw):
+        """
+        Notify all registered, non-GC'd views of a model change.
+        """
+
+        # Get rid of views that've been GC'd.
+        self.remove_view(None)
+
+        # Notify everything that's left... carefully.
+        for vv in self.views:
+            view = vv[0]()
+            if view is not None:
+                if vv[1] is not None:
+                    # Call the custom callback. We have to use a name for this; if
+                    # we try using a bound method we end up back in circular-reference
+                    # land.
+                    meth = getattr(view,vv[1])
+                    meth(self,*args,**kw)
+                else:
+                    # No custom callback, so just try to notify().
+                    view.notify(self,*args,**kw)
