@@ -10,7 +10,6 @@ rules = RectEngine()
 #rules.define('size = width, height')
 #rules.define('geometry = x, y, width, height')
 
-
 class Component(Proxy, DefaultEventMixin):
     """
     Component is an abstract base class representing a visual
@@ -28,7 +27,6 @@ class Component(Proxy, DefaultEventMixin):
     def __init__(self, *args, **kw):
         DefaultEventMixin.__init__(self)
         Proxy.__init__(self, *args, **kw)
-        self.layout_data = LayoutData() # FIXME: Will be put in self.state...
 
     def internalSync(self, names):
         """
@@ -59,3 +57,11 @@ class Component(Proxy, DefaultEventMixin):
         Blocks all aggregates from being passed to the backend.
         """
         return ['position', 'size', 'geometry']
+
+    def expandAliasedName(self,names,name):
+        """
+        Expands an aliased attribute into its aliases, and adds
+        the aliases to names.
+        """
+        for n in rules.atoms: names.append(n)
+

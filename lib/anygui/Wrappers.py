@@ -136,9 +136,9 @@ class AbstractWrapper:
             else:
                 setter = getSetter(self, candidate[1])
                 if setter is not None:
-                    for attr in candidate[0]: attrs.remove(attr)
                     result.append((setter, candidate[0]))
                     names.append(candidate[1])
+                    for attr in candidate[0]: attrs.remove(attr)
         # Get the plain setters:
         unhandled = []
         for attr in attrs:

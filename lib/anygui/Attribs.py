@@ -1,7 +1,11 @@
 from Events import link, send
+from string import upper
 
 # FIXME: Add mechanism for internal attributes (not in state[]). Uses
 # _foo naming convention for now...
+
+# New functionality: if methods set<Attrib> or get<Attrib> are
+# present, use them to get or set "attrib". - jak
 
 class Attrib:
     # TODO: Add new docstring (see below for old one)
@@ -19,11 +23,21 @@ class Attrib:
         if name == 'state' or name[0] == '_':
             self.__dict__[name] = value
         else:
-            self.set(**{name: value})
+            method = getattr(self,"set"+upper(name[0])+name[1:],None)
+            if method:
+                method(value)
+            else:
+                self.set(**{name: value})
 
     def __getattr__(self, name):
         if name[0] == '_': raise AttributeError, name
-        if name == 'state' or not self.state.has_key(name):
+        if name == 'state':
+            raise AttributeError, name
+        if name[:3] != 'set' and name[:3] != 'get':
+            method = getattr(self,"get"+upper(name[0])+name[1:],None)
+            if method:
+                return method()
+        if not self.state.has_key(name):
             raise AttributeError, name
         return self.state[name]
 

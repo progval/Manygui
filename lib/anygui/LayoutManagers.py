@@ -4,58 +4,79 @@ from anygui.Exceptions import UnimplementedMethod, Error
 from types import *
 
 class LayoutData:
-    """ Each component has a LayoutData member called layout_data that
-    LayoutManagers use to hold layout-specific information. """
-
+    """ Each component may have an associated LayoutData object,
+    maintained by the LayoutManager. You call self.getLayoutData(w)
+    within a LayoutManager in order to get the LayoutData for
+    widget w. A LayoutManager can stash any kind of data in
+    here that it needs in order to lay the widget out properly. """
     pass
 
 class LayoutManager:
 
     """ Base class for layout managers. Subclasses should implement at
-    least the resized() method, which is called when self._container
+    least the resized() method, which is called when self.container
     changes size. The resized() method should simply assign
-    appropriate geometry values to the self._container._contents. The
+    appropriate geometry values to the self.container.contents. The
     dw and dh arguments to resized() are not well-defined at this
-    point, so don't rely on them.
+    point, so don't rely on them. Do *not* call any sync() methods
+    from the resized() method; the container will deal with that.
 
     You may also implement, if desired:
 
     add_components(items,options=None,**kws):
-        to be informed when items are added to self._container.
+        to be informed when items are added to self.container.
         <items> may be either a single component or a
         list; options is an Option object that the LayoutManager may
         interpret however it pleases; **kws are keyword arguments the
         LayoutManager may interpret as it pleases.
 
     remove_component(item):
-        to be informed when an item is removed from self._container.
+        to be informed when an item is removed from self.container.
 
     """
 
     def __init__(self):
-        self._container = None
+        self.container = None
+        self.layoutData = {}
+
+    def getLayoutData(self,widget):
+        if not widget in self.container.contents:
+            try:
+                del self.layoutData[widget]
+            except KeyError:
+                pass
+            return None
+        try:
+            return self.layoutData[widget]
+        except KeyError:
+            self.layoutData[widget] = LayoutData()
+            return self.layoutData[widget]
 
     def add(self,items,options=None,**kws):
+        """ Add items to container. Parse options and kws as approppriate for
+        the specific layout manager. """
         items = flatten(items)
 
-        # Add items to container.
         for item in items:
-            if item not in self._container._contents:
-                #item._set_container(self._container)
-                item.container=self._container
+            if item not in self.container.contents:
+                item.container=self.container
 
         if options:
             options.__dict__.update(kws)
             kws.update(options.__dict__)
         self.add_components(*items,**kws)
 
-        self.resized(0,0)
+        # Lay out all components.
+        #self.resized(0,0)
+        # Not necessary - Frame.add() calls resized() for itself
+        # and all contents, and resized() calls self.layout.resized().
 
     def remove(self,item):
-        if item in self._container._contents:
-            return self._container.remove(item)
-        else:
-            self.remove_component(item)
+        self.remove_component(item)
+
+        # Rearrange remaining components.
+        #self.resized(0,0)
+        # Not necessary; see above.
 
     def configure(self,**kws):
         pass
@@ -67,7 +88,7 @@ class LayoutManager:
         pass
 
     def resized(self,dw,dh):
-        pass
+        raise UnimplementedMethod(self,"resized")
 
 ##############################################################################
 
@@ -75,7 +96,8 @@ from math import sin,cos,sqrt
 class CircleManager(LayoutManager):
     """ A simple layout manager to demonstrate how to implement one.
     All components are spaced equiradially in a circle; all components
-    are laid out as equally-sized squares. """
+    are laid out as equally-sized squares. Run test_circle.py to see
+    the results. """
 
     def __init__(self):
         LayoutManager.__init__(self)
@@ -83,8 +105,8 @@ class CircleManager(LayoutManager):
     def resized(self,dw,dh):
         # Here we just compute where all the container's contents
         # should be and assign the geometry.
-        w = self._container.width
-        h = self._container.height
+        w = self.container.width
+        h = self.container.height
 
         # Center of the container...
         cx = w/2.0
@@ -95,8 +117,12 @@ class CircleManager(LayoutManager):
         radius = int(radius)
         
         # How many radians per object?
-        cts = self._container._contents
-        rads = 2.0*3.14159/len(cts)
+        cts = self.container.contents
+        try:
+            rads = 2.0*3.14159/len(cts)
+        except ZeroDivisionError:
+            # Nothing to do.
+            return
 
         # Compute the approximate maximum size of each object.
         if len(cts)<6:
@@ -183,11 +209,12 @@ class SimpleGridManager(LayoutManager):
         if 'insets' in kwds.keys():
             insets = kwds['insets']
         for comp in items:
-            comp.layout_data.row = self.cur_row
-            comp.layout_data.col = self.cur_col
-            comp.layout_data.rows = rs
-            comp.layout_data.cols = cs
-            comp.layout_data.insets = insets
+            ld = self.getLayoutData(comp)
+            ld.row = self.cur_row
+            ld.col = self.cur_col
+            ld.rows = rs
+            ld.cols = cs
+            ld.insets = insets
             if self.rows < self.cur_row + rs:
                 self.rows = self.cur_row + rs
             if self.cols < self.cur_col + cs:
@@ -196,19 +223,18 @@ class SimpleGridManager(LayoutManager):
             if self.cur_col >= self.cols:
                 self. cur_col = 0
                 self.cur_row += rs
-        self.resized(0,0)
 
     def resized(self,dw,dh):
         # Compute the proper width and height for each
         # component.
-        w = self._container.width
-        h = self._container.height
+        w = self.container.width
+        h = self.container.height
         rowh = h/self.rows
         colw = w/self.cols
         if rowh < self.minh: rowh = self.minh
         if colw < self.minw: colw = self.minw
-        for comp in self._container._contents:
-            ld = comp.layout_data
+        for comp in self.container.contents:
+            ld = self.getLayoutData(comp)
             x = ld.col * colw + ld.insets[0]
             y = ld.row * rowh + ld.insets[1]
             comp.geometry = (x,y,colw*ld.cols-(2*ld.insets[0]),rowh*ld.rows-(2*ld.insets[1]))
@@ -328,28 +354,29 @@ class GridManager(LayoutManager):
                 self.colinfo[self.cur_col].size = comp.width
             if ysize == 0:
                 self.rowinfo[self.cur_row].size = comp.height
-            comp.layout_data.row = self.cur_row
-            comp.layout_data.col = self.cur_col
-            comp.layout_data.rows = rs
-            comp.layout_data.cols = cs
-            comp.layout_data.insets = insets
+            ld = self.getLayoutData(comp)
+            ld.row = self.cur_row
+            ld.col = self.cur_col
+            ld.rows = rs
+            ld.cols = cs
+            ld.insets = insets
             self.cur_col += 1
             if self.cur_col >= self.cols:
                 self.cur_col = 0
                 self.cur_row += 1
 
         # Lay out all components.
-        self.resized(0,0)
+        #self.resized(0,0)
 
-    def configure(self,**kws): self.add(**kws)
+    def configure(self,**kws): self.add_components(**kws)
 
     def resized(self,dw,dh):
         # Actually compute the proper width and height for each
         # component.
 
         # First, figure out the proper sizes of all rows and columns.
-        self.w = self._container.width
-        self.h = self._container.height
+        self.w = self.container.width
+        self.h = self.container.height
 
         self.compute_leftover_wh()
         
@@ -362,8 +389,8 @@ class GridManager(LayoutManager):
             self.compute_col_size(self.colinfo[i])
 
         # Then figure out the dimensions of each component.
-        for comp in self._container._contents:
-            ld = comp.layout_data
+        for comp in self.container.contents:
+            ld = self.getLayoutData(comp)
             x,y = self.get_comp_xy(comp)
             w = self.get_comp_width(comp)
             h = self.get_comp_height(comp)
@@ -372,7 +399,7 @@ class GridManager(LayoutManager):
     def get_comp_xy(self,comp):
         x = 0
         y = 0
-        ld = comp.layout_data
+        ld = self.getLayoutData(comp)
         for i in range(0,ld.col):
             x += self.colinfo[i].size
         for i in range(0,ld.row):
@@ -381,14 +408,14 @@ class GridManager(LayoutManager):
 
     def get_comp_width(self,comp):
         w = 0
-        ld = comp.layout_data
+        ld = self.getLayoutData(comp)
         for i in range(ld.col,ld.col+ld.cols):
             w += self.colinfo[i].size
         return w
 
     def get_comp_height(self,comp):
         h = 0
-        ld = comp.layout_data
+        ld = self.getLayoutData(comp)
         for i in range(ld.row,ld.row+ld.rows):
             h += self.rowinfo[i].size
         return h
@@ -408,14 +435,14 @@ class GridManager(LayoutManager):
     def compute_leftover_wh(self):
         # Find extra width and height left over after fixed-width rows
         # and columns are subtracted from the total available space.
-        width = self._container.width
+        width = self.container.width
         for i in range(0,self.cols):
             if self.colinfo[i].weight == 0:
                 width -= self.colinfo[i].size
             else:
                 width -= self.colinfo[i].minsize
         self.extra_w = width
-        height = self._container.height
+        height = self.container.height
         for i in range(0,self.rows):
             if self.rowinfo[i].weight == 0:
                 height -= self.rowinfo[i].size
@@ -465,7 +492,7 @@ class GridManager(LayoutManager):
             if self.rowinfo[self.cur_row].size < ysize:
                 self.rowinfo[self.cur_row].size = ysize
 
-        # Are row or column -minimum- sizes specified? Laargest one
+        # Are row or column -minimum- sizes specified? Largest one
         # specified for a particular row or column wins.
         xmsize = 0
         ymsize = 0
@@ -558,14 +585,14 @@ class Placer(LayoutManager):
             if right_obj:
                 r = right_obj.x - right_off
             elif right_off is not None:
-                r = self._container.width - right_off
+                r = self.container.width - right_off
             else:
                 r = None
             # Calculate bottom edge position
             if bottom_obj:
                 b = bottom_obj.y - bottom_off
             elif bottom_off is not None:
-                b = self._container.height - bottom_off
+                b = self.container.height - bottom_off
             else:
                 b = None
             # Fill in unspecified positions
@@ -609,12 +636,11 @@ class Placer(LayoutManager):
             # Position and size the item
             item.geometry = l, t, rs - l, bs - t
             # Record resizing and border options
-            if not hasattr(item,'layout_data'):
-                item.layout_data = LayoutData()
-            item.layout_data._hmove = hmove
-            item.layout_data._vmove = vmove
-            item.layout_data._hstretch = hstretch
-            item.layout_data._vstretch = vstretch
+            ld = self.getLayoutData(item)
+            ld._hmove = hmove
+            ld._vmove = vmove
+            ld._hstretch = hstretch
+            ld._vstretch = vstretch
             #item._border = border
             # Step to the next item
             if dir == 0:
@@ -639,19 +665,20 @@ class Placer(LayoutManager):
         dy = 0
         dw = 0
         dh = 0
-        if comp.layout_data._hmove:
+        ld = self.getLayoutData(comp)
+        if ld._hmove:
             dx = cdw
-        elif comp.layout_data._hstretch:
+        elif ld._hstretch:
             dw = cdw
-        if comp.layout_data._vmove:
+        if ld._vmove:
             dy = cdh
-        elif comp.layout_data._vstretch:
+        elif ld._vstretch:
             dh = cdh
         if dx != 0 or dy != 0 or dw != 0 or dh != 0:
             comp.geometry = (comp.x + dx, comp.y + dy,
                              comp.width + dw, comp.height + dh)
 
     def resized(self,dw,dh):
-        for c in self._container._contents:
+        for c in self.container.contents:
             self.resize_component(c,dw, dh)
 

@@ -6,6 +6,7 @@ class Proxy(Attrib):
 
     def __init__(self, *args, **kwds):
         Attrib.__init__(self, *args, **kwds)
+        self.rawSet(container=None)
         self.rawSet(wrapper=self.wrapperFactory()) # wrapper in state?
         self.sync() # Hm... Move to wrapper.internalProd?
 
@@ -44,6 +45,10 @@ class Proxy(Attrib):
             the backend either.
           
         """
+
+        # We may need to modify names, so...
+        names = list(names)
+
         self.internalSync(names)
 
         # FIXME: Acceptable?
@@ -56,18 +61,21 @@ class Proxy(Attrib):
         blocked.extend(self.blockedNames())
         if not names: state.update(self.state)
         else:
-	    # @@@ Temporary solution to sync(aggregate) problem:
             for name in names:
 	        if name in blocked:
-		    state.update(self.state)
-		    break
-            else:
-	    # @@@ End temporary solution
-                for name in names: state[name] = self.state[name]
+                    self.expandAliasedName(names,name)
+            for name in names: state[name] = self.state[name]
         for name in blocked:
             try: del state[name]
             except KeyError: pass
         self.wrapper.update(state)
+
+    def expandAliasedName(self,names,name):
+        """
+        Expands an aliased attribute into its aliases, and adds
+        the aliases to names.
+        """
+        pass
 
     def blockedNames(self):
         """

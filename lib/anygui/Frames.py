@@ -4,18 +4,17 @@ from anygui.Exceptions import ArgumentError, UnimplementedMethod
 from anygui.Utils import flatten
 from anygui import Defaults
 from anygui.LayoutManagers import Placer
+from anygui import backendModule
 
 class Frame(Component, Defaults.Frame):
 
     def __init__(self, *args, **kw):
-        self._contents = []
+        self.contents = []
         Component.__init__(self, *args, **kw)
         self.layout = Placer()
-        self.layout._container=self
-        #self.layout = Placer()
 
     def wrapperFactory(self):
-        return backend().FrameWrapper(self)
+        return backendModule().FrameWrapper(self)
         
     def add(self,items,options=None,**kws):
         """
@@ -25,36 +24,37 @@ class Frame(Component, Defaults.Frame):
         different expectations about **kwds, and may impose
         restrictions on the contents of items. See LayoutManagers.py.
         """
-
         items = flatten(items)
 
-        # Now add to self._contents.
+        # Now add to self.contents.
         for component in items:
-            # _set_container() adds component to self._contents.
-            # layout manager may have already called it, though.
-            if component not in self._contents:
+            if component not in self.contents:
                 component.container = self
+                self.contents.append(component)
 
         # Inform the layout manager, if any.
         if self.layout:
             self.layout.add(items,options,**kws)
+            self.resized(0,0)
 
     def remove(self, component):
         "If the given component is among the contents of this Frame, removes it."
-        if component in self._contents:
+        if component in self.contents:
+            self.contents.remove(component)
             component.container = None
             self.layout.remove(component)
-            self.layout.resized(0,0)
+            self.resized(0,0)
 
     def destroy(self):
-        while self._contents:
-            self._contents[0].destroy()
+        while self.contents:
+            self.contents[0].destroy()
         Component.destroy(self)
 
     def resized(self, dw, dh):
+        """ Ensure all contents are layed out properly. """
         try:
             self.layout.resized(dw,dh)
-            for item in self._contents:
+            for item in self.contents:
                 try:
                     item.resized(dw,dh)
                 except:
@@ -62,24 +62,12 @@ class Frame(Component, Defaults.Frame):
         except:
             pass
 
-    #def _add(self, comp):
-    #    self._contents.append(comp)
-
-    #def _remove(self, comp):
-    #    try:
-    #        self._contents.remove(comp)
-    #    except ValueError:
-    #        pass
-
-    #def _set_layout(self,lo):
-    #    if self.layout:
-    #        self.layout._container = None
-    #        ct = self._contents
-    #        for item in ct:
-    #            #self._remove(item)
-    #            self.remove(item)
-    #    self.layout = lo
-    #    lo._container = self
-
-    #def _get_layout(self):
-    #    return self.layout
+    def setLayout(self,lo):
+        """ Special handling for setting the layout manager. """
+        if 'layout' in self.state.keys():
+            self.layout.container = None
+            ct = self.contents
+            for item in ct:
+                self.remove(item)
+        self.state['layout'] = lo
+        lo.container = self
