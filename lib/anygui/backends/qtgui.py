@@ -530,8 +530,8 @@ class WindowWrapper(ComponentWrapper):
         dw = w - self.proxy.state['width'] # @@@ With lazy semantics, these will be fetched from the widget!
         dh = h - self.proxy.state['height'] # @@@ (and therefore will tell us nothing!)
 
-        self.proxy.height
-        self.proxy.width
+        self.proxy.height # FIXME: What's this? [mlh]
+        self.proxy.width  # FIXME: What's this? [mlh]
 
         self.proxy.resized(dw, dh)
         return 1
@@ -601,11 +601,15 @@ class WindowWrapper(ComponentWrapper):
 
     def setGeometry(self, x, y, width, height):
         if self.widget:
-             self.mainWindow.setGeometry(x, y, width, height)
+            # Doesn't account for the frame:
+            #self.mainWindow.setGeometry(x, y, width, height)
+            self.mainWindow.move(x, y)
+            # FIXME: Does resize account for the window frame?
+            self.mainWindow.resize(width, height)
 
     def getGeometry(self):
         if self.widget:
-            r = self.widget.geometry()
+            r = self.widget.frameGeometry()
             p = self.widget.mapToGlobal(QPoint(r.x(), r.y()))
             return (p.x(), p.y(), r.width(), r.height())
         else:

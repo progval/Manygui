@@ -15,11 +15,13 @@ too...
 
 qtgui:
 
-[mlh@20021101] qtgui windows seem to be displaced by a fixed amount.
-Also, handling of Nond vs. DummyWidget doesn't seem to work properly
+[mlh@20030217] Handling of Nond vs. DummyWidget doesn't seem to work properly
 yet. And... After editing the text in a textfield, the cursor seems to
-automatically jump to the end of the text. And defaults don't seem to
-be working properly.
+automatically jump to the end of the text. And defaults don't seem to be
+working properly. And if a window is resized to a very small size, so that a
+contained widget has one of its dimensions reduced to less zero, the widgets
+geometry will be wrong when the window is resized to become large again. The
+negative dimension should be "remembered" somehow.
 
 -- Old (0.1.1) problems ----------------------------------------------
 
