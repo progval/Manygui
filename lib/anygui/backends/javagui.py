@@ -25,6 +25,8 @@ __all__ = '''
 
 ################################################################
 
+#@@@ FIXME: Implement getGeometry and friends...
+
 #@@@ FIXME: Use isDummy instead of repeated try/except :)
 from anygui.Applications import AbstractApplication
 from anygui.Wrappers import AbstractWrapper, DummyWidget, isDummy
