@@ -1,10 +1,11 @@
 from anygui.backends import *
 __all__ = anygui.__all__
 
+import curses
 from curses import *
 
 _f = open("curses.txt","w")
-_debug_messages = 0
+_debug_messages = 1
 
 def dbg(msg):
     if not _debug_messages: return
@@ -13,12 +14,18 @@ def dbg(msg):
 
 _scr = None
 _refresh_all = 0
-def _add(x,y,ch):
-    _scr.addch(y,x,ch)
+_focus_control = None
+def _addstr(x,y,ch,n=0):
+    #dbg("adding at %s,%s: <%s>"%(x,y,ch))
+    if n != 0:
+        _scr.addnstr(y,x,ch,n)
+    else:
+        _scr.addstr(y,x,ch)
 def _erase(x,y,w,h):
+    #dbg("Erasing %s,%s,%s,%s"%(x,y,w,h))
     for xx in range(x,x+w):
         for yy in range(y,y+h):
-            _add(xx,yy,' ')        
+            _addstr(xx,yy,' ')        
 
 class ComponentMixin:
     """ Mixin class for components.
@@ -40,10 +47,14 @@ class ComponentMixin:
     _border = 1 # For debugging.
     _visible = 1
     _needs_container = 0
+    _title = "curses"
+    _gets_focus = 1
 
     def __init__(self,*args,**kws):
-        dbg("Creating %s"%self)
+        #dbg("Creating %s"%self)
         self._created = 0
+        self._focus = 0
+        self._cpos = 1,1 # Cursor position when in focus.
 
     def _scale_xy(self,x,y):
         return (int(x*self._horiz_scale),int(y*self._vert_scale))
@@ -55,6 +66,7 @@ class ComponentMixin:
         if not self._created: return 0,0
         #if self._needs_container and not self._container: return 0,0
         x,y = self._scale_xy(self.x,self.y)
+        #dbg("_gsc: %s,%s: %s"%(x,y,self._title))
         if not self._container:
             return x,y
         cx,cy = self._container._get_screen_coords()
@@ -76,7 +88,15 @@ class ComponentMixin:
         ih = iy2-iy
         if iw<0: iw=0
         if ih<0: ih=0
+        #dbg("_container_intersect (%s,%s) %s,%s,%s,%s: %s"%(x,y,ix,iy,iw,ih,self))
         return ix,iy,iw,ih
+
+    def _addstr(self,x,y,str):
+        sx,sy,w,h = self._get_bounding_rect()
+        if y>h: return
+        x += sx
+        y += sy
+        _addstr(x,y,str,sx+w-x)
 
     def _get_bounding_rect(self):
         # Get the screen x,y,w,h of the visible portion of the component.
@@ -85,22 +105,25 @@ class ComponentMixin:
         if not self._visible or not self._created:
             return 0,0,0,0
         x,y = self._get_screen_coords()
+        #dbg("%s,%s: %s"%(x,y,self))
         w,h = self._scale_xy(self.width,self.height)
         x,y,w,h = self._container_intersect(x,y,w,h)
         return x,y,w,h
 
     def _redraw(self):
-        dbg("Redrawing %s"%self)
+        #dbg("Redrawing %s"%self)
         if not self._created: return
-        dbg("Visible: %s"%self)
+        #dbg("Visible: %s"%self)
         if self.visible:
             self._erase()
             self._draw_border()
             self._draw_contents()
+            self._addstr(1,1,self._text)
 
     def _erase(self):
         if not self._created: return
         x,y,w,h = self._get_bounding_rect()
+        #dbg("Erasing %s"%self)
         _erase(x,y,w,h)
 
     def _draw_border(self):
@@ -108,22 +131,46 @@ class ComponentMixin:
         if not self._border: return
         x,y = self._get_screen_coords()
         w,h = self._scale_xy(self.width,self.height)
-        dbg("Screen coords %s for %s"%((x,y,w,h),self))
+        #dbg("Screen coords %s for %s"%((x,y,w,h),self))
         x,y,w,h = self._container_intersect(x,y,w,h)
-        dbg("Container intersect %s for %s"%((x,y,w,h),self))
-        _add(x,y,'+')
-        _add(x+w-1,y,'+')
-        _add(x,y+h-1,'+')
-        _add(x+w-1,y+h-1,'+')
+        #dbg("Container intersect %s for %s"%((x,y,w,h),self))
+        _scr.addch(y,x,curses.ACS_ULCORNER)
+        _scr.addch(y,x+w-1,curses.ACS_URCORNER)
+        _scr.addch(y+h-1,x,curses.ACS_LLCORNER)
+        _scr.addch(y+h-1,x+w-1,curses.ACS_LRCORNER)
         for xx in range(x+1,x+w-1):
-            _add(xx,y,'-')
-            _add(xx,y+h-1,'-')
+            _scr.addch(y,xx,curses.ACS_HLINE)
+            _scr.addch(y+h-1,xx,curses.ACS_HLINE)
         for yy in range(y+1,y+h-1):
-            _add(x,yy,'|')
-            _add(x+w-1,yy,'|')
+            _scr.addch(yy,x,curses.ACS_VLINE)
+            _scr.addch(yy,x+w-1,curses.ACS_VLINE)
 
     def _draw_contents(self):
         if not self._created: return
+        pass
+
+    def _change_focus(self):
+        #dbg("Changing focus on %s"%self)
+        if not self._gets_focus:
+            return
+        if not self._focus:
+            #dbg("   gained focus!")
+            self._focus = 1
+        else:
+            #dbg("   lost focus!")
+            self._focus = 0
+
+    def _ensure_focus(self):
+        if not self._created: return
+        x,y = self._get_screen_coords()
+        #dbg("Ensuring focus %s,%s on %s"%(x,y,self))
+        if self._focus:
+            #dbg("   HAS FOCUS!")
+            _scr.move(y+1,x+1)
+            global _focus_control
+            _focus_control = self
+
+    def _handle_event(self,ev):
         pass
 
     # backend api
@@ -132,7 +179,7 @@ class ComponentMixin:
         return self._created
 
     def _ensure_created(self):
-        dbg("_ensure_created(): %s"%self)
+        #dbg("_ensure_created(): %s"%self)
         if self._needs_container and not self._container:
             return 0
         self._created = 1
@@ -145,7 +192,7 @@ class ComponentMixin:
         self._redraw()
 
     def _ensure_enabled_state(self):
-        pass
+        self._redraw()
 
     def _ensure_destroyed(self):
         self._erase()
@@ -154,14 +201,29 @@ class ComponentMixin:
     def _ensure_events(self):
         pass
 
+    def _ensure_text(self):
+        self._redraw()
+
 class Label(ComponentMixin, AbstractLabel):
-    pass
+
+    _gets_focus = 0
+
+    def __init__(self,*args,**kws):
+        ComponentMixin.__init__(self,*args,**kws)
+        AbstractLabel.__init__(self,*args,**kws)
 
 class ListBox(ComponentMixin, AbstractListBox):
     pass
 
 class Button(ComponentMixin, AbstractButton):
-    pass
+
+    def __init__(self,*args,**kws):
+        ComponentMixin.__init__(self,*args,**kws)
+        AbstractLabel.__init__(self,*args,**kws)
+
+    def _handle_event(self,ev):
+        if ev == 'c':
+            send(self, 'click')
 
 #class CheckBox(ToggleButtonMixin, AbstractCheckBox):
 #    pass
@@ -183,13 +245,13 @@ class TextField(ComponentMixin, AbstractTextField, DisabledTextBindings):
 class TextArea(ComponentMixin, AbstractTextArea, DisabledTextBindings):
     pass
 
-class Frame(ComponentMixin, AbstractFrame):
+class ContainerMixin(ComponentMixin):
 
     def __init__(self,*args,**kws):
         ComponentMixin.__init__(self,*args,**kws)
-        AbstractFrame.__init__(self,*args,**kws)
 
     def _redraw(self):
+        if not self._created: return
         ComponentMixin._redraw(self)
         for comp in self._contents:
             comp._redraw()
@@ -200,24 +262,61 @@ class Frame(ComponentMixin, AbstractFrame):
         self._erase()
         self._created = 0
 
-class Window(ComponentMixin, AbstractWindow):
+    def _change_focus(self):
+        #dbg("Changing CONTAINER focus on %s"%self)
+        if not self._contents:
+            #dbg("   empty...")
+            return
+        if not self._focus:
+            #dbg("   new focus...")
+            self._focus = 1
+        self._contents[self._focus-1]._change_focus()
+        #dbg("   moving focus...")
+        done = 0
+        while not done:
+            if not self._contents[self._focus-1]._focus:
+                self._focus += 1
+                if self._focus-1 >= len(self._contents):
+                    #dbg("   focus lost...")
+                    self._focus = 0
+                    return
+                else:
+                    #dbg("   focus moved...")
+                    self._contents[self._focus-1]._change_focus()
+            else:
+                done = 1
+
+
+    def _ensure_focus(self):
+        #dbg("Ensuring focus in %s"%self)
+        if not self._contents:
+            ComponentMixin._ensure_focus(self)
+        for win in self._contents:
+            win._ensure_focus()
+
+class Frame(ContainerMixin, AbstractFrame):
+
+    def __init__(self,*args,**kws):
+        ContainerMixin.__init__(self,*args,**kws)
+        AbstractFrame.__init__(self,*args,**kws)
+        self._text = ""
+
+class Window(ContainerMixin, AbstractWindow):
 
     _needs_container = 0
 
     def __init__(self,*args,**kws):
-        ComponentMixin.__init__(self,*args,**kws)
+        ContainerMixin.__init__(self,*args,**kws)
         AbstractWindow.__init__(self,*args,**kws)
+        self._text = ""
+        #dbg("%s:%s"%(self._title,self.geometry))
 
     def _redraw(self):
-        ComponentMixin._redraw(self)
-        for comp in self._contents:
-            comp._redraw()
+        if not self._created: return
+        ContainerMixin._redraw(self)
+        self._addstr(2,0,self._title)
 
-    def _ensure_destroyed(self):
-        for comp in self._contents:
-            comp._ensure_destroyed()
-        self._erase()
-        self._created = 0
+    def _ensure_title(self): pass
 
 class Application(AbstractApplication):
     def __init__(self):
@@ -234,8 +333,13 @@ class Application(AbstractApplication):
             nocbreak()
             nodelay(0)
             endwin()
-    
+        else:
+            if self._windows:
+                self._windows[0]._change_focus()
+
     def _mainloop(self):
+        if self._windows:
+            self._windows[0]._change_focus()
         try:
             self._redraw_all()
             while self._check_for_events():
@@ -249,6 +353,11 @@ class Application(AbstractApplication):
         ch = _scr.getch()
         if ch == ord('q'):
             return 0
+        if ch == ord('f'):
+            self._change_focus()
+            return 1
+        if _focus_control is not None:
+            _focus_control._handle_event(chr(ch))
         return 1
 
     def _redraw_all(self):
@@ -256,7 +365,29 @@ class Application(AbstractApplication):
         if _refresh_all:
             _refresh_all = 0
             _scr.erase()
-        dbg("redraw_all: %s"%self._windows)
+        #dbg("redraw_all: %s"%self._windows)
         for win in self._windows:
             win._redraw()
         _scr.refresh()
+        self._ensure_focus()
+
+    def _change_focus(self):
+        # Find the window with focus:
+        #dbg("focus changing...")
+        for ii in range(len(self._windows)):
+            if self._windows[ii]._focus:
+                #dbg("Window %s has focus"%ii)
+                self._windows[ii]._change_focus()
+                if not self._windows[ii]._focus:
+                    jj = ii+1
+                    if jj >= len(self._windows):
+                        jj = 0
+                    self._windows[jj]._change_focus()
+                return
+        #dbg("No focus! Giving to window 0")
+        if self._windows:
+            self._windows[0]._change_focus()
+
+    def _ensure_focus(self):
+        for win in self._windows:
+            win._ensure_focus()
