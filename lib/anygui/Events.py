@@ -127,6 +127,8 @@ class CallbackAdapter:
         If self has a proper callback, call it, then call global
         dispatch().
         '''
+        event.source = self
+        event.freeze()
         callback = getattr(self, event.type, None)
         if callback:
             callback(event)
