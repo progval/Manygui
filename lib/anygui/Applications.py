@@ -4,7 +4,7 @@ from Utils import flatten
 from anygui.Utils import log
 import anygui
 
-class AbstractApplication(Attrib):
+class AbstractApplication(Attrib,anygui.Defaults.Application):
 
     _running = 0
     _name = 'Anygui App'

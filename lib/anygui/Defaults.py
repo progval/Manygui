@@ -17,6 +17,9 @@ space = 10
 #def _list_attributes(klass):
 #    klass.explicit_attributes = klass.__dict__.keys()
 
+class Application:
+    state = {}
+
 class Button:
     _defaultEvent = 'click'
     state = {
