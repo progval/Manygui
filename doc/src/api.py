@@ -46,7 +46,7 @@ class TextModel:
 def application():
     ""
 
-def register(src, sig, handler):
+def register(src, sig, slot):
     ""
 
 def unregister(src, sig, slot): # deregister() ?
