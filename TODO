@@ -10,6 +10,12 @@ Tentative release date: December 10th, 2001
   signals, update() and the Assignee protocol. (This
   may also be useful for LayoutManager code.)
 
+* Change add() argument structure.
+
+* Remove Window.open() and use Application.add(Window)
+  instead. Also remove implicit addition of Windows to
+  Applications.
+
 * Adjust defaults, and improve window staggering
   (needs a mechanism to find the top window)
 
