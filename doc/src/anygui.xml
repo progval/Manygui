@@ -82,13 +82,6 @@
       releases. The current release (&longversion;) should be regarded
       as a prototype.</para>
 
-      <para>One planned change in the API is renaming the
-      <code>update</code> method, since clashes with the dictionary
-      method of the same name. This method will probably be called
-      <code>refresh</code> in the final release (&shortversion;). The
-      naming of some of the environment variables used by
-      <name>Anygui</name> may also be changed.</para>
-
     </section>
 
   </section>
@@ -530,20 +523,20 @@
     </section>
 
     <section>
-      <title>The update Method</title>
+      <title>The refresh Method</title>
 
       <para>The <code>modify</code> method is used to modify
       attributes in-place, e.g. to keep them in sync with a
       widget. This is done automatically when you change a widget
       through the graphical interface. In a way, the
-      <code>update</code> method works the other way: If you modify an
-      attribute, you can call the <code>update</code> method to keep
+      <code>refresh</code> method works the other way: If you modify an
+      attribute, you can call the <code>refresh</code> method to keep
       the widget's appearance in sync with its state. When you assign
-      to an attribute, <code>update</code> is called automatically;
+      to an attribute, <code>refresh</code> is called automatically;
       you only have to call it yourself if you have an attribute which
       is a mutable object, and you modify that object.</para>
 
-      <para>For more info about the use of <code>update</code>, see
+      <para>For more info about the use of <code>refresh</code>, see
       the section "About Models, Views, and Controllers",
       below.</para>
 
@@ -661,7 +654,7 @@
       <title>About Models, Views, and Controllers</title>
 
       <para>The <name>Anygui</name> MVC mechanism (based on the
-      <code>update</code> method and the <code>Assignee</code>
+      <code>refresh</code> method and the <code>Assignee</code>
       protocol) is described in the API Reference below. Here is a
       short overview on how to use it.</para>
 
@@ -712,7 +705,7 @@
       model will be changed.</para>
 
       <para>To keep a view up-to-date manually you can call its
-      <code>update</code> method. This can be useful if you use a
+      <code>refresh</code> method. This can be useful if you use a
       simple (non-<code>Model</code>) mutable value such as a list in
       an attribute:</para>
 
@@ -721,17 +714,17 @@
 	<line>rect = [0, 0, 10, 10]</line>
 	<line>btn.geometry = rect</line>
 	<line>rect[3] = 20</line>
-	<line>btn.update()</line>
+	<line>btn.refresh()</line>
       </codelisting>
 
       <para>After modifying <code>rect</code>, the button will not
       have changed, since it can't detect the change by
       itself. (That's only possible when you use a real model.)
-      Therefore, you call <code>btn.update</code> to tell it to update
+      Therefore, you call <code>btn.refresh</code> to tell it to update
       itself.</para>
 
       <para>If you assign a value to an attribute, the
-      <code>update</code> method will be called automatically, so
+      <code>refresh</code> method will be called automatically, so
       another way of doing the same thing is:</para>
 
       <codelisting>
@@ -1383,12 +1376,12 @@
       method).</para>
 
       <para>As with <code>set</code> and ordinary attribute
-      assignment, the <code>update</code> method will automatically be
+      assignment, the <code>refresh</code> method will automatically be
       called when you use <code>modify</code>.</para>
 
       <!-- modified; modify(_foo=bar) etc. -->
 
-      <para><apiname>update</apiname>()</para>
+      <para><apiname>refresh</apiname>()</para>
       
       <para>When an attribute of a <code>Component</code> (or
       <code>Application</code>, <code>RadioGroup</code>, or an
@@ -1417,10 +1410,10 @@
       <para>After performing this code, nothing will have happened to
       the <code>ListBox</code>, because it has no way of knowing that
       the list has changed. To fix that, you can simply call its
-      <code>update</code> method:</para>
+      <code>refresh</code> method:</para>
 
       <codelisting>
-	<line>lbx.update()</line>
+	<line>lbx.refresh()</line>
       </codelisting>
 
       <para>This method checks whether any attributes have changed,
@@ -1436,7 +1429,7 @@
       of by <code>link</code> and <code>send</code>. If your object
       uses <code>send</code> every time it's modified, and you
       <code>link</code> the object to your <code>Component</code>'s
-      <code>update</code> method, things will happen by
+      <code>refresh</code> method, things will happen by
       themselves:</para>
 
       <codelisting>
@@ -1451,11 +1444,11 @@
 	<line></line>
 	<line>lbx = ListBox()</line>
 	<line>lbx.items = TriggerList()</line>
-	<line>link(lbx.items, lbx.update)</line>
+	<line>link(lbx.items, lbx.refresh)</line>
       </codelisting>
 
       <para>Now, if we call <code>lbx.items.append('fourth')</code>,
-      <code>lbx.update</code> will automatically be called. To make
+      <code>lbx.refresh</code> will automatically be called. To make
       your life easier, <name>Anygui</name> already contains some
       classes that send signals whend they are modified; these classes
       are called <code>Model</code>s.</para>
@@ -1476,7 +1469,7 @@
       object (such as a <code>Component</code>). <code>Model</code>s
       use this behaviour to automatically call <code>link</code> and
       <code>unlink</code>, so when the <code>Model</code> is modified,
-      the <code>update</code> method of the <code>Attrib</code> object
+      the <code>refresh</code> method of the <code>Attrib</code> object
       is called automatically.</para>
       
       <!-- document modified() -->
