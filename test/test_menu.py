@@ -1,4 +1,4 @@
-from anygui import Application, Window, Menu, MenuCheck, Label, link, TextField
+from anygui import Application, Window, MenuBar, Menu, MenuCheck, Label, link, TextField
 from anygui.LayoutManagers import SimpleGridManager
 
 app = Application()
@@ -7,7 +7,7 @@ win = Window(geometry=(50,50,100,100))
 win.layout = SimpleGridManager(1,2)
 
 # A menubar for the window.
-mbar = Menu()
+mbar = MenuBar()
 win.addMenu(mbar)
 
 # A menu to choose skits.
@@ -40,6 +40,7 @@ skitMenu.addSeparator()
 
 # Enable or disable skit silliness: a checkable menu item.
 def enableSilly(ev):
+    #print "Enabling silly:",enSilly.on
     # Enable or disable the silliness selection based
     # on the value of the enSilly menu item.
     if enSilly.on:
@@ -55,6 +56,7 @@ enSilly = skitMenu.addCheck(text="Enable Silliness",on=0,command=enableSilly)
 subMenu = Menu(text="Silliness...",enabled=0)
 silliness = []
 def handleSillySelect(ev):
+    #print "Handling silly select..."
     # Enforce mutual exclusion of silliness level.
     for item in silliness:
         if item != ev.source:
@@ -66,7 +68,8 @@ def handleSillySelect(ev):
 # instead of calling addThingy() a bunch of times.
 for txt in ["Slight","Moderate","Unbearable"]:
     silliness.append(MenuCheck(text=txt,command=handleSillySelect))
-subMenu.contents = silliness
+    subMenu.add(silliness[-1])
+#subMenu.contents = silliness
 skitMenu.add(subMenu)
 
 skitMenu.addSeparator()
