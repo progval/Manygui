@@ -2,14 +2,12 @@
 Experimental backend using the new 0.2 backend API.
 
 Magnus Lie Hetland, 2002-02-09
+
 '''
 
+__version__ = '$Revision$'
+
 import pyui
-
-# TODO: Ensure conversion of values if necessary
-
-# FIXME: The refresh mechanism doesn't seem quite correct yet... (Anyway, the
-#        button never appears ;)
 
 # Move this to application object?
 wrappers = []
@@ -18,7 +16,8 @@ class Application:
     
     def run(self):
         done = 1
-        pyui.init(800, 600)
+        import sys
+        pyui.init(800, 600, fullscreen=1)
         for wrapper in wrappers:
             wrapper.awake()
         
@@ -34,6 +33,8 @@ class DummyWidget:
     A dummy object used when a wrapper currently has no native widget
     instantiated.
     """
+    def isDummy(self): return 1
+    
     def dummyMethod(self, *args, **kwds): pass
 
     def __getattr__(self, name): return self.dummyMethod
@@ -60,6 +61,11 @@ class Wrapper:
         if self in wrappers: wrappers.remove(self)
         self.widget.destroy()
 
+    def set(self, **kwds):
+        # Should be more "intelligent":
+        for key, val in kwds.iteritems():
+            setter = getattr(self, 'set'+key.capitalize(), None)
+            if setter: setter(val)
 
 class ComponentWrapper(Wrapper):
 
@@ -67,10 +73,12 @@ class ComponentWrapper(Wrapper):
 
     def setX(self, x):
         self._x = x
+        # FIXME: Won't survive pack()
         self.widget.moveto(x, self._y)
 
     def setY(self, y):
         self._y = y
+        # FIXME: Won't survive pack()
         self.widget.moveto(self._x, y)
 
     def setWidth(self, width):
@@ -90,13 +98,15 @@ class ComponentWrapper(Wrapper):
     def setParent(self, parent):
         widget = getattr(parent, 'widget', None)
         if widget is not None:
-            self.widget.setParent(widget)
+            try: assert self.widget.isDummy()
+            except:
+                widget.addChild(self.widget)
 
 
 class ButtonWrapper(ComponentWrapper):
 
-    def _handler(self):
-        # Add call to send()
+    def _handler(self, evt):
+        # TODO: Add call to send()
         pass
 
     def _awake(self):
@@ -108,8 +118,6 @@ class ButtonWrapper(ComponentWrapper):
 
 class WindowWrapper(ComponentWrapper):
 
-    # FIXME: Must pack() be called somewhere?
-
     def _awake(self):
         self.widget = pyui.widgets.Frame(10, 10, 100, 100, 'Untitled')
 
@@ -117,7 +125,7 @@ class WindowWrapper(ComponentWrapper):
         self.widget.setTitle(title)
 
     def setParent(self, parent):
-        pass # ?
+        pass # Perhaps allow adding to application object...
 
 
 def test():
@@ -143,11 +151,12 @@ def test():
             self._create_wrapper()
             
         def refresh(self):
+            kwds = {}
             for attribute in self.attributes:
-                setter = getattr(self.wrapper, 'set' + attribute.capitalize())
                 value = getattr(self, attribute)
-                setter(value)
-
+                kwds[attribute] = value
+            self.wrapper.set(**kwds)
+            
 
     class Window(Component):
 
