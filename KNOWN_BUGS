@@ -1,6 +1,6 @@
 RadioGroups don't work properly in Jython.
 
-References.py is broken in Python 2.2 and Jython 2.1b1.
+References.py is broken in Jython 2.1b1.
 
 The updates in test_textarea and test_textfield
 don't work properly in tkgui.
