@@ -148,17 +148,15 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
     def _wx_clicked(self, evt):
         # FIXME: Not correct yet
         if self.group is not None:
-            if self.group._value != self._value:
-                self.group.value = self._value
-                send(self, 'click')
-        else:
-            send(self, 'click')
+            self.group.value = self.value
+        send(self, 'click')
     
     def _ensure_created(self):
-        # FIXME: Commented out 20011214mlh. Is this needed anymore?
+        # FIXME: What about moving buttons between groups? Would that
+        # require destruction and recreation?
         # The first radiobutton in a group must have the wxRB_GROUP style
-        #if self._group and 0 == self._group._items.index(self):
-        #    self._wx_style |= wxRB_GROUP
+        if self._group and 0 == self._group._items.index(self):
+            self._wx_style |= wxRB_GROUP
         return ToggleButtonMixin._ensure_created(self)
 
     def _ensure_events(self):
