@@ -70,3 +70,6 @@ Smaller issues:
 * Add support for borders?
 
 * Add .txt endings to README etc.
+
+* Remove use of id(), since it doesn't work correctly in
+  Jython.
