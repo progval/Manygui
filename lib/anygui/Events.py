@@ -3,18 +3,19 @@
     IRFC 0010 at http://anygui.sf.net/irfc.
 '''
 
-# TODO: Use some internal value instead of None for defaults
+# TODO: - Use some internal value instead of None for defaults
+#       - Add tags
+#       - Fix optional arguments
+#       - loop arg should perhaps be in link? Or both?
 
 __all__ = '''
 
-    connect
-    disconnect
-    dispatch
-    disconnectSource
-    disconnectHandler
-    disconnectMethods
-    Event
-    CallbackAdapter
+    link
+    unlink
+    send
+    unlinkSource
+    unlinkHandler
+    unlinkMethods
 
 '''.split()
 
@@ -27,59 +28,54 @@ source_stack = []
 class Any: pass
 any = Any()
 
-def locators(event, weak=0):
-    src = ref(getattr(event, 'source', any), weak)
-    type = getattr(event, 'type', any)
-    return src, type
-
-def connect(event, handler, weak=0):
-    'Connect an event pattern to an event handler.'
-    src, type = locators(event, weak)
+def link(source, event, handler, weak=0):
+    'Link a source and event to an event handler.'
+    s = ref(source, weak)
     h = ref(handler, weak)
-    if not registry.has_key(src):
-        registry[src] = {}
-    if not registry[src].has_key(type):
-        registry[src][type] = []
-    if not h in registry[src][type]:
-        registry[src][type].append(h)
+    if not registry.has_key(s):
+        registry[s] = {}
+    if not registry[s].has_key(event):
+        registry[s][event] = []
+    if not h in registry[s][event]:
+        registry[s][event].append(h)
 
-def disconnect(event, handler):
-    'Disconnect an event handler from an event pattern.'
+def unlink(source, event, handler):
+    'Unlink an event handler from an event pattern.'
     h = ref(handler, weak=0)
-    for lst in lookup(event):
+    for lst in lookup(source, event):
         try:
             lst.remove(h)
         except (KeyError, ValueError): pass
 
-def set_time(event):
-    if not hasattr(event, 'time'):
-        try:
-            event.time = time.time()
-        except TypeError: pass
+def set_time(args):
+    if not args.has_key('time'):
+        args['time'] = time.time()
 
-def lookup(event):
-    source, type = locators(event)
+def lookup(source, event):
+    source = ref(source, weak=0)
     lists = []
     sources = [source]
     if source() is not any: sources.append(ref(any, weak=0))
-    types = [type]
-    if type is not any: types.append(any)
+    events = [event]
+    if event is not any: events.append(any)
     for s in sources:
-        for t in types:
+        for e in events:
             try:
-                lists.append(registry[s][t])
+                lists.append(registry[s][e])
             except KeyError: pass
     return lists
 
-def dispatch(event):
-    'Call the appropriate event handlers with event as the argument. \
+# TODO: Add defaults etc.
+def send(source, event, loop=0, **kw):
+    'Call the appropriate event handlers with the supplied arguments. \
     As a side-effect, dead handlers are removed from the candidate lists.'
-    source_stack.append(id(getattr(event, 'source', None)))
+    args = {'source': source, 'event': event, 'loop': loop}
+    args.update(kw)
+    if not loop: source_stack.append(id(source))
     try:
         results = []
-        set_time(event)
-        event.freeze()
-        for handlers in lookup(event):
+        set_time(args)
+        for handlers in lookup(source, event):
             live_handlers = []
             for r in handlers:
                 obj = r.obj
@@ -88,34 +84,35 @@ def dispatch(event):
                 if not r.is_dead():
                     live_handlers.append(r)
                     handler = r()
-                    result = handler(event)
+                    result = handler(**args)
                     if result is not None: results.append(result)
             handlers[:] = live_handlers
         if results: return results
     finally:
-        source_stack.pop()
+        if not loop: source_stack.pop()
 
-def disconnectSource(source):
-    'Disconnect all handlers connected to a given source.'
+def unlinkSource(source):
+    'Unlink all handlers linked to a given source.'
     del registry[source]
 
-def disconnectHandler(handler):
-    'Disconnect a handler from the event framework.'
+def unlinkHandler(handler):
+    'Unlink a handler from the event framework.'
     h = ref(handler, weak=0)
     for s in registry.keys():
-        for t in registry[s].keys():
-            try: retistry[s][t].remove(h)
+        for e in registry[s].keys():
+            try: retistry[s][e].remove(h)
             except ValueError: pass
 
-def disconnectMethods(obj):
-    'Disconnect all the methods of obj that are handlers.'
+def unlinkMethods(obj):
+    'Unlink all the methods of obj that are handlers.'
     for name in dir(obj):
         attr = getattr(obj, name)
         if callable(attr):
             try:
-                disconnectHandler(attr)
+                unlinkHandler(attr)
             except: pass
 
+"""
 class Event:
     __frozen = 0
     def __init__(self, **kwds):
@@ -128,12 +125,12 @@ class Event:
     def freeze(self):
         if not self.__frozen:
             self.__frozen = 1
-
+            
 class CallbackAdapter:
-    def dispatch(self, event):
+    def send(self, event):
         '''
         If self has a proper callback, call it, then call global
-        dispatch().
+        send().
         '''
         if not hasattr(event, 'source'):
             event.source = self
@@ -142,6 +139,7 @@ class CallbackAdapter:
         callback = getattr(self, event.type, None)
         if callback:
             result = callback(event)
-        results = dispatch(event)
+        results = send(event)
         if results: return [result] + results
         else: return result
+"""

@@ -1,7 +1,8 @@
 "Mixins: mix-in classes for the anygui package"
 
 from Exceptions import SetAttributeError, GetAttributeError
-import weakref
+#import weakref
+weakref = None
 
 class Attrib:
     """Attrib: mix-in class to support attribute getting & setting
@@ -120,6 +121,8 @@ class Observable:
         model and any additional arguments the model chooses to pass. DO NOT
         pass a code object in <callback>.
         """
+        global weakref
+        if not weakref: import weakref
         self.views.append((weakref.ref(view),callback))
 
     def remove_view(self,view):

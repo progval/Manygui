@@ -123,7 +123,7 @@ class ScrollableListBox(Tkinter.Frame):
     # Replacement for Tkinter.Listbox
 
     def __init__(self, *args, **kw):
-        Frame.__init__(self, *args, **kw)
+        Tkinter.Frame.__init__(self, *args, **kw)
 
         self._yscrollbar = Tkinter.Scrollbar(self)
         self._yscrollbar.pack(side=RIGHT, fill=Y)
@@ -187,7 +187,7 @@ class ListBox(ComponentMixin, AbstractListBox):
 
     def _tk_clicked(self, event):
         #self.do_action()
-        send('action', self)
+        send(self, 'action')
 
 ################################################################
 
@@ -201,7 +201,7 @@ class Button(ComponentMixin, AbstractButton):
 
     def _tk_clicked(self):
         #self.do_action()
-        send('action', self)
+        send(self, 'action')
 
     def _ensure_text(self):
         if self._tk_comp:
@@ -219,11 +219,6 @@ class ToggleButtonMixin(ComponentMixin):
         self._tk_comp.config(variable=self._var, anchor=W)
         return 1
 
-    
-    def _tk_clicked(self):
-        self.group.value = self.value
-        send('action', self)
-
     def _ensure_events(self):
         self._tk_comp.config(command=self._tk_clicked)
 
@@ -231,9 +226,18 @@ class CheckBox(ToggleButtonMixin, AbstractCheckBox):
     _tk_class = Checkbutton
     _text = "tkCheckbutton"
 
+    def _tk_clicked(self):
+        self.on = not self.on # FIXME: ??
+        send(self, 'action')
+
 class RadioButton(ToggleButtonMixin, AbstractRadioButton):
     _tk_class = Radiobutton
     _text = "tkRadiobutton"
+
+    def _tk_clicked(self):
+        if self.group is not None:
+            self.group.value = self.value
+        send(self, 'action')
 
     def _ensure_created(self):
         result = ToggleButtonMixin._ensure_created(self)
@@ -356,7 +360,7 @@ class TextField(ComponentMixin, AbstractTextField, DisabledTextBindings):
         pass
 
     def _send_action(self, dummy): # FIXME: dummy...
-        send('action', self)
+        send(self, 'action')
 
     def _ensure_events(self):
         if self._tk_comp:

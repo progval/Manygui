@@ -1,8 +1,7 @@
 from anygui.Mixins import Attrib, Action
 from anygui.Exceptions import UnimplementedMethod
-from anygui.Messages import CallbackAdapter
 
-class AbstractComponent(Attrib, CallbackAdapter):
+class AbstractComponent(Attrib):
     """AbstractComponent is an abstract base class representing a visual component of
     the graphical user interface. A Component owns a rectangular region of
     screen space defined by its x, y, width and height properties.
@@ -14,7 +13,6 @@ class AbstractComponent(Attrib, CallbackAdapter):
 
     def __init__(self, *args, **kw):
         Attrib.__init__(self, *args, **kw)
-        CallbackAdapter.__init__(self)
 
     def destroy(self):
         self._set_container(None)
