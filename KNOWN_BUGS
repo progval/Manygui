@@ -23,15 +23,12 @@ isn't supported on the relevant widgets
 test_references.py and test_events don't work in Jython 2.1b1.
 (References and Events should still work, though...)
 
-The updates in test_textarea and test_textfield don't work properly in
-tkgui.
-
 When moving the mouse out of a text area in tkgui, the selection is
-lost.
+lost. [jknapka: this is not actually true. However, on Windows
+(not Unix), the visual indication of the selection is erased.
+The selection is still present, however.]
 
-tkgui radiobuttons (and probably checkboxes) don't work properly. (See
-test_radiobutton.py, for example.) RadioGroup doesn't work properly in
-wxgui or javagui.
+RadioGroup doesn't work properly in wxgui or javagui.
 
 id() is broken in Jython and will probably not be fixed soon.
 Therefore, any use of id() in Anygui (such as in anygui.References)
@@ -105,3 +102,10 @@ containers.
 
 test_remove.py fails under mswgui. The "Remove" button's event handler
 is never called.
+
+In cursesgui/textgui, text controls are always editable, even if
+_editable == 0. It seems _ensure_editable() never being called.
+
+test_radiogroup.py crashes under cursesgui/textgui.
+
+It is not (yet) possible to select text in cursesgui/textgui.
