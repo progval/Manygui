@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Anygui Manual</title>
+<title>The Anygui Manual</title>
 <style type="text/css">
 body                    { color: #000000;
                           background-color: #ffffff;
@@ -25,7 +25,7 @@ h3, h4                  { font-size: 120% }
 -->
 
 code                    { font-family: monospace }
-pre, .verbatim          { color: #00008b }
+pre, code, .verbatim    { color: #00008b }
 pre, code               { font-size: 90% }
 h1, .author, .date      { text-align: center }
 .date                   { padding-bottom: 2cm }
@@ -60,11 +60,12 @@ h4:before               { padding-right: 0.5cm }
 h2                      { border-bottom-style: solid;
                           border-bottom-width: thin;
                           border-bottom-color: maroon; }
+dfn                     { color: maroon }
 </style>
 </head>
 <body>
 
-<h1>Anygui Manual</h1>
+<h1>The Anygui Manual</h1>
 <div class="author">Magnus Lie Hetland</div>
 <div class="date">August 2002</div>
 
@@ -128,6 +129,15 @@ basic as possible.
 
 <h3>Structure of this Manual</h3>
 
+<p>This manual first gives you some short instructions on installing
+<span class="name">Anygui</span>. It then gives a thorough description
+of how to use <span class="name">Anygui</span> to build GUI
+applications in <span class="name">Python</span>. Following the
+tutorial is a description of how <span class="name">Anygui</span>
+functions internally, and after that comes an API reference, which
+describes all classes and functions available in the
+<code>anygui</code> package.
+</p>
 
 <h2>Installation</h2>
 
@@ -247,7 +257,7 @@ class="name">Anygui</span> in the interactive interpreter, in which
 terminal and locking up the interpreter prompt. (If you'd like to, for
 some reason, you can override this behaviour with the environment
 variable <code>ANYGUI_FORCE_CURSES</code>; see the API Reference
-below.)</p>
+later in this document.)</p>
 
 <p class="note"> The BeOS backend (<code>beosgui</code>) is currently
 not fully functional, but is included nonetheless.</p>
@@ -275,13 +285,160 @@ versions have problems with <span class="name">Tkinter</span>.</p>
 
 <h2>Anygui Internals</h2>
 
-<h3>Push and Pull</h3>
+<p>In this section I will give a broad overview of how <span
+class="name">Anygui</span> works behind the scenes. This information will
+be useful if you're trying to understand the source code, or using the
+library in advanced ways. If you are an ordinary user, simply using
+<span class="name">Anygui</span> to create relatively simple GUI
+applications, this section may not be for you.</p>
+
+<h3>The Big Picture</h3>
+
+<p>The <span class="name">Anygui</span> architecture is based on a
+division between the <dfn>front-end</dfn>, various
+<dfn>back-ends</dfn>, and, for each back-end, a <dfn>native
+toolkit</dfn>. The front-end is the part of <span
+class="name">Anygui</span> you use in your GUI programs. It is
+designed to appear as a simple GUI toolkit, such as <span
+class="name">Tkinter</span> or <span class="name">wxPython</span>. The
+truth is, however, that the front-end does not implement any GUI
+functionality itself. It delegates all requests for such functionality
+to the back-end that is currently in use.
+</p>
+
+<p>There are several back-ends to choose from. When <span
+class="name">Anygui</span> is imported, an attempt will be made to
+import each of these back-ends in turn, in a given order (as described
+in the API reference later in this document). Once a back-end is
+imported without raising any exceptions (indicating that it can be
+used in the current Python installation), that back-end will be used.
+</p>
+
+<p><span class="name">Anygui</span> is mainly a library of
+<dfn>components</dfn>, but for each component there are actually three
+objects at work: The <dfn>proxy</dfn> is the front-end object that is
+instantiated and manipulated by the application programmer, the
+<dfn>wrapper</dfn> is a back-end object that gives the proxy access to
+the currently used GUI toolkit through a simple interface, and the
+<dfn>widget</dfn> is the object that the wrapper is wrapper, an object
+from the GUI toolkit itself.
+</p>
+
+<p>As an example, consider what happens when a <code>Button</code>
+object is created with the <code>javagui</code> back-end in
+use. First, the application instantiates the <code>Button</code>
+class, which is actually only a proxy object. This proxy will then
+(automatically) make sure that it has a <code>ButtonWrapper</code>
+from <code>javagui</code> available when needed (that is, when the
+<code>Button</code> has been added to a <code>Window</code> and the
+application is runing). This <code>ButtonWrapper</code> will, in turn,
+manage a <code>JButton</code> object from the <code>java.swing</code>
+package. This native widget is completely hidden from the proxy, which
+need not know which back-end is in use. The application, of course,
+only interacts with the proxy object, and has no idea the back-end
+even exists.
+</p>
+
+<h3>Pushing and Pulling State Variables</h3>
+
+<p>Each proxy object has a state dictionary, which is stored in the
+attribute <code>state</code>. Communication between the proxies and
+the wrappers is done by using the <code>push</code>, which sends
+information from this dictionary from the proxy to the wrapper, and
+the <code>pull</code> method, which fetches information from the
+wrapper and updates the state dictionary.
+</p>
+
+<p>For instance, to update the width of a button, you might do the
+following:
+</p>
+
+<pre>btn.state['width'] = 100
+btn.push('width')</pre>
+
+<p>In this example, the first line updates the button's state
+dictionary. That in itself will have no effect on the back-end
+wrapper, because it has not been notified of the change. The next line
+calls the <code>push</code> method. This is what is needed to notify
+the wrapper (which can, in turn, tell the native widget what to
+do). In this example, the name of the state variable
+(<code>'width'</code>) is supplied. That is only an optimisation,
+which tells the back-end wrapper which state variables it must
+update. If no such names are supplied, all state variables are pushed
+through to the native widget. The <code>push</code> method of the
+proxies simply construct a state dictionary with the given state
+variables from the proxy's own state variables, and calls the
+<code>push</code> method of the wrapper, with the state dictionary as
+the only argument. (This method is described in the section on
+wrappers, later in this document.)
+</p>
+
+<p>Luckily, the application programmer need not use this pushing
+mechanism directly. It is automated through the use of proxy
+attributes. When you assign a value to a proxy attribute (that does
+not begin with an underscode, and that is not called
+<code>state</code>) it will be stored in the state dictionary, and
+automatically pushed through to the back-end. So, for example, to
+change the width of a button, you need perform one assignment, as
+shown in the following example:
+</p>
+
+<pre>btn.width = 100</pre>
+
+<p>This assignment is equivalent to the two statements used earlier in
+this section.</p>
+
+<p>The pushing mechanism is used to make the state of the GUI reflect
+changes made to the proxy objects. However, as the user manipulates
+the GUI, it may change directly, and thus foul up this synchronisation
+between front-end and back-end. To correct this, the <code>pull</code>
+method is used.
+</p>
+
+<p>Again, both the proxies and the wrappers have <code>pull</code>
+methods. And, again, the proxy version takes a number of attribute
+names (possibly none) that are to be pulled out of the back-end, while
+the wrapper version takes a state dictionary. Unlike
+<code>Wrapper.push</code>, however, the <code>Wrapper.pull</code>
+method modifies the supplied state dictionary. It modifies only the
+state variables that are already there &#151; it does not add new
+keys. When you supply attribute names to <code>Proxy.pull</code> you
+restrict which keys are used in the state dictionary supplied to
+<code>Wrapper.pull</code>, and thus you restrict which parts of the
+proxy that are updated. This is (as with <code>push</code>) only an
+optimisation; calling <code>pull</code> with no arguments is always
+legal.
+</p>
+
+<p>So, if a user resizes a window, and you want to retrieve the
+correct width of a button, you can use the following two statements:
+</p>
+
+<pre>btn.pull('width')
+width = btn.state['width']</pre>
+
+<p>As with the push mechanism, this has been automated when you access
+state variables through proxy attributes, so the previous two lines of
+code are equivalent to the following:</p>
+
+<pre>width = btn.width</pre>
+
+<p>Alias attributes implicitly call <code>push</code> and
+<code>pull</code> because they access proxy attributes behind the
+scenes.
+</p>
 
 <h3>Widgets and Wrappers</h3>
 
 <h3>Proxies</h3>
 
 <h3>The Model-View-Controller Architecture in Anygui</h3>
+
+<h4>In-Place Modification</h4>
+
+<h4>The Trouble with Dumb Models</h4>
+
+<h4>Models and the Assignee Protocol</h4>
 
 <h2>API Reference</h2>
 
