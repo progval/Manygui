@@ -1,8 +1,7 @@
 
 from unittest import TestCase, main
 
-# TODO: Add tests for add tests for update(); add tests for wrappers
-# without setters.
+# FIXME: Does not test partial ordering of setters (not yet implemented)
 
 # Temporary:
 import warnings
@@ -20,7 +19,7 @@ class Stub:
                     
 from anygui.Wrappers import AbstractWrapper
 
-class TestWrapperWithSetters(AbstractWrapper):
+class TestWrapperWithAggregates(AbstractWrapper):
     def setPosition(self, x, y):
         pass
     def setSize(self, width, height):
@@ -38,13 +37,23 @@ class TestWrapperWithSetters(AbstractWrapper):
     def setText(self, text):
         pass
 
-class TestWrapperWithoutSetters(AbstractWrapper):
-    pass
+class TestWrapperWithoutAggregates(AbstractWrapper):
+    
+    def setX(self, x):
+        pass
+    def setY(self, y):
+        pass
+    def setWidth(self, width):
+        pass
+    def setHeight(self, height):
+        pass
+    def setText(self, text):
+        pass
 
-class WrapperWithSettersTestCase(TestCase):
+class WrapperWithAggregatesTestCase(TestCase):
 
     def setUp(self):
-        self.wrapper = TestWrapperWithSetters(Stub())
+        self.wrapper = TestWrapperWithAggregates(Stub())
 
     def genericAggregateTest(self, settername, attrs):
         s, u = self.wrapper.getSetters(attrs)
@@ -88,6 +97,164 @@ class WrapperWithSettersTestCase(TestCase):
         s, u = self.wrapper.getSetters(['x'])
         self.failUnless(s[0][0].__name__ == 'setX', 'Handler should be setX()')
 
-# class WrapperWithoutSettersTestCase(TestCase): pass
+class WrapperWithoutAggregatesTestCase(TestCase):
+
+    def setUp(self):
+        self.wrapper = TestWrapperWithoutAggregates(Stub())
+
+    def genericAggregateTest(self, attrs):
+        s, u = self.wrapper.getSetters(attrs)
+        self.failUnless(len(u) == 0, 'There should be no unhandled attributes')
+        self.failUnless(len(s) == len(attrs), 'Exactly ' + `len(attrs)` + 'setters should be returned')
+        handled_attrs = []
+        for x in s:
+            self.failUnless(len(x[1]) == 1, 'There should be no aggregates')
+            handled_attrs.append(x[1][0])
+        for attr in attrs:
+            self.failUnless(attr in handled_attrs, attr + ' should be handled')
+
+    def testGetSetters1(self):
+        'Test for nonexistent aggregate position == (x, y)'
+        self.genericAggregateTest(['x', 'y'])
+
+class UpdateTestWrapper(AbstractWrapper):
+
+    def __init__(self, proxy):
+        AbstractWrapper.__init__(self, proxy)
+        self.reset()
+
+    def reset(self):
+        self.called = []
+
+    def register(self, name, *args):
+        self.called.append(name + '(' + ', '.join(map(repr, args)) + ')')
+
+    def setX(self, x):
+        self.register('setX', x)
+
+    def setY(self, y):
+        self.register('setY', y)
+
+    def setPosition(self, x, y):
+        self.register('setPosition', x, y)
+
+    def setWidth(self, width):
+        self.register('setWidth', width)
+
+    def setHeight(self, height):
+        self.register('setHeight', height)
+
+    def setSize(self, width, height):
+        self.register('setSize', width, height)
+
+    def setGeometry(self, x, y, width, height):
+        self.register('setGeometry', x, y, width, height)
+
+    def setText(self, text):
+        self.register('setText', text)
+
+class UpdateTestCase(TestCase):
+
+    def setUp(self):
+        self.wrapper = UpdateTestWrapper(Stub())
+
+    def genericUpdateTest(self, state, testCalled):
+        self.wrapper.update(state)
+        called = self.wrapper.called
+        called.sort()
+        self.assertEqual(called, testCalled)
+        self.wrapper.reset()
+
+    def testUpdate1(self):
+        'Test update without aggregates'
+        self.genericUpdateTest(
+            {
+            'x': 1,
+            'width': 10,
+            'text': 'Hello'
+            },
+            [
+            "setText('Hello')",
+            'setWidth(10)',
+            'setX(1)'
+            ])
+
+    def testUpdate2(self):
+        'Test update with position == (x, y)'
+        self.genericUpdateTest(
+            {
+            'x': 1,
+            'y': 2,
+            },
+            [
+            'setPosition(1, 2)'
+            ])
+
+    def testUpdate3(self):
+        'Test update with size == (width, height)'
+        self.genericUpdateTest(
+            {
+            'width': 10,
+            'height': 20
+            },
+            [
+            'setSize(10, 20)'
+            ])
+
+    def testUpdate4(self):
+        'Test update with geometry == (x, y, width, height)'
+        self.genericUpdateTest(
+            {
+            'x': 1,
+            'y': 2,
+            'width': 10,
+            'height': 20
+            },
+            [
+            'setGeometry(1, 2, 10, 20)'
+            ])
+        
+    def testUpdate5(self):
+        'Test update with aggregates and non-aggregates'
+        self.genericUpdateTest(
+            {
+            'x': 1,
+            'y': 2,
+            'height': 50,
+            'text': 'Hello'
+            },
+            [
+            'setHeight(50)',
+            'setPosition(1, 2)',
+            "setText('Hello')"
+            ])
+
+    def testUpdate6(self):
+        'Test update with unknown attributes'        
+        self.genericUpdateTest(
+            {
+            'foobar': 42,
+            'babar': 'Fnord'
+            },
+            [
+            ])
+
+    def testUpdate7(self):
+        'Test update with known and unknown attributes'
+        self.genericUpdateTest(
+            {
+            'x': 1,
+            'y': 2,
+            'height': 50,
+            'text': 'Hello',
+            'foobar': 42
+            },
+            [
+            'setHeight(50)',
+            'setPosition(1, 2)',
+            "setText('Hello')"
+            ])
 
 if __name__ == '__main__': main()
+
+

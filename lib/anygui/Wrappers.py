@@ -22,6 +22,10 @@ The only methods that should be explicitly called by the Proxy are:
 
 # TODO:
 # - Add attribute dependencies, i.e. (text -> selection) etc.
+# - In __init__:
+#   Add to list of wrappers that need to be prodded...
+#   (In Application, e.g. addWrapper?)
+#   Should the Wrapper realy prod itself?
 
 class AbstractWrapper:
 
@@ -44,9 +48,6 @@ class AbstractWrapper:
         method. Subclasses wanting to add (or override) aggregates
         should use the same method.
         """
-        # TODO: Add to list of wrappers that need to be prodded...
-        #       (In Application, e.g. addWrapper?)
-        #       Should the Wrapper realy prod itself?
         self.proxy = proxy
         self.widget = None
 
