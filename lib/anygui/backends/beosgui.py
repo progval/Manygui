@@ -16,8 +16,6 @@ This version of beosgui.py (and the anygui it is part of) are a work in progress
 TODO = """
 To Do List:
 
-Make Label actually a TextArea - to allow multiple lines.
-
 Make RadioGroups work.
 Stage 1: dodgy system assuming only one group per window [DONE]
 Stage 2: proper system using seperate BViews for each group
@@ -32,11 +30,6 @@ New Classes to implement:
 Alert, FilePanel, Menu, Slider, StatusBar, TabView
 
 OutlineListView, PopUpMenu, ColourControl
-
-+
-
-implement ScrollView and make ListView/TextView use the class
-
 """
 
 from anygui.backends import *
@@ -229,7 +222,6 @@ class ListBox(ComponentMixin, AbstractListBox):
     _beos_border = B_FANCY_BORDER
     
     def _ensure_created(self):
-        "With Scroll Bars."
         self._beos_id = str(self._beos_id)
         if self._beos_sub is None:
             self.sub_wrap(self._beos_sub_class(self._beos_bounds,
@@ -256,21 +248,6 @@ class ListBox(ComponentMixin, AbstractListBox):
                 float(self._width+ self._x-15),
                 float(self._height+self._y))
         
-    def _ensure_created2(self):
-        "Without Scroll Bars."
-        self._beos_class = BListView.BListView
-        self._beos_id = str(self._beos_id)
-        self._init_args = (self._beos_bounds,
-                           str(self._beos_id),
-                           self._beos_type,
-                           self._beos_mode,
-                           self._beos_flags)
-        result = ComponentMixin._ensure_created(self)
-        self._beos_sub = self._beos_comp
-        self._ensure_items()
-        self._ensure_events()
-        return result
-    
     def _backend_selection(self):
         if self._beos_comp:
             return self._beos_sub.CurrentSelection()
@@ -325,9 +302,7 @@ class ToggleButtonMixin(ComponentMixin):
     def _get_on(self):
         return self._beos_comp.Value()
     
-    #def _ensure_events(self):
-    #    ComponentMixin._ensure_events(self)
-        
+       
     def _beos_clicked(self):
         val = self._get_on()
         if val == self._on:
@@ -479,6 +454,7 @@ class TextArea(ComponentMixin, AbstractTextArea):
     _beos_border = B_FANCY_BORDER
     
     def _ensure_created(self):
+        self._dummy = 0 # Error checking device, for infinite loop in MakeFocus()
         self._focus = 0
         self._beos_id = str(self._beos_id)
         if self._beos_sub is None:
@@ -529,8 +505,13 @@ class TextArea(ComponentMixin, AbstractTextArea):
     
     def MakeFocus(self, focus=1):
         """Doesn't seem to Draw properly: clicking in another window then
-        back makes it work."""
+        back makes it work.  Donn has been notified."""
+        self._dummy = self._dummy + 1
+        if self._dummy > 1:
+            print """You need to get a bugfixed version of some Bethon files.
+Please look in the Documentation for details, or visit www.bebits.com/app/2501"""
         self._beos_sub.MakeFocus(focus)
+        self._dummy = 0
         if not focus:
             self._lost_focus()        
 
@@ -570,7 +551,11 @@ class Window(ComponentMixin, AbstractWindow):
     
     def _ensure_visibility(self):
         if self._beos_comp:
-            self._beos_comp.Minimize(not self._visible)
+            try:
+                self._beos_comp.Minimize(not self._visible)
+            except AttributeError:
+                print """You might not have the required Bethon replacement files.
+Look in the docs for details, or visit www.bebits.net/app/2501"""
     
     def _ensure_geometry(self):
         self._beos_bounds = (float(self._x)+10.0,     # Because these are inside

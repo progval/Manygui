@@ -45,6 +45,13 @@ The backends don't behave consistently wrt. setting or not setting
 focus when the selection of a TextField or TextArea is set
 programmatically.
 
+Focus of TextArea is displayed properly under beosgui - click on another
+window and back again to see selection/cursor. [Bug belongs to Bethon]
+
+Anygui will not work [well|at all?] with a vanilla Bethon installation.
+The updated files can be found at http://anygui.sourceforge.net/files.
+Email matt@null.net for details on how to build, if you need help.
+
 test/test.py crashes under systems where more than one application
 object is not permitted.  [beosgui and wxgui]
 
