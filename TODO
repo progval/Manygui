@@ -11,7 +11,7 @@ Tentative release date: December 10th, 2001
 * Simplify the widget API by detaching models, using
   signals
 
-* Adjust defaults, and add proper window tiling
+* Adjust defaults, and improve window tiling
 
 * Add simple Frame class
 
