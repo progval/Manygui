@@ -506,7 +506,7 @@ class Placer(LayoutManager):
         space      = kwds.get('space',      Defaults.space)
 
         def side(spec, name, self=self):
-            if spec:
+            if spec is not None:
                 t = type(spec)
                 if t == TupleType:
                     return spec
@@ -542,28 +542,28 @@ class Placer(LayoutManager):
             # Calculate left edge position
             if left_obj:
                 l = left_obj.x + left_obj.width + left_off
-            elif left_off:
+            elif left_off is not None:
                 l = left_off
             else:
                 l = None
             # Calculate top edge position
             if top_obj:
                 t = top_obj.y + top_obj.height + top_off
-            elif top_off:
+            elif top_off is not None:
                 t = top_off
             else:
                 t = None
             # Calculate right edge position
             if right_obj:
                 r = right_obj.x - right_off
-            elif right_off:
+            elif right_off is not None:
                 r = self._container._width - right_off
             else:
                 r = None
             # Calculate bottom edge position
             if bottom_obj:
                 b = bottom_obj.y - bottom_off
-            elif bottom_off:
+            elif bottom_off is not None:
                 b = self._container._height - bottom_off
             else:
                 b = None
