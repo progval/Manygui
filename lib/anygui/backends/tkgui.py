@@ -119,8 +119,8 @@ class Canvas(ComponentMixin, AbstractCanvas):
         AbstractCanvas.__init__(self, *args, **kwds)
         self._items = []
 
-    def _ensure_create(self):
-        result = ComponentMixin._ensure_create(self)
+    def _ensure_created(self):
+        result = ComponentMixin._ensure_created(self)
         self._tk_comp.configure(background='white')
         return result
 
