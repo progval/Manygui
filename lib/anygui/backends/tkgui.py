@@ -125,14 +125,89 @@ class LabelWrapper(ComponentWrapper):
     def setText(self, text):
         self.widget.configure(text=text)
 
-class TextFieldWrapper(ComponentWrapper):
+class TkTextMixin:
+    """ Mixin that abstracts out all behavior needed to get
+    selectable-but-not-editable behavior out of Tk text widgets.
+    We bind all keystrokes, passing them through to the underlying
+    control when _editable is true, and ignoring all but select
+    and copy keystrokes when _editable is false. The mixed-in
+    class must provide an updateModel() method, called as a
+    Tk event handler when focus leaves the control; and a
+    setEditable() method, called from update(), that manages
+    the self.editable property. """
+
+    def install_bindings(self,widget):
+        self.ctl = 0
+        self.alt = 0
+        self.shift = 0
+        self.editable = 1
+        widget.bind("<Key>", self.keybinding)
+        widget.bind("<KeyPress-Control_L>", self.ctldown)
+        widget.bind("<KeyRelease-Control_L>", self.ctlup)
+        widget.bind("<KeyPress-Alt_L>", self.altdown)
+        widget.bind("<KeyRelease-Alt_L>", self.altup)
+        widget.bind("<KeyPress-Shift_L>", self.shiftdown)
+        widget.bind("<KeyRelease-Shift_L>", self.shiftup)
+        widget.bind("<Key-Insert>", self.insertbinding)
+        widget.bind("<Key-Up>", self.arrowbinding)
+        widget.bind("<Key-Down>", self.arrowbinding)
+        widget.bind("<Key-Left>", self.arrowbinding)
+        widget.bind("<Key-Right>", self.arrowbinding)
+        widget.bind("<ButtonRelease>", self.insertbinding)
+
+        # Easy place to put this - not _editable-related, but common
+        # to all text widgets.
+        widget.bind("<Leave>", self.updateProxy)
+
+    # Track modifier key state.
+    def ctldown(self, ev):
+        self.ctl = 1
+    def ctlup(self, ev):
+        self.ctl = 0
+    def altdown(self, ev):
+        self.alt = 1
+    def altup(self, ev):
+        self.alt = 0
+    def shiftdown(self, ev):
+        self.shift = 1
+    def shiftup(self, ev):
+        self.shift = 0
+
+    def keybinding(self, ev):
+        """ This method binds all keys, and causes them to be
+        ignored when _editable is not set. """
+        if self.editable:
+            return None
+        else:
+            # This is truly horrid. Please add appropriate
+            # code for Mac platform, someone.
+            if (ev.char == "\x03") or (ev.char == "c" and self.alt):
+                # DON'T ignore this key: it's a copy operation.
+                return None
+            return "break"
+
+    def insertbinding(self,ev):
+        # Overrides _keybinding for the Insert key.
+        if self.editable:
+            return None
+        if self.ctl:
+            # Allow copy.
+            return None
+        return "break"
+
+    def arrowbinding(self,ev):
+        # This method's sole reason for existence is to allow arrows
+        # to work even when _editable is false.
+        return None
+
+class TextFieldWrapper(ComponentWrapper,TkTextMixin):
 
     def widgetFactory(self,*args,**kws):
         theWidge=Tkinter.Entry(*args,**kws)
-        theWidge.bind("<Return>",self.handle_return)
+        self.install_bindings(theWidge)
         return theWidge
 
-    def handle_return(self,*args,**kws):
+    def updateProxy(self,*args,**kws):
         # Inform proxy of text change by the user.
         self.proxy.rawModify(text=self.widget.get())
 
@@ -144,6 +219,9 @@ class TextFieldWrapper(ComponentWrapper):
         self.widget.insert(0,text)
         if disabled:
             self.widget.configure(state=Tkinter.DISABLED)
+
+    def setEditable(self,editable):
+        self.editable=editable
 
 class FrameWrapper(ComponentWrapper):
 
