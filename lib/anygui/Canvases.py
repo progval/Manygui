@@ -178,9 +178,11 @@ class AbstractCanvas(AbstractComponent, Defaults.Canvas):
             x = x + dx
             y = y + dy
 
-    def drawLine(self, x1,y1, x2,y2, color=None, width=None):
+    def drawLine(self, x1, y1, x2, y2, color=None, width=None):
         "Draw a straight line between x1,y1 and x2,y2."
-        raise NotImplementedError, 'drawLine'
+        self.drawPolygon([(x1,y1), (x2, y2)],
+                         edgeColor=color,
+                         edgeWidth=width)
 
     def drawLines(self, lineList, color=None, width=None):
         "Draw a set of lines of uniform color and width.  \
