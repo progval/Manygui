@@ -2,13 +2,13 @@
 Goals for version 0.1:
 ----------------------
 
-* Add basic support for defaults
+* Add support for the document/view model
 
-* Add support for the border property
+* Add basic support for defaults
 
 * Add Frame class with utility factories (e.g. col/row)
 
-* Add support for the document/view model
+* Add support for the border property
 
 Goals for version 0.2:
 ----------------------
