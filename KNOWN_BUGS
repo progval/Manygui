@@ -1,3 +1,8 @@
+The wxgui RadioButton seems to react to both mouse press and
+mouse release (by sending out 'click' events and updating its
+RadioGroup) while it should only react to one of these (probably
+press).
+
 In wxgui, the text cursor doesn't seem to want to leave non-editable
 text areas and text fields... It keeps moving around to the
 correct position (but in the wrong field) if one (after having
