@@ -28,12 +28,7 @@ class ComponentMixin:
                 parent = self._container._java_comp
             else:
                 parent = None
-            frame = self._java_class(
-                #parent,
-                #self._java_id,
-                #self._get_java_text(),
-                #style=self._java_style
-                )
+            frame = self._java_class()
             if parent:
                 if parent.__class__ == swing.JFrame:
                     parent.contentPane.add(frame)
