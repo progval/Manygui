@@ -910,6 +910,49 @@
       property (a tuple of two integer indices).</para>
     </section>
 
+    <section>
+      <title>Making Your Own Components and LayoutManagers</title>
+
+      <para>Currently, you can create your own components by combining
+      others in <code>Frame</code>s, and wrapping the whole thing up
+      as a class. One of the main reasons for doing this would be to
+      emulate a feature (such as a tabbed pane) available in some
+      backends, but not in others. One could then actually
+      <emphasis>use</emphasis> the native version in the backends
+      where it is available (such as <code>wx</code>, in this case),
+      and use the "emulation" in the others. There is some limited
+      support for this in the <code>backend</code> function (which
+      will allow you to check whether you are currently using the
+      correct backend), but in the future, a more complete API will be
+      developed for this, allowing you access to the coolest features
+      of your favorite GUI package, while staying "package
+      independent".</para>
+
+      <para>You can already create your own layout managers, by
+      properly supporting the methods <code>add</code>,
+      <code>remove</code>, and <code>resized</code>. The simplest way
+      of doing this is to subclass <code>LayoutManager</code>, which
+      gives you the <code>add</code> and <code>remove</code> methods
+      for free. You can then concentrate on the method
+      <code>resized</code> which takes two positional arguments,
+      <code>dw</code>, and <code>dh</code> (change in width and change
+      in height) and is responsible for changing the geometries of all
+      the components in the <code>Frame</code> the <code>LayoutManager
+      is managing</code>. (This frame is available through the private
+      attribute <code>self._container</code>.)
+      </para>
+
+      <!-- Why only allow one Options object?
+      Check with generic add() API -->
+
+      <para>To get more control over things, you should probably also
+      override the two internal methods <code>add_components</code>
+      and <code>remove_component</code>.</para>
+
+      <!-- configure? -->
+
+    </section>
+
   </section>
 
   <section>
@@ -1258,8 +1301,6 @@
        
       <para><strong>Base Classes and Common Behaviour</strong></para>
 
-      <!-- document set and modify -->
-
       <para>All components are subclasses of corresponding abstract
       components which implement behaviour common to all the
       backends. So, for instance, <code>Button</code> subclasses
@@ -1292,21 +1333,48 @@
 	<line>text      -- text associated with the component</line>
       </codelisting>
 
+      <para>These can all be set as keyword arguments to the component
+      constructors. Also, <code>Options</code> objects (with similar
+      constructors) can be used as positional arguments in the
+      constructor, with all the <code>Options</code>'s attributes
+      being set in the component as well.</para>
+
       <para>Common to <code>Application</code>, <code>Window</code>,
       and <code>Frame</code> is the <code>contents</code> attribute,
       as well as the <code>add</code> and <code>remove</code>
       methods. These will be described with the individual classes
       below.</para>
 
-      <para>[[@@@ intro para]]</para>
+      <para>All <code>Attrib</code> subclasses (including components,
+      <code>Application</code>, and <code>RadioGroup</code>) share the
+      following methods:</para>
 
-      <para><apiname>set</apiname>(...)</para>
+      <para><apiname>set</apiname>(*<var>args</var>, **<var>kwds</var>)</para>
 
-      <para>[[@@@]]</para>
+      <para>Used to set attributes. Works like the <code>Attrib</code>
+      constructor, setting attributes, and optionally using
+      <code>Options</code> objects.</para>
 
-      <para><apiname>modify</apiname>(...)</para>
+      <para><apiname>modify</apiname>(*<var>args</var>, **<var>kwds</var>)</para>
 
-      <para>[[@@@]]</para>
+      <para>Works like the <code>set</code> method, except that the
+      attributes are modified <emphasis>in place</emphasis>. That
+      means the following (for an attribute named <code>foo</code>):
+      (1) If there exists an internal method (implemented in
+      <name>Anygui</name>) for modifying the attribute inplace (called
+      <code>_modify_foo</code>), use that; otherwise (2) try to use
+      slice assignment to change the value (will work for lists and
+      <code>ListModels</code> etc.); if that doesn't work, (3) assign
+      to the value's <code>value</code> attribute (used to modify
+      <code>Model</code>s. If neither of these approaches work, simply
+      rebind the attribute (equivalent to using the <code>set</code>
+      method).</para>
+
+      <para>As with <code>set</code> and ordinary attribute
+      assignment, the <code>update</code> method will automatically be
+      called when you use <code>modify</code>.</para>
+
+      <!-- modified; modify(_foo=bar) etc. -->
 
       <para><apiname>update</apiname>()</para>
       

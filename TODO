@@ -115,3 +115,5 @@ Smaller issues:
 * Add support for borders?
 
 * Add .txt endings to README etc.
+
+* Create a Container mixin for add() and remove() methods?
