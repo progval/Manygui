@@ -154,7 +154,9 @@ class RuleEngine:
              are not, raise an IllegalState exception. If they are,
              modify all the others so they are equal to these
              elements.
-        
+
+        One important invariant of the sync method is that it (unlike
+        define) does not alter the state of the RuleEngine.
         """
         defs = self.explode(defs)
         undefs = self.getUndefs(state, defs)
