@@ -91,6 +91,9 @@ Tentative release date: February 28th, 2002
   contents or items attribute. (With items it could be used with
   ListBox too, giving the possibility of adding and removing items...)
 
+* Change Assignee to SmartValue, which also has support for Container
+  objects.
+
 * Change add() signature?
 
 * Add support for complex widgets (like wx tree widget,
