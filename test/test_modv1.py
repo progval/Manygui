@@ -14,7 +14,7 @@ def say_hello(event):
     global newbtn
     if newbtn is None:
         newbtn = Button(opt, y = g_y)
-        newbtn.text = TextModel('new')
+        newbtn.installTextModel(TextModel('new'))
         win.add(newbtn)
     else:
         newbtn.text.append('x')

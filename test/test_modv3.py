@@ -10,17 +10,17 @@ app.add(win)
 newbtn = None
 
 def printit1(event):
-    log('printit1:',newbtn.on,ignore_kwds)
+    log('printit1:',newbtn.on)
 
 def printit2(event):
-    log('printit2:',newbtn.on,ignore_kwds)
+    log('printit2:',newbtn.on)
 
 def say_hello(event):
     log("Hello, world!")
     global newbtn
     if newbtn is None:
         newbtn = CheckBox(opt, y = g_y)
-        newbtn.on = BooleanModel()
+        newbtn.installOnModel(BooleanModel())
         link(newbtn, printit1)
         link(newbtn.on, printit2)
         win.add(newbtn)
