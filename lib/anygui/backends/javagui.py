@@ -124,7 +124,7 @@ class JavaGUILayoutManager(awt.LayoutManager):
 
     def layoutContainer(self, java_parent):
         'Called when the panel is first displayed and on every resize.'
-        if self.first_time: # FIXME: Ugly hack
+        if self.first_time:
             self.first_time = 0
         else:
             w = java_parent.width
@@ -133,7 +133,7 @@ class JavaGUILayoutManager(awt.LayoutManager):
             dh = h - self.parent._height
             self.parent._width = w
             self.parent._height = h
-            if hasattr(self.parent, 'resized'): # FIXME: Ugly hack
+            if hasattr(self.parent, 'resized'):
                 self.parent.resized(dw, dh)
 
 ################################################################
@@ -458,34 +458,28 @@ class TextArea(ComponentMixin, AbstractTextArea):
         return result
     
     def _backend_text(self):
-        # FIXME: Ugly hack!
         if self._java_comp and hasattr(self._java_comp, '_jtextarea'):
             return self._java_comp.getText()
 
     def _backend_selection(self):
-        # FIXME: Ugly hack!
         if self._java_comp and hasattr(self._java_comp, '_jtextarea'):
             return self._java_comp.getSelectionStart(), \
                    self._java_comp.getSelectionEnd()
 
     def _ensure_text(self):
-        # FIXME: Ugly hack!
         if self._java_comp and hasattr(self._java_comp, '_jtextarea'):
             self._java_comp.setText(self._text)
 
     def _ensure_selection(self):
-        # FIXME: Ugly hack!
         if self._java_comp and hasattr(self._java_comp, '_jtextarea'):
             self._java_comp.setSelectionStart(self._selection[0])
             self._java_comp.setSelectionEnd(self._selection[1])
 
     def _ensure_editable(self):
-        # FIXME: Ugly hack!
         if self._java_comp and hasattr(self._java_comp, '_jtextarea'):
             self._java_comp.setEditable(self._editable)
 
     def _ensure_events(self):
-        # FIXME: Ugly hack!
         if self._java_comp and hasattr(self._java_comp, '_jtextarea'):
             self._java_comp._jtextarea.focusLost = self._java_focus_lost
 
