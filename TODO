@@ -5,7 +5,7 @@ Tentative release date: December 10th, 2001
 
 * Finalise signal system/API
 
-* Integrate the signa system into the basic callback
+* Integrate the signal system into the basic callback
   mechanism
 
 * Simplify the widget API by detaching models, using
