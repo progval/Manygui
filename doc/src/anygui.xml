@@ -530,7 +530,8 @@
       associate a callback with it.</para>
 
       <para>Whether a <code>CheckBox</code> is currently on or off is
-	indicated by its model's <code>value</code>.
+      indicated by its model's <code>value</code>.</para>
+
     </section>
 
     <section>
@@ -582,14 +583,14 @@
       select it by pressing the space bar.</para>
 
       <para>A <code>ListBox</code>'s items are set by manipulating its
-      model (a <code>ListModel</code>). The sequence can contain any
+      model (a <code>ListModel</code>). The model can contain any
       objects, and the text displayed in the widget will be the result
       of applying the built-in <name>Python</name> function
       <code>str</code> to each object.</para>
 
       <codelisting>
 	<line>lbx = ListBox()</line>
-	<line>lbx.items = 'This is a test'.split()</line>
+	<line>lbx.model.value = 'This is a test'.split()</line>
       </codelisting>
 
       <para>The currently selected item can be queried or set through
@@ -613,11 +614,11 @@
       <code>TextField</code>'s <code>action</code> callback (if
       present).</para>
 
-      <para>The text in a text component is queried or set through the
-      <code>text</code> property (a string), and the current selection
-      may be queried or set through the <code>selection</code>
-      property (a tuple of two integer indices).</para>
-
+      <para>The text in a text component is queried or set through its
+      model's <code>value</code> property (a string or equivalent),
+      and the current selection may be queried or set through the
+      <code>selection</code> property (a tuple of two integer
+      indices).</para>
     </section>
 
   </section>
@@ -836,7 +837,6 @@
     WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
     DEALINGS IN THE SOFTWARE.</para>
-
   </section>
 
 </document>
