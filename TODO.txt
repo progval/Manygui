@@ -51,6 +51,8 @@ Objectives for version 0.2a2:
   In other words, give a standardised way of integrating
   backend-specific features into Anygui programs.
 
+* Flesh out the event list
+
 New Components
 
 - Canvas widget with full graphics support
@@ -77,6 +79,8 @@ Objectives for version 0.2a3:
   "shrink-wrapping" of windows and frames that aren't
   given an explicit size; will require a "preferred
   size" for all widgets, based on font sizes etc.
+
+* Implement "full" event list
 
 New Components:
 
