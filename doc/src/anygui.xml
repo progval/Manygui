@@ -7,7 +7,7 @@
 <!ENTITY copyrightholders SYSTEM "copyrightholders.xml">
 ]>
 
-<document version="&shortversion;">
+<document version="&longversion;">
 
   <title>Anygui : Generic GUI for Python</title>
 
