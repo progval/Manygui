@@ -6,7 +6,7 @@ __all__ = anygui.__all__
 
 from qt import *
 TRUE = 1
-FALSE = 2
+FALSE = 0
 
 DEBUG = 0
 TMP_DBG = 1
@@ -111,13 +111,8 @@ class ListBox(ComponentMixin, AbstractListBox):
 		qApp.connect(self._qt_comp,SIGNAL('selected (QListBoxItem *)'),self._qt_item_select_handler)
 
 	def _qt_item_select_handler( self, item ):
-		if DEBUG: print 'in _qt_lbx_selected of: ', self._qt_comp
+		if DEBUG: print 'in _qt_item_select_handler of: ', self._qt_comp
 		send(self,'select',index=self._qt_comp.index(item),text=str(item.text()))
-
-	def _ensure_text(self):
-		if self._qt_comp:
-			if DEBUG: print 'in _ensure_text of: ', self._qt_comp
-			self._qt_comp.setText(self._get_qt_text())
 
 	def _ensure_selection(self):
 		if self._qt_comp:
@@ -126,46 +121,37 @@ class ListBox(ComponentMixin, AbstractListBox):
 
 ################################################################
 
-class Button(ComponentMixin, AbstractButton):
-	_qt_class = QPushButton
-	
+class ButtonBase(ComponentMixin):
+
 	def _ensure_events(self):
 		if self._qt_comp:
 			if DEBUG: print 'in _ensure_events of: ', self._qt_comp
 			qApp.connect(self._qt_comp,SIGNAL('clicked()'),self._qt_click_handler)
 
+	def _ensure_text(self):
+		if self._qt_comp:
+			if DEBUG: print 'in _ensure_text of: ', self._qt_comp
+			self._qt_comp.setText(QString(self._get_qt_text()))
+
+	def _get_qt_text(self):
+		return self._text
+
+class Button(ButtonBase, AbstractButton):
+	_qt_class = QPushButton
+
 	def _qt_click_handler(self):
 		if DEBUG: print 'in _qt_btn_clicked of: ', self._qt_comp
 		send(self,'click')
 
-	def _ensure_text(self):
-		if self._qt_comp:
-			if DEBUG: print 'in _ensure_text of: ', self._qt_comp
-			self._qt_comp.setText(self._get_qt_text())
-
-	def _get_qt_text(self):
-		return self._text
-
-class ToggleButtonMixin(ComponentMixin):
+class ToggleButtonBase(ButtonBase):
 	
 	def _ensure_state(self):
+		if DEBUG: print 'in _ensure_state of: ', self._qt_comp
 		if self._qt_comp:
-			if not self._qt_comp.isChecked() == self.on:
-				self._qt_comp.setChecked(self.on)
-	
-	def _ensure_events(self):
-		if DEBUG: print 'in _ensure_events of: ', self._qt_comp
-		qApp.connect(self._qt_comp,SIGNAL('clicked()'),self._qt_click_handler)
+			if not self._qt_comp.isChecked() == self._on:
+				self._qt_comp.setChecked(self._on)
 
-	def _ensure_text(self):
-		if self._qt_comp:
-			if DEBUG: print 'in _ensure_text of: ', self._qt_comp
-			self._qt_comp.setText(self._get_qt_text())
-
-	def _get_qt_text(self):
-		return self._text
-
-class CheckBox(ToggleButtonMixin, AbstractCheckBox):
+class CheckBox(ToggleButtonBase, AbstractCheckBox):
 	_qt_class = QCheckBox
 
 	def _qt_click_handler(self):
@@ -175,26 +161,35 @@ class CheckBox(ToggleButtonMixin, AbstractCheckBox):
 		self.on = val
 		send(self, 'click')
 
-class RadioButton(ToggleButtonMixin, AbstractRadioButton):
+class RadioButton(ToggleButtonBase, AbstractRadioButton):
 	_qt_class = QRadioButton
 
 	def _qt_click_handler(self):
-		if TMP_DBG: print 'in _qt_click_handler of: ', self._qt_comp
+		if DEBUG: print 'in _qt_click_handler of: ', self._qt_comp
 		val = self._qt_comp.isChecked()
-		if self.value == val:
+		if self._on == val:
 			return
-		elif self.group is not None:
-			for r_btn in self._group._items:
-				if r_btn is not self:
-					if DEBUG: print '|--> setting %s, with text "%s" to unchecked...' %(r_btn,r_btn._get_qt_text())
-					r_btn._qt_comp.setChecked(FALSE)
-		self.value = val
+		if self.group is not None:
+			self.group.value = self.value
 		send(self, 'click')
 
 ################################################################
 
-class TextMixin(ComponentMixin, AbstractTextField):
-	
+class TextBase(ComponentMixin, AbstractTextField):
+
+	def _backend_selection(self):
+		if self._qt_comp:
+			if self._qt_comp.hasMarkedText():
+				if DEBUG: print 'in _backend_selection of: ', self._qt_comp
+				text = self._backend_text()
+				mtxt = str(self._qt_comp.markedText())
+				start = text.find(mtxt)
+				end = start + len(mtxt)
+				if DEBUG: print 'returning => start: %s | end: %s' %(start,end)
+				return start,  end
+			else:
+				return 0, 0
+
 	def _backend_text(self):
 		if self._qt_comp:
 			return str(self._qt_comp.text())
@@ -213,12 +208,13 @@ class TextMixin(ComponentMixin, AbstractTextField):
 			self._qt_comp.setReadOnly(not self._editable)
 
 	def _update_model(self,ev):
-		self.model.value = str(self._qt_comp.text())
+		#self.model.value = str(self._qt_comp.text())
+		pass
 
 	def _get_qt_text(self):
-		return self._text
+		return QString(self._text)
 
-class TextField(TextMixin):
+class TextField(TextBase):
 	_qt_class = QLineEdit
 
 	def _ensure_events(self):
@@ -230,23 +226,12 @@ class TextField(TextMixin):
 			start, end = self._selection
 			self._qt_comp.setSelection(start, end-start)
 
-	def _backend_selection(self):
-		if self._qt_comp:
-			if self._qt_comp.hasMarkedText():
-				text = self._backend_text()
-				mtxt = str(self._qt_comp.markedText())
-				start = text.find(mtxt)
-				end = start + len(mtxt)
-				return start,  end
-			else:
-				return None
-
 	def _qt_key_press_handler(self, newText):
 		if DEBUG: print 'in _qt_key_pressed of: ', self._qt_comp
 		self._text = self._backend_text()
 		send(self, 'enterkey')
 
-class TextArea(TextMixin):
+class TextArea(TextBase):
 	_qt_class = QMultiLineEdit
 
 	def _ensure_events(self):
@@ -286,19 +271,6 @@ class TextArea(TextMixin):
 			#Exit hack...
 			#self._qt_comp.setSelection(srow, scol, erow, ecol)
 
-	def _backend_selection(self):
-		if self._qt_comp:
-			if self._qt_comp.hasMarkedText():
-				if DEBUG: print 'in _backend_selection of: ', self._qt_comp
-				text = self._backend_text()
-				mtxt = str(self._qt_comp.markedText())
-				start = text.find(mtxt)
-				end = start + len(mtxt)
-				if DEBUG: print 'returning start: %s & end: %s' %(start,end)
-				return start,  end
-			else:
-				return None
-
 	def _qt_key_press_handler(self):
 		if DEBUG: print 'in _qt_key_pressed of: ', self._qt_comp
 		send(self, 'enterkey')
@@ -311,7 +283,7 @@ class Frame(ComponentMixin, AbstractFrame):
 
 ################################################################
 
-class EventFilterMixin(QObject):
+class EventFilter(QObject):
 	_window_obj = None
 	
 	def __init__(self, parent):
@@ -319,8 +291,8 @@ class EventFilterMixin(QObject):
 		self._window_obj = wr.ref(parent)
 
 	def eventFilter(self, object, event):
-		if TMP_DBG: print 'in eventFilter of: ', self._window_obj()._qt_comp
-		if not event.type() in [QEvent.Resize]:
+		if DEBUG: print 'in eventFilter of: ', self._window_obj()._qt_comp
+		if not event.type() in [QEvent.Resize]: # More??
 			return 0
 		elif event.type() == QEvent.Resize:
 			self._window_obj()._qt_resize_handler(event)
@@ -352,7 +324,7 @@ class Window(ComponentMixin, AbstractWindow):
 
 	def _ensure_events(self):
 		if DEBUG: print 'in _ensure_events of: ', self._qt_comp
-		self._event_filter = EventFilterMixin(self)
+		self._event_filter = EventFilter(self)
 		self._qt_comp.installEventFilter(self._event_filter)
 		self._qt_comp.setMouseTracking(TRUE)
 
@@ -372,11 +344,14 @@ class Window(ComponentMixin, AbstractWindow):
 ################################################################
 
 class Application(AbstractApplication, QApplication):
+
 	def __init__(self, *argv):
-		if not argv: argv = list(argv)
 		AbstractApplication.__init__(self)
-		if not argv: QApplication.__init__(self,argv)
-		else: apply(QApplication.__init__,(self,)+argv)
+		if not argv:
+			argv = list(argv)
+			QApplication.__init__(self,argv)
+		else: 
+			apply(QApplication.__init__,(self,)+argv)
 		self.connect(qApp, SIGNAL('lastWindowClosed()'), qApp, SLOT('quit()'))
 
 	def _mainloop(self):
