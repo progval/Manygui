@@ -42,7 +42,7 @@ from anygui.Labels           import Label
 #from anygui.RadioButtons     import RadioButton
 #from anygui.RadioGroups      import RadioGroup
 from anygui.TextFields       import TextField
-#from anygui.TextAreas        import TextArea
+from anygui.TextAreas        import TextArea
 #from anygui.ListBoxes        import ListBox
 #from anygui.Models           import BooleanModel, ListModel, TextModel
 from anygui.Events           import *
@@ -60,6 +60,7 @@ __all__ = """
   Window
   Label
   TextField
+  TextArea
   any
   application
   backend

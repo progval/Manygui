@@ -7,6 +7,7 @@ __all__ = '''
   WindowWrapper
   LabelWrapper
   TextFieldWrapper
+  TextAreaWrapper
 
 '''.split()
 
@@ -88,7 +89,8 @@ class ComponentWrapper(Wrapper):
                 pass
             return
         parent = container.wrapper.widget
-        try: assert parent.isDummy()
+        try:
+            assert parent.isDummy()
         except (AttributeError, AssertionError):
             self.destroy()
             self.create(parent)
@@ -128,9 +130,9 @@ class TkTextMixin:
     """ Mixin that abstracts out all behavior needed to get
     selectable-but-not-editable behavior out of Tk text widgets.
     We bind all keystrokes, passing them through to the underlying
-    control when _editable is true, and ignoring all but select
-    and copy keystrokes when _editable is false. The mixed-in
-    class must provide an updateModel() method, called as a
+    control when editable is true, and ignoring all but select
+    and copy keystrokes when editable is false. The mixed-in
+    class must provide an updateProxy() method, called as a
     Tk event handler when focus leaves the control; and a
     setEditable() method, called from update(), that manages
     the self.editable property. """
@@ -141,7 +143,7 @@ class TkTextMixin:
         self.shift = 0
         self.editable = 1
         widget.bind("<Key>", self.keybinding)
-        widget.bind("<KeyRelease>",self.updateProxy)
+        widget.bind("<KeyRelease>",self.updateProxy) # Ensure all changes reach Proxy.
         widget.bind("<KeyPress-Control_L>", self.ctldown)
         widget.bind("<KeyRelease-Control_L>", self.ctlup)
         widget.bind("<KeyPress-Alt_L>", self.altdown)
@@ -188,7 +190,7 @@ class TkTextMixin:
             return "break"
 
     def insertbinding(self,ev):
-        # Overrides _keybinding for the Insert key.
+        # Overrides keybinding for the Insert key.
         if self.editable:
             return None
         if self.ctl:
@@ -211,11 +213,7 @@ class TextFieldWrapper(ComponentWrapper,TkTextMixin):
     def updateProxy(self,*args,**kws):
         # Inform proxy of text change by the user.
         self.proxy.rawModify(text=self.widget.get())
-        if self.widget.select_present():
-            start = self.widget.index('sel.first')
-            end = self.widget.index('sel.last')
-        else:
-            start = end = self.widget.index('insert')
+        start,end = self.getSelection()
         self.proxy.rawModify(selection=(start,end))
 
     def setText(self,text):
@@ -233,6 +231,103 @@ class TextFieldWrapper(ComponentWrapper,TkTextMixin):
 
     def setSelection(self,selection):
         self.widget.selection_range(*selection)
+
+    def getSelection(self):
+        if self.widget.select_present():
+            start = self.widget.index('sel.first')
+            end = self.widget.index('sel.last')
+        else:
+            start = end = self.widget.index('insert')
+        return start,end
+
+class ScrollableTextArea(Tkinter.Frame):
+
+    # Replacement for Tkinter.Text
+
+    _delegated_methods = """bind config cget get mark_names index delete insert
+    mark_set tag_add tag_remove tag_names configure""".split()
+
+    def __init__(self, *args, **kw):
+        Tkinter.Frame.__init__(self, *args, **kw)
+        
+        self._yscrollbar = Tkinter.Scrollbar(self)
+        self._yscrollbar.pack(side=Tkinter.RIGHT, fill=Tkinter.Y)
+
+        self._xscrollbar = Tkinter.Scrollbar(self, orient=Tkinter.HORIZONTAL)
+        self._xscrollbar.pack(side=Tkinter.BOTTOM, fill=Tkinter.X)
+        
+        self._textarea = Tkinter.Text(self,
+                                      yscrollcommand=self._yscrollbar.set,
+                                      xscrollcommand=self._xscrollbar.set)
+        self._textarea.pack(side=Tkinter.TOP, expand=Tkinter.YES, fill=Tkinter.BOTH)
+
+        self._yscrollbar.config(command=self._textarea.yview)
+        self._xscrollbar.config(command=self._textarea.xview)
+
+        for delegate in self._delegated_methods:
+            setattr(self, delegate, getattr(self._textarea, delegate))
+
+class TextAreaWrapper(ComponentWrapper,TkTextMixin):
+
+    def widgetFactory(self,*args,**kws):
+        theWidge=ScrollableTextArea(*args,**kws)
+        self.install_bindings(theWidge)
+        return theWidge
+
+    def getText(self):
+        return self.widget.get(1.0, Tkinter.END)[:-1] # Remove the extra newline. (Always?)
+
+    def _to_char_index(self, idx):
+        # This is no fun, but there doesn't seem to be an easier way than
+        # counting the characters in each line :-(   -- jak
+        txt = self.widget
+        idx = txt.index(idx)
+        line, col = idx.split(".")
+        line = int(line)
+        tlen = 0
+        for ll in range(1, line):
+            tlen += len(txt.get("%s.0"%ll, "%s.end"%ll))
+            tlen += 1
+        tlen += int(col)
+        return tlen
+
+    def getSelection(self):
+        try:
+            start = self.widget.index('sel.first')
+            end = self.widget.index('sel.last')
+        except Tkinter.TclError:
+            start = end = self.widget.index('insert')
+            # Convert to character positions...
+        # This could be more efficient if _to_char_index() took
+        # multiple indexes and computed them all at once.
+        start = self._to_char_index(start)
+        end = self._to_char_index(end)
+        return start, end
+
+    def setText(self,text):
+        disabled=0
+        if self.widget.cget('state') != Tkinter.NORMAL:
+            self.widget.config(state=Tkinter.NORMAL) # Make sure we can change the text
+            disabled=1
+        self.widget.delete(1.0, Tkinter.END)
+        self.widget.insert(1.0, text)
+        if disabled:
+            self.widget.config(state=Tkinter.DISABLED)
+
+    def setSelection(self,selection):
+        start, end = selection
+        self.widget.tag_remove('sel', '1.0', 'end')
+        self.widget.tag_add('sel', '1.0 + %s char' % start, '1.0 + %s char' % end)
+
+    def updateProxy(self,*args,**kws):
+        # Ugh, we have to do this on every keystroke! I think
+        # we may -really- need -some- kind of laziness.
+        self.proxy.rawModify(text=self.widget.get("1.0","end"))
+        start,end = self.getSelection()
+        self.proxy.rawModify(selection=(start,end))
+
+    def setEditable(self,editable):
+        self.editable=editable
 
 class FrameWrapper(ComponentWrapper):
 
@@ -350,7 +445,9 @@ class WindowWrapper(ComponentWrapper):
         self.widget.title(title)
 
     def setContainer(self, container):
-        pass
+        # Ensure contents are properly created.
+        for component in self.proxy.contents:
+            component.container = self.proxy
 
     def setVisible(self, visible):
         if visible: self.widget.deiconify()

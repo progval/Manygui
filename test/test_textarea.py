@@ -20,13 +20,13 @@ But they're cute, and they're cuddly, and they're ready to please.
 
 # FIXME: Change names -- text area used instead of label
 
-def init_field(event):
+def init_field(event=None):
     global ta, lbl
     ta.text = the_text
     ta.selection = (23,30)
     update_label()
 
-def update_label(event):
+def update_label(event=None):
     global ta, lbl
     sel = ta.selection
     text = ta.text
@@ -34,9 +34,11 @@ def update_label(event):
                '[' + text[sel[0]:sel[1]] + ']' + \
                 text[sel[1]:]
 
-ta = TextArea(size=(150,100))
+app = Application()
+
+ta = TextArea(width=150,height=100)
 ta.text = ''
-ta2 = TextArea(size=ta.size, editable=0)
+ta2 = TextArea(width=150,height=100, editable=0)
 ta2.text = 'Edit me... :P'
 lbl = TextArea(width=150, height=250, text='', editable=0)
 
@@ -45,8 +47,6 @@ link(update_btn, update_label)
 
 reset_btn = Button(width=50, height=30, text='Reset')
 link(reset_btn, init_field)
-
-app = Application()
 
 win = Window(title='TextArea test', width=400, height=670)
 app.add(win)
