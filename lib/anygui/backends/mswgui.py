@@ -11,19 +11,6 @@ import win32gui, win32con
 #    Actually, it seems that the arrow keys don't work here
 #    at all.
 
-#    test_place crashes upon initialisation:
-#    CHILDWINDOW not found 0x4000000
-#    CHILDWINDOW not found 0x3000000
-#    CHILDWINDOW not found 0x4000000
-#    CHILDWINDOW not found 0x3000000
-
-#    test_textarea has problems with setting the selection.
-#    (It doesn't when I press reset.)
-
-#    test_textfield has lots of "CHILDWINDOW not found"
-#    errors as well, and has the same selection problem.
-
-
 class ComponentMixin:
     # mixin class, implementing the backend methods
     _height = -1 # -1 means default size in wxPython
@@ -242,10 +229,6 @@ class TextField(ComponentMixin, AbstractTextField):
                  win32con.WS_CHILD | win32con.WS_BORDER
     _win_style_ex = win32con.WS_EX_CLIENTEDGE
 
-    def _backend_text(self):
-        if self._hwnd:
-            return win32gui.GetWindowText(self._hwnd)
-
     def _backend_selection(self):
         if self._hwnd:
             result = win32gui.SendMessage(self._hwnd,
@@ -256,7 +239,9 @@ class TextField(ComponentMixin, AbstractTextField):
             
     def _ensure_text(self):
         if self._hwnd:
-            win32gui.SetWindowText(self._hwnd, self._text)
+            if self._text != win32gui.GetWindowText(self._hwnd):
+                # avoid recursive updates
+                win32gui.SetWindowText(self._hwnd, self._text)
 
     def _ensure_selection(self):
         if self._hwnd:
@@ -291,20 +276,52 @@ class TextField(ComponentMixin, AbstractTextField):
         # lParam: handle of control (or NULL, if not from a control)
         # HIWORD(wParam): notification code
         # LOWORD(wParam): id of menu item, control, or accelerator
-        pass
+        if (wParam >> 16) == win32con.EN_CHANGE:
+            text = win32gui.GetWindowText(self._hwnd)
+            if text != self.model.value:
+                # avoid recursive updates
+                self.model.value = text
 
 class TextArea(TextField, AbstractTextArea):
     _win_style = TextField._win_style | win32con.ES_MULTILINE | win32con.ES_WANTRETURN
 
+    # XXX The only case that we override these methods
+    # is that we must convert CRLF into LF and vice versa.
+    # Maybe we should do this in TextField???
+
+    def _get_text(self):
+        # internal - call only with valid window handle
+        text = win32gui.GetWindowText(self._hwnd)
+        return self._text.replace('\r\n', '\n')
+
+    def _set_text(self, text):
+        # internal - call only with valid window handle
+        text = self._text.replace('\n', '\r\n')
+        win32gui.SetWindowText(self._hwnd, text)
+
     def _ensure_text(self):
         if self._hwnd:
-            text = self._text.replace('\n', '\r\n')
-            win32gui.SetWindowText(self._hwnd, text)
+            if self._get_text() != self.text:
+                self._set_text(text)
 
-    def _backend_text(self):
-        if self._hwnd:
-            text = win32gui.GetWindowText(self._hwnd)
-            return text.replace('\r\n', '\n')
+    def _get_msw_text(self):
+        # return the text required for creation
+        # XXX Correct? Or must we use self.model.value?
+        # maybe we shouldn't care at all, because IMO
+        # _ensure_text will be called later anyway?
+        # XXX XXX Currently NO: _ensure_text will NOT be called
+        # later!
+        return self._text.replace('\n', '\r\n')
+
+    def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
+        # lParam: handle of control (or NULL, if not from a control)
+        # HIWORD(wParam): notification code
+        # LOWORD(wParam): id of menu item, control, or accelerator
+        if (wParam >> 16) == win32con.EN_CHANGE:
+            text = self._get_text()
+            if text != self.model.value:
+                # avoid recursive updates
+                self.model.value = text
 
 ##################################################################
 
