@@ -12,7 +12,7 @@
 # by-bit comparison of each character.
 
 import sys
-from graycode import *
+#from graycode import *
 
 char2grayStr = { ' ':\
                  "0000"
