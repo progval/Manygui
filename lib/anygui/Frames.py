@@ -1,19 +1,8 @@
 from anygui.Components import AbstractComponent
 from types import TupleType, InstanceType, IntType, ListType
 from anygui.Exceptions import ArgumentError, UnimplementedMethod
+from anygui.Utils import flatten
 from anygui import Defaults
-
-def flatten(seq):
-    'Utility function used to flatten sequences'
-    try:
-        if len(seq) > 0:
-            seq[0]
-    except:
-        return [seq]
-    result = []
-    for item in seq:
-        result += flatten(item)
-    return result
 
 class AbstractFrame(AbstractComponent, Defaults.Frame):
 
