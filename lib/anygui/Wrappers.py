@@ -53,7 +53,7 @@ class AbstractWrapper:
 
     widget = None # @@@ was DummyWidget()
 
-    def __init__(self, proxy):
+    def __init__(self, proxy, _test=0):
         """
         Store the proxy and perform general initialisation.
 
@@ -80,9 +80,10 @@ class AbstractWrapper:
 
         self.constraints = []
 
-        application().manage(self)
-        self.inMainLoop = 0
-        self.prod() #@@@ ?
+        if not _test:
+            application().manage(self)
+            self.inMainLoop = 0
+            self.prod() #@@@ ?
 
     def setAggregateSetter(self, name, signature):
         """
