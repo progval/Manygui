@@ -6,6 +6,8 @@ that lists the attributes which need to be set explicitly per instance
 (currently, the latter defaults to "all defaulted attributes").
 """
 
+# FIXME: Change the default mechanism (i.e. state = {...})
+
 # For the Frame.place method:
 
 direction = 'right'

@@ -53,10 +53,10 @@ class Attrib:
     # for multiple arguments.
 
     def __init__(self, *args, **kwds):
-        # Default "inheritance":
-        self.state = self.state.copy()
-        self.set(*args, **kwds) # FIXME: Should sync *entire* state, including defaults (but preferrably without
-                                # a second call to sync()...
+        defaults = getattr(self, 'state', {})
+        self.state = defaults.copy()
+        self.rawSet(*args, **kwds)
+        self.sync()
 
     def __setattr__(self, name, value):
         if name[0]!='_':
@@ -100,7 +100,7 @@ class Attrib:
     def modify(self, *args, **kwds):
         return self._set_or_mod(self.__class__.modattr, *args, **kwds)
 
-    # FIXME: Add rawModify...
+    # FIXME: Add rawModify and rawSet
 
     def modattr(self, name, value):
         if name[0]!='_':
