@@ -2,6 +2,16 @@
 from anygui.backends import *
 __all__ = anygui.__all__
 
+import atexit
+
+def _cleanup():
+    try:
+        scr_curses.scr_quit()
+    except:
+        pass
+
+atexit.register(_cleanup)
+
 import anygui.backends.txtutils.scr_curses as scr_curses
 scr_curses.scr_init()
 import anygui.backends.txtutils.txtgui as txtgui
