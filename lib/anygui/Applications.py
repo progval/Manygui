@@ -26,7 +26,10 @@ class AbstractApplication(Attrib):
             
 
     def remove(self, win):
-        self._windows.remove(win)
+        try:
+            self._windows.remove(win)
+        except: pass
+	# FIXME: Temporary(?) fix to cover problem in mswgui _wndproc
         # FIXME: Destroy the window?
 
     #def _add_window(self, win):
