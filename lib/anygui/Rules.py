@@ -38,7 +38,7 @@ class RuleEngine:
                     self.fire(name, vals)
                     del undef[name]
                     more = 1
-        assert not undef
+        return undef.keys()
     def fire(self, name, scope):
         scope[name] = eval(self.rules[name], scope)
 

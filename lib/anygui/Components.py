@@ -39,5 +39,4 @@ class Component(Proxy, DefaultEventMixin):
         may also include 'y', but that doesn't affect the sync. If
         these requirements are broken, a SyncError is raised.
         """
-        # Use Rules.RuleEngine
-        raise NotImplementedError
+        # TODO: Use Rules.RuleEngine
