@@ -10,9 +10,27 @@ class LayoutData:
     pass
 
 class LayoutManager:
-    """ Base class for layout managers. Subclasses must implement at
-    least add() and resized(). The dw and dh arguments to resized are
-    not well-defined at this point, so don't rely on them. """
+
+    """ Base class for layout managers. Subclasses should implement at
+    least the resized() method, which is called when self._container
+    changes size. The resized() method should simply assign
+    appropriate geometry values to the self._container._contents. The
+    dw and dh arguments to resized() are not well-defined at this
+    point, so don't rely on them.
+
+    You may also implement, if desired:
+
+    add_components(items,options=None,**kws):
+        to be informed when items are added to self._container.
+        <items> may be either a single component or a
+        list; options is an Option object that the LayoutManager may
+        interpret however it pleases; **kws are keyword arguments the
+        LayoutManager may interpret as it pleases.
+
+    remove_component(item):
+        to be informed when an item is removed from self._container.
+
+    """
 
     def __init__(self):
         self._container = None
@@ -34,16 +52,16 @@ class LayoutManager:
             self.remove_component(item)
 
     def configure(self,**kws):
-        raise UnimplementedMethod(self,"resized")
+        pass
 
     def add_components(self,*items,**kws):
-        raise UnimplementedMethod(self,"add")
+        pass
 
     def remove_component(self,item):
         pass
 
     def resized(self,dw,dh):
-        raise UnimplementedMethod(self,"resized")
+        pass
 
 ##############################################################################
 
@@ -54,12 +72,6 @@ class CircleManager(LayoutManager):
 
     def __init__(self):
         LayoutManager.__init__(self)
-
-    def add_components(self,*items,**kwds):
-        # Here, if there were any per-component bookkeeping to do,
-        # we would do it, and maybe put some data in each item's
-        # layout_data.
-        pass
 
     def resized(self,dw,dh):
         # Here we just compute where all the container's contents
