@@ -2,6 +2,26 @@
 import re
 name_pat = re.compile('[a-zA-Z_][a-zA-Z_0-9]*')
 
+class Rule:
+    
+    def __init__(self, ruleString):
+        assert '"' not in ruleString and "'" not in ruleString
+        name, expr = ruleString.split('=', 1)
+        self.name = name.strip()
+        self.expr = compile(expr.strip(), '', 'eval')
+        self.deps = name_pat.findall(expr)
+
+    def fire(self, scope):
+        name = self.name
+        scope[name] = eval(self.expr, scope)        
+
+# TODO: - Add "rule checks" -- if a rule is satisfied, dependencies
+#         are irrelevant.
+#       - Add iteration mechanism to make rule effects propagate
+#         through several levels -- not just one
+#       - Refactor adjust()
+#       - Write separate test suite
+
 class RuleEngine:
     """
     A simple rule engine which can maintain relationships between a
@@ -10,21 +30,15 @@ class RuleEngine:
     
     def __init__(self):
         self.rules = {}
-        self.deps = {}
         self.is_dep = {}
         
-    def addRule(self, rule):
-        assert '"' not in rule and "'" not in rule
-        name, expr = rule.split('=', 1)
-        name = name.strip()
-        expr = expr.strip()
-        deps = name_pat.findall(expr)
-        for dep in deps: self.is_dep[dep] = 1
-        self.deps[name] = deps
-        self.rules[name] = compile(expr, '', 'eval')
+    def addRule(self, ruleString):
+        rule = Rule(ruleString)
+        for dep in rule.deps: self.is_dep[dep] = 1
+        self.rules.setdefault(rule.name, []).append(rule) # Ahem... ;)
         
     def adjust(self, vals, defs):
-        undef = self.deps.copy()
+        undef = self.rules.copy() # Hm. Only need a set of the keys...
         dirty = 0
         for name in defs:
             if self.is_dep[name]: dirty = 1
@@ -38,20 +52,21 @@ class RuleEngine:
         while undef and more:
             more = 0
             for name in undef.keys():
-                for dep in self.deps[name]:
-                    if undef.has_key(dep):
+                for rule in self.rules[name]:
+                    for dep in rule.deps:
+                        if name == 'geometry': print dep
+                        if undef.has_key(dep):
+                            break
+                    else:
+                        rule.fire(vals)
+                        del undef[name]
+                        more = 1
                         break
-                else:
-                    self.fire(name, vals)
-                    del undef[name]
-                    more = 1
         return undef.keys()
-    
-    def fire(self, name, scope):
-        scope[name] = eval(self.rules[name], scope)
 
 if __name__ == '__main__':
     eng = RuleEngine()
+    # Hm. What is the "proper" rule set?
     eng.addRule('position = x, y')
     eng.addRule('x = position[0]')
     eng.addRule('y = position[1]')
@@ -59,20 +74,24 @@ if __name__ == '__main__':
     eng.addRule('width = size[0]')
     eng.addRule('height = size[1]')
     eng.addRule('geometry = position + size')
-    # How to add reverse here without overriding existent rule?
-    # Must have multiple rules for each name... :I
-    #eng.addRule('position = geometry[0], geometry[1]')
-    #eng.addRule('size = geometry[2], geometry[3]')
-
-    # TODO: Add "rule checks" -- if a rule is satisfied, dependencies
-    # are irrelevant.
+    eng.addRule('geometry = x, y, width, height')
+    eng.addRule('position = geometry[0], geometry[1]')
+    eng.addRule('size = geometry[2], geometry[3]')
 
     vals = {}
     vals['x'] = 10
     vals['y'] = 20
+    vals['width'] = 9999
+    vals['height'] = 9999
+    vals['size'] = 9999, 9999
     vals['position'] = 10, 10
+    vals['geometry'] = 10, 10, 9999, 9999
     eng.adjust(vals, ['y', 'x']) # 'x' shouldn't be necessary... Use value checks
-    print vals['position']
+    print vals['position'], vals['geometry'] # Geometry isn't set properly here...
     vals['position'] = 42, 42
     eng.adjust(vals, ['position'])
-    print (vals['x'], vals['y'])
+    print (vals['x'], vals['y']), vals['geometry']
+
+    vals['geometry'] = 1, 2, 3, 4
+    eng.adjust(vals, ['geometry'])
+    print (vals['x'], vals['y'], vals['width'], vals['height']), vals['position']+vals['size']
