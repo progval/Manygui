@@ -8,16 +8,10 @@ from gtk import *
 import gtk
 
 class ComponentMixin:
-    # mixin class, implementing the backend methods
-    # FIXME: Defaults...
-    #_height = -1
-    #_width = -1
-    #_x = -1
-    #_y = -1
-
     _gtk_comp = None
     _gtk_id = None
     _gtk_style = 0
+    _connected = 0
     
     def _is_created(self):
         return self._gtk_comp is not None
@@ -39,8 +33,8 @@ class ComponentMixin:
 
     def _ensure_geometry(self):
         if self._gtk_comp:
-            self._gtk_comp.set_uposition(self._x, self._y)
-            self._gtk_comp.set_usize(self._width, self._height)
+            self._gtk_comp.set_uposition(int(self._x), int(self._y))
+            self._gtk_comp.set_usize(int(self._width), int(self._height))
 
     def _ensure_visibility(self):
         if self._gtk_comp:
@@ -51,19 +45,16 @@ class ComponentMixin:
 
     def _ensure_enabled_state(self):
         if self._gtk_comp:
-            self._gtk_comp.set_sensitive(self._enabled)
+            self._gtk_comp.set_sensitive(int(self._enabled))
 
     def _ensure_destroyed(self):
         if self._gtk_comp:
             self._gtk_comp.destroy()
             self._gtk_comp = None
+            self._connected = 0
 
     def _get_gtk_text(self):
-        # helper function for creation
-        # returns the text required for creation.
-        # This may be the _text property, or _title, ...,
-        # depending on the subclass
-        return self._text
+        return str(self._text)
 
     def _ensure_text(self):
         pass
@@ -71,73 +62,69 @@ class ComponentMixin:
 ################################################################
 
 class Label(ComponentMixin, AbstractLabel):
-    #_width = 100 # auto ?
-    #_height = 32 # auto ?
     _gtk_class = GtkLabel
-    _text = "GtkLabel"
 
     def _ensure_created(self):
-        self._init_args = (self._text,)
+        self._init_args = (str(self._text),)
         return ComponentMixin._ensure_created(self)
 
     def _ensure_text(self):
         if self._gtk_comp:
-            self._gtk_comp.set_text(self._text)
+            self._gtk_comp.set_text(str(self._text))
 
 ################################################################
 
 class Button(ComponentMixin, AbstractButton):
     _gtk_class = GtkButton
-    _text = "GtkButton"
-    _event_connected = 0
 
     def _ensure_created(self):
-        self._init_args = (self._text,)
+        self._init_args = (str(self._text),)
         ret = ComponentMixin._ensure_created(self)
-        if ret:
-            self._event_connected = 0
         return ret
 
     def _ensure_events(self):
-        if self._gtk_comp and not self._event_connected:
+        if self._gtk_comp and not self._connected:
             self._gtk_comp.connect("clicked", self._gtk_clicked)
-            self._event_connected = 1
+            self._connected = 1
+
+    def _ensure_text(self):
+        if self._gtk_comp:
+            self._gtk_comp.children()[0].set_text(str(self._text))
 
     def _gtk_clicked(self, *args):
-        #self.do_action()
         send(self, 'click')
 
 class ToggleButtonMixin(ComponentMixin):
     def _ensure_state(self):
         if self._gtk_comp:
-            self._gtk_comp.set_active(self.on)
+            self._gtk_comp.set_active(int(self._on))
+
+    def _ensure_events(self):
+        if self._gtk_comp and not self._connected:
+            self._gtk_comp.connect("toggled", self._gtk_toggled)
+            self._connected = 1
 
     def _gtk_toggled(self, *args):
         val = self._gtk_comp.get_active()
-        if val == self.on:
+        if val == int(self._on):
             return
         self.modify(on=val)
         #self.do_action()
         send(self, 'click')
 
+    def _ensure_text(self):
+        if self._gtk_comp:
+            self._gtk_comp.children()[0].set_text(str(self._text))
+
 class CheckBox(ToggleButtonMixin, AbstractCheckBox):
     _gtk_class = GtkCheckButton
-    _text = "GtkCheckBox"
-    _event_connected = 0
 
     def _ensure_created(self):
-        self._init_args = (self._text,)
+        self._init_args = (str(self._text),)
         return ComponentMixin._ensure_created(self)
-
-    def _ensure_events(self):
-        if self._gtk_comp and not self._event_connected:
-            self._gtk_comp.connect("toggled", self._gtk_toggled)
-            self._event_connected = 1
 
 class RadioButton(ToggleButtonMixin, AbstractRadioButton):
     _gtk_class = GtkRadioButton
-    _text = "GtkRadioButton"
-    _event_connected = 0
 
     def _ensure_created(self):
         if self._group and len(self._group._items) > 1:
@@ -146,24 +133,17 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
                     break
             else:
                 raise InternalError(self, "Couldn't find non-self group item!")
-            self._init_args = (item._gtk_comp, self._text)
+            self._init_args = (item._gtk_comp, str(self._text))
         else:
-            self._init_args = (None, self._text)
+            self._init_args = (None, str(self._text))
         return ComponentMixin._ensure_created(self)
-
-    def _ensure_events(self):
-        if self._gtk_comp and not self._event_connected:
-            self._gtk_comp.connect("toggled", self._gtk_toggled)
-            self._event_connected = 1
 
     def _gtk_toggled(self, *args):
         val = self._gtk_comp.get_active()
-        if val == self.on:
+        if val == int(self._on):
             return
         self.modify(on=val)
-        if self.on:
-            # XXX: Hack!
-            #self.do_action()
+        if int(self._on):
             if self.group is not None:
                 self.group.modify(value=self.value)
             send(self, 'click')
@@ -180,7 +160,6 @@ class ScrollableListBox(GtkScrolledWindow):
 
 class ListBox(ComponentMixin, AbstractListBox):
     _gtk_class = ScrollableListBox
-    _event_connected = 0
 
     def _ensure_created(self):
         self._init_args = ()
@@ -197,9 +176,9 @@ class ListBox(ComponentMixin, AbstractListBox):
                 self._gtk_comp._listbox.append([item])
 
     def _ensure_events(self):
-        if self._gtk_comp and not self._event_connected:
+        if self._gtk_comp and not self._connected:
             self._gtk_comp._listbox.connect("select_row", self._row_selected)
-            self._event_connected = 1
+            self._connected = 1
 
     def _row_selected(self, *args):
         #self.do_action()
@@ -212,7 +191,6 @@ class ListBox(ComponentMixin, AbstractListBox):
 
 class TextField(ComponentMixin, AbstractTextField):
     _gtk_class = GtkEntry
-    _event_connected = 0
     _ignore_changed = 0
 
     def _ensure_created(self):
@@ -222,7 +200,7 @@ class TextField(ComponentMixin, AbstractTextField):
     def _ensure_text(self):
         if self._gtk_comp:
             self._ignore_changed = 1
-            self._gtk_comp.set_text(self._text)
+            self._gtk_comp.set_text(str(self._text))
             self._ignore_changed = 0
 
     def _ensure_selection(self):
@@ -232,20 +210,20 @@ class TextField(ComponentMixin, AbstractTextField):
 
     def _ensure_editable(self):
         if self._gtk_comp:
-            self._gtk_comp.set_editable(self._editable)
+            self._gtk_comp.set_editable(int(self._editable))
 
     def _ensure_events(self):
-        if self._gtk_comp and not self._event_connected:
+        if self._gtk_comp and not self._connected:
             self._gtk_comp.connect("activate", self._entry_activated)
             # XXX, currently updates on any change in the textfield.
-            # Perhaps to CPU intensive?
+            # Perhaps too CPU intensive?
             self._gtk_comp.connect("changed", self._entry_changed)
-            self._event_connected = 1
+            self._connected = 1
 
     def _backend_selection(self):
         if self._gtk_comp:
-            start, end = self._gtk_comp.selection_start_pos, \
-                        self._gtk_comp.selection_end_pos
+            start, end = int(self._gtk_comp.selection_start_pos), \
+                        int(self._gtk_comp.selection_end_pos)
             if start > end:
                 return end, start
             else:
@@ -253,7 +231,7 @@ class TextField(ComponentMixin, AbstractTextField):
 
     def _backend_text(self):
         if self._gtk_comp:
-            return self._gtk_comp.get_text()
+            return str(self._gtk_comp.get_text())
 
     def _entry_activated(self, *args):
         #self.do_action()
@@ -273,7 +251,7 @@ class ScrollableTextArea(GtkScrolledWindow):
 
 class TextArea(ComponentMixin, AbstractTextArea):
     _gtk_class = ScrollableTextArea
-    _event_connected = 0
+    _connected = 0
     _ignore_changed = 0
 
     def _ensure_created(self):
@@ -282,20 +260,20 @@ class TextArea(ComponentMixin, AbstractTextArea):
 
     def _ensure_text(self):
         if self._gtk_comp:
-            if self._text != self._backend_text():
+            if str(self._text) != self._backend_text():
                 self._ignore_changed = 1
                 p = self._gtk_comp._textarea.get_point()
                 self._gtk_comp._textarea.freeze()
                 self._gtk_comp._textarea.set_point(0)
                 self._gtk_comp._textarea.delete_text(0, -1)
-                self._gtk_comp._textarea.insert_defaults(self._text)
+                self._gtk_comp._textarea.insert_defaults(str(self._text))
                 self._gtk_comp._textarea.set_point(p)
                 self._gtk_comp._textarea.thaw()
                 self._ignore_changed = 0
 
     def _ensure_editable(self):
         if self._gtk_comp:
-            self._gtk_comp._textarea.set_editable(self._editable)
+            self._gtk_comp._textarea.set_editable(int(self._editable))
 
     def _ensure_selection(self):
         if self._gtk_comp:
@@ -303,16 +281,16 @@ class TextArea(ComponentMixin, AbstractTextArea):
             self._gtk_comp._textarea.select_region(start, end)
 
     def _ensure_events(self):
-        if self._gtk_comp and not self._event_connected:
+        if self._gtk_comp and not self._connected:
             # XXX, currently updates on any change in the textfield.
-            # Perhaps to CPU intensive?
+            # Perhaps too CPU intensive?
             self._gtk_comp._textarea.connect("changed", self._text_changed)
-            self._event_connected = 1
+            self._connected = 1
 
     def _backend_selection(self):
         if self._gtk_comp:
-            start, end = self._gtk_comp._textarea.selection_start_pos, \
-                        self._gtk_comp._textarea.selection_end_pos
+            start, end = int(self._gtk_comp._textarea.selection_start_pos), \
+                        int(self._gtk_comp._textarea.selection_end_pos)
             if start > end:
                 return end, start
             else:
@@ -321,7 +299,7 @@ class TextArea(ComponentMixin, AbstractTextArea):
     def _backend_text(self):
         if self._gtk_comp:
             end = self._gtk_comp._textarea.get_length()
-            return self._gtk_comp._textarea.get_chars(0, end)
+            return str(self._gtk_comp._textarea.get_chars(0, end))
 
     def _text_changed(self, *args):
         if not self._ignore_changed:
@@ -332,18 +310,14 @@ class TextArea(ComponentMixin, AbstractTextArea):
 class Frame(ComponentMixin, AbstractFrame):
     _gtk_class = GtkLayout
     _visible = 0
-
-    def _ensure_created(self):
-        self._init_args = ()
-        return ComponentMixin._ensure_created(self)
+    _init_args = ()
 
     def _gtk_add(self, comp):
-        self._gtk_comp.put(comp._gtk_comp, comp._x, comp._y)
+        self._gtk_comp.put(comp._gtk_comp, int(comp._x), int(comp._y))
 
 ################################################################
 
 class Window(ComponentMixin, AbstractWindow):
-
     _gtk_class = GtkWindow
     _gtk_style = 0
 
@@ -353,9 +327,6 @@ class Window(ComponentMixin, AbstractWindow):
             self._gtk_container = GtkLayout()
             self._gtk_comp.add(self._gtk_container)
             self._gtk_container.show()
-            self._ensure_geometry()
-            self._ensure_title()
-            self._ensure_visibility()
             return 1
         return 0
 
@@ -364,19 +335,29 @@ class Window(ComponentMixin, AbstractWindow):
 
     def _ensure_title(self):
         if self._gtk_comp:
-            self._gtk_comp.set_title(self._title)
+            self._gtk_comp.set_title(str(self._title))
 
     def _gtk_close_handler(self, *args):
         global _app
         self._gtk_comp.destroy()
         self.destroy()
         _app._window_deleted()
+    
+    def _gtk_resize_handler(self, *args):
+        w = self._qt_comp.width()
+        h = self._qt_comp.height()
+        dw = w - self._width
+        dh = h - self._height
+        #self.modify(width=w, height=h)
+        self._width = w
+        self._height = h
+        self.resized(dw, dh)
 
     def _get_gtk_text(self):
-        return self._title
+        return str(self._title)
 
     def _gtk_add(self, comp):
-        self._gtk_container.put(comp._gtk_comp, comp._x, comp._y)
+        self._gtk_container.put(comp._gtk_comp, int(comp._x), int(comp._y))
 
 ################################################################
 
@@ -394,23 +375,6 @@ class Application(AbstractApplication):
         mainloop()
 
 ################################################################
-
-class factory:
-    _map = {'Window': Window,
-            'Button': Button,
-            'CheckBox': CheckBox,
-            'RadioButton': RadioButton,
-            'RadioGroup': RadioGroup,
-            'Application': Application,
-            'Label': Label,
-            'ListBox': ListBox,
-            'TextField': TextField,
-            'TextArea': TextArea,
-            'Frame': Frame,
-            }
-    def get_class(self, name):
-        return self._map[name]
-
 # Local Variables:
 # compile-command: "pychecker -s gtkgui.py"
 # End:
