@@ -27,6 +27,13 @@ Tentative release date: Mid-December, 2001
 * _ensure_events should be called by the backends, and not
   by the front-end
 
+* Decide whether programmatic changes to widgets (e.g. setting
+  the selection of a ListBox) should generate the same events
+  as when these changes are caused by the user
+
+* Make Frames invisible when they are add'ed until their
+  components have been laid out
+
 Objectives for version 0.2:
 ---------------------------
 Tentative release date: February 28th, 2002
@@ -67,9 +74,6 @@ Tentative release date: February 28th, 2002
 
 * Change add() signature?
 
-* Decide whether programmatic changes to widgets (e.g. setting
-  the selection of a ListBox) should generate the same events
-  as when these changes are caused by the user
 
 Longer term goals:
 ------------------
