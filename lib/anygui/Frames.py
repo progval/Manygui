@@ -12,20 +12,6 @@ class Frame(Component, Defaults.Frame):
         Component.__init__(self, *args, **kw)
         self._layout = None
         self.layout = Placer()
-
-    def ensure_created(self):
-        if self._ensure_created():
-            for item in self._contents:
-                item.ensure_created()
-                # Redundant:
-                #if item.ensure_created():
-                #    item._finish_creation()
-            self._finish_creation()
-            return 1
-        return 0
-
-    def _get_contents(self):
-        return tuple(self._contents)
         
     def add(self,items,options=None,**kws):
         """ Add the given items to this container, passing the items and
@@ -70,24 +56,24 @@ class Frame(Component, Defaults.Frame):
         except:
             pass
 
-    def _add(self, comp):
-        self._contents.append(comp)
+    #def _add(self, comp):
+    #    self._contents.append(comp)
 
-    def _remove(self, comp):
-        try:
-            self._contents.remove(comp)
-        except ValueError:
-            pass
+    #def _remove(self, comp):
+    #    try:
+    #        self._contents.remove(comp)
+    #    except ValueError:
+    #        pass
 
-    def _set_layout(self,lo):
-        if self._layout:
-            self._layout._container = None
-            ct = self._contents
-            for item in ct:
-                #self._remove(item)
-                self.remove(item)
-        self._layout = lo
-        lo._container = self
+    #def _set_layout(self,lo):
+    #    if self._layout:
+    #        self._layout._container = None
+    #        ct = self._contents
+    #        for item in ct:
+    #            #self._remove(item)
+    #            self.remove(item)
+    #    self._layout = lo
+    #    lo._container = self
 
-    def _get_layout(self):
-        return self._layout
+    #def _get_layout(self):
+    #    return self._layout
