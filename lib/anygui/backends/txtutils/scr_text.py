@@ -73,10 +73,10 @@ def erase(x,y,w,h):
     y -= _oy
     #dbg('erase %s,%s,%s,%s'%(x,y,w,h))
     global _scrbuf, _under_curs
-    x = max(0,x)
     ex = min(_xsize,x+w)
-    y = max(y,0)
+    x = max(0,x)
     ey = min(_ysize,y+h)
+    y = max(y,0)
     if ex <= x: return
     if ey <= y: return
     w = ex-x

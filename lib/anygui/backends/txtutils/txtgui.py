@@ -4,6 +4,7 @@ import sys
 
 from anygui.backends import *
 from anygui.Exceptions import Error
+from anygui.Utils import log
 
 # Some useful event codes.
 DOWN_ARROW=258
@@ -430,8 +431,8 @@ class ComponentMixin:
 
     def _ensure_geometry(self):
         ##_scr.dbg("Ensuring geometry",self.geometry,self)
-        _refresh_all()
-        #self._redraw()
+        #_refresh_all()
+        self._redraw()
 
     def _ensure_visibility(self):
         self._redraw()
@@ -993,6 +994,8 @@ class TextArea(TextMixin, AbstractTextArea):
 class Frame(ContainerMixin, AbstractFrame):
 
     _gets_focus = 0
+    _texty = 0
+    _text = ""
 
     def __init__(self,*args,**kws):
         ContainerMixin.__init__(self,*args,**kws)
@@ -1230,7 +1233,6 @@ _inithelp = 0
 # Character escape sequences, and the events we transform them
 # into.
 _escape_sequence_map = {
-    (LEFT_BRACKET,):None,
     (LEFT_BRACKET,65):UP_ARROW,
     (LEFT_BRACKET,66):DOWN_ARROW,
     (LEFT_BRACKET,67):RIGHT_ARROW,
@@ -1243,9 +1245,6 @@ _escape_sequence_map = {
 
     (ord('?'),):HELP_EVENT,
 
-    (ord('q'),):None,
-    (ord('q'),ord('u')):None,
-    (ord('q'),ord('u'),ord('i')):None,
     (ord('q'),ord('u'),ord('i'),ord('t')):QUIT_EVENT,
 
     (ord('r'),):REFRESH_EVENT,
@@ -1262,6 +1261,10 @@ _escape_sequence_map = {
     (ord('e'),):SELECT_END_EVENT,
 
     }
+
+for seq in _escape_sequence_map.keys():
+    for i in range(1,len(seq)):
+        _escape_sequence_map[seq[:i]] = None
 
 class Application(AbstractApplication):
     def __init__(self):
@@ -1460,6 +1463,7 @@ class Application(AbstractApplication):
                 self._move_to_top(win)
 
     def _move_to_top(self,win):
+        if self._windows[-1] == win: return
         self._windows.remove(win)
         self._windows.append(win)
         _refresh_all()

@@ -33,10 +33,10 @@ def erase(x,y,w,h):
     #dbg("Erasing %s,%s,%s,%s"%(x,y,w,h))
     x-=_ox
     y-=_oy
-    x = max(0,x)
     ex = min(_xsize,x+w)
-    y = max(y,0)
+    x = max(0,x)
     ey = min(_ysize,y+h)
+    y = max(y,0)
     if ex <= x: return
     if ey <= y: return
     line = ' '*(ex-x)
@@ -65,6 +65,7 @@ def refresh():
     
 def erase_all():
     _cur_scr.erase()
+    _cur_scr.refresh()
     
 def scr_quit():
     global _cur_scr, _inited
