@@ -131,6 +131,8 @@ Longer term goals:
 
 * Add toolbars (button bars) with menu shortcuts etc.
 
+* Add PyKDE backend...
+
 Smaller issues:
 ---------------
 
