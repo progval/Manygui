@@ -107,7 +107,7 @@ class Proxy(Attrib):
         
         # ==== MODEL SUPPORT ==== #
         state = self._partialState(*names,**kwds)
-        for prop in state:
+        for prop in state.keys():
             try:
                 model = self._installedModels[prop]
                 # if state[prop] is not the model, this means that rawSet
