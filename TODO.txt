@@ -31,6 +31,10 @@ Tentative release date: Mid-December, 2001
 * Make passive attributes (like text selection) active
   through basic event handling (Move to 0.2?)
 
+* Make send(foo) send out the default event type (e.g. 'click')
+  in addition to 'default', just as the symmetric case (e.g. send(btn,
+  'click') will send a 'default' event).
+
 Objectives for version 0.2:
 ---------------------------
 Tentative release date: February 28th, 2002
@@ -49,7 +53,9 @@ Tentative release date: February 28th, 2002
   internal or external names? A standard should be decided on.
 
 * Fix the relationship btw. size, position, and geometry wrt.
-  MVC etc.
+  MVC etc. This should be done by making size, position, and geometry
+  ordinary attributes, and synchronise them with x, y, width, and
+  height through refresh().
 
 * Adjust defaults, and improve window staggering
   (needs a mechanism to find the top window)
@@ -74,6 +80,10 @@ Tentative release date: February 28th, 2002
 * Add a Canvas widget for full graphics support
 
 * Add an optional status bar to Window
+
+* Create a Container mixin for add() and remove(), and either a
+  contents or items attribute. (With items it could be used with
+  ListBox too, giving the possibility of adding and removing items...)
 
 * Change add() signature?
 
@@ -124,7 +134,5 @@ Smaller issues:
 * Add support for borders?
 
 * Add .txt endings to README etc.
-
-* Create a Container mixin for add() and remove() methods?
 
 * Add a linkMethods (or something) function for callback support?
