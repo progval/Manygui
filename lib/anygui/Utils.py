@@ -1,5 +1,7 @@
 'Anygui utilities.'
 
+import sys
+
 # To be phased out with the place() method
 def flatten(seq):
     '''Flatten a sequence. If seq is not a sequence, return [seq].
@@ -49,4 +51,31 @@ def log(*items):
 def setLogFile(fileobj):
     _logger.setLogFile(fileobj)
     
+_jython = sys.platform[:4] == 'java'
+
+if _jython:
+    import java
+    generic_hash = java.lang.System.identityHashCode
+    del java
+else:
+    generic_hash = id
     
+class IdentityStack:
+        def __init__(self):
+            self._stk = []
+
+        def pop(self):
+            self._stk.pop()
+
+        if _jython:
+            def append(self,obj):
+                self._stk.append(obj)
+            def __contains__(self,obj):
+                for cand in self._stk:
+                    if cand is obj: return 1
+                return 0
+        else:
+            def append(self,obj):
+                self._stk.append(id(obj))
+            def __contains__(self,obj):
+                return id(obj) in self._stk

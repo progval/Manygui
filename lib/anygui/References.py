@@ -3,6 +3,8 @@ import UserList, UserDict, sys, types
 
 weakref = None
 
+from Utils import generic_hash
+
 # Possible additions:
 # - Add callbacks to CallableReference
 # - Reimplement RefValueList
@@ -24,11 +26,16 @@ def is_callable(obj):
     except:
         return 0
 
+def ref_is(ref1, ref2):
+    if ref1 is ref2: return 1
+    o1 = ref1()
+    o2 = ref2()
+    if o1 is None or o2 is None: return 0
+    return o1 is o2
+
 class Hashable:
     def __hash__(self):
         return self.hash
-    def __cmp__(self, other):
-        return cmp(self.hash, other.hash)
 
 class Reference(Hashable):
     def callback(self, obj):
@@ -38,9 +45,11 @@ class Reference(Hashable):
     def __init__(self, obj):
         self.obj = self.ref(obj, self.callback)
         self.callbacks = []
-        self.hash = id(obj)
+        self.hash = generic_hash(obj)
     def __call__(self):
         return self.deref(self.obj)
+    def __eq__(self,other):
+        return ref_is(self, other)
 
 class WeakReference(Reference):
     def ref(self, obj, cb):
@@ -92,13 +101,13 @@ class CallableReference(Hashable):
     def __init__(self, func, weak):
         obj, func = unwrap(func)
 
+        self.hash = hash((obj, func))
+
         if obj is not None:
             obj = ref(obj, weak, plain=1)
         self.obj = obj
         
         self.func = ref(func, weak, plain=1)
-        
-        self.hash = hash((obj, func))
 
     def is_dead(self):
         return self.obj is not None and self.obj() is None \
@@ -110,6 +119,10 @@ class CallableReference(Hashable):
         if obj is not None: obj = obj()
         func = self.func()
         return CallableWrapper(obj, func)
+
+    def __eq__(self,other):
+        return (ref_is(self.obj,other.obj) and
+                ref_is(self.func,self.func))
 
 class RefKeyDictionary(UserDict.UserDict):
 

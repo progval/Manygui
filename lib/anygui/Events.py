@@ -1,6 +1,5 @@
 
-''' Event framework for Anygui. For more information, see Anygui
-    IRFC 0010 at http://anygui.sf.net/irfc.
+''' Event framework for Anygui.
 
     Magnus Lie Hetland 2001-11-26
 '''
@@ -26,7 +25,8 @@ __all__ = '''
 import time
 from References import ref, mapping
 registry = mapping()
-source_stack = []
+from Utils import IdentityStack
+source_stack = IdentityStack()
 
 class Internal: pass
 any  = Internal()
@@ -49,7 +49,14 @@ def link(*args, **kwds):
         registry[s] = {}
     if not registry[s].has_key(event):
         registry[s][event] = []
-    if not h in registry[s][event]:
+    #if not h in registry[s][event]:
+    #    registry[s][event].append(h)
+    # mlh@20020105: Temporary fix; the previous two lines should work!
+    from References import ref_is
+    in_there = 0
+    for cand in registry[s][event]:
+        if ref_is(h, cand): in_there = 1
+    if not in_there:
         registry[s][event].append(h)
 
 #def unlink(source, event, handler):
@@ -86,7 +93,7 @@ def send(source, event='default', loop=0, **kw):
     As a side-effect, dead handlers are removed from the candidate lists.'
     args = {'source': source, 'event': event}
     args.update(kw)
-    source_stack.append(id(source))
+    source_stack.append(source)
     try:
         results = []
         args.setdefault('time', time.time())
@@ -99,7 +106,7 @@ def send(source, event='default', loop=0, **kw):
                     if obj is not None:
                         obj = obj()
                         if not loop and not r.loop \
-                           and id(obj) in source_stack: continue
+                           and obj in source_stack: continue
                     handler = r()
                     result = handler(**args)
                     if result is not None: results.append(result)
