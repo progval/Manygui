@@ -228,10 +228,10 @@ class ListBox(ComponentMixin, AbstractListBox):
     _beos_border = B_FANCY_BORDER
     
     # BeOS hook function
-    #def SelectionChanged(self):
-    #    """Replaced by InvocationMessage."""
-    #    if self._action:
-    #        self._action()
+    def SelectionChanged(self):
+        """Replaced by InvocationMessage."""
+        if self._action:
+            self._action()
     
     def _ensure_created(self):
         "With Scroll Bars."
@@ -271,12 +271,12 @@ class ListBox(ComponentMixin, AbstractListBox):
         return result
 
         
-    def _backend_items(self):
-        if self._beos_comp:
-            items = []
-            for index in range(self._beos_sub.CountItems()):
-                items.append(self._beos_sub.ItemAt(index).Text())
-            return items
+    #def _backend_items(self):
+    #    if self._beos_comp:
+    #        items = []
+    #        for index in range(self._beos_sub.CountItems()):
+    #            items.append(self._beos_sub.ItemAt(index).Text())
+    #        return items
     
     def _backend_selection(self):
         if self._beos_comp:
@@ -292,10 +292,11 @@ class ListBox(ComponentMixin, AbstractListBox):
         if self._beos_comp:
             self._beos_sub.Select(self._selection)
     
-    def _ensure_events(self):
-        if self._beos_comp:
-            ComponentMixin._ensure_events(self)
-            self._beos_sub.SetInvocationMessage(self._beos_msg)
+    #def _ensure_events(self):
+    #    "For double-click."
+    #    if self._beos_comp:
+    #        ComponentMixin._ensure_events(self)
+    #        self._beos_sub.SetInvocationMessage(self._beos_msg)
             
 ###################################################################
 
@@ -333,7 +334,7 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
     _beos_class = BRadioButton.BRadioButton
 
 
-class BRadioGroup(RadioGroup):
+class RadioGroup(RadioGroup):
     _beos_class = BView.BView #Not yet used :)
     """ FIXME: forces all buttons into the one group.
                Selecting a button from another group
@@ -352,7 +353,7 @@ class BRadioGroup(RadioGroup):
         for btn in buttons:
             btn.group = self
             btn.action = self._action
-            
+    
 '''
 class RadioGroup(ComponentMixin, Attrib, Action):
     """Needs lots of work."""
@@ -433,10 +434,7 @@ class TextField(ComponentMixin, AbstractTextField):
     
     def _backend_selection(self):
         if self._beos_comp:
-            start, end = self._beos_comp.TextView().GetSelection()
-            # Supposed to pass  (2 x) pointer to int, and have no return.
-            #  Still trying to get this to work :-)
-            return (start, end)
+            return self._beos_comp.TextView().GetSelection()
     
     def _ensure_selection(self):
         if self._beos_comp:
