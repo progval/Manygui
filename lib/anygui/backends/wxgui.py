@@ -147,7 +147,8 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
 
     def _wx_clicked(self, evt):
         # FIXME: Not correct yet
-        if self.group is not None:
+        # print self._wx_comp.GetInt()
+        if self.group is not None: # ... and self._wx_comp.GetInt()?
             self.group.modify(value=self.value)
         send(self, 'click')
     
