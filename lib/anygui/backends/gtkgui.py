@@ -324,11 +324,23 @@ class TextArea(ComponentMixin, AbstractTextArea):
 
 ################################################################
 
+class Frame(ComponentMixin, AbstractFrame):
+    _gtk_class = GtkLayout
+    _visible = 0
+
+    def _ensure_created(self):
+        self._init_args = ()
+        return ComponentMixin._ensure_created(self)
+
+    def _gtk_add(self, comp):
+        self._gtk_comp.put(comp._gtk_comp, comp._x, comp._y)
+
+################################################################
+
 class Window(ComponentMixin, AbstractWindow):
 
     _gtk_class = GtkWindow
     _gtk_style = 0
-    _visible = 0
 
     def _ensure_created(self):
         if self._gtk_comp is None:
@@ -389,6 +401,7 @@ class factory:
             'ListBox': ListBox,
             'TextField': TextField,
             'TextArea': TextArea,
+            'Frame': Frame,
             }
     def get_class(self, name):
         return self._map[name]
