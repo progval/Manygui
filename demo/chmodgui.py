@@ -31,8 +31,8 @@ for p in people:
         cbx[p][t].on = mode & mask
         mask = mask >> 1
 
-# Callback
-def chmod():
+# Callbacks
+def chmod(**kw):
     mode, mask = 0, 256
     for p in people:
         for t in types:
@@ -42,10 +42,15 @@ def chmod():
     os.chmod(filename, mode)
     sys.exit()
 
+def exit(**kw): sys.exit()
+
 opt = Options(y=140, width=80, height=25)
 
-cancel = Button(opt, x=100, text='Cancel', action=sys.exit)
-ok     = Button(opt, x=190, text='OK',     action=chmod)
+cancel = Button(opt, x=100, text='Cancel')
+ok     = Button(opt, x=190, text='OK')
+
+link(cancel, exit)
+link(ok, chmod)
 
 win.add(cancel, ok)
 app.run()
