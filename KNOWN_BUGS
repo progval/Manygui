@@ -1,3 +1,6 @@
+Labels display HTML tags in Jython on some platforms. (Old
+Swing versions?)
+
 ListModel._set_value doesn't work properly; fails during
 notification.
 
