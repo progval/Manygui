@@ -13,7 +13,7 @@
 
   <author>Magnus Lie Hetland</author>
 
-  <date>September 7, 2001</date>
+  <date>September 9, 2001</date>
 
   <section>
     <title>Introduction</title>
@@ -183,6 +183,7 @@
 	<line>Tkinter    (tkgui)     <url>http://www.python.org/topics/tkinter</url></line>
 	<line>wxPython   (wxgui)     <url>http://www.wxpython.org</url></line>
 	<line>Java Swing (javagui)   <url>http://www.jython.org</url></line>
+	<line>PyGTK      (gtkgui)    <url>http://www.daa.com.au/~james/pygtk</url></line>
 	<line>Bethon     (beosgui)   <url>http://www.bebits.com/app/1564</url></line>
       </codelisting>
 
