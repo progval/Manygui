@@ -9,7 +9,8 @@ Matthew Schinckel           beosgui
 Kalle Svensson              gtkgui*
 Joe Knapka                  tkgui
 Just van Rossum             macgui*
-Shanky Tiwari               javagui, elinuxgui*
+Shanky Tiwari               pyqtgui*, javagui
+David Mertz                 cursesgui*
 
 (* backend not yet implemented)
 
