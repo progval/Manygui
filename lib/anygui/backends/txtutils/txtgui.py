@@ -87,7 +87,9 @@ _focus_capture_control = None
 _focus_dir = 1
 def _discard_focus():
     global _focus_control
+    old_fc = _focus_control
     _focus_control = None
+    old_fc._focus_lost()
 
 def _add_to_focus_list(comp):
     """ Add comp to _all_components in the proper focus-visit position. """
@@ -226,6 +228,12 @@ class ComponentMixin:
     def _is_visible(self):
         if self._visible: return self._container._is_visible()
 
+    def _focus_gained(self):
+        pass
+
+    def _focus_lost(self):
+        pass
+
     def _set_focus(self,val):
         #self._ensure_enabled_state()
         global _focus_control
@@ -234,6 +242,7 @@ class ComponentMixin:
             #_scr.dbg("_set_focus:",self._gets_focus,self._is_visible(),self._curses_created,_in_focus_purview(self),self)
             if self._gets_focus and self._is_visible() and self._curses_created \
                and _in_focus_purview(self):
+                self._focus_gained()
                 return
             else:
                 _app._change_focus(_focus_dir)
@@ -693,6 +702,7 @@ class TextMixin(ComponentMixin):
         self._cur_line = 0
         self._cur_col = 0
         #self._curs_selection = (0,0)
+        self._curs_text = str(self._text)
 
     def _ensure_editable(self):
         #_scr.dbg("ENSURING EDITABLE",self)
@@ -723,6 +733,10 @@ class TextMixin(ComponentMixin):
         #st,en = self._selection
         #self._curs_selection = (st,en)
 
+    def _ensure_text(self):
+        self._curs_text = str(self._text)
+        self._redraw()
+
     def _backend_selection(self):
         _scr.dbg("BACKEND_SELECTION",self._selection)
         #return self._curs_selection
@@ -732,15 +746,18 @@ class TextMixin(ComponentMixin):
         pass
 
     def _backend_text(self):
-        return str(self._text)
+        return str(self._curs_text)
+
+    def _focus_lost(self):
+        self.modify(text=self._curs_text)
 
     ### Event handlers ###
     def _backspace(self,ev):
         """Erase character before cursor."""
         if not self._editable: return
         if self._tpos < 1: return 1
-        self.modify(text=self._text[:self._tpos-1] + self._text[self._tpos:])
-        #self._text=self._text[:self._tpos-1] + self._text[self._tpos:]
+        #self.modify(text=self._text[:self._tpos-1] + self._text[self._tpos:])
+        self._curs_text=self._curs_text[:self._tpos-1] + self._curs_text[self._tpos:]
         self._tpos -= 1
         self._redraw()
         return 1
@@ -750,8 +767,8 @@ class TextMixin(ComponentMixin):
         if not self._editable: return
         if not chr(ev) in string.printable:
             return 0
-        self.modify(text=self._text[:self._tpos] + chr(ev) + self._text[self._tpos:])
-        #self._text=self._text[:self._tpos] + chr(ev) + self._text[self._tpos:]
+        #self.modify(text=self._text[:self._tpos] + chr(ev) + self._text[self._tpos:])
+        self._curs_text=self._curs_text[:self._tpos] + chr(ev) + self._curs_text[self._tpos:]
         self._tpos += 1
         self._redraw() # FIXME: only really need to redraw current line.
         return 1
@@ -766,7 +783,7 @@ class TextMixin(ComponentMixin):
     def _fwd(self,ev):
         """Move cursor forward one character."""
         self._tpos += 1
-        if self._tpos>len(self._text): self._tpos=len(self._text)
+        if self._tpos>len(self._curs_text): self._tpos=len(self._curs_text)
         self._redraw()
         return 1
 
@@ -827,7 +844,7 @@ class TextMixin(ComponentMixin):
     ### Event handler end ###
 
     def _move_line(self,n):
-        lines = str(self._text).split('\n')
+        lines = str(self._curs_text).split('\n')
         nlines = len(lines)
         self._cur_line += n
         cur_line_not_0 = 1
@@ -846,7 +863,7 @@ class TextMixin(ComponentMixin):
     def _draw_contents(self):
         if self._screen_height()<3: return
         
-        t = str(self._text)
+        t = str(self._curs_text)
         x=1;y=1
         try:
             lines = t.split('\n')
@@ -918,7 +935,7 @@ class TextMixin(ComponentMixin):
         return startline,startcol,line-startline+1,col-startcol+1
 
     def _find_relative_cpos(self,line,col,nlines,nchars):
-        # Take the line,col position of the cursor in self._text
+        # Take the line,col position of the cursor in self._curs_text
         # and convert it, based on window size, into the window-
         # relative cursor position, which is stored in self._cpos.
         # Then return the line and column of the character that
@@ -953,8 +970,8 @@ class TextMixin(ComponentMixin):
 class TextField(TextMixin, AbstractTextField):
 
     def __init__(self,*args,**kws):
-        TextMixin.__init__(self,*args,**kws)
         AbstractTextField.__init__(self,*args,**kws)
+        TextMixin.__init__(self,*args,**kws)
 
     _event_map = {}
     _event_map.update(TextMixin._event_map)
@@ -965,8 +982,8 @@ class TextField(TextMixin, AbstractTextField):
 class TextArea(TextMixin, AbstractTextArea):
 
     def __init__(self,*args,**kws):
-        TextMixin.__init__(self,*args,**kws)
         AbstractTextArea.__init__(self,*args,**kws)
+        TextMixin.__init__(self,*args,**kws)
 
 class Frame(ContainerMixin, AbstractFrame):
 
