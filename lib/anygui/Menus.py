@@ -3,7 +3,7 @@ from anygui.Utils import flatten
 from anygui.Proxies import Proxy
 from anygui.Events import DefaultEventMixin
 import anygui.Defaults as Defaults
-from anygui import backendModule
+from anygui import backendModule, link
 
 # TODO: Use Container mixin?
 #       Subclass Component?
@@ -16,6 +16,8 @@ class MenuCommand(Proxy,DefaultEventMixin,Defaults.MenuCommand):
     def __init__(self, *args, **kw):
         DefaultEventMixin.__init__(self)
         Proxy.__init__(self, *args, **kw)
+        if 'command' in kw.keys():
+            link(self,kw['command'])
 
     def wrapperFactory(self):
         return backendModule().MenuCommandWrapper(self)
@@ -24,6 +26,8 @@ class MenuCheck(Proxy,DefaultEventMixin,Defaults.MenuCheck):
     def __init__(self, *args, **kw):
         DefaultEventMixin.__init__(self)
         Proxy.__init__(self, *args, **kw)
+        if 'command' in kw.keys():
+            link(self,kw['command'])
 
     def wrapperFactory(self):
         return backendModule().MenuCheckWrapper(self)
@@ -47,13 +51,17 @@ class Menu(Proxy, DefaultEventMixin, Defaults.Menu):
         return backendModule().MenuWrapper(self)
 
     # Adders.
-    def addCommand(self,text="COMMAND",enabled=1,index=None,*args,**kws):
+    def addCommand(self,text="COMMAND",enabled=1,index=None,command=None,*args,**kws):
         cmdItem = MenuCommand(text=text,*args,**kws)
+        if command:
+            link(cmdItem,command)
         self.add(cmdItem,index)
         return cmdItem
 
-    def addCheck(self,text="CHECKBOX",enabled=1,index=None,*args,**kws):
+    def addCheck(self,text="CHECKBOX",enabled=1,index=None,command=None,*args,**kws):
         cmdItem = MenuCheck(text=text,*args,**kws)
+        if command:
+            link(cmdItem,command)
         self.add(cmdItem,index)
         return cmdItem
 
