@@ -40,6 +40,10 @@ class RuleEngine:
             addSubKey(self.whole, part, whole)
             addSubKey(self.parts, whole, part)
         self.rules[whole] = rule
+
+    def check(self, state):
+        # Check that no rules cause any change...
+        pass
     
     def sync(self, state, defs):
         undef = {}
@@ -47,6 +51,9 @@ class RuleEngine:
             undef.update(self.getChildren(name))
             undef.update(self.getParents(name))
             undef.update(self.getSpouses(name))
+        if not undef: # Is this correct?
+            self.check(state)
+            return
         stable = 0
         while undef and not stable:
             stable = 1
