@@ -14,6 +14,8 @@ class AbstractFrame(AbstractComponent, Defaults.Frame):
         result = self._ensure_created()
         if self._is_created():
             self.ensure_contents_created()
+        if result:
+            self._finish_creation()
         return result
 
     def ensure_contents_created(self):
