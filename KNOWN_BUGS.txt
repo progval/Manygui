@@ -28,9 +28,14 @@ test_references.py and test_events don't work in Jython 2.1b1.
 (References and Events should still work, though...)
 
 When moving the mouse out of a text area in tkgui, the selection is
-lost. [jknapka: this is not actually true. However, on Windows (not
+lost.
+
+jknapka: this is not actually true. However, on Windows (not
 Unix), the visual indication of the selection is erased.  The
-selection is still present, however.]
+selection is still present, however.
+
+mlh: the selection is not properly set, though... (That goes for more
+backends, actually, e.g. javagui.)
 
 id() is broken in Jython and will probably not be fixed soon.  This
 will probably not affect the correctness of the hashing of references
@@ -71,7 +76,7 @@ Bethon]
 
 Anygui will not work [well|at all?] with a vanilla Bethon
 installation. The updated files can be found at
-http://anygui.sourceforge.net/files. Email matt@null.net for details
+http://anygui.org/files. Email matt@null.net for details
 on how to build, if you need help.
 
 test/test.py crashes under systems where more than one application
