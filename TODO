@@ -1,4 +1,15 @@
 
+The Big Picture:
+----------------
+
+Release 0.1: Basic functionality and main API
+
+Release 0.2: Refactoring, menus, full event set,
+             more complete functionality
+
+Release 0.3: Less API change, focus on robustness
+             and stability
+
 Remaining objectives for version 0.1:
 -------------------------------------
 Tentative release date: December 10th, 2001
@@ -28,6 +39,10 @@ Tentative release date: February 28th, 2002
   between core and backends (having only the bare necessities
   actually _in_ the backends). Reevaluate the _ensure_foo
   strategy?
+
+  Methods like _tk_clicked, which contain no backend-specific
+  code, should be lifted to the front-end, and linked to
+  event triggers in the backend's _ensure_events.
 
 * Add support for __delattr__ (in the form of _del_foobar)
   in Mixins.Attrib, and make sure it's used where applicable
