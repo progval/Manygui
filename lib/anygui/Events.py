@@ -5,8 +5,7 @@
     Magnus Lie Hetland, 2001-11-16
 '''
 
-# Dispatching is currently broken. I know what the problem is -- will fix
-# it soon.
+# Will be rewritten to use anygui.References, among other things
 
 __all__ = '''
 
