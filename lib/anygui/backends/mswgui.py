@@ -166,7 +166,7 @@ class ComponentWrapper(AbstractWrapper):
             except:
                 pass
             self.widget = None
-                
+
 
     def setText(self,text):
         if not self.widget: return
@@ -248,7 +248,7 @@ class ListBoxWrapper(ComponentWrapper):
                                  win32con.LB_ADDSTRING,
                                  0,
                                  item)
-                
+
 
     def setSelection(self,selection):
         if not self.widget: return
@@ -313,7 +313,7 @@ class RadioButtonWrapper(ToggleButtonWrapper):
     def __init__(self,*args,**kws):
         self._value = -2
         ToggleButtonWrapper.__init__(self,*args,**kws)
-    
+
     def widgetFactory(self,*args,**kws):
         # The first radiobutton in a group must have the wxRB_GROUP style
         if self.proxy.group and self.proxy.group._items.index(self.proxy) == 0:
@@ -379,7 +379,7 @@ class TextFieldWrapper(ComponentWrapper):
         start -= text[:start].count('\n')
         end -= text[:end].count('\n')
         return start, end
-            
+
     def setSelection(self,selection):
         #log("TextField._ensure_selection")
         if not self.widget: return
@@ -416,7 +416,7 @@ class TextAreaWrapper(TextFieldWrapper):
 class ContainerMixin:
     def __init__(self,*args,**kws):
         self.widget_map = {} # maps child window handles to instances
-    
+
     def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
         #log("ContainerMixin _WM_COMMAND called for %s"%self)
         # lParam: handle of control (or NULL, if not from a control)
@@ -448,7 +448,7 @@ class FrameWrapper(ComponentWrapper,ContainerMixin):
         """
         OK, this probably needs to be pulled into a mixin heritable by
         various backends.
-        
+
         Ensure all contents are properly created. This looks like it could
         be handled at the Proxy level, but it probably *shouldn't* be -
         it's handling a Tk-specific requirement about the order in which
@@ -527,7 +527,7 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
         else:
             dw = w - self._width
             dh = h - self._height
-        
+
         self._width = w
         self._height = h
         if (dw,dh) == (0,0): return
@@ -572,8 +572,8 @@ class Application(AbstractApplication):
                 win32con.WM_PAINT: _dispatch_WM_PAINT,
                 }
 
-    def __init__(self):
-        AbstractApplication.__init__(self)
+    def __init__(self, **kwds):
+        AbstractApplication.__init__(self, **kwds)
         if not self._wndclass:
             self._register_class()
         WindowWrapper._wndclass = self._wndclass
@@ -604,7 +604,7 @@ class Application(AbstractApplication):
         except:
             x = -1
         return x
-        
+
     def internalRun(self):
         win32gui.PumpMessages()
 
