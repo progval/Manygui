@@ -87,13 +87,13 @@ class _weak_callable:
         else:
             return self._meth(*args,**kws)
 
-class _signal_adapter(_weak_callable):
+class _handler_adapter(_weak_callable):
     """
-    _signal_adapter lets us call any function or method as a
+    _handler_adapter lets us call any function or method as a
     signal handler, even if it doesn't accept the same
     keyword arguments the signal source provides. ALL
-    arguments to a _signal_adapter must be keywords.
-    A _signal_adapter is a _weak_callable, which means
+    arguments to a _handler_adapter must be keywords.
+    A _handler_adapter is a _weak_callable, which means
     calling it can fail if the associated object has
     been GC'd.
     """
@@ -106,6 +106,29 @@ class _signal_adapter(_weak_callable):
         real_kwargs = {}
         if self._argmap is None:
             real_kwargs.update(kw)
+
+            if str(type(object)) == "<type 'instance'>":
+                # instances are callable when they have __call__()
+                object = object.__call__
+
+            if hasattr(object, "func_code"):
+                # function
+                fc = object.func_code
+                expected = fc.co_varnames[0:fc.co_argcount]
+            elif hasattr(object, "im_func"):
+                # method
+                fc = object.im_func.func_code
+                expected = fc.co_varnames[1:fc.co_argcount]
+
+            # remove unexpected args - co_flags & 0x08 indicates
+            # **kws in use, so no need to remove args.
+            if not (fc.co_flags & 0x08):
+                for name in args.keys():
+                    if name not in expected:
+                        del args[name]
+
+            return apply(object, (), args)
+
         else:
             for arg in self._argmap.keys():
                 try:
@@ -141,7 +164,7 @@ class _weak_ref_fn:
 
     def __call__(self):
         if self._dead(): return None
-        return _signal_adapter(self.obj,self.meth,self.argmap)
+        return _handler_adapter(self.obj,self.meth,self.argmap)
 
     def _dead(self):
         return self.obj is not None and self.obj() is None
