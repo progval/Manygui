@@ -24,11 +24,11 @@ The only methods that should be explicitly called by the Proxy are:
 # - Add attribute dependencies, i.e. (text -> selection) etc.
 # - Fix use of dir() to get attributes/methods... ("Broken" until 2.2)
 # - The specificity sort (in Utils) simply counts 'And' -- should work
-#   like the splitting itself.
-# - Check for the presence of 'And' in attributes (raise exception)
-# - Add dependencies/partial ordering of attributes
-# - Use inspect.getargspec instead of naming convention (in addition
-#   to "set<uppercase>" prefix) for the setter methods.
+#   like the splitting itself (if that mechanism is kept)
+# - Check for the presence of 'And' in attributes (raise exception) or
+#   similar stuff (for other mechanisms)
+# - Find new setter dispatch mechanism, possibly doing any introspection
+#   as preprocessing
 
 class AbstractWrapper:
 
