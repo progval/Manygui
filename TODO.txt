@@ -14,9 +14,6 @@ Objectives for version 0.2a1:
 
 * Implement the new architecture.
 
-* Wrap the event repository in class which implements "link counting"
-  for a two-way version of enableEvent.
-
 * Fix default events so that their event type is the real type
   (e.g. 'click'), not 'default'.
 

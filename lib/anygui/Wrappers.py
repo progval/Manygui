@@ -17,6 +17,7 @@ The only methods that should be explicitly called by the Proxy are:
   getPrefs()
   prod()
   enableEvent(event)
+  disableEvent(event)
   destroy()
 
 """
@@ -217,9 +218,23 @@ class AbstractWrapper:
         nothing.
         """
         # TODO: Add default implementation with some registry of
-        # activated events? Possibly have a "reference counting"
-        # system and disable events when there are no links to them? A
-        # bit tricky to get right in the current event system...
+        # activated events?
+
+    def disableEvent(self, event):
+        """
+        Called when the Wrapper need no longer worry about an event.
+
+        This method may be called by the Proxy object which will, in
+        turn, be told to do so by the event system, in the event that
+        no event handlers exist that rely on the given event with the
+        Proxy as the source. The Wrapper is the free to stop
+        generating the given event until enableEvent is called again
+        (if ever).
+
+        Note that the Wrapper is free to ignore this method. Note also
+        that this method is not currently used by the event system,
+        but may be used in a future version.        
+        """
 
     def destroy(self):
         """

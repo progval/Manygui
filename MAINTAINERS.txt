@@ -21,7 +21,6 @@ Other Contributors:
 Greg Ewing
 Kevin Altis
 Stephane Conversy
-Laura Creighton
 Robin Dunn
 Warren Kirk
 Samuele Pedroni
