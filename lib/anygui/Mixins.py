@@ -106,7 +106,7 @@ class Attrib:
     more than one attribute at once) but uses modattr rather than setattr.
 
 
-    Attrib also supplies a default update method, which calls all the
+    Attrib also supplies a default refresh method, which calls all the
     relevant methods named _ensure_* if flag _inhibit_update is false.
     In this release, all _ensure_* are called; eventually, some kind
     of mechanism will use the hints to be more selective/optimizing.
@@ -116,13 +116,13 @@ class Attrib:
 
 
     Note that Attrib embodies two patterns (attribute setting/getting
-    and update functionality) and is thus "Alexandrian dense"; cfr
+    and refresh functionality) and is thus "Alexandrian dense"; cfr
     Vlissides, "Pattern Hatching", page 30, for pluses and minuses of
     such "dense" approaches and the resulting "profound" code.
     """
 
     _all_ensures = []           # no _ensure_* called until Attrib.__init__
-    _inhibit_update = 0         # default Attribs are always update-enabled
+    _inhibit_refresh = 0        # default Attribs are always refresh-enabled
 
     def __setattr__(self, name, value):
         if name[0]!='_':
@@ -134,15 +134,14 @@ class Attrib:
             else:
                 try: getattr(self, name).removed(self, name)
                 except: pass
-                inhibit_update = setter(value)
+                inhibit_refresh = setter(value)
                 try: value.assigned(self, name)
                 except: pass
-                if not inhibit_update: self.update(name=name)
+                if not inhibit_refresh: self.refresh(assigned=name)
                 return
         self.__dict__[name] = value
         if name[0]!='_':
-            # Hack-attempt, not working...: self.__dict__['_'+name] = value
-            self.update(name=name)
+            self.refresh(assigned=name)
 
     def __getattr__(self, name):
         if name[0]=='_': raise GetAttributeError(self, name)
@@ -176,7 +175,7 @@ class Attrib:
                 inhibit_update = modifier(value)
                 try: getattr(self, name).modified()
                 except: pass
-                if not inhibit_update: self.update(modified=name)
+                if not inhibit_update: self.refresh(modified=name)
                 return
 
         # we need to perform the modification-task directly
@@ -195,7 +194,7 @@ class Attrib:
         try: old_value.modified()
         except: pass
         if name[0]!='_':
-            self.update(modified=name)
+            self.refresh(modified=name)
 
     def __init__(self, *args, **kwds):
         # _all_ensures must be computed exactly once per concrete class
@@ -218,8 +217,8 @@ class Attrib:
 
         self.set(*args, **kwds)
 
-    def update(self, **ignore_kw):
-        if self._inhibit_update: return
+    def refresh(self, **ignore_kw):
+        if self._inhibit_refresh: return
         for ensure_name in self._all_ensures:
             if ensure_name in _ensures_once:
                 if ensure_name in self._ensures_called:

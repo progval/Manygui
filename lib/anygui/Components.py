@@ -17,7 +17,7 @@ class AbstractComponent(Attrib, DefaultEventMixin):
     # of the getters/setters (except those for geometry, probably) can
     # also be eventually removed (and backends fixed accordingly)
     
-    _inhibit_update = 1         # Components start out update-inhibited
+    _inhibit_refresh = 1         # Components start out refresh-inhibited
     _container = None
 
     def __init__(self, *args, **kw):
@@ -35,22 +35,20 @@ class AbstractComponent(Attrib, DefaultEventMixin):
 
     def _finish_creation(self):
         self._ensure_events()
-        self._inhibit_update = 0
-        self.update()
+        self._inhibit_refresh = 0
+        self.refresh()
 
     def _set_visible(self, value):
         """Set the visibility."""
         if value == self._visible:
             return
         self._visible = value
-        # self._ensure_visibility()
 
     def _set_enabled(self, value):
         """Enable or disable the component."""
         if value == self._enabled:
             return
         self._enabled = value
-        # self._ensure_enabled_state()
 
     def _get_visible(self):
         """Return whether the component is currently visible."""
@@ -61,7 +59,6 @@ class AbstractComponent(Attrib, DefaultEventMixin):
         if x == self._x:
             return
         self._x = x
-        # self._ensure_geometry()
 
     def _get_x(self):
         "Return the current horizontal position."""
@@ -72,7 +69,6 @@ class AbstractComponent(Attrib, DefaultEventMixin):
         if y == self._y:
             return
         self._y = y
-        # self._ensure_geometry()
 
     def _get_y(self):
         "Return the current vertical position."""
@@ -83,7 +79,6 @@ class AbstractComponent(Attrib, DefaultEventMixin):
         if w == self._width:
             return
         self._width = w
-        # self._ensure_geometry()
 
     def _get_width(self):
         "Return the current width."""
@@ -94,7 +89,6 @@ class AbstractComponent(Attrib, DefaultEventMixin):
         if h == self._height:
             return
         self._height = h
-        # self._ensure_geometry()
 
     def _get_height(self):
         "Return the current height."""
@@ -106,7 +100,6 @@ class AbstractComponent(Attrib, DefaultEventMixin):
             return
         self._width = w
         self._height = h
-        # self._ensure_geometry()
 
     def _get_size(self):
         """Return the current size."""
@@ -118,7 +111,6 @@ class AbstractComponent(Attrib, DefaultEventMixin):
             return
         self._x = x
         self._y = y
-        # self._ensure_geometry()
 
     def _get_position(self):
         """Return the current position."""
@@ -132,7 +124,6 @@ class AbstractComponent(Attrib, DefaultEventMixin):
         self._y = y
         self._width = w
         self._height = h
-        # self._ensure_geometry()
 
     def _get_geometry(self):
         """Return position and size."""

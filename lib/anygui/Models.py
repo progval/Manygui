@@ -10,15 +10,15 @@ class Assignee:
         self.names = []
 
     def assigned(self, object, name):
-        update = getattr(object, 'update', None)
-        if update is not None:
+        refresh = getattr(object, 'refresh', None)
+        if refresh is not None:
             self.names.append(name)
-            link(self, update)
+            link(self, refresh)
 
     def removed(self, object, name):
-        update = getattr(object, 'update', None)
-        if update is not None:
-            unlink(self, update)
+        refresh = getattr(object, 'refresh', None)
+        if refresh is not None:
+            unlink(self, refresh)
             self.names.remove(name)
 
     def send(self, **kw):
@@ -27,7 +27,7 @@ class Assignee:
 
 class Model(Attrib, Assignee):
 
-    def update(self, **kwds):
+    def refresh(self, **kwds):
         self.send(**kwds)
 
     def __init__(self, *arg, **kw):

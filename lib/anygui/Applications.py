@@ -9,7 +9,7 @@ class AbstractApplication(Attrib):
     _running = 0
 
     # Needed by Attrib:
-    def update(self, **ignore): pass
+    def refresh(self, **ignore): pass
     
     def __init__(self):
         self._windows = []

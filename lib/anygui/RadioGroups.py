@@ -7,7 +7,7 @@ from Utils import flatten
 class RadioGroup(Attrib, Defaults.RadioGroup, DefaultEventMixin):
 
     # Needed by Attrib
-    def update(self, **ignore): pass
+    def refresh(self, **ignore): pass
 
     def __init__(self, items=[], **kw):
         Attrib.__init__(self, **kw)
