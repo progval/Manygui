@@ -558,7 +558,8 @@ class ListBox(ComponentMixin, AbstractListBox):
         pass
 
     def _backend_selection(self):
-        return self._selection
+        if self._curses_created:
+            return self._selection
 
     def _draw_contents(self):
         lh = self._screen_height()-2
@@ -881,13 +882,15 @@ class TextMixin(ComponentMixin):
     def _backend_selection(self):
         _scr.dbg("BACKEND_SELECTION",self._selection)
         #return self._curs_selection
-        return self._selection
+        if self._curses_created:
+            return self._selection
 
     def _ensure_editable(self):
         pass
 
     def _backend_text(self):
-        return str(self._curs_text)
+        if self._curses_created:
+            return str(self._curs_text)
 
     def _focus_lost(self):
         self.modify(text=self._curs_text)
