@@ -7,6 +7,18 @@ Magnus Lie Hetland, 2002-02-09, 2002-02-11
 
 __version__ = '$Revision$'[11:-2]
 
+
+from anygui.backends import *
+__all__ = '''
+
+  Application
+  ButtonWrapper
+  WindowWrapper
+
+'''.split()
+
+################################################################
+
 import pyui
 
 wrappers = []

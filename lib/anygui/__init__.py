@@ -1,6 +1,49 @@
-_backends = 'msw gtk java wx tk beos qt curses text'
+#_backends = 'msw gtk java wx tk beos qt curses text'
+_backends = 'pyui'
+
+
+def application():
+    'Return the global application object'
+    #global _application
+    if not _application:
+        #_application = factory()._map['Application']()
+        raise RuntimeError, 'no application exists'
+    return _application
+
+def backend():
+    'Return the name of the current backend'
+    if not _backend_name:
+        raise RuntimeError, 'no backend exists'
+    return _backend_name
+
+def setup(self, **kwds):
+    'Used to configure Anygui'
+    raise NotImplementedError
+
+
+########## Begin Imports ##################################################
 
 import os, sys
+from anygui.Mixins           import Attrib
+from anygui.Utils            import Options
+from anygui.Applications     import Application
+from anygui.Windows          import Window
+from anygui.Buttons          import Button
+from anygui.Canvases         import Canvas
+from anygui                  import Colors
+from anygui.Labels           import Label
+from anygui.CheckBoxes       import CheckBox
+from anygui.RadioButtons     import RadioButton
+from anygui.RadioGroups      import RadioGroup
+from anygui.TextFields       import TextField
+from anygui.TextAreas        import TextArea
+from anygui.ListBoxes        import ListBox
+from anygui.Models           import BooleanModel, ListModel, TextModel
+from anygui.Events           import *
+from anygui.Frames           import Frame
+from anygui.LayoutManagers   import LayoutManager, Placer
+
+########### End Imports ###################################################
 
 # 20020208:mlh -- starting to experiment with new architecture
 __all__ = """
@@ -22,8 +65,9 @@ __all__ = """
 
 """.split()
 
+
 """
-# 'Real' export list:
+# Original export list:
 __all__ = ['application', 'Application',
            'Window', 'Button', 'CheckBox', 'Label',
            'RadioButton', 'RadioGroup', 'ListBox', 'TextField', 'TextArea',
@@ -54,8 +98,9 @@ if DEBUG:
     except ValueError:
         pass
 
-_application = None
-_backend     = None
+_application  = None
+_backend      = None
+_backend_name = None
 
 def _dotted_import(name):
     # version of __import__ which handles dotted names
@@ -80,7 +125,7 @@ def _backend_passthrough():
     for name in _backends:
         try:
             mod = _dotted_import('anygui.backends.%sgui' % name,)
-            for key in __all__:
+            for key in mod.__all__:
                 globals()[key] = mod.__dict__[key]
         except (ImportError, AttributeError, KeyError):
             if DEBUG and not (DEBUG in _backends and not DEBUG==name):
@@ -88,27 +133,10 @@ def _backend_passthrough():
                 traceback.print_exc()
             continue
         else:
-            _backend = name
+            _backend_name = name
+            _backend      = mod
             return
     raise RuntimeError, "no usable backend found"
-
-def application():
-    'Return the global application object'
-    #global _application
-    if not _application:
-        #_application = factory()._map['Application']()
-        raise RuntimeError, 'no application exists'
-    return _application
-
-def backend():
-    'Return the name of the current backend'
-    if not _backend:
-        raise RuntimeError, 'no backend exists'
-    return _backend
-
-def setup(self, **kwds):
-    'Used to configure Anygui'
-    raise NotImplementedError
 
 # Pass the backend namespace through:
 _backend_passthrough()

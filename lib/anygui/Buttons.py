@@ -1,5 +1,5 @@
-from anygui.GenericButtons import AbstractGenericButton
+from anygui.GenericButtons import GenericButton
 from anygui import Defaults
 
-class AbstractButton(AbstractGenericButton, Defaults.Button):
+class Button(GenericButton, Defaults.Button):
     pass
