@@ -63,6 +63,15 @@
 
     </section>
 
+    <section>
+      <title>Warning</title>
+
+      <para>The <name>Anygui</name> API is currently very much in flux
+      as the <name>Anygui</name> team keeps experimenting to come up
+      with the best possible solution. Because of that, backwards
+      incompatibilities may occur between releases.</para>
+    </section>
+
   </section>
 
   <section>
