@@ -1,6 +1,6 @@
 Title: Anygui Tutorial
 Author: Magnus Lie Hetland
-Date: 2001-01-04
+Date: 2002-01-04
 
 1. Introduction
 
