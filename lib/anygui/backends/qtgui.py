@@ -34,6 +34,9 @@ class ComponentMixin:
 			return 1
 		return 0
 
+	def _ensure_events(self):
+		pass
+
 	def _ensure_geometry(self):
 		if self._qt_comp:
 			if DEBUG: print 'in _ensure_geometry of: ', self._qt_comp
@@ -66,7 +69,7 @@ class ComponentMixin:
 			self._qt_comp.destroy()
 			self._qt_comp = None
 
-	def _ensure_events(self):
+	def _ensure_text(self):
 		pass
 
 class EventFilter(QObject):
@@ -110,12 +113,10 @@ class Label(ComponentMixin,AbstractLabel):
 class ListBox(ComponentMixin, AbstractListBox):
 	_qt_class = QListBox
 	_connected = 0
-	
-	def _ensure_events(self):
-		if DEBUG: print 'in _ensure_events of: ', self
-		if self._qt_comp and not self._connected:
-			qApp.connect(self._qt_comp,SIGNAL('selected (QListBoxItem *)'),self._qt_item_select_handler)
-			self._connected = 1
+
+	def _backend_selection(self):
+		if self._qt_comp:
+			return int(self._qt_comp.currentItem())
 
 	def _ensure_items(self):
 		if self._qt_comp:
@@ -125,11 +126,13 @@ class ListBox(ComponentMixin, AbstractListBox):
 
 	def _ensure_selection(self):
 		if self._qt_comp:
-			self._qt_comp.setCurrentItem(self._selection)
+			self._qt_comp.setCurrentItem(int(self._selection))
 
-	def _backend_selection(self):
-		if self._qt_comp:
-			return int(self._qt_comp.currentItem())
+	def _ensure_events(self):
+		if DEBUG: print 'in _ensure_events of: ', self
+		if self._qt_comp and not self._connected:
+			qApp.connect(self._qt_comp,SIGNAL('selected (QListBoxItem *)'),self._qt_item_select_handler)
+			self._connected = 1
 
 	def _qt_item_select_handler( self, item ):
 		if DEBUG: print 'in _qt_item_select_handler of: ', self._qt_comp
@@ -316,10 +319,8 @@ class TextArea(TextBase):
 
 	def _qt_translate_row_col(self, pos):
 		if DEBUG: print 'translating pos to row/col...'
-		lines = self._qt_get_lines()
-		row, col, curr_row = 0, 0, 0
-		tot_len = 0
-		for ln in lines:
+		row, col, curr_row, tot_len = 0, 0, 0, 0
+		for ln in self._qt_get_lines():
 			if pos <= len(str(ln)) + tot_len:
 				row = curr_row
 				col = pos - tot_len
@@ -352,7 +353,7 @@ class Frame(ComponentMixin, AbstractFrame):
 
 ################################################################
 
-class QWindow(QWidget): pass
+class QWindow(QWidget): pass #Alias for clarity
 
 class Window(ComponentMixin, AbstractWindow):
 	_qt_class = QWindow
