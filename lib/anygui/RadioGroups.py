@@ -1,6 +1,6 @@
 from anygui.Exceptions import UnimplementedMethod
-from anygui.Mixins import Attrib, DefaultEventMixin
-from anygui.Events import send
+from anygui.Attribs import Attrib
+from anygui.Events import send, DefaultEventMixin
 from anygui import Defaults
 from Utils import flatten
 

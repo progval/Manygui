@@ -1,8 +1,10 @@
-from anygui.Mixins import Attrib
-from Events import link, unlink, send
+from Attribs import Attrib
+from Events import link, unlink, send, caller
 from UserList import UserList
 from UserString import UserString
 
+# FIXME: Fix link(self, sync) to use the caller() function; deal with
+# unlinking problems.
 
 class Assignee:
 
@@ -10,15 +12,15 @@ class Assignee:
         self.names = []
 
     def assigned(self, object, name):
-        refresh = getattr(object, 'refresh', None)
+        sync = getattr(object, 'sync', None)
         if refresh is not None:
             self.names.append(name)
-            link(self, refresh)
+            link(self, sync)
 
     def removed(self, object, name):
-        refresh = getattr(object, 'refresh', None)
-        if refresh is not None:
-            unlink(self, refresh)
+        sync = getattr(object, 'sync', None)
+        if sync is not None:
+            unlink(self, sync)
             self.names.remove(name)
 
     def send(self, **kw):
@@ -27,7 +29,7 @@ class Assignee:
 
 class Model(Attrib, Assignee):
 
-    def refresh(self, event):
+    def sync(self, event):
         self.send(**event.dict)
 
     def __init__(self, *arg, **kw):

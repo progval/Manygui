@@ -24,7 +24,7 @@ def setup(self, **kwds):
 ########## Begin Imports ##################################################
 
 import os, sys
-from anygui.Mixins           import Attrib
+from anygui.Attribs          import Attrib
 from anygui.Utils            import Options
 #from anygui.Applications     import AbstractApplication
 from anygui.Windows          import Window

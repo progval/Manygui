@@ -1,4 +1,5 @@
-from anygui.Mixins import Attrib, DefaultEventMixin
+from anygui.Attribs import Attrib
+from anygui.Events import DefaultEventMixin
 from anygui.Exceptions import UnimplementedMethod
 from anygui.LayoutManagers import LayoutData
 

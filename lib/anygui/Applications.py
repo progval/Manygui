@@ -1,6 +1,5 @@
-#from Mixins import Action
 from Exceptions import UnimplementedMethod
-from Mixins import Attrib
+from Attribs import Attrib
 from Utils import flatten
 import anygui
 

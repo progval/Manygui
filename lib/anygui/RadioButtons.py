@@ -1,5 +1,4 @@
 from anygui.Exceptions import UnimplementedMethod
-from anygui.Mixins import Attrib
 from anygui.ToggleButtons import ToggleButton
 from anygui import Defaults
 

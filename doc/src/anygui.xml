@@ -11,6 +11,7 @@
            - Add script for version
            - Describe new send() behaviour -- no longer uses **kwds, but event object;
              (Add this description to the tutorial as well).
+           - Document sender() and caller()
 
      Remember to keep backend-list up to date
 -->

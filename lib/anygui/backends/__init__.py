@@ -1,7 +1,7 @@
 
 # mlh20020211 -- commented out and moved to anygui/__init__.py
 """
-from anygui.Mixins import Attrib
+from anygui.Attribs import Attrib
 from anygui.Utils import Options
 from anygui import application, backend
 from anygui.Applications import AbstractApplication

@@ -18,6 +18,7 @@ __all__ = '''
     unlink
     send
     sender
+    caller
     unlinkSource
     unlinkHandler
     unlinkMethods
@@ -113,7 +114,7 @@ def send(source, event='default', loop=0, **kw):
         source_stack.pop()
 
 class Sender:
-    def __init__(self, event):
+    def __init__(self, event='default'):
         self.event = event
     def __call__(self, event):
         args = event.dict.copy()
@@ -121,9 +122,31 @@ class Sender:
         del args['event']
         send(event.source, self.event, **args)
         
-def sender(event='default'):
-    return Sender(event)
+sender = Sender
 
+class Caller:
+    def __init__(self, func, args, kwds):
+        self.func = func
+        self.args = args
+        self.kwds = kwds
+    def __call__(self, *args, **kwds):
+        return self.func(*self.args, **self.kwds)
+
+caller = Caller
+
+class DefaultEventMixin:
+
+    def __init__(self):
+        if hasattr(self, '_default_event'):
+            link(self, self._default_event, self._default_event_handler,
+                 weak=1, loop=1)
+
+    def _default_event_handler(self, event):
+        args = event.dict.copy()
+        del args['source']
+        del args['event']
+        send(self, 'default', **args)
+                         
 def unlinkSource(source):
     'Unlink all handlers linked to a given source.'
     del registry[source]

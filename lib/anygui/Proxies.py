@@ -1,4 +1,8 @@
-from Mixing import Attrib
+from Attribs import Attrib
+
+# NOTE: Make sure that inheriting defaults still works with the new
+# Attrib mechanism (e.g. "inherit" by updating the state dictionary
+# with a default one).
 
 class Proxy(Attrib):
 
@@ -47,5 +51,3 @@ class Proxy(Attrib):
         where a native widget must be explicitly destroyed.
         """
         self.wrapper.destroy()
-
-    
