@@ -1,7 +1,7 @@
 """
 >>> from anygui.Events import *
 >>> class Test:
-...     def handle(self, event):
+...     def handle(self, **kw):
 ...         print 'Handled!'
 ...
 
@@ -9,45 +9,45 @@ Basic functionality:
 
 >>> s = Test()
 >>> q = Test()
->>> link(s, q.handle, weak=1)
+>>> link(s, 'default', q.handle)
+>>> send(s, 'default')
+Handled!
+>>> unlink(s, 'default', q.handle)
+>>> send(s, 'default')
+
+>>> link(s, q.handle)
 >>> send(s)
 Handled!
+>>> unlink(s, q.handle)
+>>> send(s)
 
->>> t = Test()
->>> evt1 = Event()
->>> evt1.type = 'something'
->>> link(event='something', t.handle, weak=1)
->>> send(event='something')
+#>>> t = Test()
+#>>> evt1 = Event()
+#>>> evt1.type = 'something'
+#>>> link(event='something', t.handle, weak=1)
+#>>> send(event='something')
 Handled!
 
 [More comparison demonstrations?]
 
-Disconnecting:
-
->>> t = Test()
->>> link(handler=t.handle, weak=1)
->>> send()
-Handled!
->>> unlink(handler=t.handle)
->>> send()
->>>
-
 Weak handlers:
 
+>>> s = Test()
 >>> t = Test()
->>> link(handler=t.handle, weak=1)
->>> send()
+>>> link(s, t.handle, weak=1)
+>>> send(s)
 Handled!
 >>> del t
->>> send()
+>>> send(s)
 >>>
 
 Strong handlers:
 
+>>> s = Test()
 >>> t = Test()
->>> link(event='strong-handlers'), handler=t.handle)
+>>> link(s, 'strong-handlers', t.handle)
 >>> del t
->>> send(event='strong-handlers')
+>>> send(s, 'strong-handlers')
 Handled!
 
 Weak sources:
@@ -56,40 +56,45 @@ Weak sources:
 
 Loop blocking:
 
->>> t = Test()
 >>> s = Test()
->>> link(handler=t.handle, weak=1)
+>>> t = Test()
+>>> link(s, t.handle)
+>>> link(t, t.handle)
 >>> send(s)
 Handled!
 >>> send(t)
->>> unlink(handler=t.handle)
 
 Wrapper functions:
 
->>> def wrapper_test(obj, event):
+>>> def wrapper_test(obj, **kw):
 ...     print '<wrapper>'
-...     obj.handle(None)
+...     obj.handle()
 ...     print '</wrapper>'
 ...
->>> link(event='wrapper-event', handler=(t, wrapper_test), weak=1)
->>> send(event='wrapper-event')
+>>> s = Test()
+>>> t = Test()
+>>> link(s, 'wrapper-event', (t, wrapper_test))
+>>> send(s, 'wrapper-event')
 <wrapper>
 Handled!
 </wrapper>
 
 Return values from event handlers:
 
->>> def handler1(event): return 1
+>>> s = Test()
+>>> def handler1(**kw): return 1
 ...
->>> def handler2(event): return 2
+>>> def handler2(**kw): return 2
 ...
->>> def handler3(event): return 3
+>>> def handler3(**kw): return 3
 ...
->>> link(event='return-values', handler=handler1)
->>> link(event='return-values', handler=handler2)
->>> link(event='return-values', handler=handler3)
->>> send(event='return-values')
+>>> link(s, 'return-values', handler1)
+>>> link(s, 'return-values', handler2)
+>>> link(s, 'return-values', handler3)
+>>> send(s, 'return-values')
 [1, 2, 3]
+
+[Tag handling]
 
 [Other API functions]
 

@@ -1,12 +1,17 @@
 
 ''' Event framework for Anygui. For more information, see Anygui
     IRFC 0010 at http://anygui.sf.net/irfc.
+
+    Magnus Lie Hetland 2001-11-26
 '''
 
-# TODO: - Use some internal value instead of None for defaults
-#       - Add tags
-#       - Fix optional arguments
-#       - loop arg should perhaps be in link? Or both?
+TODO = '''
+    - Add tags
+    - Fix optional arguments/use of kwdargs in place of positionals etc.
+'''
+
+# NOTE: Current semantics (with default events vs. globbing etc.) is
+# not necessarily consistent. I'm working on it...     [mlh20011126]
 
 __all__ = '''
 
@@ -21,17 +26,27 @@ __all__ = '''
 
 
 import time
-from References import ref, RefKeyDictionary
-registry = RefKeyDictionary()
+from References import ref, mapping
+registry = mapping()
 source_stack = []
 
-class Any: pass
-any = Any()
+class Internal: pass
+any  = Internal()
+void = Internal()
 
-def link(source, event, handler, weak=0):
+#def link(source, event, handler, tag=void, weak=0, loop=0):
+def link(*args, **kwds):
     'Link a source and event to an event handler.'
+    assert len(args) < 4, 'link takes only three positional arguments'
+    if len(args) == 2:
+        source, handler = args; event = 'default'
+    else:
+        source, event, handler = args
+    weak = kwds.get('weak', 0)
+    tag  = kwds.get('tag', void)
     s = ref(source, weak)
     h = ref(handler, weak)
+    #if tag is not void: h.tag = tag
     if not registry.has_key(s):
         registry[s] = {}
     if not registry[s].has_key(event):
@@ -39,19 +54,22 @@ def link(source, event, handler, weak=0):
     if not h in registry[s][event]:
         registry[s][event].append(h)
 
-def unlink(source, event, handler):
-    'Unlink an event handler from an event pattern.'
+#def unlink(source, event, handler, tag=void):
+def unlink(*args, **kwds):
+    'Unlink an event handler from a source and event.'
+    assert len(args) < 4, 'link takes only three positional arguments'
+    if len(args) == 2:
+        source, handler = args; event = 'default'
+    else:
+        source, event, handler = args
+    tag = kwds.get('tag', void)
     h = ref(handler, weak=0)
-    for lst in lookup(source, event):
+    for lst in lookup(source, event, tag):
         try:
             lst.remove(h)
         except (KeyError, ValueError): pass
 
-def set_time(args):
-    if not args.has_key('time'):
-        args['time'] = time.time()
-
-def lookup(source, event):
+def lookup(source, event, tag=void):
     source = ref(source, weak=0)
     lists = []
     sources = [source]
@@ -61,12 +79,13 @@ def lookup(source, event):
     for s in sources:
         for e in events:
             try:
-                lists.append(registry[s][e])
+                h = registry[s][e]
+                if tag == void or getattr(h,'tag',void):
+                    lists.append(registry[s][e])
             except KeyError: pass
     return lists
 
-# TODO: Add defaults etc.
-def send(source, event, loop=0, **kw):
+def send(source, event='default', tag=void, loop=0, **kw):
     'Call the appropriate event handlers with the supplied arguments. \
     As a side-effect, dead handlers are removed from the candidate lists.'
     args = {'source': source, 'event': event, 'loop': loop}
@@ -74,8 +93,8 @@ def send(source, event, loop=0, **kw):
     if not loop: source_stack.append(id(source))
     try:
         results = []
-        set_time(args)
-        for handlers in lookup(source, event):
+        args.setdefault('time', time.time())
+        for handlers in lookup(source, event, tag):
             live_handlers = []
             for r in handlers:
                 obj = r.obj
@@ -111,35 +130,3 @@ def unlinkMethods(obj):
             try:
                 unlinkHandler(attr)
             except: pass
-
-"""
-class Event:
-    __frozen = 0
-    def __init__(self, **kwds):
-        self.__dict__.update(kwds)
-    def __setattr__(self, name, value):
-        if not self.__frozen:
-            self.__dict__[name] = value
-        else:
-            raise TypeError, 'object has been frozen'
-    def freeze(self):
-        if not self.__frozen:
-            self.__frozen = 1
-            
-class CallbackAdapter:
-    def send(self, event):
-        '''
-        If self has a proper callback, call it, then call global
-        send().
-        '''
-        if not hasattr(event, 'source'):
-            event.source = self
-        set_time(event)
-        event.freeze()
-        callback = getattr(self, event.type, None)
-        if callback:
-            result = callback(event)
-        results = send(event)
-        if results: return [result] + results
-        else: return result
-"""

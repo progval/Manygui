@@ -15,6 +15,8 @@ def ref(obj, weak, plain=0):
     else:
         return StrongReference(obj)
 
+def mapping(init={}): return RefKeyDictionary(init)
+
 def is_callable(obj):
     if callable(obj): return 1
     try:
