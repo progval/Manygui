@@ -10,12 +10,13 @@ cvs = Canvas(size=win.size)
 win.add(cvs)
 
 def click(x, y, **kw):
-    print 'Mouse clicked at (%i, %i)' % (x, y)
+    print '[Mouse clicked at (%i, %i)]' % (x, y)
+    if 30 <= x <= 100 and 30 <= y <= 100:
+        print 'Yay! You clicked the round rect!'
+
 link(cvs, 'click', click)
 
 # Taken from http://piddle.sourceforge.net/sample1.html
-
-# FIXME: Some of this is *definitely* not quite right yet...
 
 cvs.defaultLineColor = Color(0.7,0.7,1.0)    # light blue
 cvs.drawLines(map(lambda i:(i*10,0,i*10,300), range(30)))
