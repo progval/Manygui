@@ -1,20 +1,27 @@
 
-Goals for version 0.1:
-----------------------
+Remaining objectives for version 0.1:
+-------------------------------------
+Tentative release date: December 10th, 2001
 
-* Integrate the signal/slot architecture into the basic
-  callback mechanism and document/view behaviour;
-  simplify the widget API by detaching models
+* Finalise signal system/API
+
+* Integrate the signa system into the basic callback
+  mechanism
+
+* Simplify the widget API by detaching models, using
+  signals
 
 * Adjust defaults, and add proper window tiling
 
-* Add Frame class
+* Add simple Frame class
 
-* Make new Windows invisible until event loop is entered
-  or re-entered, e.g. after a callback
+* Separate layout mechanism from the Frame class (including
+  the place() method), using signals
 
-Goals for version 0.2:
-----------------------
+
+Objectives for version 0.2:
+---------------------------
+Tentative release date: February 30th, 2002
 
 * Add a dialog class
 
@@ -25,8 +32,10 @@ Goals for version 0.2:
 * Add full event system, based on signal()
 
 * Add a grid-based layout mechanism
+  (May require minimum_size and preferred_size properties)
 
-* Add support for borders?
+* Refactor to reduce code duplication, simplify the backend
+  API, and reduce coupling between core and backends
 
 Longer term goals:
 ------------------
@@ -49,5 +58,9 @@ Longer term goals:
 Smaller issues:
 ---------------
 
-* Merge .add() and .place() and allow several widgets as
-  positional arguments?
+* Add support for borders?
+
+* Make new Windows invisible until event loop is entered
+  or re-entered, e.g. after a callback
+  (Currently works, more or less "by default", but isn't
+  properly designed/implemented.)
