@@ -921,21 +921,95 @@
     which may be used by the operating system or window
     manager to identify the window to the user in various ways.</para>
 
-    <para><strong>TBD:</strong></para>
+  </section>
+
+  <section>
+    <title>Planned Components</title>
+
+    <para>The following components are planned as part of release &shortversion;.
+    </para>
+
+    <para><strong>Note:</strong> The current API description is very
+    tentative.</para>
+
+    <para><strong>class Canvas</strong></para>
 
     <codelisting>
-      <line>Canvas</line>
-      <line>ComboBox</line>
-      <line>Dialog</line>
-      <line>FileDialog</line>
-      <line>Menu</line>
-      <line>MenuBar</line>
-      <line>MenuItem</line>
-      <line>ProgressBar</line>
-      <line>StatusBar</line>
-      <line>Notebook</line>
-      <line>Table</line>
-      <line>TreeBox</line>
+      <line>TBD</line>
+    </codelisting>
+
+    <para><strong>class ComboBox</strong></para>
+
+    <codelisting>
+      <line>box.items             -- C.f. ListBox</line>
+    </codelisting>
+
+    <para><strong>class Dialog</strong></para>
+
+    <codelisting>
+      <line>TBD</line>
+    </codelisting>
+
+    <para><strong>class FileDialog</strong></para>
+
+    <codelisting>
+      <line>TBD</line>
+    </codelisting>
+
+    <para><strong>class Menu</strong></para>
+
+    <codelisting>
+      <line>menu.add(item)        -- Add a MenuItem</line>
+    </codelisting>
+
+    <para><strong>class MenuBar</strong></para>
+
+    <codelisting>
+      <line>menubar.add(menu)     -- Add a Menu</line>
+    </codelisting>
+
+    <para>A <code>MenuBar</code> is added to a <code>Window</code>
+    with <code>win.add(bar)</code>. This will automatically set
+    <code>win.menubar</code> to <code>bar</code>.</para>
+
+    <para><strong>class MenuItem</strong></para>
+
+    <codelisting>
+      <line>item.text             -- The MenuItem text</line>
+    </codelisting>
+
+    <para><strong>class ProgressBar</strong></para>
+
+    <codelisting>
+      <line>bar.value             -- Progress (from 0 to 1)</line>
+    </codelisting>
+
+    <para><strong>class StatusBar</strong></para>
+
+    <codelisting>
+      <line>bar.text              -- StatusBar text</line>
+    </codelisting>
+
+    <para><strong>class Notebook</strong></para>
+
+    <codelisting>
+      <line>book.add(frame)       -- Add a Frame</line>
+    </codelisting>
+
+    <para>The <code>Frame</code>s added to a <code>Notebook</code>
+    should have their <code>title</code> attribute set. This will be
+    used as the text on the tabs of the <code>Notebook</code>.</para>
+
+    <para><strong>class Table</strong></para>
+
+    <codelisting>
+      <line>TBD</line>
+    </codelisting>
+
+    <para><strong>class TreeBox</strong></para>
+
+    <codelisting>
+      <line>TBD</line>
     </codelisting>
 
   </section>
