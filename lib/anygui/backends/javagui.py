@@ -4,8 +4,9 @@ import sys
 __all__ = '''
 
   Application
-  WindowWrapper
   LabelWrapper
+  ListBoxWrapper
+  WindowWrapper
 
 '''.split()
 
@@ -64,6 +65,10 @@ class Wrapper(AbstractWrapper):
 
     # @@@ Cookie-cutter from tkgui
     def enterMainLoop(self):
+        #FIXME: For LabelWrappers, the following is false, but for ListBoxWrappers, it
+        #is true, something which makes ListBoxWrappers sort of ... not work. :P
+        #[mlh20020813]
+        #assert isDummy(self.proxy.state['container'].wrapper.widget)
         self.proxy.push() 
 
     # internalDestroy?
@@ -151,8 +156,6 @@ class ComponentWrapper(Wrapper):
             return self.widget.text
         else:
             return "" # @@@ What would be the best behaviour here? Should there be an exception?
-
-# @@@ -------------------- Continue here --------------------
           
 ################################################################
 
@@ -163,6 +166,72 @@ class LabelWrapper(ComponentWrapper):
         widget.horizontalAlignment = swing.SwingConstants.LEFT # @@@ Should be settable from Proxy
         widget.verticalAlignment = swing.SwingConstants.TOP    # @@@ Should be settable from Proxy
         return widget
+
+
+################################################################
+
+class JScrollableListBox(swing.JPanel):
+    # Replacement for swing.JList
+
+    def __init__(self):
+        self._jlist = swing.JList()
+        self.layout = awt.BorderLayout()
+        self._jscrollpane = swing.JScrollPane(self._jlist)
+        self.add(self._jscrollpane, awt.BorderLayout.CENTER)
+
+    def getModel(self):
+        return self._jlist.model
+
+    def setSelectionMode(self, mode):
+        self._jlist.selectionMode = mode
+
+    def getSelectedIndex(self):
+        return self._jlist.selectedIndex
+
+    def setSelectedIndex(self, index):
+        self._jlist.selectedIndex = index
+
+    def setListData(self, items):
+        self._jlist.setListData(items)
+
+    def setMouseReleased(self, callback):
+        self._jlist.mouseReleased = callback
+
+
+class ListBoxWrapper(ComponentWrapper):
+
+    def widgetFactory(self, *args, **kwds):
+        widget = JScrollableListBox()
+        widget.setSelectionMode(swing.ListSelectionModel.SINGLE_SELECTION)
+        return widget
+
+    def setSelection(self, selection):
+        self.widget.setSelectedIndex(selection)
+        
+    def getSelection(self):
+        if isDummy(self.widget): return 0
+        return self.widget.getSelectedIndex()
+
+    def setItems(self, items):
+        temp = java.util.Vector()
+        for item in items:
+            temp.addElement(str(item))
+        self.widget.setListData(items)
+
+    def widgetSetUp(self):
+        # Won't work because it (1) reacts to programmatic
+        # changes, and (2) reacts to both mouse-down and
+        # mouse-up events:
+        # self._java_comp.valueChanged = self._java_clicked
+
+        # mlh20011217: Wouldn't it be OK to generate events
+        # on programmatic changes?
+            
+        # This works, however:
+        self.widget.setMouseReleased(self.clickHandler)
+
+    def clickHandler(self, event):
+        send(self, 'select')
 
 ################################################################
 
