@@ -80,16 +80,21 @@ class ComponentWrapper(AbstractWrapper):
         self.setVisible(1)
 
     def getGeometry(self):
-        l,t,r,b = win32gui.GetWindowRect(self.widget)
-        w = r-l
-        h = b-t
-
         # Gag me with a cat.
         # Child window positions are reported relative to the
         # *toplevel* window, not relative to the parent.
         # Refactor this. - jak
-        if not isinstance(self.container,WindowWrapper):
-            done = 0
+        if isinstance(self,WindowWrapper):
+            l,t,r,b = win32gui.GetClientRect(self.widget)
+            w = r-l
+            h = b-t
+            return l,t,w,h
+
+        l,t,r,b = win32gui.GetWindowRect(self.widget)
+        w = r-l
+        h = b-t
+
+        if not isinstance(self.container.wrapper,WindowWrapper):
             try:
                 if isinstance(self.proxy.container.wrapper,FrameWrapper):
                     px,py,pw,ph = self.proxy.container.geometry
@@ -98,7 +103,7 @@ class ComponentWrapper(AbstractWrapper):
                 else:
                     done=1
             except AttributeError:
-                done = 1
+                pass
 
         return l,t,w,h
 

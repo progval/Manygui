@@ -1,3 +1,4 @@
+import sys
 from anygui.Components import Component
 from types import TupleType, InstanceType, IntType, ListType
 from anygui.Exceptions import ArgumentError, UnimplementedMethod
@@ -69,6 +70,7 @@ class Frame(Component, Defaults.Frame):
                 except:
                     pass
         except:
+            print "Layout error, please contact Anygui team:",sys.exc_info()
             pass
 
     def setLayout(self,lo):
