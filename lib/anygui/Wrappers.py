@@ -181,7 +181,9 @@ class AbstractWrapper:
 
         # Move all prioritized attribs to the front.
         nameResults = zip(names,result)
-        for pri in self.constraints:
+        rcons = self.constraints[:]
+        rcons.reverse()
+        for pri in rcons:
             try:
                 idx = names.index(pri)
                 nameResults[:idx+1] = [nameResults[idx]] + nameResults[:idx]
@@ -399,17 +401,18 @@ class AbstractWrapper:
         """
         # FIXME: Deal with dummy widgets...
         if application().isRunning():
-            try:
-                widget = self.widget
-            except AttributeError:
-                widget = None
-            try:
-                assert self.widget.isDummy()
-            except (AttributeError, AssertionError):
-                if widget is None:
-                    self.widget = self.widgetFactory(*args, **kwds)
-                    self.widgetSetUp()        
-            else:
+            if self.noWidget():
+            #try:
+            #    widget = self.widget
+            #except AttributeError:
+            #    widget = None
+            #try:
+            #    assert self.widget.isDummy()
+            #except (AttributeError, AssertionError):
+            #    if widget is None:
+            #        self.widget = self.widgetFactory(*args, **kwds)
+            #        self.widgetSetUp()        
+            #else:
                 self.widget = self.widgetFactory(*args, **kwds)
                 self.widgetSetUp()
 
@@ -467,3 +470,20 @@ class AbstractWrapper:
         event handlers (those added by setUp and those added by
         enableEvent) are removed.
         """
+
+    def noWidget(self):
+        """
+        Returns true if this wrapper's widget has not yet been
+        created by the backend (i.e. it doesn't exist, or is
+        a DummyWidget).
+        """
+        try:
+            try:
+                widget = self.widget
+            except AttributeError:
+                return 1
+            assert(widget.isDummy())
+            return 1
+        except (AttributeError,AssertionError):
+            return 0
+
