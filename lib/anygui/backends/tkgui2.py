@@ -70,7 +70,7 @@ class Wrapper:
         if not self in wrappers: wrappers.append(self)
         #self.makeSetterMap()
         self.proxy = proxy
-        if application().isRunning():
+        if application().isRunning(): #@ Backwards; prod should check whether the app is running
             self.prod()
 
     def prod(self):
@@ -79,13 +79,13 @@ class Wrapper:
         else:
             self.widget.destroy()
             self._prod()
-        self.proxy.refresh()
+        self.proxy.sync()
 
     def destroy(self):
         if self in wrappers: wrappers.remove(self)
         self.widget.destroy() #@ ?
 
-    def stateUpdate(self, state):
+    def update(self, state):
         # Should be more "intelligent":
         for key, val in state.iteritems():
             setter = getattr(self, 'set'+key[1:].capitalize(), None)

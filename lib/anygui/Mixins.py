@@ -98,23 +98,23 @@ class Attrib:
     more than one attribute at once) but uses modattr rather than setattr.
 
     # REWRITE:
-    Attrib also supplies a default refresh method, which calls all the
+    Attrib also supplies a default sync method, which calls all the
     relevant methods named set* in the connected _dependant object if
-    flag _inhibit_refresh is false.  In this release, all set* are
+    flag _inhibit_sync is false.  In this release, all set* are
     called; eventually, some kind of mechanism will use the hints to
     be more selective/optimizing.  Attrib's responsibilities include
     enforcing a calling order among set* methods.
 
 
     Note that Attrib embodies two patterns (attribute setting/getting
-    and refresh functionality) and is thus "Alexandrian dense"; cfr
+    and sync functionality) and is thus "Alexandrian dense"; cfr
     Vlissides, "Pattern Hatching", page 30, for pluses and minuses of
     such "dense" approaches and the resulting "profound" code.
     """
 
     _dependant = None
     #_all_setters = []           # no set* called until Attrib.__init__
-    _inhibit_refresh = 0        # default Attribs are always refresh-enabled
+    _inhibit_sync = 0        # default Attribs are always sync-enabled
 
     def __setattr__(self, name, value):
         if name[0]!='_':
@@ -126,14 +126,14 @@ class Attrib:
             else:
                 try: getattr(self, name).removed(self, name)
                 except: pass
-                inhibit_refresh = setter(value)
+                inhibit_sync = setter(value)
                 try: value.assigned(self, name)
                 except: pass
-                if not inhibit_refresh: self.refresh(assigned=name)
+                if not inhibit_sync: self.sync(assigned=name)
                 return
         self.__dict__[name] = value
         if name[0]!='_':
-            self.refresh(assigned=name)
+            self.sync(assigned=name)
 
     def __getattr__(self, name):
         if name[0]=='_': raise GetAttributeError(self, name)
@@ -167,7 +167,7 @@ class Attrib:
                 inhibit_update = modifier(value)
                 try: getattr(self, name).modified()
                 except: pass
-                if not inhibit_update: self.refresh(modified=name)
+                if not inhibit_update: self.sync(modified=name)
                 return
 
         # we need to perform the modification-task directly
@@ -186,7 +186,7 @@ class Attrib:
         try: old_value.modified()
         except: pass
         if name[0]!='_':
-            self.refresh(modified=name)
+            self.sync(modified=name)
 
     def __init__(self, *args, **kwds):
         # _all_setters must be computed exactly once per concrete class
@@ -209,8 +209,8 @@ class Attrib:
 
         self.set(*args, **kwds)
 
-    def refresh(self, **ignore_kw):
-        if self._inhibit_refresh: return
+    def sync(self, **ignore_kw):
+        if self._inhibit_sync: return
         # Temporary hack:
         attributes = [name for name in dir(self) if name[0] == '_']
         state = {}
