@@ -136,6 +136,7 @@ class CheckBox:
         'vstretch' : 0,
         'visible' : 1,
         'enabled' : 1,
+        'on' : 0,
         }
 
 class ListBox:
@@ -170,6 +171,8 @@ class RadioButton:
         'vstretch' : 0,
         'visible' : 1,
         'enabled' : 1,
+        'on' : 0,
+        'group' : None,
         }
 
 class RadioGroup:
