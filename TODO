@@ -26,3 +26,5 @@ Longer term goals:
 * Add advanced support for default, including default
   "shrink-wrapping" of windows and frames that aren't
   given an explicit size
+
+* Support accessibility standards
