@@ -1,0 +1,333 @@
+<html>
+<head>
+<title>Anygui Manual</title>
+<style type="text/css">
+body                    { color: #000000;
+                          background-color: #ffffff;
+                          margin: 2.0cm }
+
+a:active                { color: #ff0000; }
+a[href]:hover           { background-color: #bbeeff; }
+a:visited               { color: #551a8b; }
+a:link                  { color: #0000bb; }
+a                       { text-decoration: none }
+
+h1, h2, h3, h4, h5, h6,
+.author, .date          { font-family: tahoma, avantgarde, sans-serif;
+                          font-weight: bold;
+                          color: maroon }
+h2, h3, h4, h5, h6      { margin-left: -0.75cm }
+
+<!--
+h1                      { font-size: 180% }
+h2                      { font-size: 150% }
+h3, h4                  { font-size: 120% }
+-->
+
+code                    { font-family: monospace }
+pre, .verbatim          { color: #00008b }
+pre, code               { font-size: 90% }
+h1, .author, .date      { text-align: center }
+.date                   { padding-bottom: 2cm }
+h2                      { counter-reset: sec-num }
+h2:before               { counter-increment: chap-num;
+                          content: counter(chap-num) "." }
+h3                      { counter-reset: subsec-num }
+h3:before               { counter-increment: sec-num;
+                          content: counter(chap-num) "."
+                                   counter(sec-num) }
+h4:before               { counter-increment: subsec-num;
+                          content: counter(chap-num) "."
+                                   counter(sec-num)  "."
+                                   counter(subsec-num) }
+h2:before,
+h3:before,
+h4:before               { padding-right: 0.5cm }
+
+.note:before            { content: "Note ";
+                          font-weight: bold;
+                          color: maroon;
+                          font-family: sans-serif;
+                          padding-right: 0.8cm }
+.note                   { margin-left: 3cm;
+                          margin-right: 3cm;
+                          border-color: black;
+                          border-style: dashed;
+                          border-width: thin;
+                          padding: 6pt}
+.name                   { font-style: italic;
+                          color: green }
+h2                      { border-bottom-style: solid;
+                          border-bottom-width: thin;
+                          border-bottom-color: maroon; }
+</style>
+</head>
+<body>
+
+<h1>Anygui Manual</h1>
+<div class="author">Magnus Lie Hetland</div>
+<div class="date">August 2002</div>
+
+<h2>Introduction</h2>
+
+<p>The <span class="name">Python</span> standard library currently
+does not contain any platform-independent GUI packages. It is the goal
+of the <span class="name">Anygui</span> project to change this
+situation. There are many such packages available, but none has been
+defined as standard, so when writing GUI programs for <span
+class="name">Python</span>, you cannot assume that your user has the
+right package installed.
+</p>
+
+<p>The problem is that declaring a GUI package as standard would be
+quite controversial. There are some packages that are quite commonly
+available, such as Tkinter; but it would not be practical to require
+all installations to include it, nor would it be desirable to require
+all <span class="name">Python</span> GUI programs to use it, since
+there are many programmers who prefer other packages.
+</p>
+
+<p><span class="name">Anygui</span> tries to solve this problem in a
+manner similar to the standard anydbm package. There is no need to
+choose one package at the expense of all others. Instead, <span
+class="name">Anygui</span> gives generic access to several popular
+packages through a simple API, which makes it possible to write GUI
+applications that work with all these packages. Thus, one gets a
+platform-independent GUI module which is written entirely in <span
+class="name">Python</span>.
+</p>
+
+<p>To get the latest <span class="name">Anygui</span> distribution, or
+to get in touch with the developers, please visit the <span
+class="name">Anygui</span> website, at <code><a
+href="http://anygui.org">anygui.org</a></code>.
+</p>
+
+<p class="note">Although the <span class="name">Anygui</span> API is
+stabilising, it is not yet completely frozen.</p>
+
+<h3>Design Goals</h3>
+
+<ul>
+<li><span class="name">Anygui</span> should be an easy to use GUI
+package that may be used to create simple graphical programs, or that
+may serve as the basis for more complex application frameworks.
+</li>
+
+<li><span class="name">Anygui</span> should be a pure <span
+class="name">Python</span> package that serves as a front-end for as
+many as possible of the GUI packages available for <span
+class="name">Python</span>, in a transparent manner.
+</li>
+
+<li><span class="name">Anygui</span> should include functionality
+needed to perform most GUI tasks, but should remain as simple and
+basic as possible.
+</li>
+</ul>
+
+<h3>Structure of this Manual</h3>
+
+
+<h2>Installation</h2>
+
+<p>The <span class="name">Anygui</span> package comes in the form of a
+<code>gzip</code> compressed <code>tar</code> archive, a binary
+Windows installer and as an RPM package. The Windows installer and RPM
+package should be fairly easy to install. To install the
+<code>tar</code> archive, it you will first have to uncompress the
+archive. On <span class="name">Windows</span> this can be done with
+<span class="name">WinZip</span>. in <span class="name">Mac OS</span>,
+you can use <span class="name">StuffIt Expander</span>. In <span
+class="name">Unix</span>, first move to a directory where you'd like
+to put <span class="name">Anygui</span>, and then do something like
+the following:</p>
+
+<pre>foo:~/python$ tar xzvf anygui-0.2.tar.gz</pre>
+
+<p>If your version of tar doesn't support the <code>z</code> switch,
+you can do something like this:</p>
+
+<pre>foo:~/python$ zcat anygui-0.2.tar.gz | tar xvf</pre>
+
+<p>Another possibility is:</p>
+
+<pre>foo:~/python$ gunzip anygui-0.2.tar.gz
+foo:~/python$ tar -xvf anygui-0.2.tar</pre>
+
+<p>No matter which version you choose, you should end up with a
+directory named <code>anygui-0.2</code>.</p>
+
+<h3>Running setup.py</h3>
+
+<p>The simple way of installing <span class="name">Anygui</span> is to
+use the installation script that's included in the distribution. This
+requires <span class="name">Distutils</span> (<code><a
+href="http://www.python.org/sigs/distutils-sig">http://www.python.org/sigs/distutils-sig</a></code>),
+which is included in <span class="name">Python</span> distributions
+from version 2.0. To install the <span class="name">Anygui</span>
+package in the default location, simply run the setup script with the
+<code>install</code> command:</p>
+
+<pre>foo:~$ python setup.py install</pre>
+
+<p>This will install <span class="name">Anygui</span> in your standard
+<span class="name">Python</span> directory structure. If you don't
+have access to this directory (e.g. because <span
+class="name">Python</span> was installed by a sysadmin, and you don't
+have root access) you can install it somewhere else with the
+<code>--prefix</code> option:</p>
+
+<pre>foo:~$ python setup.py install --prefix=${HOME}/python</pre>
+
+<h3>Doing it Manually</h3>
+
+<p>Since <span class="name">Anygui</span> consists of only <span
+class="name">Python</span> code, nothing needs to be compiled. And the
+only thing needed to install <span class="name">Python</span> code is
+to ensure that the packages and modules are found by your <span
+class="name">Python</span> interpreter. This is as simple as including
+the <code>lib</code> directory of the <span class="name">Anygui</span>
+distribution in your <code>PYTHONPATH</code> environment variable. In
+<code>bash</code> (<code><a
+href="http://www.gnu.org/manual/bash/">http://www.gnu.org/manual/bash/</a></code>),
+you could do something like this:</p>
+
+<pre>foo:~$ export PYTHONPATH=$PYTHONPATH:/path/to/anygui/lib</pre>
+
+<p>To make this permanent, you should put it in your
+<code>.bash_profile</code> file, or something equivalent. If you don't
+want to mess around with this, and already have a standard directory
+where you place your <span class="name">Python</span> modules, you can
+simply copy (or move) the <code>anygui</code> package (found in
+<code>anygui-0.2/lib</code>) there, or possibly place a symlink in
+that directory to the <code>anygui</code> package.</p>
+
+<h3>Making Sure You Have a Usable GUI Toolkit</h3>
+
+<p>Once you have <span class="name">Anygui</span> installed, you'll
+want to make sure you have a usable GUI toolkit. This is easy to
+check: Simply start an interactive <span class="name">Python</span>
+interpreter and try to execute the following:</p>
+
+<pre>&gt;&gt;&gt; from anygui import *
+&gt;&gt;&gt; backend()</pre>
+
+<p>The <code>backend</code> function will return the name of the
+backend in use. If it is neither <code>'curses'</code> nor
+<code>'text'</code> you should be all set for making GUI programs with
+<span class="name">Anygui</span>. (The <code>'curses'</code> and
+<code>'text'</code> backends use plain text to emulate graphical
+interfaces on platforms that don't have them.)  <span
+class="name">Anygui</span> currently supports the following
+packages:</p>
+
+<pre class="verbatim">PythonWin  (mswgui)    <code><a href="http://starship.python.net/crew/mhammond/win32">http://starship.python.net/crew/mhammond/win32</a></code>
+Tkinter    (tkgui)     <code><a href="http://www.python.org/topics/tkinter">http://www.python.org/topics/tkinter</a></code>
+wxPython   (wxgui)     <code><a href="http://www.wxpython.org">http://www.wxpython.org</a></code>
+Java Swing (javagui)   <code><a href="http://www.jython.org">http://www.jython.org</a></code>
+PyGTK      (gtkgui)    <code><a href="http://www.daa.com.au/~james/pygtk">http://www.daa.com.au/~james/pygtk</a></code>
+Bethon     (beosgui)   <code><a href="http://www.bebits.com/app/1564">http://www.bebits.com/app/1564</a></code>
+PyQt       (qtgui)     <code><a href="http://www.thekompany.com/projects/pykde">http://www.thekompany.com/projects/pykde</a></code>
+Curses     (cursesgui) -- used when no GUI package is available
+Plain text (textgui)   -- used if curses is not available</pre>
+
+<p>Add <code>gui</code> to name returned by the <code>backend</code>
+function to get the full name of the backend module (in the
+<code>anygui.backends</code> package). For instance, the
+<code>msw</code> backend is found in
+<code>anygui.backends.mswgui</code> module.</p>
+
+<p>In general, if you end up with a text-based solution,
+<code>cursesgui</code> will be preferred over <code>textgui</code>if
+your <span class="name">Python</span>-installation has a wrorking
+<code>curses</code> module. The exception is if you are using <span
+class="name">Anygui</span> in the interactive interpreter, in which
+<code>textgui</code> will be preferred, to avoid interfering with the
+terminal and locking up the interpreter prompt. (If you'd like to, for
+some reason, you can override this behaviour with the environment
+variable <code>ANYGUI_FORCE_CURSES</code>; see the API Reference
+below.)</p>
+
+<p class="note"> The BeOS backend (<code>beosgui</code>) is currently
+not fully functional, but is included nonetheless.</p>
+
+<p>Of these, <span class="name">Tkinter</span> is compiled in by
+default in the <span class="name">MS Windows</span> distribution of
+<span class="name">Python</span> (available from <code><a
+href="http://www.python.org">http://www.python.org</a></code>), <span
+class="name">PythonWin</span> (as well as <span
+class="name">Tkinter</span>) is included in the <span
+class="name">ActiveState</span> distribution, <span
+class="name">ActivePython</span> (available from <code><a
+href="http://www.activestate.com">http://www.activestate.com</a></code>),
+and <span class="name">Java Swing</span> is automatically available in
+<span class="name">Jython</span>, the <span class="name">Java</span>
+implementation of <span class="name">Python</span>.</p>
+
+<p class="note">In <span class="name">Mac OS</span> 9, <span
+class="name">Anygui</span> (using <span class="name">Tkinter</span>)
+works with with <span class="name">Python Classic</span> and recent
+versions of <span class="name">Python Carbon</span>, but older
+versions have problems with <span class="name">Tkinter</span>.</p>
+
+<h2>Using Anygui</h2>
+
+<h2>Anygui Internals</h2>
+
+<h3>Push and Pull</h3>
+
+<h3>Widgets and Wrappers</h3>
+
+<h3>Proxies</h3>
+
+<h3>The Model-View-Controller Architecture in Anygui</h3>
+
+<h2>API Reference</h2>
+
+<h2>Contributing</h2>
+
+<p>If you want to contribute to the <span class="name">Anygui</span>
+project, we could certainly use your help. First of all, you should
+visit the <span class="name">Anygui</span> web site at <code><a
+href="http://www.anygui.org">http://www.anygui.org</a></code>,
+subscribe to the developer's mailing list
+(<code>devel@anygui.org</code>) and the user's list
+(<code>users@anygui.org</code>), and try to familiarise yourself with
+how the package works behind the scenes. Then, you may either help
+develop the currently supported GUI packages, or you may start writing
+a backend of your own. Several potential backend targets may be found
+at <code><a
+href="http://starbase.neosoft.com/~claird/comp.lang.python/python_GUI.html">http://starbase.neosoft.com/~claird/comp.lang.python/python_GUI.html</a></code>.
+</p>
+
+<h2>Anygui License</h2>
+
+<p>Copyright &copy; 2001, 2002 Magnus Lie Hetland, Thomas Heller, Alex
+Martelli, Greg Ewing, Joseph A. Knapka, Matthew Schinckel, Kalle
+Svensson, Shanky Tiwari, Laura Creighton, Dallas T. Johnston, Patrick
+K. O'Brien.</p>
+
+<p>Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the &#147;Software&#148;), to deal in the Software without
+restriction, including without limitation the rights to use, copy,
+modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:</p>
+
+<p>The above copyright notice and this permission notice shall
+be included in all copies or substantial portions of the
+Software.</p>
+
+<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+AND NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.</p>
+
+</body>
+</html>
