@@ -16,7 +16,7 @@ The only methods that should be explicitly called by the Proxy are:
   update(state)
   getPrefs()
   prod()
-  activateEvent(event)
+  enableEvent(event)
   destroy()
 
 """
@@ -217,7 +217,9 @@ class AbstractWrapper:
         nothing.
         """
         # TODO: Add default implementation with some registry of
-        # activated events?
+        # activated events? Possibly have a "reference counting"
+        # system and disable events when there are no links to them? A
+        # bit tricky to get right in the current event system...
 
     def destroy(self):
         """
