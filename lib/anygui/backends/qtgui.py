@@ -25,7 +25,7 @@ __all__ = '''
 from weakref import ref as wr
 from qt import *
 from anygui.Applications import AbstractApplication
-from anygui.Wrappers import AbstractWrapper, DummyWidget, isDummy
+from anygui.Wrappers import AbstractWrapper
 from anygui.Events import *
 from anygui.Windows import Window
 from anygui import application
@@ -94,35 +94,44 @@ class ComponentWrapper(Wrapper):
         Wrapper.__init__(self, *args, **kwds)
 
     def setX(self, x):
-        self.setGeometry(x,self.y,self.width,self.height)
+        if self.widget:
+            self.setGeometry(x,self.y,self.width,self.height)
 
     def setY(self, y):
-        self.setGeometry(self.x,y,self.width,self.height)
+        if self.widget:
+            self.setGeometry(self.x,y,self.width,self.height)
 
     def setWidth(self, width):
-        self.setGeometry(self.x,self.y,width,self.height)
+        if self.widget:
+            self.setGeometry(self.x,self.y,width,self.height)
 
     def setHeight(self, height):
-        self.setGeometry(self.x,self.y,self.width,height)
+        if self.widget:
+            self.setGeometry(self.x,self.y,self.width,height)
 
     def setPosition(self, x, y):
-        self.setGeometry(x,y,self.width,self.height)
+        if self.widget:
+            self.setGeometry(x,y,self.width,self.height)
 
     def setSize(self, width, height):
-        self.setGeometry(self.x,self.y,width,height)
+        if self.widget:
+            self.setGeometry(self.x,self.y,width,height)
 
     def setGeometry(self, x, y, width, height):
-        self.widget.setGeometry(x,y,width,height)
+        if self.widget:
+            self.widget.setGeometry(x,y,width,height)
 
     def getGeometry(self):
-        r = self.widget.geometry()
-        return (r.x(), r.y(), r.width(), r.height())
+        if self.widget:
+            r = self.widget.geometry()
+            return (r.x(), r.y(), r.width(), r.height())
 
     def setVisible(self, visible):
-        if visible:
-            self.widget.show()
-        else:
-            self.widget.hide()
+        if self.widget:
+            if visible:
+                self.widget.show()
+            else:
+                self.widget.hide()
 
     def setContainer(self, container):
         if container is None: return
@@ -134,7 +143,7 @@ class ComponentWrapper(Wrapper):
         #     return
         parent = container.wrapper.widget
         try:
-            assert parent.isDummy()
+            assert parent is None
         except (AttributeError, AssertionError):
             # self.destroy()
             self.create(parent)
@@ -142,21 +151,24 @@ class ComponentWrapper(Wrapper):
             self.setupChildWidgets()
 
     def setEnabled(self, enabled):
-           self.widget.setEnabled(enabled)
+        if self.widget:
+            self.widget.setEnabled(enabled)
 
     def setText(self, text):
-        try:
-            self.widget.setText(QString(text))
-        except:
-            pass
+        if self.widget:
+            try:
+                self.widget.setText(QString(str(text)))
+            except:
+                pass
 
     def getText(self):
-        try:
-            return str(self.widget.text())
-        except:
-            # Widget has no text.
-            return ""
-
+        if self.widget:
+            try:
+                return str(self.widget.text())
+            except:
+                # Widget has no text.
+                return ""
+            
 #    def setText(self, text):
 #        try: self.widget
 #
@@ -217,20 +229,24 @@ class ListBoxWrapper(ComponentWrapper):
             self.connected = 1
 
     def setItems(self, items):
-        self.widget.clear()
-        self.items = items[:]
-        for item in self.items:
-            self.widget.insertItem(QString(str(item)),-1)
+        if self.widget:
+            self.widget.clear()
+            self.items = items[:]
+            for item in self.items:
+                self.widget.insertItem(QString(str(item)),-1)
 
     def getItems(self):
-        return self.items
+        if self.widget:
+            return self.items
 
     def setSelection(self, selection):
-        self.widget.setCurrentItem(int(selection))
+        if self.widget:
+            self.widget.setCurrentItem(int(selection))
 
     def getSelection(self):
-        selection = int(self.widget.currentItem())
-        return selection
+        if self.widget:
+            selection = int(self.widget.currentItem())
+            return selection
 
     def clickHandler(self, index):
         # self.selection = int(index)
@@ -270,10 +286,12 @@ class ToggleButtonWrapperBase(ButtonWrapperBase):
         ButtonWrapperBase.__init__(self, *args, **kws)
 
     def setOn(self, on):
-        self.widget.setChecked(on)
+        if self.widget:
+            self.widget.setChecked(on)
 
     def getOn(self):
-        return self.widget.isChecked()
+        if self.widget:
+            return self.widget.isChecked()
 
 #--------------------------------------------------------------#
 
@@ -335,10 +353,11 @@ class TextWrapperBase(ComponentWrapper):
             self.connected = 1
 
     def setEditable(self, editable):
-        self.widget.setReadOnly(not editable)
+        if self.widget:
+            self.widget.setReadOnly(not editable)
 
     def qtText(self):
-        return QString(self.text)
+        return QString(str(self.text))
 
     def keyPressHandler(self, event):
         if DEBUG: print 'in keyPressHandler of: ', self.widget
@@ -381,17 +400,19 @@ class TextFieldWrapper(TextWrapperBase):
         return QLineEdit(*args, **kwds)
 
     def setSelection(self, selection):
-        if DEBUG: print 'in setSelection of: ', self.widget
-        start, end = selection
-        self.widget.setSelection(start, end-start)
+        if self.widget:
+            if DEBUG: print 'in setSelection of: ', self.widget
+            start, end = selection
+            self.widget.setSelection(start, end-start)
         
     def getSelection(self):
-        if DEBUG: print 'in getSelection of: ', self.widget
-        pos = self.widget.cursorPosition()
-        if self.widget.hasSelectedText():
-            return self.widget.getSelection()[1:] #ignore bool
-        else:
-            return pos, pos
+        if self.widget:
+            if DEBUG: print 'in getSelection of: ', self.widget
+            pos = self.widget.cursorPosition()
+            if self.widget.hasSelectedText():
+                return self.widget.getSelection()[1:] #ignore bool
+            else:
+                return pos, pos
 
 #--------------------------------------------------------------#
 
@@ -426,7 +447,7 @@ class TextAreaWrapper(TextWrapperBase):
 
     def qtGetParagraphs(self):
         paras = []
-        if not self.noWidget():
+        if self.widget is not None:
             for n in range(self.widget.paragraphs()):
                 paras.append(str(self.widget.text(n)) + '\n')
         if DEBUG:
@@ -491,8 +512,8 @@ class WindowWrapper(ComponentWrapper):
         ComponentWrapper.__init__(self, proxy)
 
     def setTitle(self, title):
-        if not self.noWidget():
-            self.mainWindow.setCaption(QString(title))
+        if self.widget is not None:
+            self.mainWindow.setCaption(QString(str(title)))
 
     def widgetSetUp(self):
         if not self.connected:
@@ -553,7 +574,7 @@ class WindowWrapper(ComponentWrapper):
     def setContainer(self, container):
         if container is None: return
         try:
-            assert(self.widget.isDummy())
+            assert(self.widget is None)
             self.create()
         except (AttributeError):
             self.create()
@@ -584,7 +605,7 @@ class WindowWrapper(ComponentWrapper):
         self.mainWindow.destroy()
 
     def setGeometry(self, x, y, width, height):
-        if not self.noWidget():
+        if self.widget is not None:
             g = self.widget.geometry()
             dx = -self.widget.x()
             dy = -self.widget.y()
@@ -594,7 +615,7 @@ class WindowWrapper(ComponentWrapper):
                                         width + dw, height + dh)
 
     def getGeometry(self):
-        if not self.noWidget():
+        if self.widget is not None:
             r = self.widget.geometry()
             p = self.widget.mapToGlobal(QPoint(r.x(), r.y()))
             return (p.x(), p.y(), r.width(), r.height())
@@ -626,10 +647,10 @@ class MenuItemMixin:
     parentWidget = None
 
     def widgetFactory(self,*args,**kws):
-        return QtMenuDummy()
+        return None
 
     def createIfNeeded(self):
-        if self.noWidget(): self.create()
+        if self.widget is None: self.create()
 
     def setEnabled(self,enabled):
         if self.proxy.container is None or self.proxy.container.wrapper.noWidget():
@@ -642,7 +663,7 @@ class MenuItemMixin:
                 return
             if self.proxy in self.proxy.container.contents:
                 self.proxy.container.contents.remove(self.proxy)
-            self.widget = DummyWidget()
+            self.widget = None
             self.proxy.container.wrapper.rebuild()
         else:
             self.createIfNeeded()
@@ -663,9 +684,6 @@ class MenuItemMixin:
     def internalDestroy(self):
         pass
 
-class QtMenuDummy:
-    pass
-
 class MenuWrapper(MenuItemMixin, ComponentWrapper):
 
     def widgetFactory(self,*args,**kws):
@@ -679,7 +697,7 @@ class MenuWrapper(MenuItemMixin, ComponentWrapper):
                 self.proxy.container.contents.remove(self.proxy)
             #print "DESTROYING",self
             self.widget.destroy()
-            self.widget = DummyWidget()
+            self.widget = None
             self.proxy.container.wrapper.rebuild()
         else:
             if container.wrapper.noWidget():
@@ -712,7 +730,7 @@ class MenuWrapper(MenuItemMixin, ComponentWrapper):
 
         parent = self.proxy.container.wrapper.widget
         if DEBUG: print "\nREBUILDING: ", self,self.proxy.contents
-        if not self.noWidget():
+        if self.widget is not None:
             self.widget.clear()
         else:
             if isinstance(self.proxy.container, Window):
