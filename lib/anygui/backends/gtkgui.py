@@ -167,13 +167,13 @@ class ListBox(ComponentMixin, AbstractListBox):
 
     def _backend_selection(self):
         if self._gtk_comp:
-            return self._gtk_comp._listbox.selection[0]
+            return int(self._gtk_comp._listbox.selection[0])
 
     def _ensure_items(self):
         if self._gtk_comp:
             self._gtk_comp._listbox.clear()
             for item in self._items:
-                self._gtk_comp._listbox.append([item])
+                self._gtk_comp._listbox.append([str(item)])
 
     def _ensure_events(self):
         if self._gtk_comp and not self._connected:
@@ -185,7 +185,8 @@ class ListBox(ComponentMixin, AbstractListBox):
         send(self, 'select')
 
     def _ensure_selection(self):
-        pass
+        if self._gtk_comp:
+            self._gtk_comp._listbox.select_row(int(self._selection),0)
 
 ################################################################
 
@@ -332,6 +333,7 @@ class Window(ComponentMixin, AbstractWindow):
 
     def _ensure_events(self):
         self._gtk_comp.connect('destroy', self._gtk_close_handler)
+        self._gtk_comp.connect('size_allocate', self._gtk_resize_handler)
 
     def _ensure_title(self):
         if self._gtk_comp:
@@ -344,11 +346,11 @@ class Window(ComponentMixin, AbstractWindow):
         _app._window_deleted()
     
     def _gtk_resize_handler(self, *args):
-        w = self._qt_comp.width()
-        h = self._qt_comp.height()
+        w = self._gtk_comp.get_allocation()[2] #width
+        h = self._gtk_comp.get_allocation()[3] #height
         dw = w - self._width
         dh = h - self._height
-        #self.modify(width=w, height=h)
+        #self.modify(width=w, height=h) #this is broken!
         self._width = w
         self._height = h
         self.resized(dw, dh)
