@@ -43,7 +43,7 @@ for frm, i in zip(fms,range(num)):
     win.add(frm,top=60,left=10,right=10,bottom=10,hstretch=1,vstretch=1)
 callbacks = []
 for i in range(num):
-    def callback(i=i,*args,**kws): # Store the index
+    def callback(event,i=i,*args,**kws): # Store the index
         for j in range(num):
             if j!=i:
                 fms[j].visible = 0

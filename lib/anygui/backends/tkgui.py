@@ -68,30 +68,44 @@ class Wrapper(AbstractWrapper):
 # layout_data attribute too... Hm.)
 class ComponentWrapper(Wrapper):
 
+    visible=1
+
     def setX(self, x):
+        if not self.visible: return
         self.widget.place(x=x)
 
     def setY(self, y):
+        if not self.visible: return
         self.widget.place(y=y)
 
     def setWidth(self, width):
+        if not self.visible: return
         self.widget.place(width=width)
 
     def setHeight(self, height):
+        if not self.visible: return
         self.widget.place(height=height)
 
     def setPosition(self, x, y):
+        if not self.visible: return
         self.widget.place(x=x, y=y)
 
     def setSize(self, width, height):
+        if not self.visible: return
         self.widget.place(width=width, height=height)
 
     def setGeometry(self, x, y, width, height):
+        if not self.visible: return
         self.widget.place(x=x, y=y, width=width, height=height)
 
     def setVisible(self, visible):
-        if not visible: self.widget.place_forget()
-        # Other case handled by geometric setters
+        print self,"visible=",visible
+        if not visible:
+            self.widget.place_forget()
+            self.visible=0
+        else:
+            self.visible=1
+            self.proxy.push('x','y','width','height')
 
     def setContainer(self, container):
         if container is None:
