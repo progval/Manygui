@@ -1,7 +1,5 @@
 
-# TODO:
-# - Add total consistency check (when supplied with no relevant defs)
-# - Add consistency check for ordinary updates
+class IllegalState(Exception): pass
 
 def addSubKey(dict, key, subkey):
     dict.setdefault(key, {})[subkey] = 1
@@ -42,8 +40,12 @@ class RuleEngine:
         self.rules[whole] = rule
 
     def check(self, state):
-        # Check that no rules cause any change...
-        pass
+        names = self.parts.copy()
+        names.update(self.whole)
+        names = names.keys()
+        for name in names:
+            if not state[name] == self.newValue(name, state, {}):
+                raise IllegalState('inconsistent attribute values')
     
     def sync(self, state, defs):
         undef = {}
@@ -51,15 +53,14 @@ class RuleEngine:
             undef.update(self.getChildren(name))
             undef.update(self.getParents(name))
             undef.update(self.getSpouses(name))
-        if not undef: # Is this correct?
+        if not undef:
             self.check(state)
-            return
         stable = 0
         while undef and not stable:
             stable = 1
             for name in undef.keys():
                 newValue = self.newValue(name, state, undef)
-                if newValue is not None:
+                if newValue is not None: # FIXME: None is not safe here; use exception
                     state[name] = newValue
                     del undef[name]
                     stable = 0

@@ -1,5 +1,5 @@
 from unittest import TestCase, main
-from anygui.Rules import RuleEngine
+from anygui.Rules import RuleEngine, IllegalState
 
 class RectangleTestCase(TestCase):
     def setUp(self):
@@ -39,5 +39,21 @@ class RectangleTestCase(TestCase):
         self.assertEqual(state['height'], 4)
         self.assertEqual(state['position'], (1, 2))
         self.assertEqual(state['size'], (3, 4))
+
+        self.eng.sync(state, []) # No exception should be raised
+        
+        state['x'] = 2 # Inconsistent with position and geometry
+        self.assertRaises(IllegalState, self.eng.sync, state, [])
+        self.assertEqual(self.eng.sync(state, ['x']), [])
+
+        # @@@ Not implemented/working yet:
+
+        state['x'] = 42
+        state['position'] = 20, 30
+        self.assertRaises(IllegalState, self.eng.sync, state, ['x', 'position'])
+
+        state['x'] = 42
+        state['position'] = 42, 30
+        self.assertEqual(self.eng.sync(state, ['x', 'position']), [])
 
 if __name__ == '__main__': main()
