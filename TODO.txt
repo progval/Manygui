@@ -15,7 +15,8 @@ Short-term Objectives/FIXMEs
   self.modify to correctly interact with models
 
 * Either allow the creation of windows before the application object,
-  or rewrite tutorial (and other docs)
+  or rewrite tutorial (and other docs). Best solution probably to make
+  Application a Borg (and instantiate it implicitly when needed).
 
 * Fix Model classes to work with push/pull mechanism; add 'modified'
   event (or something equivalent) to allow real-time notification to
