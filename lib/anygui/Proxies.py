@@ -89,7 +89,7 @@ class Proxy(Attrib):
             assert(self.wrapper)
         except (AttributeError,AssertionError):
             return
-        self.wrapper.update(self._partialState(*names,**kwds))
+        self.wrapper.push(self._partialState(*names,**kwds))
 
     #def expandAliasedName(self,names,name):
     #    """
