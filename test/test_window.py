@@ -6,19 +6,21 @@ class MyWindow(Window):
 app = Application()
 
 win = MyWindow(title="A Standard Window",
-               width=220, height = 150)
+               width=220, height = 45)
 app.add(win)
 
 def new_window(**kw):
     win = Window(title='Yay, another window!')
-    app.add(win)
 
     # Test for flashing (should not be visible):
     for i in range(5):
         win.visible = not win.visible
     win.visible = 1
+
+    # win.open()
+    app.add(win)
     
-btn = Button(text='Create new window', size=(200,60), x=10, y=50)
+btn = Button(text='Create new window', size=(200,25), x=10, y=10)
 link(btn, new_window)
 win.add(btn)
 

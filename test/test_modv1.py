@@ -5,6 +5,7 @@ app = Application()
 g_y = 150
 
 win = Window(width = 110, height = 210)
+app.add(win)
 newbtn = None
 
 def say_hello(**kw):
