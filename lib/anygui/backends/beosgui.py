@@ -22,9 +22,7 @@ Make RadioGroups work.
 Stage 1: dodgy system assuming only one group per window [DONE]
 Stage 2: proper system using seperate BViews for each group
 
-Find out why the 2 text areas are on top of one another in
-test/test_textarea.py.  Suspect place bug, since changing sizes
-fixes the problem.
+Fix Command-Q bug.
 
 Put more comments - with the other available values, ie in
 _beos_mode, _beos_flags, etc.
@@ -114,6 +112,7 @@ class ComponentMixin(WrapThis):
     _beos_id = 0
     _beos_style = None
     _beos_msg = None
+    _beos_clicked = None
     _beos_mode = B_FOLLOW_LEFT + B_FOLLOW_TOP
     _beos_flags = B_WILL_DRAW + B_NAVIGABLE
 
@@ -203,7 +202,9 @@ class Label(ComponentMixin, AbstractLabel):
                            self._text,
                            self._beos_mode,
                            self._beos_flags)
-        return ComponentMixin._ensure_created(self)
+        result = ComponentMixin._ensure_created(self)
+        self._ensure_text()
+        return result
     
     def _ensure_created2(self):
         "Multiple Lines...Not Working Yet"
@@ -223,6 +224,7 @@ class Label(ComponentMixin, AbstractLabel):
         if self._beos_comp:
             self._beos_comp.SetText(self._text)
             self._ensure_geometry()
+            self._beos_comp.ResizeToPreferred()
 
 ##################################################################
 
@@ -325,7 +327,7 @@ class ToggleButtonMixin(ComponentMixin):
 
     def _ensure_state(self):
         if self._beos_comp is not None:
-            self._beos_comp.SetValue(self._on)
+            self._beos_comp.SetValue(self.model.value)
 
     def _ensure_enabled_state(self):
         if self._beos_comp:
@@ -333,6 +335,16 @@ class ToggleButtonMixin(ComponentMixin):
             
     def _get_on(self):
         return self._beos_comp.Value()
+    
+    #def _ensure_events(self):
+    #    ComponentMixin._ensure_events(self)
+        
+    def _beos_clicked(self):
+        val = self._get_on()
+        if val == self._on:
+            return
+        self.model.value = val
+        # self.do_action()
 
      
 class CheckBox(ToggleButtonMixin, AbstractCheckBox):
@@ -595,7 +607,7 @@ class Window(ComponentMixin, AbstractWindow):
 
     def MessageReceived(self, msg):
         """
-        BeOS hook function - this function is called whenever a BMessage is generated.
+        BeOS hook function - this function is called whenever a BMessage is received.
         The msg.what value tells us what type of BMessage it is.  We are only interested
         at this stage in those that have been defined as a self._action function.
         If the message is the right type, find the id of the object that created it, and
@@ -605,6 +617,8 @@ class Window(ComponentMixin, AbstractWindow):
             id = msg.FindString('self_id')
             for item in self._contents:
                 if item._beos_id == id:
+                    if item._beos_clicked:    # Bit of a hack?
+                        item._beos_clicked()
                     item._action()
 
     def _ensure_title(self):
@@ -666,6 +680,6 @@ class Application(WrapThis, AbstractApplication):
     def AboutRequested(self):
         about = BAlert.BAlert("About", __doc__, "Dismiss")
         about.Go()
-    
+           
     def _mainloop(self):
         self._beos_comp.Run()
