@@ -97,10 +97,14 @@ class Attrib:
     def set(self, *args, **kwds):
         return self._set_or_mod(setattr, *args, **kwds)
 
+    def rawSet(self, *args, **kwds):
+        raise NotImplementedError # FIXME
+
     def modify(self, *args, **kwds):
         return self._set_or_mod(self.__class__.modattr, *args, **kwds)
 
-    # FIXME: Add rawModify and rawSet
+    def rawModify(self, *args, **kwds):
+        raise NotImplementedError # FIXME
 
     def modattr(self, name, value):
         if name[0]!='_':
