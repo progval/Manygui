@@ -626,8 +626,6 @@
   <section>
     <title>API Reference</title>
     
-    <para>Under construction.</para>
-    
     <!--
 
     <section>
@@ -722,38 +720,70 @@
     <code>application</code> function. Calling
     <code>application</code> when no <code>Application</code> object
     has been instantiated will raise an exception.</para>
-        
+    
     <para><strong>class Application</strong></para>
+
+    <para>[Under construction]</para>
     
     <para><strong>class BooleanModel</strong></para>
+
+    <para>[Under construction]</para>
     
     <para><strong>class Button</strong></para>
+
+    <para>[Under construction]</para>
     
     <para><strong>class CheckBox</strong></para>
+
+    <para>[Under construction]</para>
     
     <para><strong>class Label</strong></para>
+
+    <para>[Under construction]</para>
     
     <para><strong>class ListBox</strong></para>
+
+    <para>[Under construction]</para>
     
     <para><strong>class ListModel</strong></para>
+
+    <para>[Under construction]</para>
     
     <para><strong>class RadioButton</strong></para>
+
+    <para>[Under construction]</para>
     
     <para><strong>class RadioGroup</strong></para>
+
+    <para>[Under construction]</para>
     
     <para><strong>def register(src, sig, slot)</strong></para>
+   
+    <para>[Under construction]</para>
     
     <para><strong>def signal(src, sig, kw)</strong></para>
+
+    <para>[Under construction]</para>
     
     <para><strong>class TextArea</strong></para>
+
+    <para>[Under construction]</para>
     
     <para><strong>class TextField</strong></para>
+
+    <para>[Under construction]</para>
     
     <para><strong>class TextModel</strong></para>
+
+    <para>[Under construction]</para>
     
     <para><strong>def unregister(src, sig, slot)</strong></para>
+
+    <para>[Under construction]</para>
     
     <para><strong>class Window</strong></para>
+
+    <para>[Under construction]</para>
     
   </section>
 
