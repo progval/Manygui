@@ -31,7 +31,6 @@ class DependencyGraph:
         self.edges = {}
         self.nodes = {}
     def add(self, src, dst):
-        # FIXME: Check that src != dst? "Self-dependency" doesn't make sense...
         self.nodes[src] = 1
         self.nodes[dst] = 1
         self.edges.setdefault(src,{})[dst] = 1
@@ -59,7 +58,6 @@ class DependencyGraph:
                     if closure.has_key((x, k)) and \
                        closure.has_key((k, y)):
                         closure[x, y] = 1
-
         for x, y in closure.keys():
             if x != y: self.add(x, y)
 
