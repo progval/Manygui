@@ -13,7 +13,7 @@ def pushed_it(**kw):
     print "Button pushed."
 
 def checked_it(**kw):
-    print "Check boxes changed to:", cb1.model.value, cb2.model.value
+    print "Check boxes changed to:", cb1.on, cb2.on
 
 def option_chosen(**kw):
     print "Hoopy option %d chosen" % rg.value
@@ -70,7 +70,7 @@ def main():
     label = Label(text = "Flavour:")
     #entry = TextField(width = 200, height = 28, text="Hi")
     entry = TextField(width = 200, height = 28)
-    entry.model.value = "Hi"
+    entry.text = "Hi"
     win.add(label, left = 10, top = (cb1, 20))
     win.add(entry, left = 10, top = (label, 10), border = 1)
 
