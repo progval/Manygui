@@ -22,7 +22,7 @@ link(b1,change_lb1)
 win2.add(b1)
 
 lb2 = Label(geometry=(1,1,36,3),text="f changes focus; q quits; c clicks")
-b2, b3 = Button(geometry=(2,4,10,3),text="A button"), Button(geometry=(12,4,12,3),text="Button 0")
+b2, b3 = Button(geometry=(2,4,10,3),text="A button"), Button(geometry=(14,4,12,3),text="Button 0")
 
 n = 0
 def change_b3(*args,**kws):

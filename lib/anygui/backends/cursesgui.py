@@ -50,11 +50,21 @@ class ComponentMixin:
     _title = "curses"
     _gets_focus = 1
 
+    # Border characters:
     def __init__(self,*args,**kws):
         #dbg("Creating %s"%self)
         self._created = 0
         self._focus = 0
         self._cpos = 1,1 # Cursor position when in focus.
+        self._LVLINE = curses.ACS_VLINE
+        self._RVLINE = curses.ACS_VLINE
+        self._UHLINE = curses.ACS_HLINE
+        self._LHLINE = curses.ACS_HLINE
+        self._ULCORNER = curses.ACS_ULCORNER
+        self._URCORNER = curses.ACS_URCORNER
+        self._LLCORNER = curses.ACS_LLCORNER
+        self._LRCORNER = curses.ACS_LRCORNER
+
 
     def _scale_xy(self,x,y):
         return (int(x*self._horiz_scale),int(y*self._vert_scale))
@@ -134,16 +144,16 @@ class ComponentMixin:
         #dbg("Screen coords %s for %s"%((x,y,w,h),self))
         x,y,w,h = self._container_intersect(x,y,w,h)
         #dbg("Container intersect %s for %s"%((x,y,w,h),self))
-        _scr.addch(y,x,curses.ACS_ULCORNER)
-        _scr.addch(y,x+w-1,curses.ACS_URCORNER)
-        _scr.addch(y+h-1,x,curses.ACS_LLCORNER)
-        _scr.addch(y+h-1,x+w-1,curses.ACS_LRCORNER)
+        _scr.addch(y,x,self._ULCORNER)
+        _scr.addch(y,x+w-1,self._URCORNER)
+        _scr.addch(y+h-1,x,self._LLCORNER)
+        _scr.addch(y+h-1,x+w-1,self._LRCORNER)
         for xx in range(x+1,x+w-1):
-            _scr.addch(y,xx,curses.ACS_HLINE)
-            _scr.addch(y+h-1,xx,curses.ACS_HLINE)
+            _scr.addch(y,xx,self._UHLINE)
+            _scr.addch(y+h-1,xx,self._LHLINE)
         for yy in range(y+1,y+h-1):
-            _scr.addch(yy,x,curses.ACS_VLINE)
-            _scr.addch(yy,x+w-1,curses.ACS_VLINE)
+            _scr.addch(yy,x,self._LVLINE)
+            _scr.addch(yy,x+w-1,self._RVLINE)
 
     def _draw_contents(self):
         if not self._created: return
@@ -220,6 +230,15 @@ class Button(ComponentMixin, AbstractButton):
     def __init__(self,*args,**kws):
         ComponentMixin.__init__(self,*args,**kws)
         AbstractLabel.__init__(self,*args,**kws)
+        self._LVLINE = ord('<')
+        self._RVLINE = ord('>')
+        self._UHLINE = ord(' ')
+        self._LHLINE = ord(' ')
+        self._ULCORNER = ord(' ')
+        self._URCORNER = ord(' ')
+        self._LLCORNER = ord(' ')
+        self._LRCORNER = ord(' ')
+
 
     def _handle_event(self,ev):
         if ev == 'c':
