@@ -62,7 +62,7 @@ class ComboBoxWrapper(Wrapper):
     """This is a generic implementation of the ComboBox that is provided for
        backends that do not provide the ComboBox widget in their respective
        toolkits. This also models the creation of Mega-widgets using the
-       Anygui GUI API."""
+       Anygui API."""
 
     _connected = 0
     _comps     = 0
@@ -77,6 +77,33 @@ class ComboBoxWrapper(Wrapper):
     _btnWidth = 0
     _lbxHeight = 0
     _cbxHeight = 0
+
+    def _getLbxY(self):
+        # ----------------------------------------
+        #      calculate position of listbox
+        # ----------------------------------------
+        # if the bottom of the list box is lower
+        # than the bottom of the containing window,
+        # then we will display the listbox
+        # above the textfield.
+        # note: this does not prevent clipping
+        #       of the listbox when the window
+        #       is too small to contain the entire
+        #       listbox widget
+        tmpComp = self.proxy.container
+        mainWindow = None
+        while not mainWindow:
+            if isinstance(tmpComp, anygui.Window):
+                mainWindow = tmpComp
+            else:
+                tmpComp = tmpComp.container
+        txtGeom = self._textFld.geometry
+        txtBtmY  = txtGeom[1] + txtGeom[3] # txtField.y + txtField.height == bottom Y
+        btmY =  txtBtmY + self._lbxHeight # bottom Y + itemLbx.height
+        if btmY > mainWindow.height:
+            return txtGeom[1] - self._lbxHeight
+        else:
+            return txtBtmY
 
 
     def _createWidgets(self):
@@ -99,7 +126,7 @@ class ComboBoxWrapper(Wrapper):
         self._itemLbx = anygui.ListBox(visible = 0,
                                        items = items,
                                        geometry = ( x,
-                                                    y + height,
+                                                    y + height, #this will be set later
                                                     width,
                                                     self._lbxHeight ))
 
@@ -148,6 +175,7 @@ class ComboBoxWrapper(Wrapper):
     def _handlePopup(self, event):
         #print '>> handling Popup...'
         self._loop = 1
+        self._itemLbx.y = self._getLbxY()
         self._itemLbx.visible = self._popupOpen = not self._popupOpen
         self._loop = 0
 
@@ -209,8 +237,9 @@ class ComboBoxWrapper(Wrapper):
                                        y,
                                        height,
                                        height)
+
             self._itemLbx.geometry =  (x,
-                                       y + height,
+                                       self._getLbxY(),
                                        width,
                                        self._lbxHeight)
             self._loop = 0
@@ -361,7 +390,7 @@ def sort_files_first(x, y):
     return cmp(x, y)
 
 SORT_RULES={ALPHABETICAL: cmp, DIRS_FIRST: sort_dirs_first,\
-            FILES_FIRST: sort_files_first}
+            FILES_FIRST:  sort_files_first}
 
 # == END SORT_RULES == #
 
