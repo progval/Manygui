@@ -1,3 +1,7 @@
+
+# NOTE: This demonstration should not be expected to work
+#       in release 0.1
+
 from anygui import *
 from anygui.Utils import log
 from anygui.Colors import *

@@ -248,7 +248,7 @@
       <para><strong>Note:</strong> <name>Anygui</name> (using
       <name>Tkinter</name>) works with <name>Mac OS</name> 9 with
       <name>Python Classic</name>. There seems to be some problems
-      with <name>Carbon</name>.</para>
+      with <name>Python Carbon</name>.</para>
 
       <para>In the future <name>Anygui</name> should hopefully work in
       almost any <name>Python</name> installation, even those which do
@@ -928,6 +928,7 @@
 
       ANYGUI_SCREENSIZE
       ANYGUI_SKIP # Test script...
+      ANYGUI_CURSES_NOHELP=1
       -->
 	
     </section>
