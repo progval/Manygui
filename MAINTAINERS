@@ -9,6 +9,7 @@ Kalle Svensson              gtkgui
 Joe Knapka                  tkgui
 Shanky Tiwari               pyqtgui*, javagui
 David Mertz                 cursesgui*
+Laura Creighton             tkgui
 
 (* backend not yet implemented)
 
