@@ -241,3 +241,17 @@ class DefaultEventMixin:
         del kw['source']
         send(self, 'default', **kw)
 
+class Container:
+    'A unfinished prototype for a container mixin.' # 20010122:mlh
+    def add(self, *args, **kwds): pass
+    def remove(self, *args, **kwds): pass
+    def clear(self): pass
+    def _get_contents(self): pass
+    def _set_contents(self): pass
+    #def _get_items(self): pass
+    #def _set_items(self, items): pass
+    def _add(self): pass
+    def _remove(self): pass
+    def _clear(self): pass
+    #def refresh(self, **kwds): pass
+    #def destroy(self): pass

@@ -201,8 +201,7 @@ class TextField(ComponentMixin, AbstractTextField):
     def _ensure_text(self):
         if self._gtk_comp:
             self._ignore_changed = 1
-            if str(self._text) != self._backend_text():
-                self._gtk_comp.set_text(str(self._text))
+            self._gtk_comp.set_text(str(self._text))
             self._ignore_changed = 0
 
     def _ensure_selection(self):
