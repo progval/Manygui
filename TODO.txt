@@ -106,6 +106,8 @@ Objectives for version 0.2:
 * Add a combobox with a default implementation in terms of simpler
   components
 
+* Add a relay mechanism to the event framework?
+
 Longer term goals:
 ------------------
 
