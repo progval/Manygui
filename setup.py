@@ -10,4 +10,5 @@ setup (name               = 'anygui',
        url                = 'http://anygui.sf.net',
        platforms          = ['Any'],
        package_dir        = {'': 'lib'},
-       packages           = ['anygui', 'anygui.backends'])
+       packages           = ['anygui', 'anygui.backends',
+                              'anygui.backends.txtutils'])
