@@ -708,6 +708,9 @@ class MenuWrapper(MenuItemMixin,AbstractWrapper):
                 return
             self.rebuild()
 
+    def setContents(self,contents):
+        self.rebuild_all()
+
     def rebuild_all(self):
         """
         Rebuild the entire menu structure starting from the toplevel menu.

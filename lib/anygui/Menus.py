@@ -50,25 +50,21 @@ class Menu(Proxy, DefaultEventMixin, Defaults.Menu):
     def addCommand(self,text="COMMAND",enabled=1,*args,**kws):
         cmdItem = MenuCommand(text=text,*args,**kws)
         self.add(cmdItem)
-        self.push()
         return cmdItem
 
     def addCheck(self,text="CHECKBOX",enabled=1,*args,**kws):
         cmdItem = MenuCheck(text=text,*args,**kws)
         self.add(cmdItem)
-        self.push()
         return cmdItem
 
     def addSeparator(self):
         sepItem = MenuSeparator()
         self.add(sepItem)
-        self.push()
         return sepItem
 
     def addMenu(self,text="MENU",enabled=1,*args,**kws):
         mnu = Menu(text=text,enabled=enabled,*args,**kws)
         self.add(mnu)
-        self.push()
         return mnu
 
     def add(self,items):
@@ -76,6 +72,7 @@ class Menu(Proxy, DefaultEventMixin, Defaults.Menu):
         for item in items:
             self.contents.append(item)
             item.container = self
+        self.push('contents')
 
     def remove(self, item):
         if item in self.contents:
