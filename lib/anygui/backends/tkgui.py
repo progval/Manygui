@@ -337,12 +337,17 @@ class TextField(ComponentMixin, AbstractTextField, DisabledTextBindings):
             start, end = self._selection
             self._tk_comp.selection_range(start, end)
 
+    def _do_ensure_selection(self,ev=None):
+        self._ensure_selection()
+
     def _ensure_editable(self):
         pass
 
     def _ensure_events(self):
         if self._tk_comp:
             self._tk_comp.bind('<KeyPress-Return>', self.do_action)
+            if EXPORTSELECTION == 'false':
+                self._tk_comp.bind('<KeyRelease-Tab>',self._do_ensure_selection)
 
 class ScrollableTextArea(Tkinter.Frame):
 
