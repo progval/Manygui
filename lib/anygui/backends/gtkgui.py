@@ -253,8 +253,16 @@ class TextField(ComponentMixin, AbstractTextField):
         if not self._ignore_changed:
             self.model.value = self._backend_text()
 
+class ScrollableTextArea(GtkScrolledWindow):
+    def __init__(self, *args, **kw):
+        GtkScrolledWindow.__init__(self, *args, **kw)
+        self._textarea = GtkText()
+        self._textarea.show()
+        self.set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC)
+        self.add_with_viewport(self._textarea)
+
 class TextArea(ComponentMixin, AbstractTextArea):
-    _gtk_class = GtkText
+    _gtk_class = ScrollableTextArea
     _event_connected = 0
     _ignore_changed = 0
 
@@ -266,35 +274,35 @@ class TextArea(ComponentMixin, AbstractTextArea):
         if self._gtk_comp:
             if self._text != self._backend_text():
                 self._ignore_changed = 1
-                p = self._gtk_comp.get_point()
-                self._gtk_comp.freeze()
-                self._gtk_comp.set_point(0)
-                self._gtk_comp.delete_text(0, -1)
-                self._gtk_comp.insert_defaults(self._text)
-                self._gtk_comp.set_point(p)
-                self._gtk_comp.thaw()
+                p = self._gtk_comp._textarea.get_point()
+                self._gtk_comp._textarea.freeze()
+                self._gtk_comp._textarea.set_point(0)
+                self._gtk_comp._textarea.delete_text(0, -1)
+                self._gtk_comp._textarea.insert_defaults(self._text)
+                self._gtk_comp._textarea.set_point(p)
+                self._gtk_comp._textarea.thaw()
                 self._ignore_changed = 0
 
     def _ensure_editable(self):
         if self._gtk_comp:
-            self._gtk_comp.set_editable(self._editable)
+            self._gtk_comp._textarea.set_editable(self._editable)
 
     def _ensure_selection(self):
         if self._gtk_comp:
             start, end = self._selection
-            self._gtk_comp.select_region(start, end)
+            self._gtk_comp._textarea.select_region(start, end)
 
     def _ensure_events(self):
         if self._gtk_comp and not self._event_connected:
             # XXX, currently updates on any change in the textfield.
             # Perhaps to CPU intensive?
-            self._gtk_comp.connect("changed", self._text_changed)
+            self._gtk_comp._textarea.connect("changed", self._text_changed)
             self._event_connected = 1
 
     def _backend_selection(self):
         if self._gtk_comp:
-            start, end = self._gtk_comp.selection_start_pos, \
-                        self._gtk_comp.selection_end_pos
+            start, end = self._gtk_comp._textarea.selection_start_pos, \
+                        self._gtk_comp._textarea.selection_end_pos
             if start > end:
                 return end, start
             else:
@@ -302,8 +310,8 @@ class TextArea(ComponentMixin, AbstractTextArea):
 
     def _backend_text(self):
         if self._gtk_comp:
-            end = self._gtk_comp.get_length()
-            return self._gtk_comp.get_chars(0, end)
+            end = self._gtk_comp._textarea.get_length()
+            return self._gtk_comp._textarea.get_chars(0, end)
 
     def _text_changed(self, *args):
         if not self._ignore_changed:
