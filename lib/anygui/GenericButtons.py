@@ -9,7 +9,7 @@ class AbstractGenericButton(AbstractComponent):
     def _set_text(self, text):
         if self._text != text:
             self._text = text
-            self._ensure_text()
+            # self._ensure_text()
 
     def _ensure_text(self):
         raise UnimplementedMethod, (self, "_ensure_text")

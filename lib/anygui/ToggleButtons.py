@@ -16,9 +16,9 @@ class AbstractToggleButton(AbstractGenericButton):
         try: self._on.value = on
         except: self._on = on
 
-    def _finish_creation(self):
-        AbstractGenericButton._finish_creation(self)
-        self._ensure_state()
+    # def _finish_creation(self):
+        # AbstractGenericButton._finish_creation(self)
+        # self._ensure_state()
 
     def _ensure_state(self):
         raise UnimplementedMethod, (self, "_ensure_state")

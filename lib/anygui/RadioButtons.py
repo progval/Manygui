@@ -25,7 +25,7 @@ class AbstractRadioButton(AbstractToggleButton, Defaults.RadioButton):
         group = self._group
         if group:
             self.on = self._value == group._value
-            self._ensure_state()
+            # self._ensure_state()
 
     def _get_value(self):
         return self._value

@@ -173,8 +173,8 @@ class Window:
 _list_attributes(Window)
 
 def shift_window():
-        Window._x += 30
-        Window._x %= 360
-        Window._y += 30
-        Window._y %= 360
+    Window._x += 30
+    Window._x %= 360
+    Window._y += 30
+    Window._y %= 360
 

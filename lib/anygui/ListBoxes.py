@@ -31,12 +31,12 @@ class AbstractListBox(AbstractComponent, Defaults.ListBox):
     
     def _set_selection(self, selection):
         self._selection = selection
-        self._ensure_selection()
+        # self._ensure_selection()
         
     def _finish_creation(self): # FIXME: Hm...
         AbstractComponent._finish_creation(self)
-        self._ensure_items()
-        self._ensure_selection()
+        # self._ensure_items()
+        # self._ensure_selection()
 
     def _ensure_items(self):
         raise UnimplementedMethod, (self, '_ensure_items')

@@ -8,12 +8,11 @@ class AbstractTextComponent(AbstractComponent):
 
     def __init__(self, *arg, **kw):
         AbstractComponent.__init__(self, *arg, **kw)
-        self.text = kw.get('text','')
 
     # text property:
 
     def _get_text(self):
-        # semikludge: replace all text if any part changed
+        # semi-kludge: replace all text if any part changed
         text = self._backend_text()
         if text is not None and text != str(self._text):
             try: self._text[:] = text
@@ -22,7 +21,7 @@ class AbstractTextComponent(AbstractComponent):
 
     def _set_text(self, text):
         self._text = text
-        self._ensure_text()
+        # self._ensure_text()
 
     def _ensure_text(self):
         raise UnimplementedMethod, (self, '_ensure_text')
@@ -37,7 +36,7 @@ class AbstractTextComponent(AbstractComponent):
     
     def _set_selection(self, selection):
         self._selection = selection
-        self._ensure_selection()
+        # self._ensure_selection()
 
     def _ensure_selection(self):
         raise UnimplementedMethod, (self, '_ensure_selection')
@@ -49,14 +48,14 @@ class AbstractTextComponent(AbstractComponent):
 
     def _set_editable(self, editable):
         self._editable = editable
-        self._ensure_editable()
+        # self._ensure_editable()
 
     def _ensure_editable(self):
         raise UnimplementedMethod, (self, '_ensure_editable')
 
 
-    def _finish_creation(self): # FIXME: Hm...
-        AbstractComponent._finish_creation(self)
-        self._ensure_text()
-        self._ensure_selection()
-        self._ensure_editable()
+    # def _finish_creation(self): # FIXME: Hm...
+        # AbstractComponent._finish_creation(self)
+        # self._ensure_text()
+        # self._ensure_selection()
+        # self._ensure_editable()

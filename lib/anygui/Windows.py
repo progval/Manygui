@@ -46,7 +46,7 @@ class AbstractWindow(AbstractFrame, Defaults.Window):
     def _set_title(self, text):
         if self._title != text:
             self._title = text
-            self._ensure_title()
+            # self._ensure_title()
 
     def _get_title(self):
         return self._title

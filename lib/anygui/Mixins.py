@@ -67,7 +67,7 @@ class Attrib:
                 return
         self.__dict__[name] = value
         if name[0]!='_':
-            # self.__dict__['_'+name] = value
+            # Hack-attempt, not working...: self.__dict__['_'+name] = value
             self.update(name=name)
 
     def __getattr__(self, name):
@@ -81,7 +81,7 @@ class Attrib:
 
     def set(self, *args, **kwds):
         for opt in args:
-            #kwds.update(opt.__dict__) # Doesn't work in Jython 2.1a1
+            # kwds.update(opt.__dict__) # Doesn't work in Jython 2.1a1
             for key, val in opt.__dict__.items():
                 kwds[key] = val
         for name, value in kwds.items():
@@ -94,7 +94,8 @@ class Attrib:
         self._all_ensures.sort()
 
         """
-        # handle explicit-attributes
+        # handle explicit-attributes -- currently disabled (breaks some
+        # top-level window geometry/sizing [?])
         try: explicit_attributes_names = self.explicit_attributes
         except AttributeError: pass
         else:

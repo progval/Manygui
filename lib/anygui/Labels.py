@@ -16,7 +16,7 @@ class AbstractLabel(AbstractComponent, Defaults.Label):
             text = text.replace('\n', ' ')
             text = text.replace('\r', ' ')
             self._text = text
-            self._ensure_text()
+            # self._ensure_text()
 
     #def _set_font(self, font):
     #    if self._font != font:

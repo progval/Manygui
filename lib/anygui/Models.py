@@ -158,7 +158,8 @@ class NumberModel(Model):
     def __div__(self, other): return self.value/other
     def __divmod__(self, other): return divmod(self.value, other)
     def __float__(self): return float(self.value)
-    def __hash__(self): return hash(self.value)
+    # not immutable, as _value can be set, so, no hash allowed:
+    # def __hash__(self): return hash(self.value)
     def __hex__(self): return hex(self.value)
     def __int__(self): return int(self.value)
     def __invert__(self): return ~ self.value
