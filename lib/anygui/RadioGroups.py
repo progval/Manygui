@@ -2,6 +2,7 @@ from anygui.Exceptions import UnimplementedMethod
 from anygui.Mixins import Attrib, DefaultEventMixin
 from anygui.Events import send
 from anygui import Defaults
+from Utils import flatten
 
 class RadioGroup(Attrib, Defaults.RadioGroup, DefaultEventMixin):
 
@@ -25,7 +26,7 @@ class RadioGroup(Attrib, Defaults.RadioGroup, DefaultEventMixin):
         send(self, 'select')
 
     def add(self, buttons):
-        for btn in buttons:
+        for btn in flatten(buttons):
             btn.group = self
 
     def remove(self, buttons):
