@@ -63,6 +63,8 @@ Loop blocking:
 >>> send(s)
 Handled!
 >>> send(t)
+>>> send(t, loop=1)
+Handled!
 
 Wrapper functions:
 

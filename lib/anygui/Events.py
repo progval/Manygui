@@ -99,14 +99,13 @@ def send(source, event='default', tag=void, loop=0, **kw):
         args.setdefault('time', time.time())
         for handlers in lookup(source, event, tag):
             live_handlers = []
-            if loop: print handlers
             for r in handlers:
-                obj = r.obj
-                if obj is not None:
-                    obj = obj()
-                    if not loop and id(obj) in source_stack: continue
                 if not r.is_dead():
                     live_handlers.append(r)
+                    obj = r.obj
+                    if obj is not None:
+                        obj = obj()
+                        if not loop and id(obj) in source_stack: continue
                     handler = r()
                     result = handler(**args)
                     if result is not None: results.append(result)
