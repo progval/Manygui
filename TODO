@@ -31,3 +31,11 @@ Longer term goals:
 * Support accessibility standards
 
 * Add a Canvas widget for full graphics support
+
+Smaller issues:
+---------------
+
+* Add proportional scaling/positioning?
+
+* Make new Windows invisible until event loop is entered
+  or re-entered (after a callback)?
