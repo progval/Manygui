@@ -7,11 +7,10 @@ from qt import *
 TRUE = 1
 FALSE = 0
 
-DEBUG = 1
+DEBUG = 0
 TMP_DBG = 1
 
 class ComponentMixin:
-
 	_qt_comp = None
 	_qt_style = None
 
@@ -29,8 +28,6 @@ class ComponentMixin:
 				new_comp = self._qt_class(parent,self._get_qt_title())
 			elif hasattr(self,'_get_qt_text') and not self._qt_class is QMultiLineEdit:
 				new_comp = self._qt_class(self._get_qt_text(),parent,str(self))
-			elif hasattr(self,'_get_qt_title'):
-				new_comp = self._qt_class(self._get_qt_title(),parent,str(self))
 			else:
 				new_comp = self._qt_class(parent,str(self))
 			self._qt_comp = new_comp
@@ -72,6 +69,22 @@ class ComponentMixin:
 	def _ensure_events(self):
 		pass
 
+class EventFilter(QObject):
+	_comp = None
+	_events = {}
+	
+	def __init__(self, parent, events):
+		QObject.__init__(self, parent._qt_comp)
+		self._comp = wr(parent)
+		self._events = events
+
+	def eventFilter(self, object, event):
+		#if DEBUG: print 'in eventFilter of: ', self._window_obj()._qt_comp
+		type = event.type()
+		if not type in self._events.keys():
+			return 0
+		self._events[type](self._comp(), event) 
+		return 1
 
 #########################################################
 
@@ -108,7 +121,7 @@ class ListBox(ComponentMixin, AbstractListBox):
 		if self._qt_comp:
 			self._qt_comp.clear()
 			for item in self._items:
-				self._qt_comp.insertItem(item,-1)
+				self._qt_comp.insertItem(QString(str(item)),-1)
 
 	def _ensure_selection(self):
 		if self._qt_comp:
@@ -116,10 +129,11 @@ class ListBox(ComponentMixin, AbstractListBox):
 
 	def _backend_selection(self):
 		if self._qt_comp:
-			return self._qt_comp.currentItem()
+			return int(self._qt_comp.currentItem())
 
 	def _qt_item_select_handler( self, item ):
 		if DEBUG: print 'in _qt_item_select_handler of: ', self._qt_comp
+		self.modify(selection=self._backend_selection())
 		#send(self,'select',index=self._qt_comp.index(item),text=str(item.text()))
 		send(self,'select')
 
@@ -138,10 +152,11 @@ class ButtonBase(ComponentMixin):
 	def _ensure_text(self):
 		if self._qt_comp:
 			if DEBUG: print 'in _ensure_text of: ', self._qt_comp
-			self._qt_comp.setText(QString(self._get_qt_text()))
+			self._qt_comp.setText(self._get_qt_text())
 
 	def _get_qt_text(self):
-		return self._text
+		if DEBUG: print 'in _get_qt_text of: ', self
+		return QString(str(self._text))
 
 class Button(ButtonBase, AbstractButton):
 	_qt_class = QPushButton
@@ -162,6 +177,7 @@ class CheckBox(ToggleButtonBase, AbstractCheckBox):
 	_qt_class = QCheckBox
 
 	def _qt_click_handler(self):
+		if DEBUG: print 'in _qt_click_handler of: ', self._qt_comp
 		val = self._qt_comp.isChecked()
 		if self.on == val:
 			return
@@ -185,6 +201,15 @@ class RadioButton(ToggleButtonBase, AbstractRadioButton):
 class TextBase(ComponentMixin, AbstractTextField):
 	_connected = 0
 
+	def _ensure_events(self):
+		if self._qt_comp and not self._connected:
+			events = {QEvent.KeyRelease: self._qt_key_press_handler.im_func,\
+					  QEvent.FocusIn:	 self._qt_got_focus_handler.im_func,\
+					  QEvent.FocusOut:	 self._qt_lost_focus_handler.im_func}
+			self._event_filter = EventFilter(self, events)
+			self._qt_comp.installEventFilter(self._event_filter)
+			self._connected = 1
+
 	def _ensure_text(self):
 		if self._qt_comp:
 			if DEBUG: print 'in _ensure_text of: ', self._qt_comp
@@ -200,9 +225,25 @@ class TextBase(ComponentMixin, AbstractTextField):
 			return str(self._qt_comp.text())
 
 	def _get_qt_text(self):
-		return QString(self._text)
+		return QString(str(self._text))
 
-	def _calc_start_end(self,text,mtxt,pos):
+	def _qt_key_press_handler(self, event):
+		if DEBUG:	
+			print 'in _qt_key_press_handler of: ', self._qt_comp
+			print 'new key is: ', str(event.key())
+		self.modify(text=self._backend_text())
+		if int(event.key()) == 0x1004: #Qt Return Key Code
+			send(self, 'enterkey')
+
+	def _qt_lost_focus_handler(self, event):
+		if DEBUG: print 'in _qt_lost_focus_handler of: ', self._qt_comp
+		#	send(self, 'lostfocus')
+
+	def _qt_got_focus_handler(self, event):
+		if DEBUG: print 'in _qt_got_focus_handler of: ', self._qt_comp
+		#	send(self, 'gotfocus')
+
+	def _qt_calc_start_end(self, text, mtxt, pos):
 		start, idx = 0, -1
 		for n in range(text.count(mtxt)):
 			idx = text.find(mtxt, idx+1)
@@ -216,11 +257,6 @@ class TextBase(ComponentMixin, AbstractTextField):
 class TextField(TextBase):
 	_qt_class = QLineEdit
 
-	def _ensure_events(self):
-		if self._qt_comp and not self._connected:
-			qApp.connect(self._qt_comp,SIGNAL('textChanged(const QString &)'),self._qt_key_press_handler)
-			self._connected = 1
-
 	def _ensure_selection(self):
 		if self._qt_comp:
 			if DEBUG: print 'in _ensure_selection of: ', self._qt_comp
@@ -230,36 +266,26 @@ class TextField(TextBase):
 
 	def _backend_selection(self):
 		if self._qt_comp:
+			if DEBUG: print 'in _backend_selection of: ', self._qt_comp
+			pos = self._qt_comp.cursorPosition()
 			if self._qt_comp.hasMarkedText():
-				if DEBUG: print 'in _backend_selection of: ', self._qt_comp
 				text = self._backend_text()
 				mtxt = str(self._qt_comp.markedText())
-				pos = self._qt_comp.cursorPosition()
-				return self._calc_start_end(text,mtxt,pos)
+				return self._qt_calc_start_end(text,mtxt,pos)
 			else:
-				return 0, 0
-
-	def _qt_key_press_handler(self, newText):
-		if DEBUG: print 'in _qt_key_pressed of: ', self._qt_comp
-		self.modify(text=self._backend_text())
-		send(self, 'enterkey')
+				return pos, pos
 
 class TextArea(TextBase):
 	_qt_class = QMultiLineEdit
-
-	def _ensure_events(self):
-		if self._qt_comp and not self._connected:
-			qApp.connect(self._qt_comp,SIGNAL('textChanged()'),self._qt_key_press_handler)
-			self._connected = 1
 
 	def _ensure_selection(self):
 		#QMultiLineEdit.setSelection is yet to be implemented...
 		#Hacked it so that it will work until the proper method can be used.
 		if self._qt_comp:
+			if DEBUG: print 'in _ensure_selection of: ', self._qt_comp
 			start, end = self._selection
-			lines = self._qt_get_lines()
-			srow, scol = self._qt_translate_row_col(lines,start)
-			erow, ecol = self._qt_translate_row_col(lines,end)
+			srow, scol = self._qt_translate_row_col(start)
+			erow, ecol = self._qt_translate_row_col(end)
 			#Enter hack...
 			self._qt_comp.setCursorPosition(srow, scol, FALSE)
 			self._qt_comp.setCursorPosition(erow, ecol, TRUE)
@@ -269,36 +295,40 @@ class TextArea(TextBase):
 
 	def _backend_selection(self):
 		if self._qt_comp:
+			if DEBUG: print 'in _backend_selection of: ', self._qt_comp
+			row, col = self._qt_comp.getCursorPosition()
+			if DEBUG: print 'cursor -> row: %s| col: %s' %(row,col) 
+			pos = self._qt_translate_position(row, col)
+			if DEBUG: print 'pos of cursor is: ', pos
 			if self._qt_comp.hasMarkedText():
-				if DEBUG: print 'in _backend_selection of: ', self._qt_comp
 				text = self._backend_text()
 				mtxt = str(self._qt_comp.markedText())
-				row, col = self._qt_comp.getCursorPosition()
-				if DEBUG: print 'row, col -> %s, %s' %(row,col) 
-				pos = self._qt_translate_position(row, col)
-				if DEBUG: print 'pos of cursor is: ', pos
-				return self._calc_start_end(text,mtxt,pos)
+				return self._qt_calc_start_end(text,mtxt,pos)
 			else:
-				return 0, 0
+				return pos, pos
 
 	def _qt_get_lines(self):
 		lines = []
 		for n in range(1,self._qt_comp.numLines()):
 			lines.append(str(self._qt_comp.textLine(n)) + '\n')
-		print 'lines are: \n', lines
+		if DEBUG: print 'lines are: \n', lines
 		return lines
 
-	def _qt_translate_row_col(self, lines, pos):
+	def _qt_translate_row_col(self, pos):
+		if DEBUG: print 'translating pos to row/col...'
+		lines = self._qt_get_lines()
 		row, col, curr_row = 0, 0, 0
 		tot_len = 0
 		for ln in lines:
 			if pos <= len(str(ln)) + tot_len:
 				row = curr_row
 				col = pos - tot_len
+				if DEBUG: print 'returning => row: %s| col: %s' %(row,col)
 				return row, col
 			else:
 				curr_row += 1
 				tot_len += len(str(ln))
+		if DEBUG: print 'returning => row: %s| col: %s' %(row,col)
 		return row, col
 
 	def _qt_translate_position(self, row, col):
@@ -311,14 +341,8 @@ class TextArea(TextBase):
 			else:
 				pos += col
 				break
-		if DEBUG: print 'returning pos -> ', pos
+		if DEBUG: print 'returning pos => ', pos
 		return pos
-
-	def _qt_key_press_handler(self):
-		if DEBUG: print 'in _qt_key_pressed of: ', self._qt_comp
-		self.modify(text=self._backend_text())
-		send(self, 'enterkey')
-
 
 ################################################################
 
@@ -327,21 +351,6 @@ class Frame(ComponentMixin, AbstractFrame):
 	_qt_style = QFrame.Plain
 
 ################################################################
-
-class EventFilter(QObject):
-	_window_obj = None
-	
-	def __init__(self, parent):
-		QObject.__init__(self, parent._qt_comp)
-		self._window_obj = wr(parent)
-
-	def eventFilter(self, object, event):
-		#if DEBUG: print 'in eventFilter of: ', self._window_obj()._qt_comp
-		if not event.type() in [QEvent.Resize]: # More??
-			return 0
-		elif event.type() == QEvent.Resize:
-			self._window_obj()._qt_resize_handler(event)
-			return 1
 
 class QWindow(QWidget): pass
 
@@ -352,14 +361,6 @@ class Window(ComponentMixin, AbstractWindow):
 	_layout = None
 	_connected = 0
 
-	def _ensure_created(self):
-		result = ComponentMixin._ensure_created(self)
-		if DEBUG: print 'in _ensure_created of: ', self._qt_comp
-		if result:
-			self._qt_frame = Frame(self._qt_comp)
-			self._ensure_title()
-		return result
-
 	def _ensure_title(self):
 		if self._qt_comp:
 			if DEBUG: print 'in _ensure_title of: ', self._qt_comp
@@ -368,9 +369,10 @@ class Window(ComponentMixin, AbstractWindow):
 	def _ensure_events(self):
 		if DEBUG: print 'in _ensure_events of: ', self._qt_comp
 		if self._qt_comp and not self._connected:
-			self._event_filter = EventFilter(self)
+			events = {QEvent.Resize: self._qt_resize_handler.im_func,\
+					  QEvent.Move:	 self._qt_move_handler.im_func}
+			self._event_filter = EventFilter(self, events)
 			self._qt_comp.installEventFilter(self._event_filter)
-			self._qt_comp.setMouseTracking(TRUE)
 			self._connected = 1
 
 	def _get_qt_title(self):
@@ -379,15 +381,27 @@ class Window(ComponentMixin, AbstractWindow):
 	def _get_panel(self):
 		return self._qt_frame
 
-	def _qt_resize_handler(self,event):
+	def _qt_resize_handler(self, event):
 		if DEBUG: print 'in _qt_resize_handler of: ', self._qt_comp
 		w = self._qt_comp.width()
 		h = self._qt_comp.height()
 		dw = w - self._width
 		dh = h - self._height
-		self.modify(width=w)
-		self.modify(height=h)
-		self.resized(dw, dh)
+		#self.modify(width=w, height=h)
+		self._width = w
+		self._height = h
+		self.resized(dw, dh)	
+
+	def _qt_move_handler(self, event):
+		if DEBUG: print 'in _qt_move_handler of: ', self._qt_comp
+		nx = self._qt_comp.x()
+		ny = self._qt_comp.y()
+		dx = nx - self._x
+		dy = ny - self._y
+		self._x = nx
+		self._y = ny
+		#self.modify(x=nx, y=ny)
+		#self.moved(dx, dy)
 
 ################################################################
 
@@ -398,11 +412,11 @@ class Application(AbstractApplication, QApplication):
 		if not argv:
 			argv = list(argv)
 			QApplication.__init__(self,argv)
-		else: 
+		else:	
 			apply(QApplication.__init__,(self,)+argv)
 		self.connect(qApp, SIGNAL('lastWindowClosed()'), qApp, SLOT('quit()'))
 
 	def _mainloop(self):
-		self.exec_loop()
+		qApp.exec_loop()
 
 ################################################################
