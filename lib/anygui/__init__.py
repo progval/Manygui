@@ -80,6 +80,9 @@ class TextField(ImpIsDelegate):
 class TextArea(ImpIsDelegate):
     _class_ = 'TextArea'
 
+class Application(ImpIsDelegate):
+    _class_ = 'Application'
+
 def application():
     """Return the global application object"""
     global _application
