@@ -4,8 +4,6 @@ _backends = 'x java wx tk beos'
 # before anygui.wishlist), and ANYGUI_DEBUG (to print out
 # stacktraces when importing backends):
 
-# FIXME: ANYGUI_WISHLIST cannot contain spaces in Jython...
-
 import os, sys
 
 if hasattr(sys, 'registry'):
