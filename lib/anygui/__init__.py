@@ -47,6 +47,7 @@ from anygui.ListBoxes        import ListBox
 from anygui.Events           import *
 from anygui.Frames           import Frame
 from anygui.LayoutManagers   import LayoutManager, Placer
+from anygui.Menus            import Menu, MenuCommand, MenuCheck, MenuSeparator
 
 ########### End Imports ###################################################
 

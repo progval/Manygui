@@ -12,6 +12,10 @@ __all__ = '''
   ListBoxWrapper
   RadioButtonWrapper
   CheckBoxWrapper
+  MenuWrapper
+  MenuCommandWrapper
+  MenuCheckWrapper
+  MenuSeparatorWrapper
 
 '''.split()
 
@@ -21,7 +25,9 @@ import Tkinter, re
 from anygui.Applications import AbstractApplication
 from anygui.Wrappers import AbstractWrapper, DummyWidget, isDummy
 from anygui.Events import *
+from anygui.Windows import Window
 from anygui import application
+from anygui.Menus import Menu, MenuCommand, MenuCheck, MenuSeparator
 
 class Application(AbstractApplication):
 
@@ -621,3 +627,171 @@ class WindowWrapper(ComponentWrapper):
 
     def widgetFactory(self, *args, **kwds):
         return Tkinter.Toplevel(*args, **kwds)
+
+class MenuItemMixin:
+
+    def widgetFactory(self,*args,**kws):
+        return TkMenuDummy()
+
+    def createIfNeeded(self):
+        if self.noWidget(): self.create()
+
+    def setEnabled(self,enabled):
+        #print "setEnabled",self,enabled
+        if self.proxy.container is None or self.proxy.container.wrapper.noWidget():
+            return
+        self.proxy.container.wrapper.rebuild_all()
+
+    def setContainer(self,container):
+        #print "MenuItemMixin.setContainer",self,container
+        if not container:
+            if self.proxy.container is None:
+                return
+            if self.proxy in self.proxy.container.contents:
+                self.proxy.container.contents.remove(self.proxy)
+            self.widget = DummyWidget()
+            self.proxy.container.wrapper.rebuild()
+        else:
+            self.createIfNeeded()
+            self.proxy.container.wrapper.rebuild()
+
+    def setText(self,text):
+        if self.proxy.container is None or self.proxy.container.wrapper.noWidget():
+            return
+        try:
+            self.proxy.container.wrapper.rebuild_all()
+        except:
+            pass
+
+    def tkEnabled(self):
+        try:
+            if self.proxy.enabled:
+                return "normal"
+            else:
+                return "disabled"
+        except:
+            pass
+
+    def enterMainLoop(self): # ...
+        pass
+
+    def internalDestroy(self):
+        pass
+
+    def __str__(self):
+        if self.noWidget():
+            widg = "NOWIDGET"
+        else:
+            widg = self.widget
+        return "%s %s@%s w%s"%(self.__class__.__name__.split('.')[-1],self.proxy.state.get('text','NONE'),id(self),widg)
+
+class TkMenuDummy:
+    pass
+
+class MenuWrapper(MenuItemMixin,AbstractWrapper):
+
+    def widgetFactory(self,*args,**kws):
+        return Tkinter.Menu(*args,**kws)
+
+    def setContainer(self,container):
+        if not container:
+            if self.noWidget:
+                return
+            if self.proxy in self.proxy.container.contents:
+                self.proxy.container.contents.remove(self.proxy)
+            #print "DESTROYING",self
+            self.widget.destroy()
+            self.widget = DummyWidget()
+            self.proxy.container.wrapper.rebuild()
+        else:
+            if container.wrapper.noWidget():
+                return
+            self.rebuild()
+
+    def rebuild_all(self):
+        """
+        Rebuild the entire menu structure starting from the toplevel menu.
+        """
+        if self.proxy.container is None:
+            return
+        if self.noWidget():
+            return
+        if self.proxy.container.wrapper.noWidget():
+            return
+        proxies = [self.proxy]
+        while not isinstance(proxies[-1],Window):
+            proxies.append(proxies[-1].container)
+        proxies[-2].wrapper.rebuild()
+
+    def rebuild(self):
+        """
+        Rebuild the menu structure of self and all children; re-add
+        self to parent.
+        """
+        if self.proxy.container is None:
+            return
+        if self.proxy.container.wrapper.noWidget():
+            return
+
+        #print "\nREBUILDING",self,self.proxy.contents
+        if not self.noWidget():
+            self.widget.delete(0,'end')
+        if self.noWidget():
+            self.create()
+        if isinstance(self.proxy.container,Window):
+            #print "Adding menubar",self,"to",self.proxy.container.wrapper
+            self.proxy.container.wrapper.widget.configure(menu=self.widget)
+        else:
+            #print "Adding cascade",self,"to",self.proxy.container.wrapper
+            try:
+                self.proxy.container.wrapper.widget.delete(self.proxy.text)
+            except:
+                pass
+            self.proxy.container.wrapper.widget.add_cascade(label=self.proxy.text,
+                                                            menu=self.widget,state=self.tkEnabled())
+        for item in self.proxy.contents:
+            if isinstance(item,Menu):
+                item.wrapper.rebuild()
+                continue
+            item.wrapper.createIfNeeded()
+            if isinstance(item,MenuCommand):
+                #print "Adding command",item.wrapper,"to",self
+                self.widget.add_command(label=item.text,command=item.wrapper.clickHandler,
+                                        state=self.tkEnabled())
+            if isinstance(item,MenuCheck):
+                #print "Adding checkbutton",item.wrapper,"to",self
+                self.widget.add_checkbutton(label=item.text,command=item.wrapper.clickHandler,
+                                            onvalue=1,offvalue=0,variable=item.wrapper.var,
+                                            state=self.tkEnabled())
+            if isinstance(item,MenuSeparator):
+                #print "Adding separator",item.wrapper,"to",self
+                self.widget.add_separator()
+
+    def enterMainLoop(self): # ...
+        self.proxy.push() # FIXME: Why is this needed when push is called in internalProd (by prod)?
+
+class MenuCommandWrapper(MenuItemMixin,AbstractWrapper):
+
+    def __init__(self,*args,**kws):
+        AbstractWrapper.__init__(self,*args,**kws)
+
+    def clickHandler(self,*args,**kws):
+        #print "CLICKED",self
+        send(self.proxy,'click',text=self.proxy.text)
+
+class MenuCheckWrapper(MenuCommandWrapper):
+
+    def __init__(self,*args,**kws):
+        MenuCommandWrapper.__init__(self,*args,**kws)
+        self.var = Tkinter.IntVar()
+
+    def setOn(self,on):
+        #print "MenuCheck.setOn",self,on
+        self.var.set(on)
+
+    def getOn(self):
+        #print "MenuCheck.getOn",self,self.var.get()
+        return self.var.get()
+
+class MenuSeparatorWrapper(MenuItemMixin,AbstractWrapper):
+    pass

@@ -2,7 +2,7 @@ from anygui.Exceptions import UnimplementedMethod
 from anygui.Attribs import Attrib
 from anygui.Events import send, DefaultEventMixin
 from anygui import Defaults
-from Utils import flatten
+from Utils import flatten,log
 
 class RadioGroup(Attrib, Defaults.RadioGroup, DefaultEventMixin):
 
@@ -13,6 +13,7 @@ class RadioGroup(Attrib, Defaults.RadioGroup, DefaultEventMixin):
         self.add(buttons)
 
     def getValue(self):
+        log(self,"getValue",self._items)
         for btn in self._items:
             if btn.on:
                 return int(btn.value)

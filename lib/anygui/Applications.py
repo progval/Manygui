@@ -1,6 +1,7 @@
 from Exceptions import UnimplementedMethod
 from Attribs import Attrib
 from Utils import flatten
+from anygui.Utils import log
 import anygui
 
 class AbstractApplication(Attrib):
@@ -16,8 +17,8 @@ class AbstractApplication(Attrib):
     def add(self, win):
         for w in flatten(win):
             self._windows.append(w)
-            win.container = self            
-            win.wrapper.prod()
+            w.container = self            
+            w.wrapper.prod()
 
     def remove(self, win):
         try:

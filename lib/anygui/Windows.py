@@ -18,3 +18,8 @@ class Window(Frame, Defaults.Window):
         except ValueError:
             # Already removed
             pass
+
+    def addMenu(self,menu):
+        self.menu = menu
+        if menu:
+            menu.container = self

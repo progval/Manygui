@@ -679,6 +679,7 @@ class Placer(LayoutManager):
                              comp.width + dw, comp.height + dh)
 
     def resized(self,dw,dh):
+        log("Resized",dw,dh,self.container)
         for c in self.container.contents:
             self.resize_component(c,dw, dh)
 

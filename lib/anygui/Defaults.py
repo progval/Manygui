@@ -198,3 +198,20 @@ class TextArea:
         'editable' : 1,
         'selection' : (0, 0),
         }
+
+class Menu:
+    _defaultEvent = 'click'
+    state = {
+        'contents' : []
+        }
+
+class MenuCommand:
+    _defaultEvent = 'click'
+    state = {}
+
+class MenuCheck:
+    _defaultEvent = 'click'
+    state = {}
+
+class MenuSeparator:
+    state = {}
