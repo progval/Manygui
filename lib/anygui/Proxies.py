@@ -91,22 +91,6 @@ class Proxy(Attrib):
             return
         self.wrapper.push(self._partialState(*names,**kwds))
 
-    #def expandAliasedName(self,names,name):
-    #    """
-    #    Expands an aliased attribute into its aliases, and adds
-    #    the aliases to names.
-    #    """
-    #    pass
-
-    #def blockedNames(self):
-    #    """
-    #    Returns a sequence of names that should not be passed to the backend Wrapper.
-    #
-    #    Should be overridden by subclasses which need to block
-    #    names. The default is an empty list.
-    #    """
-    #    return []
-
     def internalPush(self, names): # @@@ May no longer be needed!
         """
         Used for internal synchronisation in the Proxy.

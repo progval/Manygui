@@ -79,7 +79,13 @@ class AbstractWrapper:
 
         self.constraints = []
         self.addConstraint('text', 'selection')
+
         # 'container' before everything... Handler through added sync call?
+        self.prioritizedAttrs = []
+        self.addPrioritizedAttrs('container','x','y','width','height')
+        # Note: x,y,width, and height probably have no effect here, due to
+        # the way getSetters() works. I'm not sure if that's something
+        # that needs fixing or not... - jak
         
         application().manage(self)
         self.inMainLoop = 0
@@ -116,6 +122,21 @@ class AbstractWrapper:
         constraint = before, after
         if not constraint in self.constraints:
             self.constraints.append((before, after))
+
+    def addPrioritizedAttrs(self,*attrs):
+        """
+        Add a prioritized attribute. Prioritized attributes are always
+        set first, in the order in which they were added, when they appear
+        in a push() operation. Backends may use this facility to
+        express mandatory explicit ordering of attribute set operations.
+
+        NOTE: If you use a prioritized attribute in an addConstraint()
+        call, you may experience undefined behavior, disk crashes,
+        uncontrollable vomiting, or a surprise tax audit. Don't
+        do it. (Hmm, maybe this mechanism can completely replace
+        the constraint mechanism?)
+        """
+        self.prioritizedAttrs = self.prioritizedAttrs + list(attrs)
 
     def getSetters(self, attrs):
         """
@@ -163,6 +184,18 @@ class AbstractWrapper:
 
         # Make sure the order is legal:
         topologicalSort(names, result, self.constraints)
+
+        # Move all prioritized attribs to the front.
+        nameResults = zip(names,result)
+        for pri in self.prioritizedAttrs:
+            try:
+                idx = names.index(pri)
+                nameResults[:idx+1] = [nameResults[idx]] + nameResults[:idx]
+                names[:idx+1] = [names[idx]] + names[:idx]
+            except ValueError:
+                pass
+        result = [r for (n,r) in nameResults]
+        
         return result, unhandled
     
     def push(self, state):

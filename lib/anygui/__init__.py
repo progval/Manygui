@@ -39,8 +39,8 @@ from anygui.Buttons          import Button
 #from anygui                  import Colors
 from anygui.Labels           import Label
 #from anygui.CheckBoxes       import CheckBox
-#from anygui.RadioButtons     import RadioButton
-#from anygui.RadioGroups      import RadioGroup
+from anygui.RadioButtons     import RadioButton
+from anygui.RadioGroups      import RadioGroup
 from anygui.TextFields       import TextField
 from anygui.TextAreas        import TextArea
 from anygui.ListBoxes        import ListBox
@@ -62,6 +62,8 @@ __all__ = """
   TextField
   TextArea
   ListBox
+  RadioButton
+  RadioGroup
   any
   application
   backend

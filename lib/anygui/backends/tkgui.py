@@ -10,6 +10,7 @@ __all__ = '''
   TextFieldWrapper
   TextAreaWrapper
   ListBoxWrapper
+  RadioButtonWrapper
 
 '''.split()
 
@@ -106,6 +107,20 @@ class ComponentWrapper(Wrapper):
         except Tkinter.TclError:
             # Widget doesn't support -state
             pass
+
+    def setText(self,text):
+        try:
+            self.widget.configure(text=text)
+        except:
+            # Widget has no text.
+            pass
+
+    def getText(self):
+        try:
+            return self.widget.cget('text')
+        except:
+            # Widget has no text.
+            return ""
 
 class ButtonWrapper(ComponentWrapper):
 
@@ -370,6 +385,54 @@ class ListBoxWrapper(ComponentWrapper):
         return selection
     def _tk_clicked(self, event):
         send(self.proxy, 'select')
+
+class RadioButtonWrapper(ComponentWrapper):
+
+    groupMap = {}
+    
+    def __init__(self,*args,**kws):
+        ComponentWrapper.__init__(self,*args,**kws)
+        self._var = Tkinter.IntVar()
+        self._var.set(0)
+
+    def widgetFactory(self,*args,**kws):
+        kws['command'] = self._tk_clicked
+        kws['variable'] = self._var
+        theWidge=Tkinter.Radiobutton(*args,**kws)
+        return theWidge
+
+    def setOn(self,on):
+        if on:
+            self.widget.select()
+        else:
+            self.widget.deselect()
+
+    def getOn(self):
+        return self._var.get() == int(self.widget.cget('value'))
+
+    def setGroup(self,group):
+        if group is None:
+            self._var = Tkinter.IntVar()
+            self.widget.configure(variable=self._var)
+            return
+        if self.proxy not in group._items:
+            group._items.append(self.proxy)
+        try:
+            var = RadioButtonWrapper.groupMap[group]
+        except KeyError:
+            var = Tkinter.IntVar()
+            RadioButtonWrapper.groupMap[group] = var
+        self._var = var
+        self.widget.configure(variable=self._var)
+
+    def setValue(self,value):
+        self.widget.configure(value=int(value))
+
+    def getValue(self):
+        return int(self.widget.cget('value'))
+
+    def _tk_clicked(self,*args,**kws):
+        send(self.proxy,'click')
 
 class FrameWrapper(ComponentWrapper):
 

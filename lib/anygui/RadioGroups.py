@@ -6,31 +6,32 @@ from Utils import flatten
 
 class RadioGroup(Attrib, Defaults.RadioGroup, DefaultEventMixin):
 
-    # Needed by Attrib
-    def refresh(self, **ignore): pass
-
-    def __init__(self, items=[], **kw):
+    def __init__(self, buttons=[], **kw):
         Attrib.__init__(self, **kw)
         DefaultEventMixin.__init__(self)
         self._items = []
-        self.add(items)
+        self.add(buttons)
 
-    def _get_value(self):
-        return self._value
+    def getValue(self):
+        for btn in self._items:
+            if btn.on:
+                return int(btn.value)
+        return -1
 
-    def _set_value(self, value):
-        if 1 or self._value != value: # FIXME: Why is this "commented out"?
-            self._value = value
-            for item in self._items:
-                item._update_state()
-        send(self, 'select')
+    def setValue(self, value):
+        for btn in self._items:
+            btn.on = 0
+            if btn.value == value:
+                btn.on = 1
 
     def add(self, buttons):
         for btn in flatten(buttons):
-            btn.group = self
+            if btn.group != self:
+                self._items.append(btn)
+                btn.group = self
 
     def remove(self, buttons):
         for btn in buttons:
             if btn in self._items:
                 btn.group = None
-                #self._items.remove(btn)
+                self._items.remove(btn)
