@@ -112,6 +112,9 @@ Objectives for version 0.2:
   dock, MacOS menu, Windows tray, etc. with a small window as
   fallback?
 
+* Add font, alignment, and colour (etc.) attributes to all relevant
+  components.
+
 Longer term goals:
 ------------------
 
