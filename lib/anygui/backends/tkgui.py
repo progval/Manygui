@@ -223,7 +223,73 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
 
 ################################################################
 
-class TextField(ComponentMixin, AbstractTextField):
+class DisabledTextBindings:
+    """ Mixin that abstracts out all behavior needed to get
+    selectable-but-not-editable behavior out of Tk text widgets.
+    We bind all keystrokes, passing them through to the underlying
+    control when _editable is true, and ignoring all but select
+    and copy keystrokes when _editable is false. The mixed-in
+    class must provide and maintain the _editable attribute. """
+
+    def _install_bindings(self):
+        self._ctl = 0
+        self._alt = 0
+        self._shift = 0
+        self._tk_comp.bind("<Key>",self._keybinding)
+        self._tk_comp.bind("<KeyPress-Control_L>",self._ctldown)
+        self._tk_comp.bind("<KeyRelease-Control_L>",self._ctlup)
+        self._tk_comp.bind("<KeyPress-Alt_L>",self._altdown)
+        self._tk_comp.bind("<KeyRelease-Alt_L>",self._altup)
+        self._tk_comp.bind("<KeyPress-Shift_L>",self._shiftdown)
+        self._tk_comp.bind("<KeyRelease-Shift_L>",self._shiftup)
+        self._tk_comp.bind("<Key-Insert>",self._insertbinding)
+        self._tk_comp.bind("<Key-Up>",self._arrowbinding)
+        self._tk_comp.bind("<Key-Down>",self._arrowbinding)
+        self._tk_comp.bind("<Key-Left>",self._arrowbinding)
+        self._tk_comp.bind("<Key-Right>",self._arrowbinding)
+
+    # Track modifier key state.
+    def _ctldown(self,ev):
+        self._ctl = 1
+    def _ctlup(self,ev):
+        self._ctl = 0
+    def _altdown(self,ev):
+        self._alt = 1
+    def _altup(self,ev):
+        self._alt = 0
+    def _shiftdown(self,ev):
+        self._shift = 1
+    def _shiftup(self,ev):
+        self._shift = 0
+
+    def _keybinding(self,ev):
+        """ This method binds all keys, and causes them to be
+        ignored when _editable is not set. """
+        if self._editable:
+            return None
+        else:
+            # This is truly horrid. Please add appropriate
+            # code for Mac platform, someone.
+            if (ev.char == "\x03") or (ev.char == "c" and self._alt):
+                # DON"T ignore this key: it's a copy operation.
+                return None
+            return "break"
+
+    def _insertbinding(self,ev):
+        # Overrides _keybinding for the Insert key.
+        if self._editable:
+            return None
+        if self._ctl:
+            # Allow copy.
+            return None
+        return "break"
+
+    def _arrowbinding(self,ev):
+        # This method's sole reason for existence is to allow arrows
+        # to work even when _editable is false.
+        return None
+
+class TextField(ComponentMixin, AbstractTextField, DisabledTextBindings):
     _tk_class = Tkinter.Entry
 
     def _backend_text(self):
@@ -239,6 +305,12 @@ class TextField(ComponentMixin, AbstractTextField):
                 start = end = self._tk_comp.index('insert')
             return start, end
             
+    def _ensure_created(self):
+        result = ComponentMixin._ensure_created(self)
+        if result:
+            self._install_bindings()
+        return result
+
     def _ensure_text(self):
         if self._tk_comp:
             self._tk_comp.delete(0, END)
@@ -250,19 +322,11 @@ class TextField(ComponentMixin, AbstractTextField):
             self._tk_comp.selection_range(start, end)
 
     def _ensure_editable(self):
-        if self._tk_comp:
-            if self._editable:
-                state = NORMAL
-            else:
-                state = DISABLED
-            self._tk_comp.config(state=state)
+        pass
 
     def _ensure_events(self):
         if self._tk_comp:
-            self._tk_comp.bind('<KeyPress-Return>', self._tk_enterkey)
-
-    def _tk_enterkey(self, event):
-        self.do_action()
+            self._tk_comp.bind('<KeyPress-Return>', self.do_action)
 
 class ScrollableTextArea(Tkinter.Frame):
 
@@ -318,73 +382,15 @@ class ScrollableTextArea(Tkinter.Frame):
     def tag_names(self): return self._textarea.tag_names()
 
 
-# FIXME: 'Copy-Paste' inheritance...
-class TextArea(ComponentMixin, AbstractTextArea):
+class TextArea(ComponentMixin, AbstractTextArea, DisabledTextBindings):
     _tk_class = ScrollableTextArea # Tkinter.Text
 
     def _ensure_created(self):
         result = ComponentMixin._ensure_created(self)
         if result:
             self._tk_comp.config(wrap=NONE) #, wrap=WORD)
-            self._tk_comp.bind("<Key>",self._keybinding)
-            self._tk_comp.bind("<KeyPress-Control_L>",self._ctldown)
-            self._tk_comp.bind("<KeyRelease-Control_L>",self._ctlup)
-            self._tk_comp.bind("<KeyPress-Alt_L>",self._altdown)
-            self._tk_comp.bind("<KeyRelease-Alt_L>",self._altup)
-            self._tk_comp.bind("<KeyPress-Shift_L>",self._shiftdown)
-            self._tk_comp.bind("<KeyRelease-Shift_L>",self._shiftup)
-            self._tk_comp.bind("<Key-Insert>",self._insertbinding)
-            self._tk_comp.bind("<Key-Up>",self._arrowbinding)
-            self._tk_comp.bind("<Key-Down>",self._arrowbinding)
-            self._tk_comp.bind("<Key-Left>",self._arrowbinding)
-            self._tk_comp.bind("<Key-Right>",self._arrowbinding)
-            self._ctl = 0
-            self._alt = 0
-            self._shift = 0
+            self._install_bindings()
         return result
-
-    # Track modifier key state.
-    def _ctldown(self,ev):
-        self._ctl = 1
-    def _ctlup(self,ev):
-        self._ctl = 0
-    def _altdown(self,ev):
-        self._alt = 1
-    def _altup(self,ev):
-        self._alt = 0
-    def _shiftdown(self,ev):
-        self._shift = 1
-    def _shiftup(self,ev):
-        self._shift = 0
-
-    def _keybinding(self,ev):
-        """ This method binds all keys, and causes them to be
-        ignored when _editable is not set. """
-        if self._editable:
-            return None
-        else:
-            # This is truly horrid. Please add appropriate
-            # code for Mac platform, someone.
-            if (ev.char == "\x03") or (ev.char == "c" and self._alt):
-                # DON"T ignore this key: it's a copy operation.
-                return None
-            return "break"
-
-    def _insertbinding(self,ev):
-        if self._editable:
-            return None
-        if self._ctl:
-            # Allow copy.
-            return None
-        return "break"
-
-    def _arrowbinding(self,ev):
-        if self._editable:
-            return None
-        if self._shift:
-            # Allow selection.
-            return None
-        return "break"
 
     def _backend_text(self):
         if self._tk_comp:
