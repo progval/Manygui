@@ -267,6 +267,10 @@ class DisabledTextBindings:
         self._tk_comp.bind("<Key-Left>",self._arrowbinding)
         self._tk_comp.bind("<Key-Right>",self._arrowbinding)
 
+        # Easy place to put this - not _editable-related, but common
+        # to text widgets.
+        self._tk_comp.bind("<Leave>",self._update_model)
+
     # Track modifier key state.
     def _ctldown(self,ev):
         self._ctl = 1
@@ -307,6 +311,9 @@ class DisabledTextBindings:
         # This method's sole reason for existence is to allow arrows
         # to work even when _editable is false.
         return None
+
+    def _update_model(self,ev):
+        pass
 
 class TextField(ComponentMixin, AbstractTextField, DisabledTextBindings):
     _tk_class = Tkinter.Entry
@@ -351,6 +358,10 @@ class TextField(ComponentMixin, AbstractTextField, DisabledTextBindings):
             self._tk_comp.bind('<KeyPress-Return>', self.do_action)
             if EXPORTSELECTION == 'false':
                 self._tk_comp.bind('<KeyRelease-Tab>',self._do_ensure_selection)
+
+    def _update_model(self,ev):
+        self.model.about_to_update(self)
+        self.model.value = self._tk_comp.get()
 
 class ScrollableTextArea(Tkinter.Frame):
 
@@ -463,6 +474,10 @@ class TextArea(ComponentMixin, AbstractTextArea, DisabledTextBindings):
 
     def _ensure_editable(self):
         pass
+
+    def _update_model(self,ev):
+        self.model.about_to_update(self)
+        self.model.value = self._tk_comp.get("1.0","end")
 
 ################################################################
 

@@ -115,6 +115,7 @@ class Observable:
     def __init__(self):
         self.views = []
         self.hints = []
+        self._last_updater = None
 
     def add_view(self,view,callback=None):
         """
@@ -148,7 +149,7 @@ class Observable:
         # Notify everything that's left... carefully.
         for vv in self.views:
             view = vv[0]()
-            if view is not None:
+            if view is not None and view is not self._last_updater:
                 if vv[1] is not None:
                     # Call the custom callback. We have to use a name for this; if
                     # we try using a bound method we end up back in circular-reference
@@ -174,3 +175,6 @@ class Observable:
         """
         self.raw_notify_views(change=self.hints)
         self.hints = []
+
+    def about_to_update(self,view):
+        self._last_updater = view
