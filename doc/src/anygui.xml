@@ -532,7 +532,20 @@
     <section>
       <title>The update Method</title>
 
-      <para>[[@@@ TBD]]</para>
+      <para>The <code>modify</code> method is used to modify
+      attributes in-place, e.g. to keep them in sync with a
+      widget. This is done automatically when you change a widget
+      through the graphical interface. In a way, the
+      <code>update</code> method works the other way: If you modify an
+      attribute, you can call the <code>update</code> method to keep
+      the widget's appearance in sync with its state. When you assign
+      to an attribute, <code>update</code> is called automatically;
+      you only have to call it yourself if you have an attribute which
+      is a mutable object, and you modify that object.</para>
+
+      <para>For more info about the use of <code>update</code>, see
+      the section "About Models, Views, and Controllers",
+      below.</para>
 
     </section>
 
@@ -578,7 +591,13 @@
       containing <code>Frame</code> is resized. (The vertical version
       is <code>vstretch</code>.)</para>
 
-      <para>[[@@@ Options objects]]</para>
+      <para>Just like in component constructors, you can use
+      <code>Options</code> objects in the <code>add</code> method,
+      after the component to be added:</para>
+
+      <codelisting>
+	<line>win.add(lab, opt, left=10)</line>
+      </codelisting>
 
       <section>
 	<title>Placing More Than One Widget</title>
@@ -599,9 +618,10 @@
 	<para><strong>Note:</strong> Remember to enclose your
 	components in a sequence (such as a tuple or a list), since
 	<code>add</code> allows you to use more positional arguments,
-	but will treat them differently. For more information see the
-	section about the <code>Frame</code> class in the API
-	Reference below.</para>
+	but will treat them differently. If you want to use
+	<code>Options</code> objects, place them outside (after) the
+	sequence. For more information see the section about the
+	<code>Frame</code> class in the API Reference below.</para>
 
       </section>
 
@@ -733,7 +753,26 @@
       generate an event (of the type <code>default</code>) when they
       are modified.</para>
 
-      <para>[[@@@ Example]]</para>
+      <para>Example:</para>
+
+      <codelisting>
+	<line>from anygui import *</line>
+	<line>>>> mdl = BooleanModel()</line>
+	<line>>>> mdl.value = 1</line>
+	<line>>>> def model_changed(**kw):</line>
+	<line>>>>     print 'The model has changed!'</line>
+	<line></line>
+	<line>>>> link(mdl, model_changed)</line>
+	<line>>>> mdl.value = 0</line>
+	<line>The model has changed</line>
+	<line>>>> mdl.value = 0</line>
+	<line>The model has changed</line>
+      </codelisting>
+
+      <para>Note the last two lines: We haven't really changed the
+      model, but the event handler is called nonetheless. If you want
+      to know whether the model really changed, you must retain a copy
+      of its state, and compare the new value.</para>
 
     </section>
 
@@ -753,8 +792,6 @@
 
     <section>
       <title>RadioButtons and RadioGroups</title>
-
-      <para>[[@@@ Behaviour undefined for buttons without group]]</para>
 
       <para><code>RadioButton</code>s are toggle buttons, just like
       <code>CheckBox</code>es. The main differences are that they look
@@ -783,8 +820,24 @@
 	<line>rbn = RadioButton(group=grp)</line>
       </codelisting>
 
-      <!-- Document RadioGroup add method...? -->
+      <para><strong>Note:</strong> The behaviour of a
+      <code>RadioButton</code> when it does not belong to a
+      <code>RadioGroup</code> is not defined by the
+      <name>Anygui</name> API, and may vary across backend. Basically,
+      a <code>RadioButton</code> without a <code>RadioGroup</code> is
+      meaningless; use a <code>CheckBox</code> instead.</para>
 
+      <para><code>RadioGroups</code> also support an <code>add</code>
+      method, as all other <name>Anygui</name> container-like
+      objects:</para>
+
+      <para><apiname>add</apiname>(<var>button</var>)</para>
+
+      <para>Adds the <var>button</var> to the group, including setting
+      <var>button</var><code>.group</code> to the group. As with the
+      other <code>add</code> methods, the argument may be either a
+      single object, or a sequence of objects.</para>
+      
     </section>
 
     <section>
@@ -1030,8 +1083,6 @@
       [<var>event</var>,] <var>handler</var>, <var>weak</var>=0,
       <var>loop</var>=0)</para> <!-- change to [] -->
 
-      <para>[[@@@ default events in parallel with standard events]]</para>
-
       <para>Creates a link in the <name>Anygui</name> event system,
       between the <code>source</code> (any object) and the
       <code>handler</code> (any callable, or a <code>(obj,func)</code>
@@ -1043,7 +1094,7 @@
       <code>'default'</code> will be assumed. Setting
       <code>weak</code> to a true value will use weak references when
       setting up the link, so that no objects will be "kept alive" by
-      the event system. [[@@@ the link]].</para>
+      the link.</para>
 
       <para>[[@@@ Rewrite]] A send-loop occurs if an object sends an
       event "to itself" (i.e. it is the source of a call to
@@ -1105,9 +1156,21 @@
       [<var>event</var>,] <var>handler</var>)</para>
 
       <para>Undoes a call to <code>link</code> with the same
-      positional arguments.  <!-- TODO: Describe use of the "any"
+      positional arguments.  <!-- @@@ Describe use of the "any"
       value -->
       </para>
+
+      <para><strong>Default Events</strong>: When used without the
+      event argument, both <code>link</code> and <code>send</code> use
+      an event type called <code>default</code>. Most event-generating
+      components have a default event type, such as <code>click</code>
+      for <code>Button</code>s. The fact that this event type is
+      default for <code>Button</code> means that when a
+      <code>Button</code> generates a <code>click</code> event it will
+      <emphasis>also</emphasis> generate a <code>default</code>
+      event. So, if you listen to both <code>click</code> events and
+      <code>default</code> events from a <code>Button</code>, your
+      event handler will always be called twice.</para>
 
       <para><apiname>unlinkHandler</apiname>(<var>handler</var>)</para>
 
