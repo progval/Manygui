@@ -20,10 +20,13 @@ The only methods that should be explicitly called by the Proxy are:
 
 """
 
-# TODO: Add attribute dependencies, i.e. (text -> selection) etc.
-# Fix use of dir() to get attributes/methods... ("Broken" until 2.2)
-# The specificity sort (in Utils) simply counts 'And' -- should work
-# like the splitting itself.
+# TODO:
+# - Add attribute dependencies, i.e. (text -> selection) etc.
+# - Fix use of dir() to get attributes/methods... ("Broken" until 2.2)
+# - The specificity sort (in Utils) simply counts 'And' -- should work
+#   like the splitting itself.
+# - Check for the presence of 'And' in attributes (raise exception)
+# - Add dependencies/partial ordering of attributes
 
 class AbstractWrapper:
 
