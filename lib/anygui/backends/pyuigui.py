@@ -5,21 +5,21 @@ Magnus Lie Hetland, 2002-02-09
 
 '''
 
-__version__ = '$Revision$'
+__version__ = '$Revision$'[11:-2]
 
 import pyui
 
-# Move this to application object?
 wrappers = []
 
 class Application:
     
     def run(self):
         done = 1
-        import sys
+
         pyui.init(800, 600, fullscreen=1)
+        
         for wrapper in wrappers:
-            wrapper.awake()
+            wrapper.prod()
         
         while done:
             pyui.draw()
@@ -52,9 +52,9 @@ class Wrapper:
         if not self in wrappers: wrappers.append(self)
         self.proxy = proxy
 
-    def awake(self):
+    def prod(self):
         self.widget.destroy()
-        self._awake()
+        self._prod()
         self.proxy.refresh()
 
     def destroy(self):
@@ -100,7 +100,7 @@ class ComponentWrapper(Wrapper):
         if widget is not None:
             try: assert self.widget.isDummy()
             except:
-                widget.addChild(self.widget)
+                widget.addChild(self.widget, (self._x, self._y)) # ...
 
 
 class ButtonWrapper(ComponentWrapper):
@@ -109,7 +109,7 @@ class ButtonWrapper(ComponentWrapper):
         # TODO: Add call to send()
         pass
 
-    def _awake(self):
+    def _prod(self):
         self.widget = pyui.widgets.Button('Button', self._handler)        
 
     def setText(self, text):
@@ -118,8 +118,12 @@ class ButtonWrapper(ComponentWrapper):
 
 class WindowWrapper(ComponentWrapper):
 
-    def _awake(self):
+    def _prod(self):
+        # This is really a "relative layout manager"...
+        # How does one get absolute positioning?
+        layout = pyui.layouts.AbsoluteLayoutManager()
         self.widget = pyui.widgets.Frame(10, 10, 100, 100, 'Untitled')
+        self.widget.setLayout(layout)
 
     def setTitle(self, title):
         self.widget.setTitle(title)
