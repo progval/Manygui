@@ -55,6 +55,11 @@ Longer term goals:
 * Add instant model update for text widgets, not just on
   "focus lost"?
 
+* Add support for complex widgets (like wx tree widget,
+  notebook, PMW-style widgets etc) with default
+  implementations in the basic Anygui API (in the vein
+  of the piddle/sping API)
+
 Smaller issues:
 ---------------
 
