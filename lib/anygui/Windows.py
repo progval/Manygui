@@ -20,13 +20,13 @@ class AbstractWindow(AbstractFrame, Defaults.Window):
         self._ensure_destroyed()
         application()._remove_window(self)
 
-    def show(self):
-        "Alias for window.visible = 1. Needed?"
-        self._set_visible(1)
+    #def show(self):
+    #    "Alias for window.visible = 1. Needed?"
+    #    self._set_visible(1)
 
-    def hide(self):
-        "Alias for window.visible = 0. Needed?"
-        self._set_visible(0)
+    #def hide(self):
+    #    "Alias for window.visible = 0. Needed?"
+    #    self._set_visible(0)
 
     def _set_title(self, text):
         if self._title != text:
