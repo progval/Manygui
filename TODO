@@ -35,6 +35,8 @@ Longer term goals:
 
 * Add a Canvas widget for full graphics support
 
+* Add support for importing xml files through xslt?
+
 Smaller issues:
 ---------------
 
