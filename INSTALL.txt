@@ -1,7 +1,12 @@
-To install anygui, simply run the included install script with the
+To install Anygui, simply run the included setup script with the
 "install" command:
 
    python setup.py install
+
+To uninstall Anygui, run the setup script with the "uninstall"
+command:
+
+   python setup.py uninstall
 
 For information on the various options available, use:
 

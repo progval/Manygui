@@ -14,6 +14,7 @@ __all__ = """
   link
   send
   sender
+  setup
   unlink
   unlinkHandler
   unlinkMethods
@@ -104,6 +105,10 @@ def backend():
     if not _backend:
         raise RuntimeError, 'no backend exists'
     return _backend
+
+def setup(self, **kwds):
+    'Used to configure Anygui'
+    raise NotImplementedError
 
 # Pass the backend namespace through:
 _backend_passthrough()
