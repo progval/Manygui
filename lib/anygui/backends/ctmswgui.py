@@ -25,7 +25,7 @@ from anygui import application
 from anygui.Utils import log, setLogFile
 
 ################################################################
-from ctypes import CDLL, _DLLS, _DynFunction, CFunction, c_string, Structure, WinError, byref, GetLastError
+from ctypes import CDLL, _DLLS, WinDLL, WINFUNCTYPE, c_buffer, c_int, c_char_p, Structure, WinError, byref, GetLastError
 
 _apiMode = 'A'
 def _to_native(text):
@@ -34,16 +34,18 @@ def _to_native(text):
 def _from_native(text):
     return text.replace('\r\n', '\n')
 
-class WinDLL(CDLL):
-
+class LocalWinDLL(WinDLL):
     def __getattr__(self, name):
+        if name[:2] == '__' and name[-2:] == '__':
+            raise AttributeError, name
         try:
-            func = _DynFunction(name, self)
+            func = self._StdcallFuncPtr(name, self)
         except:
-            func = _DynFunction(name+_apiMode, self)
+            func = self._StdcallFuncPtr(name+_apiMode, self)
         setattr(self, name, func)
         return func
-windll = _DLLS(WinDLL)
+ 
+windll = _DLLS(LocalWinDLL)
 
 user32 = windll.user32
 gdi32 = windll.gdi32
@@ -212,10 +214,10 @@ PBM_SETRANGE=WM_USER+1
 #   setLogFile('/tmp/dbg.txt')
 
 class t_rect(Structure):
-    _fields_=(('left','i'),('top','i'),('right','i'),('bottom','i'))
+    _fields_=(('left',c_int),('top',c_int),('right',c_int),('bottom',c_int))
 
 class t_point(Structure):
-    _fields_=(('x','i'),('y','i'))
+    _fields_=(('x',c_int),('y',c_int))
 
 # BUGS:
 #
@@ -355,12 +357,12 @@ class ComponentWrapper(AbstractWrapper):
     def setText(self,text):
         if not self.widget: return
         #if _verbose: log("%s.SetWindowText('%s'(%s)) hwnd=%s(%s) self=%s" % (self.__class__.__name__,text,type(text),self.widget,type(self.widget),str(self)))
-        SetWindowText(self.widget,c_string(_to_native(text)))
+        SetWindowText(self.widget,c_buffer(_to_native(text)))
 
     def _getText(self):
         'return native text'
         n = GetWindowTextLength(self.widget)
-        t = c_string('\000'*(n+1))
+        t = c_buffer('\000'*(n+1))
         GetWindowText(self.widget,t,n+1)
         return t.value
 
@@ -427,7 +429,7 @@ class ListBoxWrapper(ComponentWrapper):
         SendMessage(self.widget, LB_RESETCONTENT, 0, 0)
         for item in map(str, list(items)):
             # FIXME: This doesn't work! Items get jumbled...
-            SendMessage(self.widget, LB_ADDSTRING, 0, c_string(item))
+            SendMessage(self.widget, LB_ADDSTRING, 0, c_buffer(item))
 
 
     def setSelection(self,selection):
@@ -604,7 +606,7 @@ class Resource:
     def _fn2handle(self,fn):
         if self.kind=='bitmap':
             try:
-                self._handle = LoadImage(0,c_string(fn),
+                self._handle = LoadImage(0,c_buffer(fn),
                     IMAGE_BITMAP,0,0,LR_DEFAULTSIZE|LR_LOADFROMFILE)
             except:
                 log(WinError())
@@ -712,7 +714,7 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
 
     def setTitle(self,title):
         if self.widget and title:
-            SetWindowText(self.widget, c_string(title))
+            SetWindowText(self.widget, c_buffer(title))
 
     def getTitle(self):
         if not self.widget: return
@@ -809,21 +811,20 @@ class Application(AbstractApplication):
 
     def _register_class(self):
         #if _verbose: log('Application._register_class:start',str(self))
-        class WINDOWPROC(CFunction):
-            _types_ = "iiii"
-            _stdcall_ = 1
+        WINDOWPROC = WINFUNCTYPE(c_int,c_int,c_int,c_int,c_int)
+
         class WNDCLASS(Structure):
             _fields_= (
-                ('style','i'),
+                ('style',c_int),
                 ('lpfnWndProc',WINDOWPROC),
-                ('cls_extra','i'),
-                ('wnd_extra','i'),
-                ('hInst','i'),
-                ('hIcon','i'),
-                ('hCursor','i'),
-                ('hbrBackground','i'),
-                ('menu_name','z'),
-                ('lpzClassName','z'),
+                ('cls_extra',c_int),
+                ('wnd_extra',c_int),
+                ('hInst',c_int),
+                ('hIcon',c_int),
+                ('hCursor',c_int),
+                ('hbrBackground',c_int),
+                ('menu_name',c_char_p),
+                ('lpzClassName',c_char_p),
                 )
 
         # register a window class for our windows.
@@ -860,13 +861,13 @@ class Application(AbstractApplication):
         #if _verbose: log('internalRun:Begin',str(self))
         class MSG(Structure):
             _fields_ = (
-                ('hwnd','i'),
-                ('message','i'),
-                ('wParam','i'),
-                ('lParam','i'),
-                ('time','i'),
-                ('x','i'),
-                ('y','i'),
+                ('hwnd',c_int),
+                ('message',c_int),
+                ('wParam',c_int),
+                ('lParam',c_int),
+                ('time',c_int),
+                ('x',c_int),
+                ('y',c_int),
                 )
 
         msg = MSG()
