@@ -93,13 +93,7 @@ work in Python.  Stolen blatantly from Donn."""
 
 class ComponentMixin(WrapThis):
     "Base class for all components."
-    #_height = -1 # default sizes & positions
-    #_width = -1
-    #_x = 0 # Note funny default for window positions.
-    #_y = 0 # (Works on inside of window, not outside).
-    
-    _action = None
-    
+        
     _beos_comp = None
     _beos_sub = None
     _beos_id = 0
@@ -135,15 +129,17 @@ class ComponentMixin(WrapThis):
             return 1
         return 0
     
+    def _ensure_destroyed(self):
+        pass
+        
     def _is_created(self):
         return self._beos_comp is not None
     
     def _ensure_events(self):
-        if self._action:
-            self._beos_msg = BMessage.BMessage(ACTION)              # Create a BMessage instance
-            self._beos_msg.AddString('self_id', str(self._beos_id)) # Add the id of the object
-            # also need to add the args and keywords ?
-            # Perhaps pickle the args and add, pickle kwargs and add?
+        #if self._action:
+        #    print self._action
+        self._beos_msg = BMessage.BMessage(ACTION)              # Create a BMessage instance
+        self._beos_msg.AddString('self_id', str(self._beos_id)) # Add the id of the object
 
     def _ensure_geometry(self):
         self._beos_bounds = (float(self._x),
@@ -194,6 +190,9 @@ class Label(ComponentMixin, AbstractLabel):
             self._beos_comp.SetText(self._text)
             self._ensure_geometry()
             self._beos_comp.ResizeToPreferred()
+    
+    def _ensure_events(self):
+        pass
 
 ##################################################################
 
@@ -257,8 +256,7 @@ class ListBox(ComponentMixin, AbstractListBox):
     # BeOS hook function
     def SelectionChanged(self):
         """Might be replaced by InvocationMessage."""
-        if self._action:
-            self._action()
+        send(self, 'select')
     
             
 ###################################################################
@@ -273,6 +271,10 @@ class Button(ComponentMixin, AbstractButton):
     def _ensure_enabled_state(self):
         if self._beos_comp:
             self._beos_comp.SetEnabled(self._enabled)
+    
+    def _beos_clicked(self):
+        #print "Hi There!"
+        send(self, 'click', loop=1)
 
 
 class ToggleButtonMixin(ComponentMixin):
@@ -294,7 +296,7 @@ class ToggleButtonMixin(ComponentMixin):
         if val == self.on:
             return
         self.model.on = val
-        # self.do_action()
+        send(self, 'click', loop=1)
 
      
 class CheckBox(ToggleButtonMixin, AbstractCheckBox):
@@ -323,7 +325,7 @@ class RadioGroup(RadioGroup):
     def add(self, buttons):
         for btn in buttons:
             btn.group = self
-            btn.action = self._action
+            #btn.action = self._action
     
 '''
 class RadioGroup(ComponentMixin, Attrib, Action):
@@ -347,7 +349,7 @@ class RadioGroup(ComponentMixin, Attrib, Action):
             self._value = value
             for item in self._items:
                 item._update_state()
-            self.do_action()
+            self._beos_clicked()
 
     def add(self, buttons):
         if buttons and (self._beos_comp is None):
@@ -399,8 +401,8 @@ class TextField(ComponentMixin, AbstractTextField):
         self._ensure_text()
         return result
     
-    def _ensure_events(self):
-        ComponentMixin._ensure_events(self)
+    #def _ensure_events(self):
+    #    ComponentMixin._ensure_events(self)
         
     def _backend_text(self):
         if self._beos_comp:
@@ -597,20 +599,21 @@ Look in the docs for details, or visit www.bebits.net/app/2501"""
     def MessageReceived(self, msg):
         """
         BeOS hook function - this function is called whenever a BMessage is received.
-        The msg.what value tells us what type of BMessage it is.  We are only interested
-        at this stage in those that have been defined as a self._action function.
+        The msg.what value tells us what type of BMessage it is.
         If the message is the right type, find the id of the object that created it, and
-        call the function/method that is that object's _current_ action.
+        call _beos_clicked() and _beos_lost_focus if applicable.
         """
         if msg.what == ACTION:
+            #print "Received"
             id = msg.FindString('self_id')
             for item in self._contents:
                 if item._beos_id == id:
                     if item._beos_clicked:    # Bit of a hack?
+                        #print "Hello"
                         item._beos_clicked()
                     if item._lost_focus:
                         item._lost_focus()
-                    item._action()                
+                    #item._action()                
 
     def _ensure_title(self):
         if self._beos_comp:
