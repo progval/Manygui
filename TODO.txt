@@ -17,9 +17,6 @@ Short-term Objectives/FIXMEs [mlh]
   Remove blocked names? Disallow setting non-existant attributes
   (except possibly with an initial underscore)?
 
-* Find a general scheme for event setup and calling rawModify from
-  backend wrappers
-
 * Rewrite AbstractApplication; clear up prodding issue
 
 * Clear up _foo issue
