@@ -211,6 +211,7 @@ class ComponentMixin:
         self._LRCORNER = _scr.SCR_LRCORNER
         self._attr = _scr.ATTR_NORMAL
         self.resize_command = None
+        self.focus_lost_cmd = None
         self.set_parent(parent)
         self.set_geometry(geometry)
         self.set_text(text)
@@ -222,14 +223,14 @@ class ComponentMixin:
         if self.resize_command:
             self.resize_command(dw,dh)
 
-    def set_geometry(self,(x,y,w,h)):
+    def set_geometry(self,(x,y,w,h),event=0):
         self.x = x
         self.y = y
         dw = w-self.width
         dh = h-self.height
         self.width = w
         self.height = h
-        if dw != 0 or dh != 0:
+        if event:
             self.curs_resized(dw,dh)
         #self.redraw()
 
@@ -840,8 +841,11 @@ class Button(ComponentMixin):
 
     def do_click(self,ev):
         """Click on button."""
+        log("CLICKED")
         if self.command:
             self.command(self)
+        else:
+            log("NO COMMAND!")
 
     _event_map = { ord(' '):do_click }
 
@@ -1027,6 +1031,8 @@ class TextMixin(ComponentMixin):
 
     def change_focus(self,ev):
         """Focus on the next control."""
+        if self.focus_lost_cmd:
+            self.focus_lost_cmd()
         _app.change_focus()
         return 1
 
@@ -1472,7 +1478,7 @@ class HelpWindow(Window):
                   ord('Q'):dismiss,}
 
 # If false, present an initial help window.
-_inithelp = 1
+_inithelp = 0
 
 # Character escape sequences, and the events we transform them
 # into.
@@ -1496,6 +1502,7 @@ _escape_sequence_map = {
     (ord('w'),):WINMENU_EVENT,
 
     (ord('f'),):FOCUS_FORWARD_EVENT,
+    (ord('b'),):FOCUS_BACKWARD_EVENT,
     (9,):FOCUS_BACKWARD_EVENT,
 
     # Convert ESC-m into Return, for textgui's benefit.
@@ -1590,7 +1597,7 @@ class Application:
             for win in wins:
                 win.destroy()
             return 0
-        if ch == FOCUS_FORWARD_EVENT or ch == DOWN_ARROW:  # ^F,down
+        if ch == FOCUS_FORWARD_EVENT or ch == DOWN_ARROW or ch == 9:  # ^F,down,tab
             self.change_focus(1)
         if ch == FOCUS_BACKWARD_EVENT or ch == UP_ARROW:  # ^B,up
             self.change_focus(-1)

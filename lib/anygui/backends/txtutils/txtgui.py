@@ -70,6 +70,7 @@ class ComponentWrapper(AbstractWrapper):
     def destroy(self):
         if self.noWidget(): return
         self.widget.destroy()
+        self.widget.set_parent(None)
         self.widget = DummyWidget()
 
     def setText(self,text):
@@ -126,28 +127,65 @@ class ListBoxWrapper(ComponentWrapper):
 #class CanvasWrapper(ComponentWrapper):
 #    _twclass = tw.Canvas
 
-class ButtonWrapper(ComponentWrapper):
-    _twclass = tw.Button
+class ButtonMixin:
 
     def widgetSetUp(self):
         self.widget.command = self._twClick
 
-    def _twClick(self,btn):
+    def _twClick(self,btn=None,*args,**kws):
         send(self.proxy,'click')
 
-class ToggleButtonMixin:
-    pass
+class ButtonWrapper(ButtonMixin,ComponentWrapper):
+    _twclass = tw.Button
 
-class CheckBoxWrapper(ComponentWrapper,ToggleButtonMixin):
+class ToggleButtonMixin(ButtonMixin):
+
+    def getOn(self):
+        if self.noWidget(): return
+        return self.widget.on
+
+    def setOn(self,on):
+        if self.noWidget(): return
+        self.widget.set_state(on)
+
+class CheckBoxWrapper(ToggleButtonMixin,ComponentWrapper):
     _twclass = tw.CheckBox
 
-class RadioButtonWrapper(ComponentWrapper,ToggleButtonMixin):
+class RadioButtonWrapper(ToggleButtonMixin,ComponentWrapper,ButtonMixin):
     _twclass = tw.RadioButton
 
-class TextFieldWrapper(ComponentWrapper):
+class TextControlMixin:
+
+    def getText(self):
+        if not self.noWidget():
+            return self.widget.get_text()
+            
+    def setText(self,text):
+        if not self.noWidget():
+            self.widget.set_text(str(text))
+
+    def setEditable(self,editable):
+        if not self.noWidget():
+            self.widget.set_editable(int(editable))
+
+    def getSelection(self):
+        if not self.noWidget():
+            return self.widget.get_selection()
+
+    def setSelection(self,selection):
+        if not self.noWidget():
+            self.widget.set_selection(selection)
+
+class TextFieldWrapper(TextControlMixin,ComponentWrapper):
     _twclass = tw.TextField
 
-class TextAreaWrapper(ComponentWrapper):
+    def widgetSetup(self):
+        self.widget.focus_lost_cmd = self.handleEnterKey
+
+    def handleEnterKey(self,*args,**kws):
+        send(self.proxy, 'enterkey')
+
+class TextAreaWrapper(TextControlMixin,ComponentWrapper):
     _twclass = tw.TextArea
 
 class ContainerMixin:
