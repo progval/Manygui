@@ -701,6 +701,8 @@ class TextMixin(ComponentMixin):
         self._cur_pos=(1,1)
         self._cur_line = 0
         self._cur_col = 0
+        self._startline = 0
+        self._startcol = 0
         #self._curs_selection = (0,0)
         self._curs_text = str(self._text)
 
@@ -723,10 +725,10 @@ class TextMixin(ComponentMixin):
         if _focus_control is self:
             ##_scr.dbg("Ensuring focus on ",self)
             ##_scr.dbg("   HAS FOCUS!")
-            ety = self._effective_texty()
+            #ety = self._effective_texty()
             #_scr.dbg("focus ety ",ety,self,self._height*self._vert_scale)
             tx,ty = self._cur_pos
-            _scr.move_cursor(x+tx,y+ty)
+            _scr.move_cursor(x+tx+1,y+ty+1)
 
     def _ensure_selection(self):
         pass
@@ -860,6 +862,9 @@ class TextMixin(ComponentMixin):
         self._tpos = len(string.join(trunc_lines,'\n'))+self._cur_col+cur_line_not_0
         self._redraw()
 
+    def _adjust_start(self):
+        pass
+
     def _draw_contents(self):
         if self._screen_height()<3: return
         
@@ -870,7 +875,6 @@ class TextMixin(ComponentMixin):
         except:
             lines = "COULD NOT RENDER TEXT IN CONTROL"
         line,col = self._find_cursor_pos(lines)
-        self._cur_line_len = len(lines[line])
 
         startline,startcol = self._find_relative_cpos(line,col,len(lines),len(lines[line]))
         sh = self._screen_height()-2
@@ -917,22 +921,6 @@ class TextMixin(ComponentMixin):
             return ((txt[startcol:en_col],_scr.ATTR_SELECTED),
                     (txt[en_col:],_scr.ATTR_NORMAL))
 
-    def _find_relative_pos(self,line,col,nlines,nchars):
-        lh = self._screen_height()-3
-        startline = 0
-        if lh<nlines:
-            startline = line - lh
-            if startline<0: startline = 0
-            
-        lw = self._screen_width()-3
-        startcol = 0
-        if lw<nchars:
-            startcol = col - lw
-            if startcol<0: startcol = 0
-
-        _scr.dbg("cur_pos:",self._cur_pos,self)
-
-        return startline,startcol,line-startline+1,col-startcol+1
 
     def _find_relative_cpos(self,line,col,nlines,nchars):
         # Take the line,col position of the cursor in self._curs_text
@@ -940,7 +928,24 @@ class TextMixin(ComponentMixin):
         # relative cursor position, which is stored in self._cpos.
         # Then return the line and column of the character that
         # should appear at the top-left corner.
-        tl_line,tl_col,rline,rcol = self._find_relative_pos(line,col,nlines,nchars)
+        lh = self._screen_height()-3
+        lw = self._screen_width()-3
+
+        tl_line,tl_col,rline,rcol = (self._startline,
+                                     self._startcol,
+                                     line-self._startline,
+                                     col-self._startcol)
+
+        if rline<0: self._startline += rline
+        if rline>=lh: self._startline += rline-lh
+        if rcol<0: self._startcol += rcol
+        if rcol>=lw: self._startcol += rcol-lw
+
+        tl_line,tl_col,rline,rcol = (self._startline,
+                                     self._startcol,
+                                     line-self._startline,
+                                     col-self._startcol)
+
         self._cur_pos = (rcol, rline)
         return tl_line,tl_col
 
