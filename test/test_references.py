@@ -112,7 +112,23 @@ The global function will not die:
 >>> getrefcount(wc1()) > 0
 1
 
-[Insert RefKeyDictionary tests]
+RefKeyDictionary:
+
+>>> d = RefKeyDictionary()
+>>> o1 = Object()
+>>> o2 = Object()
+>>> sr = ref(o1, weak=0)
+>>> wr = ref(o2, weak=1)
+>>> d[sr] = 1
+>>> d[wr] = 1
+>>> len(d)
+2
+>>> del o1
+>>> len(d)
+2
+>>> del o2
+>>> len(d)
+1
 
 [Insert RefValueList tests]
 
