@@ -3,7 +3,7 @@ import weakref, UserList, UserDict
 
 # TODO:
 # - Add callbacks to CallableReference
-# - Reimplement RefKeyDictionary and RefValueList
+# - Reimplement RefValueList
 
 def ref(obj, weak, plain=0):
     if not plain and is_callable(obj):
@@ -98,6 +98,95 @@ class CallableReference(Hashable):
         func = self.func()
         return CallableWrapper(obj, func)
 
-class RefKeyDictionary(UserDict.UserDict): pass
+class RefKeyDictionary(UserDict.UserDict):
 
-class RefValueList(UserList.UserList): pass
+    def __repr__(self):
+        return "<RefKeyDictionary at %s>" % id(self)
+
+    def callback(self, obj, key):
+        del self[key]
+
+    def add_callback(self, key):
+        key.callbacks.append(self.callback)
+
+    def __setitem__(self, key, value):
+        obj = key()
+        if obj is not None:
+            self.add_callback(key)
+            self.data[key] = value
+
+    def copy(self):
+        new = RefKeyDictionary()
+        for key, value in self.data.items():
+            obj = key()
+            if obj is not None:
+                new[obj] = value
+        return new
+
+    def items(self):
+        L = []
+        for key, value in self.data.items():
+            obj = key()
+            if obj is not None:
+                L.append((key, value))
+        return L
+
+    def iteritems(self):
+        return RefKeyedItemIterator(self)
+
+    def iterkeys(self):
+        return RefKeyedKeyIterator(self)
+    __iter__ = iterkeys
+
+    def itervalues(self):
+        return self.data.itervalues()
+
+    def keys(self):
+        L = []
+        for key in self.data.keys():
+            obj = key()
+            if obj is not None:
+                L.append(key)
+        return L
+
+    def popitem(self):
+        while 1:
+            key, value = self.data.popitem()
+            obj = key()
+            if obj is not None:
+                return key, value
+
+    def update(self, dict):
+        for key, value in dict.items():
+            self[key] = value
+
+class BaseIter:
+    def __iter__(self):
+        return self
+
+
+class RefKeyedKeyIterator(BaseIter):
+    def __init__(self, refdict):
+        self._next = refdict.data.iterkeys().next
+
+    def next(self):
+        while 1:
+            key = self._next()
+            obj = key()
+            if obj is not None:
+                return key
+
+
+class RefKeyedItemIterator(BaseIter):
+    def __init__(self, refdict):
+        self._next = refdict.data.iteritems().next
+
+    def next(self):
+        while 1:
+            key, value = self._next()
+            obj = key()
+            if obj is not None:
+                return key, value
+
+class RefValueList(UserList.UserList):
+    pass # TBD
