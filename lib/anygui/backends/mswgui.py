@@ -165,6 +165,11 @@ class Button(ComponentMixin, AbstractButton):
             #self.do_action()
             send(self, 'click', loop=1)
 
+    def _ensure_text(self):
+        if self._hwnd:
+            win32gui.SetWindowText(self._hwnd, self._text)
+
+
 class ToggleButtonMixin(ComponentMixin):
 
     def _get_msw_text(self):
