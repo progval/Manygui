@@ -17,6 +17,7 @@ class AbstractApplication(Attrib):
         for w in flatten(win):
             self._windows.append(w)
             win.container = self            
+            win.wrapper.prod()
 
     def remove(self, win):
         try:

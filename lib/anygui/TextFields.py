@@ -1,5 +1,7 @@
 from anygui.TextComponents import TextComponent
-from anygui import Defaults
+from anygui import Defaults,backendModule
 
 class TextField(TextComponent, Defaults.TextField):
-    pass
+
+    def wrapperFactory(self):
+        return backendModule().TextFieldWrapper(self)

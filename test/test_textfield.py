@@ -1,13 +1,15 @@
-from anygui import *
+from anygui import Window,TextField,Application,Button,Label,link
 from anygui.Utils import log
 
-def init_field(event):
+app = Application()
+
+def init_field(*args,**kws):
     global tf, lbl
     tf.text = 'This is a TextField test.'
     tf.selection = (10,19)
     update_label()
 
-def update_label(event):
+def update_label(*args,**kws):
     global tf, lbl
     sel = tf.selection
     text = tf.text
@@ -19,23 +21,21 @@ def print_contents(event):
     global tf
     log('Enter was pressed. Field contents:', tf.text)
 
+win = Window(title='TextField test', width=200, height=245)
+app.add(win)
+
 tf = TextField(width=150, height=25)
 link(tf, print_contents)
 tf.text = ''
 tf2 = TextField(width=150, height=25, editable=0)
 tf2.text = 'Edit me... :P'
-lbl = Label(width = 150, height=25, text = '')
+lbl = Label(width = 150, height=25, text = 'I Am A LABEL')
 
 update_btn = Button(width=50, height=30, text='Update')
 link(update_btn, update_label)
 
-reset_btn = Button(width=50, height=30, text='Reset')
+reset_btn = Button(height=30, text='Reset')
 link(reset_btn, init_field)
-
-app = Application()
-
-win = Window(title='TextField test', width=200, height=245)
-app.add(win)
 
 win.add([tf, tf2, lbl], left=25, right=25, top=40, hstretch=1,
           direction='down', space=20)

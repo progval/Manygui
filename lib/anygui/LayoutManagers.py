@@ -41,7 +41,8 @@ class LayoutManager:
         # Add items to container.
         for item in items:
             if item not in self._container._contents:
-                item._set_container(self._container)
+                #item._set_container(self._container)
+                item.container=self._container
 
         if options:
             options.__dict__.update(kws)
@@ -200,8 +201,8 @@ class SimpleGridManager(LayoutManager):
     def resized(self,dw,dh):
         # Compute the proper width and height for each
         # component.
-        w = self._container._width
-        h = self._container._height
+        w = self._container.width
+        h = self._container.height
         rowh = h/self.rows
         colw = w/self.cols
         if rowh < self.minh: rowh = self.minh
@@ -324,9 +325,9 @@ class GridManager(LayoutManager):
             self.expand_rowcoldata(rs,cs)
             self.compute_rowcol_data(**kwds)
             if xsize == 0:
-                self.colinfo[self.cur_col].size = comp._width
+                self.colinfo[self.cur_col].size = comp.width
             if ysize == 0:
-                self.rowinfo[self.cur_row].size = comp._height
+                self.rowinfo[self.cur_row].size = comp.height
             comp.layout_data.row = self.cur_row
             comp.layout_data.col = self.cur_col
             comp.layout_data.rows = rs
@@ -347,8 +348,8 @@ class GridManager(LayoutManager):
         # component.
 
         # First, figure out the proper sizes of all rows and columns.
-        self.w = self._container._width
-        self.h = self._container._height
+        self.w = self._container.width
+        self.h = self._container.height
 
         self.compute_leftover_wh()
         
@@ -557,14 +558,14 @@ class Placer(LayoutManager):
             if right_obj:
                 r = right_obj.x - right_off
             elif right_off is not None:
-                r = self._container._width - right_off
+                r = self._container.width - right_off
             else:
                 r = None
             # Calculate bottom edge position
             if bottom_obj:
                 b = bottom_obj.y - bottom_off
             elif bottom_off is not None:
-                b = self._container._height - bottom_off
+                b = self._container.height - bottom_off
             else:
                 b = None
             # Fill in unspecified positions
@@ -647,8 +648,8 @@ class Placer(LayoutManager):
         elif comp.layout_data._vstretch:
             dh = cdh
         if dx != 0 or dy != 0 or dw != 0 or dh != 0:
-            comp.geometry = (comp._x + dx, comp._y + dy,
-                             comp._width + dw, comp._height + dh)
+            comp.geometry = (comp.x + dx, comp.y + dy,
+                             comp.width + dw, comp.height + dh)
 
     def resized(self,dw,dh):
         for c in self._container._contents:

@@ -10,8 +10,9 @@ class Frame(Component, Defaults.Frame):
     def __init__(self, *args, **kw):
         self._contents = []
         Component.__init__(self, *args, **kw)
-        self._layout = None
-        self.layout = Placer()
+        self._layout = Placer()
+        self._layout._container=self
+        #self.layout = Placer()
 
     def wrapperFactory(self):
         return backend().FrameWrapper(self)

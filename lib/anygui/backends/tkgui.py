@@ -6,6 +6,7 @@ __all__ = '''
   ButtonWrapper
   WindowWrapper
   LabelWrapper
+  TextFieldWrapper
 
 '''.split()
 
@@ -117,6 +118,26 @@ class LabelWrapper(ComponentWrapper):
 
     def setText(self, text):
         self.widget.configure(text=text)
+
+class TextFieldWrapper(ComponentWrapper):
+
+    def widgetFactory(self,*args,**kws):
+        theWidge=Tkinter.Entry(*args,**kws)
+        theWidge.bind("<Return>",self.handle_return)
+        return theWidge
+
+    def handle_return(self,*args,**kws):
+        # Inform proxy of text change by the user.
+        self.proxy.rawModify(text=self.widget.get())
+
+    def setText(self,text):
+        disabled=0
+        if self.widget.cget('state') != Tkinter.NORMAL:
+            self.widget.configure(state=Tkinter.NORMAL)
+        self.widget.delete(0,Tkinter.END)
+        self.widget.insert(0,text)
+        if disabled:
+            self.widget.configure(state=Tkinter.DISABLED)
 
 class WindowWrapper(ComponentWrapper):
 

@@ -1,8 +1,10 @@
 from anygui.Components import Component
-from anygui.Exceptions import UnimplementedMethod
+from anygui import Defaults, backendModule
 
 class TextComponent(Component):
+    pass
 
+'''
     _selection = (0, 0)
     _editable = 1
 
@@ -59,3 +61,4 @@ class TextComponent(Component):
         # self._ensure_text()
         # self._ensure_selection()
         # self._ensure_editable()
+'''
