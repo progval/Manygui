@@ -6,6 +6,7 @@ grp = RadioGroup()
 grp1 = RadioGroup()
 
 def report():
+    print grp.value
     print labels[grp.value], "selected (%d)" % grp.value
 
 def report1():

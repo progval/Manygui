@@ -34,3 +34,16 @@ selection is preserved.
 The backends don't behave consistently wrt. setting or not setting
 focus when the selection of a TextField or TextArea is set
 programmatically.
+
+Invisible windows crash the application when made visible in BeOS.
+
+RadioGroups don't work properly under BeOS (but buttons on their 
+own do (!) ).
+
+Labels under BeOS display line breaks as an unprintable character: 
+this is because they are designed for single line use only.
+
+test/test_textarea.py : under BeOS, both text areas are placed in 
+the same position.  I don't know if this is a textarea or place bug.
+
+All List- and Text- Views always have scrollbars under BeOS.

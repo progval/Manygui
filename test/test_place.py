@@ -30,10 +30,10 @@ def main():
   view2 = BigTestView(width = 300, height = 300)
 
   cb1 = CheckBox(x = 10, y = 50,
-		width = 100, height = 20,
+		width = 80, height = 20,
 		text = "Check Me!", action = checked_it)
   cb2 = CheckBox(x = 10, y = 70,
-		width = 100, height = 20,
+		width = 110, height = 20,
 		text = "Check Me Too!", action = checked_it)
 
   rbs = []
