@@ -48,7 +48,7 @@ class Attrib:
 class DefaultEventMixin:
     def __init__(self):
         if hasattr(self, '_default_event'):
-            link(self, self._default_event, self._default_event_handler)
+            link(self, self._default_event, self._default_event_handler, weak=1)
     def _default_event_handler(self, **kw):
         kw = kw.copy()
         del kw['event']
