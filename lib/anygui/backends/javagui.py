@@ -26,12 +26,7 @@ from java import awt
 import java
 #from synchronize import apply_synchronized
 
-def _r(obj): # @@@ for debug
-    cl = obj.__class__.__name__
-    p = cl.rfind('.')
-    cl = cl[p+1:]
-    return "%s@%s" % (cl,id(obj))
-
+from anygui.Utils import objDescr as _r # @@@ debug
 
 # Set the "look-and-feel":
 swing.UIManager.setLookAndFeel(swing.UIManager.getSystemLookAndFeelClassName())
@@ -79,6 +74,7 @@ class Wrapper(AbstractWrapper):
 
         if not self.widget:
             self.widget = self.widgetFactory(*args, **kwds)
+            self.widget.visible = self.proxy.state['visible'] # @@@ Experimental
             self.widgetSetUp()
 
     # internalDestroy?
@@ -87,35 +83,32 @@ class Wrapper(AbstractWrapper):
 
 class ComponentWrapper(Wrapper):
 
+    # mandatory setXxx
     def setX(self, x):
         if not self.widget: return
-        self.widget.x = x
-        if self.widget.layout:
-            self.widget.validate()
+        self.widget.setLocation(x,self.widget.y)
 
     def setY(self, y):
         if not self.widget: return
-        self.widget.y = y
-        if self.widget.layout:
-            self.widget.validate()
+        self.widget.setLocation(self.widget.x,y)
 
     def setWidth(self, width):
         if not self.widget: return
-        self.widget.width = width
+        self.widget.size = width, self.widget.height
         if self.widget.layout:
             self.widget.validate()
 
-    def setHeight(self, height):
+    def setHeigth(self, height):
         if not self.widget: return
-        self.widget.height = height
+        self.widget.size = self.widget.width, height
         if self.widget.layout:
             self.widget.validate()
 
+    # opt setXxx
+        
     def setPosition(self, x, y):
         if not self.widget: return
-        self.widget.position = x, y
-        if self.widget.layout:
-            self.widget.validate()
+        self.widget.setLocation(x,y)
 
     def setSize(self, width, height):
         if not self.widget: return
@@ -125,7 +118,6 @@ class ComponentWrapper(Wrapper):
 
     def setGeometry(self, x, y, width, height):
         if not self.widget: return
-            
         self.widget.bounds = x, y, width, height
         if self.widget.layout:
             self.widget.validate()
@@ -407,12 +399,42 @@ class WindowWrapper(ComponentWrapper):
         widget.contentPane.layout = None
         return widget
 
+    # mandatory setXxx
+    def setWidth(self,width):
+        if not self.widget: return
+        insets = self.widget.insets
+        width += insets.left + insets.right
+        self.widget.size = width, self.widget.height
+        if self.widget.layout:
+            self.widget.validate()
+
+    def setHeight(self,height):
+        if not self.widget: return
+        insets = self.widget.insets
+        height += insets.top + insets.bottom
+        self.widget.size = self.widget.width, height
+        if self.widget.layout:
+            self.widget.validate()
+
+    # /mandatory
+
+    def setSize(self, width, height):
+        if not self.widget: return
+        insets = self.widget.insets
+        width += insets.left + insets.right
+        height += insets.top + insets.bottom
+        self.widget.size = width,height
+        if self.widget.layout:
+            self.widget.validate()
+        
     def setGeometry(self, x, y, width, height):
         if not self.widget: return
         insets = self.widget.insets
         width += insets.left + insets.right
         height += insets.top + insets.bottom
-        ComponentWrapper.setGeometry(self, x, y, width, height)
+        self.widget.bounds = x, y, width, height
+        if self.widget.layout:
+            self.widget.validate()
 
     def getGeometry(self):
         bounds = self.widget.bounds
@@ -467,3 +489,4 @@ class WindowWrapper(ComponentWrapper):
     def closeHandler(self, evt):
         self.destroy()
         application().remove(self.proxy) # @@@ Hm...
+        
