@@ -2,19 +2,19 @@
 Goals for version 0.1:
 ----------------------
 
-* Add support for the document/view model, using either
-  the Observer pattern, or the signal/slot architecture
+* Integrate the signal/slot architecture into the basic
+  callback mechanism and document/view behaviour;
+  simplify the widget API by detaching models
 
-* Add basic support for defaults, including window tiling
+* Adjust defaults, and add proper window tiling
 
-* Add Frame class with utility factories e.g. col/row
-  (May be postponed)
+* Add Frame class with utility factories e.g. col/row,
+  and/or change the standard layout mechanism to some
+  form of grid(), including proportional scaling and
+  positioning
 
 * Make new Windows invisible until event loop is entered
   or re-entered, e.g. after a callback
-
-* Add basic one-level "shrink-wrapping" of windows
-  (May be postponed)
 
 Goals for version 0.2:
 ----------------------
@@ -23,9 +23,9 @@ Goals for version 0.2:
 
 * Add support for native dialogs (e.g. file dialogs)
 
-* Add menus
+* Add menus (including popup menus?)
 
-* Add full event system
+* Add full event system, based on signal()
 
 * Add support for borders?
 
@@ -34,13 +34,15 @@ Longer term goals:
 
 * Add advanced support for default, including default
   "shrink-wrapping" of windows and frames that aren't
-  given an explicit size
+  given an explicit size; will require a "preferred
+  size" for all widgets, based on font sizes etc.
 
 * Support accessibility standards
 
 * Add a Canvas widget for full graphics support
 
 * Add support for importing xml files through xslt?
+  (E.g. XUL)
 
 * Add instant model update for text widgets, not just on
   "focus lost"?
@@ -48,12 +50,5 @@ Longer term goals:
 Smaller issues:
 ---------------
 
-* Add proportional scaling/positioning?
-
-* Add option objects?
-
 * Merge .add() and .place() and allow several widgets as
   positional arguments?
-
-* Allow multiple widges as positional arguments to place
-  (instead of/in addition to sequence)
