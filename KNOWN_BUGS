@@ -1,10 +1,11 @@
+For some reason, it's impossible to set the width of the
+window in test_textchange below a certain value...
+
 test_textarea doesn't work properly. (Swap
 from Label to TextArea needs ironing out...)
 
-Some widgets (e.g. buttons) in some backends (e.g.
-mswgui) don't support _ensure_text (and possibly
-other attributes), so their text can't be changed
-on the fly.
+test_textchange fails in some backends (e.g. wx) because
+_ensure_text isn't supported on the relevant widgets
 
 test_references.py and test_events don't work in Jython
 2.1b1. (References and Events should still work, though...)

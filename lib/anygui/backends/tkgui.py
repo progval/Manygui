@@ -304,6 +304,10 @@ class ToggleButtonMixin(ComponentMixin):
     def _ensure_events(self):
         self._tk_comp.config(command=self._tk_clicked)
 
+    def _ensure_text(self):
+        if self._tk_comp:
+            self._tk_comp.configure(text = self._text)
+
 class CheckBox(ToggleButtonMixin, AbstractCheckBox):
     _tk_class = Checkbutton
     _text = "tkCheckbutton"

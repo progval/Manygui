@@ -176,6 +176,10 @@ class ToggleButtonMixin(ComponentMixin):
         # return the text required for creation
         return self._text
 
+    def _ensure_text(self):
+        if self._hwnd:
+            win32gui.SetWindowText(self._hwnd, self._text)
+
     def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
         # lParam: handle of control (or NULL, if not from a control)
         # HIWORD(wParam): notification code

@@ -204,6 +204,8 @@
 	<line>Java Swing (javagui)   <url>http://www.jython.org</url></line>
 	<line>PyGTK      (gtkgui)    <url>http://www.daa.com.au/~james/pygtk</url></line>
 	<line>Bethon     (beosgui)   <url>http://www.bebits.com/app/1564</url></line>
+	<!-- PyQt -- qtgui -->
+	<!-- curses -- cursesgui -->
       </codelisting>
 
       <!--

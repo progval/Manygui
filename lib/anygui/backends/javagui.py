@@ -96,7 +96,8 @@ class ComponentMixin:
         return self._text
 
     def _ensure_text(self):
-        pass
+        if self._java_comp and hasattr(self._java_comp, 'text'):
+            self._java_comp.text = self._text
 
 class JavaGUILayoutManager(awt.LayoutManager):
 
@@ -394,9 +395,9 @@ class TextField(ComponentMixin, AbstractTextField):
             return self._java_comp.selectionStart, \
                    self._java_comp.selectionEnd
 
-    def _ensure_text(self):
-        if self._java_comp:
-            self._java_comp.text = self._text
+    #def _ensure_text(self):
+    #    if self._java_comp:
+    #        self._java_comp.text = self._text
 
     def _ensure_selection(self):
         if self._java_comp:

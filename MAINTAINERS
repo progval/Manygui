@@ -7,10 +7,10 @@ Alex Martelli               dhtmlgui*, core
 Matthew Schinckel           beosgui
 Kalle Svensson              gtkgui
 Joe Knapka                  tkgui, core, cursesgui*
-Shanky Tiwari               pyqtgui*, javagui
+Shanky Tiwari               qtgui*, javagui
 David Mertz                 cursesgui*
 Laura Creighton             tkgui, core
-Dallas T. Johnston          pyqtgui
+Dallas T. Johnston          qtgui*
 Patrick K. O'Brien          wxgui, core
 
 (* backend not yet implemented)

@@ -1,17 +1,21 @@
 from anygui import *
 
 app = Application()
-bt1 = Button(text='Before')
-bt2 = Button(text='Change')
+btn = Button(text='Before')
+cbx = CheckBox(text='Before')
+rbn = RadioButton(text='Before')
+lbl = Label(text='Before')
+
+cng = Button(text='Change')
+
+cmps = btn, cbx, rbn, lbl
 
 def change(**kw):
-    bt1.text = 'After'
+    for cmp in cmps:
+        cmp.text = 'After'
 
-link(bt2, change)
+link(cng, change)
 
-win = Window()
-win.width = bt1.width*2 + 10
-win.height = bt1.height
-win.add((bt1, bt2))
-
+win = Window(width=btn.width, height=145)
+win.add(cmps+(cng,), direction='down')
 app.run()
