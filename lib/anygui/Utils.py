@@ -16,6 +16,20 @@ def flatten(seq):
         result += flatten(item)
     return result
 
+def setterName(attribute):
+    return 'set' + capitalizeAttribute(attribute)
+
+def getterName(attribute):
+    return 'get' + capitalizeAttribute(attribute)
+
+def capitalizeAttribute(name):
+    return + name[0].capitalize() + name[1:]
+
+def getSetter(obj, attr):
+    return getattr(obj, setterName(attr), None)
+
+def getGetter(obj, attr):
+    return getattr(obj, getterName(attr), None)
 
 class Bunch:
     def __init__(self, **kwds):

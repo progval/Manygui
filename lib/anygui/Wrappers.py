@@ -1,5 +1,6 @@
 
 from anygui import application
+from anygui.Utils import getSetter
 
 """
 The back-end wrapper presents a unified and simple interface for
@@ -54,8 +55,13 @@ class AbstractWrapper:
         supplied. If no native widget has been created, this method
         will have no effect.
         """
-
         
+        # TODO: - Add support for aggregated setter methods
+        #       - Add doc about default implementation
+        
+        for key, val in state.items():
+            setter = getSetter(self, key)
+            if callable(setter): setter(val)
 
     def getPrefs(self):
         """
