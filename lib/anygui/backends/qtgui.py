@@ -1,41 +1,4 @@
-# TODO: Look into working with this code to fix events in qtgui...
-'''
-class MyEventFilter(QObject):
-	def __init__(self, parent):
-		QObject.__init__(self, parent)
-		self.parent = parent
-
-	def eventFilter(self, object, event):
-		if event.type() == QEvent.MouseButtonPress:
-			print 'click'
-			return 1
-		return 0
-
-
-class Form1(QDialog):
-	def __init__(self, parent=None, name='Form1', modal=0, fl = 0):
-		QDialog.__init__(self,parent,name,modal,fl)
-
-		self.resize(120,60)
-		self.setCaption(self.tr('Form1'))
-
-		self.TextLabel1 = QLabel(self, 'TextLabel1')
-		self.TextLabel1.setGeometry(QRect(30,20,61,15))
-		self.TextLabel1.setText('TextLabel1')
-
-		self.myeventfilter = MyEventFilter(self)
-		self.installEventFilter(self.myeventfilter)
-		self.TextLabel1.installEventFilter(self.myeventfilter)
-
-
-a = QApplication(sys.argv)
-QObject.connect(a,SIGNAL('lastWindowClosed()'),a,SLOT('quit()'))
-w = Form1()
-a.setMainWidget(w)
-w.show()
-a.exec_loop()
-'''
-
+import weakref as wr
 from anygui.backends import *
 __all__ = anygui.__all__
 
@@ -61,7 +24,7 @@ class ComponentMixin:
 				parent = self._container._qt_comp
 			else:
 				parent = None
-			if self._qt_class == QMainWindow:
+			if self._qt_class == QWindow:
 				new_comp = self._qt_class(parent,self._get_qt_title(),Qt.WDestructiveClose)
 			elif hasattr(self,'_get_qt_text') and not self._qt_class is QMultiLineEdit:
 				new_comp = self._qt_class(self._get_qt_text(),parent,str(self))
@@ -331,27 +294,31 @@ class TextArea(TextMixin):
 class Frame(ComponentMixin, AbstractFrame):
 	_qt_class = QFrame
 	_qt_style = QFrame.Plain
-	
-	def _ensure_created(self):
-		result = ComponentMixin._ensure_created(self)
-		if result:
-			pass
-		return result
-	
-	def add(self,comp):
-		comp.reparent(self._qt_comp, QPoint(comp.x, comp.y), TRUE)
 
 ################################################################
 
-import sys
-from qt import *
+class EventFilterMixin(QObject):
+	_window_obj = None
+	
+	def __init__(self, parent):
+		QObject.__init__(self, parent._qt_comp)
+		self._window_obj = wr.ref(parent)
+
+	def eventFilter(self, object, event):
+		if not event.type() in [QEvent.Resize]:
+			return 0
+		elif event.type() == QEvent.Resize:
+			self._window_obj()._qt_resize_handler(event)
+			return 1
+
+class QWindow(QWidget): pass
 
 class Window(ComponentMixin, AbstractWindow):
-	_qt_class = QMainWindow
+	_qt_class = QWindow
 	_qt_style = None #Check on this...
 	_qt_frame = None
 	_layout = None
-	_title = 'QMainWindow'
+	_title = 'QWindow'
 
 	def _get_panel(self):
 		return self._qt_frame
@@ -360,29 +327,21 @@ class Window(ComponentMixin, AbstractWindow):
 		result = ComponentMixin._ensure_created(self)
 		if DEBUG: print 'in _ensure_created of: ', self._qt_comp
 		if result:
+			self._qt_frame = Frame(self._qt_comp)
 			self._ensure_title()
-			self._qt_comp.setMouseTracking(TRUE)
 		return result
 
 	def _ensure_events(self):
 		if DEBUG: print 'in _ensure_events of: ', self._qt_comp
-		qApp.connect(self._qt_comp,SIGNAL('destroyed()'),self._qt_close_handler)
-		#This currently doesn't work... :-(
-		if DEBUG: print 'connecting resizeEvent of: ', self._qt_comp
-		#qApp.connect(self._qt_comp,SIGNAL('resizeEvent(QResizeEvent*)'),self._qt_resize_handler)
+		self._event_filter = EventFilterMixin(self)
+		self._qt_comp.installEventFilter(self._event_filter)
+		self._qt_comp.setMouseTracking(TRUE)
 
 	def _get_qt_title(self):
 		return self._title
 
-	def _qt_close_handler(self):
-		if DEBUG: print 'in _qt_close_handler of: ', self._qt_comp
-		self._qt_comp = None
-	
-	def resize(self,w,h):
-		print '************** OK ***************'
-
 	def _qt_resize_handler(self,event):
-		if DEBUG: print 'in _qt_size_handler of: ', self._qt_comp
+		if DEBUG: print 'in _qt_resize_handler of: ', self._qt_comp
 		w = self._qt_comp.width()
 		h = self._qt_comp.height()
 		dw = w - self._width
