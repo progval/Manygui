@@ -69,7 +69,7 @@ def compatible(cat, filter):
     elif cat == ANON:
         return filter == ANON
 
-''' Sources sending events. '''
+# Sources sending events:
 source_stack = []
 
 def dispatch(event):
@@ -81,6 +81,7 @@ def dispatch(event):
         src, type = key
         for cat2 in categories:
             if not compatible(cat1, cat2): continue
+            if cat2 is ANON: key = (None, None)
             handlers = registry[cat2].get(key, [])
             for weak_handler in handlers:
                 obj = weak_handler.get_obj()
@@ -124,7 +125,7 @@ class Event:
     def freeze(self):
         if not self.__frozen:
             self.__frozen = 1
-    def match(self, other):
+    def match(self, other): # Should Event(source=s).match(Event()) == 1 etc. too?
         """
         Match another event if it has the same type and source as self.
         Ignore either type or source or both if self doesn't have them.

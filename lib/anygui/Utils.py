@@ -14,7 +14,7 @@ class WeakCallable:
         self.meth = func
     def __call__(self, *args, **kwds):
         if self.obj is not None:
-            return self.meth(self.obj, *args, **kwds)
+            return self.meth(self.obj(), *args, **kwds)
         else:
             return self.meth(*args, **kwds)
 
@@ -30,7 +30,7 @@ class WeakMethod:
             self.obj = ref(func.im_self)
             self.meth = func.im_func
         except AttributeError:
-            self.obj = None
+            self.obj = ref(obj)
             self.meth = func
     def get_obj(self):
         if self.obj is None: return None
@@ -58,10 +58,10 @@ class HashableWeakRef:
         if self.ref is None:
             return None
         return self.ref()
-#    def __cmp__(self, other):
-#        if id(self.ref)<id(other_ref): return 1
-#        if id(self.ref)>id(other_ref): return -1
-#        return 0
+    def __cmp__(self,other):
+        if id(self.ref)<id(other.ref): return 1
+        if id(self.ref)>id(other.ref): return -1
+        return 0
     def __hash__(self):
         return id(self.ref)
 

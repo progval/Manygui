@@ -72,6 +72,12 @@
       as the <name>Anygui</name> team keeps experimenting with
       it. Because of that, backwards incompatibilities may occur
       between releases.</para>
+
+      <para>Some features that are currently being developed or are
+      in the design stage may not be documented here, but described
+      in an <emphasis>internal request for comments</emphasis>.
+      These IRFCs can be found at <url>http://anygui.sf.net/irfc</url>.
+      </para>
     </section>
 
   </section>
