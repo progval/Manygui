@@ -582,30 +582,56 @@
     <section>
       <title>Buttons and Event Handling</title>
 
-      <para>[TBD]</para>
+      <para><code>Buttons</code> (as most <code>Components</code>)
+      work more or less the same way as <code>Labels</code>. You can
+      set their <code>size</code>, their <code>position</code>, their
+      <code>text</code>, etc. and then <code>add</code> them to a
+      <code>Frame</code> (such as a <code>Window</code>). The thing
+      that makes them interesting is that they emit
+      <emphasis>events</emphasis>. Each time the user clicks a button,
+      it sends out a <code>click</code> event. You can catch these
+      events by linking your button to one or more <emphasis>event
+      handlers</emphasis>. It's really simple:</para>
+
+      <codelisting>
+	<line>btn = Button(text='Greet Environment')</line>
+	<line>def greeting(**args):</line>
+	<line>    print 'Hello, World!'</line>
+	<line>link(btn, greeting)</line>
+      </codelisting>
+
+      <para>The event handling is taken care of by the call to
+      <code>link</code>. An event handler may receive several keyword
+      arguments, and if you're not particularly interested in any of
+      them, simply use something like <code>**args</code> above. (For
+      more information about this, see the section about global
+      functions in the API Reference below.)</para>
 
     </section>
 
     <section>
       <title>About Models, Views, and Controllers</title>
 
-      <para>[TBD]</para>
+      <para>The <name>Anygui</name> MVC mechanism (based on the
+      <code>update</code> method and the <code>Assignee</code>
+      protocol) is described in the API Reference below. Here is a
+      short overview on how to use it.</para>
+
+      <!-- @@@ continue here -->
 
     </section>
 
     <section>
       <title>Using CheckBoxes</title>
 
-      <para>[update this]</para>
-
       <para>A <code>CheckBox</code> is a <emphasis>toggle
       button</emphasis>, a button which can be in one of two states,
       "on" or "off". Except for that, it works more or less like any
       other button in that you can place it, set its text, and
-      associate a callback with it.</para>
+      link an event handler to it.</para>
 
       <para>Whether a <code>CheckBox</code> is currently on or off is
-      indicated by its model's <code>value</code>.</para>
+      indicated by its <code>on</code> attribute.</para>
 
     </section>
 

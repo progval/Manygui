@@ -14,6 +14,8 @@ Remaining objectives for version 0.1:
 -------------------------------------
 Tentative release date: Mid-December, 2001
 
+* Rename the update method
+
 * Fix remaining bugs and make sure the tests work in all
   backends
 
@@ -53,6 +55,9 @@ Tentative release date: February 28th, 2002
 
   Should backends access frontend attributes through their
   internal or external names? A standard should be decided on.
+
+* Fix the relationship btw. size, position, and geometry wrt.
+  MVC etc.
 
 * Adjust defaults, and improve window staggering
   (needs a mechanism to find the top window)
