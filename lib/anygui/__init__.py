@@ -94,6 +94,6 @@ def factory():
         _factory = _get_factory()
     return _factory
 
-__all__ = ['application', 'factory', 'wishlist', \
+__all__ = ['application', 'Application', 'factory', 'wishlist', \
            'Window', 'Button', 'CheckBox', 'Label', \
            'RadioButton', 'RadioGroup', 'ListBox', 'TextField', 'TextArea']
