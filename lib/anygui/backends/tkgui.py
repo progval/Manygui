@@ -114,7 +114,8 @@ class ScrollableListBox(Tkinter.Frame):
         self._yscrollbar.pack(side=RIGHT, fill=Y)
 
         self._listbox = Tkinter.Listbox(self,
-                                        yscrollcommand=self._yscrollbar.set)
+                                        yscrollcommand=self._yscrollbar.set,
+                                        selectmode="single")
         self._listbox.pack(side=LEFT, expand=YES, fill=BOTH)
         self._yscrollbar.config(command=self._listbox.yview)
 
