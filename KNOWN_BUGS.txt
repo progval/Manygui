@@ -40,7 +40,8 @@ backends, actually, e.g. javagui.)
 id() is broken in Jython and will probably not be fixed soon.  This
 will probably not affect the correctness of the hashing of references
 (in anygui.References), but care should be taken not to store things
-with id(obj) as key.
+with id(obj) as key. [mlh20020103: It *does* affect the current
+hashing, which should be rewritten.]
 
 Compiling Anygui apps to jar files seems problematic in Jython, giving
 the error "anygui clashes with package of same name".
