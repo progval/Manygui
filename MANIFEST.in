@@ -6,5 +6,8 @@ include MAINTAINERS.txt
 include README.txt
 include TODO.txt
 include VERSION.txt
-include doc/anygui.*
+include doc/anygui.html
+include doc/anygui.pdf
+include doc/anygui.ps
+include doc/anygui.txt
 include demo/*

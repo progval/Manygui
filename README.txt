@@ -5,7 +5,7 @@ API for writing GUI applications.
 There isn't much documentation available at the moment, but for more
 information, consult the project web pages at
 
-   http://anygui.sf.net
+   http://www.anygui.org
 
 For license information, see the accompanying LICENSE file. For
 installation instructions, see INSTALL.
