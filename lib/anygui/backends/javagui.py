@@ -137,6 +137,25 @@ class JavaGUILayoutManager(awt.LayoutManager):
             self.parent._height = h
             if hasattr(self.parent, 'resized'): # FIXME: Ugly hack
                 self.parent.resized(dw, dh)
+
+################################################################
+
+class Canvas(ComponentMixin, AbstractCanvas):
+
+    _java_class = awt.Canvas # Right wrt. swing?
+
+    def __init__(self):
+        self.clear()
+        
+    def paint(g):
+        pass # Draw the offscreen thingy
+
+    def clear(self):
+        self._offscreen = None # Create an image with a toolkit...
+
+    def drawPolygon(self, pointlist,
+                    edgeColor=None, edgeWidth=None, fillColor=None, closed=0):
+        pass # Draw the polygon on the offscreen buffer
             
 ################################################################
 

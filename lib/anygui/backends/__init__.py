@@ -5,6 +5,8 @@ from anygui import application
 from anygui.Applications import AbstractApplication
 from anygui.Windows import AbstractWindow
 from anygui.Buttons import AbstractButton
+from anygui.Canvases import AbstractCanvas
+from anygui import Colors
 from anygui.Labels import AbstractLabel
 from anygui.CheckBoxes import AbstractCheckBox
 from anygui.RadioButtons import AbstractRadioButton

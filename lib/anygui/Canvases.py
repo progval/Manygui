@@ -139,8 +139,8 @@ class AbstractCanvas(AbstractComponent, Defaults.Canvas):
 
     """
     def drawImage(self, image, x1, y1, x2=None, y2=None):
-        """Draw a PIL Image into the specified rectangle.  If x2 and y2 are
-        omitted, they are calculated from the image size."""
+        '''Draw a PIL Image into the specified rectangle.  If x2 and y2 are
+        omitted, they are calculated from the image size.'''
         raise NotImplementedError, 'drawImage'
 
     def stringWidth(self, s, font=None):
