@@ -191,7 +191,7 @@ class ComponentWrapper(AbstractWrapper):
     def setEnabled(self,enabled):
         """ Set/get the native widget's enabled/disabled state. """
         if self.noWidget(): return
-        raise NotImplementedError, 'should be implemented by subclasses'    def setEnabled(self,enabled):
+        raise NotImplementedError, 'should be implemented by subclasses'
 
     def setText(self,text):
         """ Set/get the text associated with the widget. This might be
