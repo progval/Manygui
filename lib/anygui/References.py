@@ -70,6 +70,9 @@ def is_callable_instance(obj):
     return hasattr(obj, '__call__') and \
            hasattr(obj.__call__, 'im_func')
 
+def is_method(obj):
+    return hasattr(obj, 'im_self')
+
 def unwrap(func):
     try:
         obj, func = func
@@ -77,7 +80,7 @@ def unwrap(func):
         obj = None
     if is_callable_instance(func):
         func = func.__call__
-    if hasattr(func, 'im_self'):
+    if is_method(func):
         if func.im_self is not None:
             if obj is None: obj = func.im_self
             else: assert obj is func.im_self
