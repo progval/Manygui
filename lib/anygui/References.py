@@ -3,7 +3,7 @@ import UserList, UserDict
 
 weakref = None
 
-# TODO (?):
+# Possible additions:
 # - Add callbacks to CallableReference
 # - Reimplement RefValueList
 
@@ -72,7 +72,9 @@ def unwrap(func):
     except:
         obj = None
     if hasattr(func, '__call__'):
-        func = func.__call__
+        # Make sure __call__ isn't a 'method-wrapper':
+        if hasattr(func.__call__, 'im_func'):
+            func = func.__call__
     if hasattr(func, 'im_self'):
         if func.im_self is not None:
             if obj is None: obj = func.im_self
