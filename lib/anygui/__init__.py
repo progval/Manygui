@@ -1,6 +1,6 @@
 import os
 
-backends = 'x java wx tk beos'
+_backends = 'x java wx tk beos'
 wishlist = os.environ.get('ANYGUI_WISHLIST', 'x java wx tk beos').split()
 
 # set to true to see tracebacks when searching for factories
@@ -20,11 +20,11 @@ def _dotted_import(name):
     return mod
 
 def _get_factory():
-    global backends
-    backends = backends.split()
-    backends = [b for b in backends if not b in wishlist]
-    backends = wishlist + backends
-    for name in backends:
+    global _backends
+    _backends = _backends.split()
+    _backends = [b for b in _backends if not b in wishlist]
+    _backends = wishlist + _backends
+    for name in _backends:
         try:
             module = _dotted_import('anygui.backends.%sgui' % name, )
         except ImportError:
