@@ -1,7 +1,7 @@
 #from Mixins import Action
 from Exceptions import UnimplementedMethod
 from Mixins import Attrib
-from Util import flatten
+from Utils import flatten
 import anygui
 
 class AbstractApplication(Attrib):
