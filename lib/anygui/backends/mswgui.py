@@ -120,7 +120,7 @@ class Label(ComponentMixin, AbstractLabel):
 
 class ListBox(ComponentMixin, AbstractListBox):
     _wndclass = "LISTBOX"
-    _win_style = win32con.WS_CHILD | win32con.LBS_STANDARD | win32con.LBS_NOTIFY
+    _win_style = win32con.WS_CHILD | win32con.WS_VSCROLL | win32con.WS_BORDER | win32con.LBS_NOTIFY
     _win_style_ex = win32con.WS_EX_CLIENTEDGE
 
     def _get_msw_text(self):
