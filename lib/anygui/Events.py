@@ -59,7 +59,9 @@ def connect(event, handler, weak=0):
 def disconnect(event, handler):
     'Disconnect an event handler from an event pattern.'
     cat, key = locators(event)
-    registry[cat][key].remove(WeakMethod(handler))
+    handler = WeakMethod(handler)
+    if handler in registry[cat][key]:
+        registry[cat][key].remove(handler)
 
 def compatible(cat, filter):
     if cat == BOTH:
@@ -75,7 +77,8 @@ def compatible(cat, filter):
 source_stack = []
 
 def dispatch(event):
-    'Call the appropriate event handlers with event as the argument.'
+    'Call the appropriate event handlers with event as the argument. \
+    As a side-effect, dead handlers are removed from the candidate lists.'
     source_stack.append(id(getattr(event, 'source', None)))
     try:
         if not hasattr(event, 'time'):
@@ -87,11 +90,15 @@ def dispatch(event):
             if not compatible(cat1, cat2): continue
             if cat2 is ANON: key = (None, None)
             handlers = registry[cat2].get(key, [])
+            live_handlers = []
             for weak_handler in handlers:
                 obj = weak_handler.get_obj()
                 if id(obj) in source_stack: continue
                 handler = weak_handler()
-                if handler: handler(event)
+                if handler:
+                    live_handlers.append(weak_handler)
+                    handler(event)
+            registry[cat2][key] = live_handlers
     finally:
         source_stack.pop()
 
@@ -104,9 +111,11 @@ def disconnectSource(source):
 
 def disconnectHandler(handler):
     'Disconnect a handler from the event framework.'
+    handler = WeakMethod(handler)
     for cat in categories:
         for handlers in registry[cat].values():
-            handlers.remove(WeakMethod(handler))
+            if handler in handlers:
+                handlers.remove(WeakMethod(handler))
 
 def disconnectMethods(obj):
     'Disconnect all the methods of obj that are handlers.'
