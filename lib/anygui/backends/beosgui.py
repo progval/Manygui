@@ -151,7 +151,7 @@ class ComponentMixin(WrapThis):
     
     def _ensure_events(self):
         if self._action:
-            self._beos_msg = BMessage.BMessage(ACTION) # Create a BMessage instance
+            self._beos_msg = BMessage.BMessage(ACTION)              # Create a BMessage instance
             self._beos_msg.AddString('self_id', str(self._beos_id)) # Add the id of the object
             # also need to add the args and keywords ?
             # Perhaps pickle the args and add, pickle kwargs and add?
@@ -159,10 +159,10 @@ class ComponentMixin(WrapThis):
     def _ensure_geometry(self):
         self._beos_bounds = (float(self._x),
                 float(self._y),
-                float(self._width), # Needs this?
-                float(self._height))
+                float(self._width+ self._x),
+                float(self._height+self._y))
         if self._beos_comp:
-            self._beos_comp.ResizeToPreferred()
+            #self._beos_comp.ResizeToPreferred()
             '''
             # Should be something a bit like...
             width, height = self._beos_comp.GetPreferredSize()
@@ -171,7 +171,6 @@ class ComponentMixin(WrapThis):
             elif height > self._height:
                 self._beos_comp.ResizeToPreferred()
             '''
-
 
     def _ensure_visibility(self):
         pass
@@ -237,12 +236,6 @@ class ListBox(ComponentMixin, AbstractListBox):
     _vertical = 1
     _beos_border = B_FANCY_BORDER
     
-    # BeOS hook function
-    def SelectionChanged(self):
-        """Replaced by InvocationMessage."""
-        if self._action:
-            self._action()
-    
     def _ensure_created(self):
         "With Scroll Bars."
         self._beos_id = str(self._beos_id)
@@ -280,7 +273,6 @@ class ListBox(ComponentMixin, AbstractListBox):
         self._ensure_events()
         return result
 
-        
     #def _backend_items(self):
     #    if self._beos_comp:
     #        items = []
@@ -307,6 +299,13 @@ class ListBox(ComponentMixin, AbstractListBox):
     #    if self._beos_comp:
     #        ComponentMixin._ensure_events(self)
     #        self._beos_sub.SetInvocationMessage(self._beos_msg)
+
+    # BeOS hook function
+    def SelectionChanged(self):
+        """Might be replaced by InvocationMessage."""
+        if self._action:
+            self._action()
+    
             
 ###################################################################
 
@@ -532,9 +531,9 @@ class TextArea(ComponentMixin, AbstractTextArea):
 
 class Window(ComponentMixin, AbstractWindow):
     _beos_class = BWindow.BWindow
-    _beos_style = B_TITLED_WINDOW
+    _beos_style = B_TITLED_WINDOW                       # See below for other styles
     _beos_flags = B_WILL_DRAW
-    _beos_workspaces = B_CURRENT_WORKSPACE # or B_ALL_WORKSPACES
+    _beos_workspaces = B_CURRENT_WORKSPACE              # or B_ALL_WORKSPACES
     _style = 'default'
     _beos_styles = { 'default' : B_TITLED_WINDOW,
                      'document' : B_DOCUMENT_WINDOW,
@@ -566,31 +565,22 @@ class Window(ComponentMixin, AbstractWindow):
             self._beos_comp.Minimize(not self._visible)
     
     def _ensure_geometry(self):
-        self._beos_bounds = (float(self._x)+10.0, # Because these are inside
-                             float(self._y)+30.0, # values, not outside!
-                             float(self._width)*1.25, # Not Wide enough...?
+        self._beos_bounds = (float(self._x)+10.0,     # Because these are inside
+                             float(self._y)+30.0,     # values, not outside!
+                             float(self._width), # Not Wide enough...?
                              float(self._height))
         if self._beos_comp:
-            self._beos_comp.MoveTo(float(self._x)+10, float(self._y)+30)
-            self._beos_comp.ResizeTo(float(self._width)*1.25, float(self._height))
+            self._beos_comp.MoveTo(self._beos_bounds[0], self._beos_bounds[1])
+            self._beos_comp.ResizeTo(self._beos_bounds[2], self._beos_bounds[3])
     
     def _ensure_style(self):
-        try:
-            #print self._style
-            self._beos_style = self._beos_styles[self._style]
-        except:
-            pass
         if self._beos_comp:
-            self._beos_comp.SetType(self._beos_style)
+            self._beos_comp.SetType(self._beos_styles[self._style])
             
     def QuitRequested(self):
         """
         This BeOS hook function is called whenever a quit type action is requested.
-        
         Currently sends a Quit message to the app if it is the last window.
-        
-        #### LIKELY TO CHANGE ####
-        
         """
         if BApplication.be_app.CountWindows() == 1:
             BApplication.be_app.PostMessage(B_QUIT_REQUESTED)
@@ -608,10 +598,8 @@ class Window(ComponentMixin, AbstractWindow):
             id = msg.FindString('self_id')
             for item in self._contents:
                 if item._beos_id == id:
-                    #print item._action.__name__
                     item._action()
 
-    
     def _ensure_title(self):
         if self._beos_comp:
             self._beos_comp.SetTitle(self._title)
@@ -636,6 +624,8 @@ class Window(ComponentMixin, AbstractWindow):
         """
         self._beos_comp.AddChild(object._beos_comp)
         AbstractWindow.add(self, object)
+    
+    # Had to overload these methods, but they still call the parent.
     
     def show(self):
         AbstractWindow.show(self)
@@ -662,7 +652,8 @@ class Application(WrapThis, AbstractApplication):
         return 1
     
     def RefsReceived(self, msg):
-        "BeOS hook function supposedly called when files dropped on our icon"
+        "BeOS hook function called when files dropped on our icon"
+        # Don't know if this will work, since we don't really have an icon!
         print msg.refs
     
     def AboutRequested(self):
@@ -671,6 +662,3 @@ class Application(WrapThis, AbstractApplication):
     
     def _mainloop(self):
         self._beos_comp.Run()
-
-    
-#####################################################################
