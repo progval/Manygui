@@ -31,3 +31,4 @@ class RadioGroup(Attrib, Defaults.RadioGroup, DefaultEventMixin):
         for btn in buttons:
             if btn in self._items:
                 btn.group = None
+                #self._items.remove(btn)

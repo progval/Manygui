@@ -4,9 +4,11 @@ import curses
 _f = open("curses.txt","w")
 _debug_messages = 1
 
-def dbg(msg):
+def dbg(*msg):
     if not _debug_messages: return
-    _f.write(msg+"\n")
+    for m in msg:
+        _f.write("%s %s"%(m,','))
+    _f.write("\n")
     _f.flush()
 
 ATTR_NORMAL = curses.A_NORMAL

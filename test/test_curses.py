@@ -10,7 +10,7 @@ win.geometry=(10,10,400,200)
 win.add(Label(text="^F focus; ^Q quit; space click",
               geometry=(30,30,300,30)))
 b1_1 = Button(text="Click Me",
-            geometry=(30,60,100,30))
+            geometry=(30,60,100,70))
 lb1_1 = Label(text="Label 1",
             geometry=(150,60,200,30))
 win.add(b1_1)
@@ -27,8 +27,8 @@ win2 = Window(title="Window 2")
 win2.geometry=(100,250,400,200)
 
 n = 0
-b2_1 = Button(text="Cheshire",geometry=(30,60,100,30))
-b2_2 = Button(text="0",geometry=(150,60,100,30))
+b2_1 = Button(text="Cheshire",geometry=(30,60,100,70))
+b2_2 = Button(text="0",geometry=(150,60,100,70))
 
 def change_b2_2(*args,**kws):
     global n

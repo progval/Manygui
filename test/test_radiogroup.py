@@ -1,4 +1,5 @@
 from anygui import *
+import sys
 
 labels = ["Banana", "Chocolate", "Strawberry"]
 
@@ -10,6 +11,7 @@ def report(**kw):
     print labels[grp.value], "selected (%d)" % grp.value
 
 def report1(**kw):
+    print grp1.value,type(grp1.value)
     print labels[grp1.value], "selected (%d)" % grp1.value
     
 app = Application()
@@ -30,5 +32,6 @@ for i in xrange(0, 3):
     win.add(btn)
 
 grp.value = 1
+#grp1.value = 1
 
 app.run()
