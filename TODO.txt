@@ -165,3 +165,5 @@ Smaller issues:
   arguments.
 
 * Add a "resizable" (or something) attribute to windows?
+
+* Add scrollbars or scrollable frames (or both)
