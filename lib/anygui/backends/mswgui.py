@@ -54,13 +54,11 @@ class ComponentWrapper(AbstractWrapper):
         return self.widget is not None
 
     def widgetFactory(self,*args,**kws):
-        print "Creating",self
         app = application()
         if hasattr(self.proxy.container,'wrapper'):
             parent = self.proxy.container.wrapper.widget
         else:
             parent = 0
-            print "\tPARENT:",parent
         widget = win32gui.CreateWindowEx(self._win_style_ex,
                                          self._wndclass,
                                          "NO SUCH TEXT",
@@ -74,7 +72,6 @@ class ComponentWrapper(AbstractWrapper):
                                          0, # hInstance
                                          None)
         app.widget_map[self.widget] = self
-        print "\tCreated."
         return widget
 
     def widgetSetUp(self):
@@ -152,7 +149,6 @@ class ComponentWrapper(AbstractWrapper):
         pass
 
     def setContainer(self,container):
-        print "Setting container:",self,container
         if container is None:
             try:
                 self.destroy()
@@ -168,7 +164,6 @@ class ComponentWrapper(AbstractWrapper):
             self.proxy.push(blocked=['container'])
 
     def enterMainLoop(self):
-        print "msw Entering main loop"
         self.proxy.push()
 
 
@@ -535,8 +530,8 @@ class WindowWrapper(ComponentWrapper):
                              self._hfont,
                              0)
     def _WM_CLOSE(self, hwnd, msg, wParam, lParam):
-        print "GOT CLOSE EVENT"
         self.destroy()
+        application().remove(self.proxy)
         return 1
 
     def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
@@ -615,6 +610,10 @@ class Application(AbstractApplication):
         
     def internalRun(self):
         win32gui.PumpMessages()
+
+    def internalRemove(self):
+        if not self._windows:
+            win32gui.PostQuitMessage(0)
 
 ################################################################
 
