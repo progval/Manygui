@@ -309,13 +309,59 @@ class TextArea(TextField, AbstractTextArea):
 
 ##################################################################
 
-class Window(ComponentMixin, AbstractWindow):
+class ContainerMixin(ComponentMixin):
+    def __init__(self):
+        self._hwnd_map = {} # maps child window handles to instances
+    
+    def _finish_creation(self):
+        for comp in self._contents:
+            self._hwnd_map[comp._hwnd] = comp
+
+    def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
+        # lParam: handle of control (or NULL, if not from a control)
+        # HIWORD(wParam): notification code
+        # LOWORD(wParam): id of menu item, control, or accelerator
+        try:
+            child_window = self._hwnd_map[lParam]
+        except KeyError:
+            # we receive (when running test_textfield.py)
+            # EN_CHANGE (0x300) and EN_UPDATE (0x400) notifications
+            # here even before the call to CreateWindow returns.
+            return
+        child_window._WM_COMMAND(hwnd, msg, wParam, lParam)
+
+    def _WM_SIZE(self, hwnd, msg, wParam, lParam):
+        w, h = lParam & 0xFFFF, lParam >> 16
+        dw = w - self._width
+        dh = h - self._height
+        self._width = w
+        self._height = h
+        self.resized(dw, dh)
+
+
+class Frame(ContainerMixin, AbstractFrame):
+    _win_style = win32con.WS_CHILD
+    _win_style_ex = 0
+
+    def __init__(self, *args, **kw):
+        ContainerMixin.__init__(self)
+        AbstractFrame.__init__(self, *args, **kw)
+
+    def _get_msw_text(self):
+        return ""
+
+    def _finish_creation(self):
+        ContainerMixin._finish_creation(self)
+        AbstractFrame._finish_creation(self)
+
+
+class Window(ContainerMixin, AbstractWindow):
 
     _win_style = win32con.WS_OVERLAPPEDWINDOW | win32con.WS_CLIPCHILDREN
     _win_style_ex = 0
 
     def __init__(self, *args, **kw):
-        self._hwnd_map = {} # maps child window handles to instances
+        ContainerMixin.__init__(self)
         AbstractWindow.__init__(self, *args, **kw)
 
     def _ensure_geometry(self):
@@ -343,8 +389,7 @@ class Window(ComponentMixin, AbstractWindow):
         return res
 
     def _finish_creation(self):
-        for comp in self._contents:
-            self._hwnd_map[comp._hwnd] = comp
+        ContainerMixin._finish_creation(self)
         AbstractWindow._finish_creation(self)
 
     def _get_msw_text(self):
@@ -358,27 +403,6 @@ class Window(ComponentMixin, AbstractWindow):
         self.destroy()
         return 1
 
-    def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
-        # lParam: handle of control (or NULL, if not from a control)
-        # HIWORD(wParam): notification code
-        # LOWORD(wParam): id of menu item, control, or accelerator
-        try:
-            child_window = self._hwnd_map[lParam]
-        except KeyError:
-            # we receive (when running test_textfield.py)
-            # EN_CHANGE (0x300) and EN_UPDATE (0x400) notifications
-            # here even before the call to CreateWindow returns.
-            return
-        child_window._WM_COMMAND(hwnd, msg, wParam, lParam)
-
-    def _WM_SIZE(self, hwnd, msg, wParam, lParam):
-        w, h = lParam & 0xFFFF, lParam >> 16
-        dw = w - self._width
-        dh = h - self._height
-        self._width = w
-        self._height = h
-        self.resized(dw, dh)
-
 ################################################################
 
 class Application(AbstractApplication):
@@ -390,6 +414,7 @@ class Application(AbstractApplication):
         if not self._wndclass:
             self._register_class()
         Window._wndclass = self._wndclass
+        Frame._wndclass = self._wndclass
 
     def _register_class(self):
         # register a window class for toplevel windows.
