@@ -47,30 +47,33 @@ class Menu(Proxy, DefaultEventMixin, Defaults.Menu):
         return backendModule().MenuWrapper(self)
 
     # Adders.
-    def addCommand(self,text="COMMAND",enabled=1,*args,**kws):
+    def addCommand(self,text="COMMAND",enabled=1,index=None,*args,**kws):
         cmdItem = MenuCommand(text=text,*args,**kws)
-        self.add(cmdItem)
+        self.add(cmdItem,index)
         return cmdItem
 
-    def addCheck(self,text="CHECKBOX",enabled=1,*args,**kws):
+    def addCheck(self,text="CHECKBOX",enabled=1,index=None,*args,**kws):
         cmdItem = MenuCheck(text=text,*args,**kws)
-        self.add(cmdItem)
+        self.add(cmdItem,index)
         return cmdItem
 
-    def addSeparator(self):
+    def addSeparator(self,index=None):
         sepItem = MenuSeparator()
-        self.add(sepItem)
+        self.add(sepItem,index)
         return sepItem
 
-    def addMenu(self,text="MENU",enabled=1,*args,**kws):
+    def addMenu(self,text="MENU",enabled=1,index=None,*args,**kws):
         mnu = Menu(text=text,enabled=enabled,*args,**kws)
-        self.add(mnu)
+        self.add(mnu,index)
         return mnu
 
-    def add(self,items):
+    def add(self,items,index=None):
+        if index is None:
+            index = len(self.contents)
         items = flatten(items)
         for item in items:
-            self.contents.append(item)
+            self.contents.insert(index,item)
+            index = index+1
             item.container = self
         self.push('contents')
 
