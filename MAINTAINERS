@@ -6,8 +6,8 @@ Thomas Heller               core, wxgui, mswgui
 Alex Martelli               dhtmlgui*, core
 Matthew Schinckel           beosgui
 Kalle Svensson              gtkgui
-Joe Knapka                  tkgui, core, cursesgui
-Shanky Tiwari               qtgui, javagui
+Joe Knapka                  tkgui, core, cursesgui, textgui
+Shanky Tiwari               qtgui, javagui, fltkgui*
 David Mertz                 cursesgui
 Laura Creighton             tkgui, core
 Dallas T. Johnston          qtgui
