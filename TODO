@@ -17,6 +17,8 @@ Tentative release date: December 10th, 2001
 
 * Update default wishlist to reflect new backends.
 
+* Document special controls for cursesgui/textgui.
+
 Objectives for version 0.2:
 ---------------------------
 Tentative release date: February 28th, 2002
