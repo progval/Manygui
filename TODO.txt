@@ -90,6 +90,9 @@ Objectives for version 0.2:
 
 * Move main event loop to a separate GUI thread?
 
+* Integrate an "event path" notion into the event framework,
+  facilitating the use of callbacks in containers to react to events
+  from child components.
 
 Objectives for version 0.3:
 ---------------------------
