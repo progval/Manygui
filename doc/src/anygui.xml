@@ -7,8 +7,6 @@
 <!ENTITY copyrightholders SYSTEM "copyrightholders.xml">
 ]>
 
-<!-- Remember: Windows are now visible per default -->
-
 <!-- TODO: - Add special tags for API reference
            - Add script for version
 -->
@@ -81,14 +79,6 @@
       it. Because of that, backwards incompatibilities may occur
       between releases. The current release should be regarded as a
       prototype.</para>
-
-      <!--
-      <para>Some features that are currently being developed or are
-      in the design stage may not be documented here, but described
-      in an <emphasis>internal request for comments</emphasis>.
-      These IRFCs can be found at <url>http://anygui.sf.net/irfc</url>.
-      </para>
-      -->
 
     </section>
 
@@ -216,10 +206,22 @@
 	<line>Java Swing (javagui)   <url>http://www.jython.org</url></line>
 	<line>PyGTK      (gtkgui)    <url>http://www.daa.com.au/~james/pygtk</url></line>
 	<line>Bethon     (beosgui)   <url>http://www.bebits.com/app/1564</url></line>
-	<line>Curses     (cursesgui) <url>...</url></line>
-	<line>Plain text (textgui)   <url>...</url></line>
+	<line>Curses     (cursesgui) <url></url></line>
+	<line>Plain text (textgui)   <url></url></line>
 	<line>PyQt       (qtgui)     <url>http://www.thekompany.com/projects/pykde</url></line>
       </codelisting>
+
+      <para>All of these backends are named with a short code (such as
+      <code>msw</code> for <code>mswgui</code>, or PythonWin, and
+      <code>wx</code> for <code>wxgui</code>, or
+      <code>wxPython</code>). The code of the backend currently in use
+      by a program can be retrieved with the <code>backend</code>
+      function.</para>
+
+      <para><strong>Note:</strong> The <name>BeOS</name> backen is not
+      included in the current release (&longversion;), but is
+      scheduled for inclusion in the final release
+      (&shortversion;).</para>
 
       <!--
       Matt's fixes to Bethon:
@@ -232,78 +234,6 @@
       Rebuild Bethon with these.
       -->
 
-      <!--
-
-From Joe:
-
-Update of /cvsroot/anygui/anygui/lib/anygui/backends/txtutils
-In directory usw-pr-cvs1:/tmp/cvs-serv27433
-
-Modified Files:
-scr_curses.py scr_text.py txtgui.py 
-Log Message:
-Completely redid curses/text focus model, AGAIN. Now ^F moves focus
-forward, ^B backward. In curses, up/down arrow have the same effect.
-I think this is the last time this will need to change.
-
-^O opens a window "O"ption menu, which lets you close the window.
-While the window is open, hjkl move the window left-down-up-right,
-and HJKL resize the window. This works best in curses, naturally.
-
-Made erase() fast. This lets focus changes and window
-restacking/resizing/repositioning feasible, performance-wise.
-
-Removed border for checkboxes and radiobuttons; they obscured
-the meaning of the indicator in textgui, and look fine in
-both text backends now.
-
-Windows are now clipped to the screen. This differs from the
-old strategy, which was to crash when a window extended past
-the screen edge.
-
-z,Z now scale the entire screen up/down by a factor of 2.
-So if a button is invisible, hit z to expand the presentation.
-(Need to add screen-scrolling for presentations that are
-larger than the physical screen.)
-
-Buttons now get drawn nicely when they are only one line
-tall. 2-line-tall buttons still suck, though.
-
-Fixed focus indicator in textgui - it now always shows up.
-
-...
-
-- textgui now uses LINES/COLUMNS environment vars to determine
-screen size, and if that fails, uses ANYGUI_SCREENSIZE, which
-should be a string of the format "<columns>x<lines>", eg "80x24".
-
-- textfields and textareas now actually work in curses. Arrows
-move the cursor, you can enter text and backspace to erase.
-ESC to move to the next control in the focus order.
-Still need to add selection.  textgui is still not going
-to handle text controls very well.
-
-- scr_curses.py reorganized, and cursesgui.py now asserts
-if scr_curses can't be loaded properly. I don't know if that
-will help Andrew's probelm, but one can hope.
-
-...
-
-- Now interpret escape sequences "by hand". Among other things, this
-means arrow keys now work in textgui, and in general everything now
-works the same in both backends, except that in textgui you must
-type <Return> to get input processed.
-
-- Replaced most use of control characters with escape sequences:
-ESC-w to get a window menu, ESC-? to open the help window.
-
-- Up, down arrow now change listbox selection.
-
-- Added the ability to scroll the entire screen using ESC-<arrows>,
-so the user can see clipped parts of the Anygui presentation.
-
-      -->
-
       <para>Of these, <name>Tkinter</name> is compiled in by default
       in the <name>MS Windows</name> distribution of
       <name>Python</name> (available from
@@ -314,6 +244,11 @@ so the user can see clipped parts of the Anygui presentation.
       <name>Java Swing</name> is automatically available in
       <name>Jython</name>, the <name>Java</name> implementation of
       <name>Python</name>.</para>
+
+      <para><strong>Note:</strong> <name>Anygui</name> (using
+      <name>Tkinter</name>) works with <name>Mac OS</name> 9 with
+      <name>Python Classic</name>. There seems to be some problems
+      with <name>Carbon</name>.</para>
 
       <para>In the future <name>Anygui</name> should hopefully work in
       almost any <name>Python</name> installation, even those which do
@@ -333,8 +268,6 @@ so the user can see clipped parts of the Anygui presentation.
 
   <section>
     <title>Using Anygui</title>
-
-    <para>[To be rewritten shortly]</para>
 
     <para><emphasis>Note</emphasis>: For some examples of working
     <name>Anygui</name> code, see the <code>test</code> and
@@ -484,8 +417,6 @@ so the user can see clipped parts of the Anygui presentation.
     <section>
       <title>The set Method and the Options Class</title>
 
-      <!-- document modify -->
-
       <para>If you want to change some attributes of a widget, you can
       either just set them directly, or (if you'd like to set several
       at once), use the <code>set</code> method, just like the
@@ -522,6 +453,64 @@ so the user can see clipped parts of the Anygui presentation.
     </section>
 
     <section>
+      <title>The modify Method</title>
+
+      <para>Just like <code>set</code> can be used to set the
+      attributes of a <code>Component</code>, the <code>modify</code>
+      method can be used to <emphasis>modify</emphasis> them, without
+      rebinding them to another value. To show the difference,
+      consider the following example (where <code>foo</code> is an
+      attribute that does nothing special):</para>
+
+      <codelisting>
+	<line>>>> from anygui import *</line>
+	<line>>>> btn = Button()</line>
+	<line>>>> some_list = [1, 2, 3]</line>
+	<line>>>> btn.foo = some_list</line>
+	<line>>>> btn.modify(foo=[4, 5, 6])</line>
+	<line>>>> btn.foo</line>
+	<line>[4, 5, 6]</line>
+	<line>>>> some_list</line>
+	<line>[4, 5, 6]</line>
+	<line>>>> btn.set(foo=[7, 8, 9])</line>
+	<line>>>> btn.foo</line>
+	<line>[7, 8, 9]</line>
+	<line>>>> some_list</line>
+	<line>[4, 5, 6]</line>
+      </codelisting>
+
+      <para>As you can see, using <code>modify</code> modifies the
+      list, while <code>set</code> replaces it. The
+      <code>modify</code> method is very important for implementing
+      Model-View-Controller systems. (More about that later.)</para>
+
+      <para>The <code>modify</code> method works as follows: If there
+      is a specific internal method for modifying an attribute, that
+      is called. Otherwise, the supplied value will be assigned to
+      <code>self.name[:]</code> (where <code>name</code> is the
+      attribute in question). If that doesn't work (a
+      <code>TypeError</code> exception is raised), the value will be
+      assigned to <code>self.name.value</code>. If that doesn't work
+      either, the attribute will be rebound to the new value, with the
+      same result as using <code>set</code>. So, to avoid any in-place
+      modification, all you need to do is use immutable values:
+      </para>
+
+      <codelisting>
+	<line>>>> from anygui import *</line>
+	<line>>>> btn = Button()</line>
+	<line>>>> some_list = [1, 2, 3]</line>
+	<line>>>> btn.foo = tuple(some_list)</line>
+	<line>>>> btn.modify(foo=[4, 5, 6])</line>
+	<line>>>> btn.foo</line>
+	<line>[4, 5, 6]</line>
+	<line>>>> some_list</line>
+	<line>[1, 2, 3]</line>
+      </codelisting>
+
+    </section>
+
+    <section>
       <title>Adding a Label</title>
 
       <para>Simple labels are created with the <code>Label</code>
@@ -545,7 +534,10 @@ so the user can see clipped parts of the Anygui presentation.
     <section>
       <title>Layout: Placing Widgets in a Frame</title>
 
-      <para>[TBD: intro]</para>
+      <para>This section goves a simple example of positioning
+      <code>Components</code>; for more information about the
+      <name>Anygui</name> layout mechanism, please refer to the API
+      Reference (below).</para>
 
       <codelisting>
 	<line>win.add(lab, position=(10,10))</line>
@@ -560,37 +552,31 @@ so the user can see clipped parts of the Anygui presentation.
       containing <code>Frame</code> is resized. (The vertical version
       is <code>vstretch</code>.)</para>
 
-      <!-- hmove and vmove -->
-
-      <!-- more about generic layout -->
-
-      <!--
-
       <section>
 	<title>Placing More Than One Widget</title>
 
-	<para>The <code>place</code> method can also position a
-	<emphasis>list</emphasis> of widgets. The first widget will be
-	placed as before, while the subsequent ones will be placed
-	either to the right or to the left (according to the
-	<code>direction</code> argument), at a given distance
-	(<code>space</code>):</para>
+	<para>The <code>add</code> method can also position a
+	<emphasis>sequence</emphasis> of widgets. The first widget
+	will be placed as before, while the subsequent ones will be
+	placed either to the <code>right</code>, to the
+	<code>left</code>, above (<code>up</code>), or below
+	(<code>down</code>), according to the <code>direction</code>
+	argument, at a given distance (<code>space</code>):</para>
 
 	<codelisting>
-	  <line>win.place([lab1, lab2], position=(10,10),</line>
-	  <line>          direction='right', space=10)</line>
+	  <line>win.add((lab1, lab2), position=(10,10),</line>
+	  <line>        direction='right', space=10)</line>
 	</codelisting>
 
-	# positional arguments
-
-	<para><emphasis>Note</emphasis>: When using
-        <code>direction</code> and <code>space</code> like this, you
-        should explicitly set the size of your widgets, otherwise they
-        will most likely overlap. This will hopefully be fixed (with a
-        decent system of defaults) in future releases.</para>
+	<para><strong>Note:</strong> Remember to enclose your
+	components in a sequence (such as a tuple or a list), since
+	<code>add</code> allows you to use more positional arguments,
+	but will treat them differently. For more information see the
+	section about the <code>Frame</code> class in the API
+	Reference below.</para>
 
       </section>
-      -->
+
     </section>
 
     <section>
@@ -782,7 +768,7 @@ to get +-| borders on strange terminal emulators. This is
 mentioned on the initial help screen as well.
 
 ANYGUI_SCREENSIZE
-
+ANYGUI_SKIP # Test script...
       -->
 
       <para>Example:</para>
@@ -970,8 +956,6 @@ ANYGUI_SCREENSIZE
 
       <para><strong>Assignee and update()</strong></para>
       
-      <para>[Move this to the tutorial section]</para>
-
       <para>When an attribute of a <code>Component</code> (or
       <code>Application</code>, <code>RadioGroup</code>, or an
       instance of another <code>Attrib</code> subclass) is assigned a
@@ -1011,8 +995,6 @@ ANYGUI_SCREENSIZE
 
       <para><strong>Updating Automatically</strong></para>
 
-      <para>[Move this to the tutorial section]</para>
-
       <para>Updating <code>Components</code> explicitly can be useful,
       but sometimes you would want it to be done for you,
       automatically, each time you modify an object that is referred
@@ -1046,21 +1028,24 @@ ANYGUI_SCREENSIZE
 
       <para><strong>Model and Assignee</strong></para>
 
-      <para>[Move this to the tutorial section]</para>
-
-      <!-- Add NumberModel - remove BooleanModel? -->
-
       <para>The <name>Anygui</name> models (<code>BooleanModel</code>,
-      <code>ListModel</code>, and <code>TextModel</code>) are objects
-      that call <code>send</code> (with the <code>'default'</code>
-      event) when they are modified.</para>
+      <code>ListModel</code>, <code>TextModel</code>, and
+      <code>NumberModel</code>) are objects that call
+      <code>send</code> (with the <code>'default'</code> event) when
+      they are modified.</para>
 
-      <para>[TBD]</para>
+      <para>An <code>Assignee</code> (part of the <name>Anygui</name>
+      Model-View-Controller mechanism) is an object that supports the
+      methods <code>assigned</code> and <code>removed</code>. These
+      are automatically called (if present) when the object is
+      assigned to one of the attributes of an <code>Attrib</code>
+      object (such as a <code>Component</code>). <code>Model</code>s
+      use this behaviour to automatically call <code>link</code> and
+      <code>unlink</code>, so when the <code>Model</code> is modified,
+      the <code>update</code> method of the <code>Attrib</code> object
+      is called automatically.</para>
 
-      <!-- More about Models, and then about Attrib and the Model
-      behaviour of calling link() and unlink() -->
-
-      <!-- Make sure Model.update() works -->
+      <!-- document the valu attribute -->
 
       <para><strong>class Application</strong></para>
 
@@ -1078,9 +1063,6 @@ ANYGUI_SCREENSIZE
       be a useful way of structuring your program, but it is in no way
       required.</para>
 
-      <!-- What about Application.windows()? Why not
-      Application._get_windows? -->
-
       <para><code>Application</code> has the following methods:</para>
 
       <para><apiname>run</apiname>()</para>
@@ -1095,9 +1077,39 @@ ANYGUI_SCREENSIZE
 	<line>app.run()</line>
       </codelisting>
     
-      <para>[...]</para>
+      <para><apiname>add</apiname>(<var>win</var>)</para>
 
-      <!-- add, remove, and contents attribute -->
+      <para>Adds a <code>Window</code> to the
+      <code>Application</code>, in the same way
+      <code>Components</code> can be added to <code>Frame</code>s (see
+      below). A <code>Window</code> will not be visible until it has
+      been <code>add</code>ed to the current <code>Application</code>
+      object, and that <code>Application is running</code>. When
+      constructing new <code>Window</code>s after
+      <code>Application.run</code> has been called, you should ensure
+      that you <code>add</code> your <code>Window</code> to your
+      running <code>Application</code> <emphasis>after</emphasis> all
+      the <code>Components</code> have been added to your
+      <code>Window</code>; otherwise, you may see them appearing and
+      moving about as <name>Anygui</name> takes care of the
+      layout. (Before <code>Application.run</code> is called, this is
+      not an issue, since no <code>Window</code>s will be appear
+      before that time.)</para>
+ 
+      <para>The parameter <code>win</code> can be either a single
+      <code>Window</code>, or a sequence of
+      <code>Windows</code>.</para>
+
+      <para><apiname>remove</apiname>(<var>win</var>)</para>
+
+      <para>Removes a <code>Window</code> from the application. This
+      will make the <code>Window</code> disappear.</para>
+
+      <para><apiname>contents</apiname></para>
+
+      <para>A read-only property containing a tuple of the
+      <code>Window</code>s the <code>Application</code> currently
+      manages.</para>
 
       <para><strong>class Button</strong></para>
 
@@ -1124,7 +1136,8 @@ ANYGUI_SCREENSIZE
       time the box is clicked. The state of the <code>CheckBox</code>
       can be altered by assigning to this attribute.</para>
     
-      <!-- model stuff -->
+      <para>The <code>on</code> attribute is a useful place to use a
+      <code>BooleanModel</code>.</para>
 
       <para><strong>class Frame</strong></para>
   
@@ -1145,9 +1158,19 @@ ANYGUI_SCREENSIZE
       overridden with keyword arguments, and all this information will
       be passed to the <code>LayougManager</code> (see below) of the
       <code>Frame</code>, if any. This <code>LayougManager</code> is
-      stored in the <code>layoug</code> property.</para>
+      stored in the <code>layout</code> property.</para>
 
-      <!-- remove() and contents attribute -->
+      <para><apiname>remove</apiname>(<var>comp</var>)</para>
+
+      <para>Removes a component from the <code>Frame</code>.</para>
+
+      <para><apiname>contents</apiname></para>
+
+      <para>This is a read-only property which contains the contents
+      (a tuple of <code>Components</code>) of the
+      <code>Frame</code>.</para>
+
+      <!-- This property should perhaps behave like other properties? -->
 
       <para><strong>class Label</strong></para>
 
@@ -1159,19 +1182,34 @@ ANYGUI_SCREENSIZE
 
       <para>A layout manager is responsible for setting the
       <code>geometry</code> properties of a set of components when
-      their parent <code>Frame</code> changes shape. A layout manager
-      should subclass <code>LayougManager</code>, and then implement
-      the following methods:</para>
+      their parent <code>Frame</code> changes shape. <!-- A layout
+      manager should subclass <code>LayoutManager</code>, and then
+      implement the following methods: --> The default
+      <code>LayoutManager</code> (and the only one supplied with the
+      current release) is the <code>Placer</code> (see below).
+      </para>
 
-      <!-- placer as default -->
+      <para><strong>Note:</strong> Although Anygui &shortversion;
+      comes only with this layout manager, more will appear in the
+      future.</para>
 
       <para><strong>class ListBox</strong></para>
       
-      <para>[Under construction]</para>
+      <para>Shows a list of options, of which one may be selected. The
+      <code>ListBox</code> has two special attributes:
+      <code>items</code>, a sequence of items to display, and
+      <code>selection</code>, the currently selected (as an index in
+      the <code>items</code> sequence).</para>
+
+      <para>The <code>selection</code> property will be automatically
+      modified (as per the MVC mechanism) when the user makes a
+      selection. This will also cause the <code>ListBox</code> to
+      <code>send</code> a <code>select</code> event.</para>
 
       <para><strong>class Model</strong></para>
 
-      <para>[Under construction]</para>
+      <para>See the section on <code>Model</code> and
+      <code>Assignee</code> above.</para>
 
       <para><strong>class Options</strong></para>
       
@@ -1219,7 +1257,44 @@ ANYGUI_SCREENSIZE
 
       <para><strong>class Placer</strong></para>
 
-      <para>[Under construction]</para>
+      <para>A simple but powerful layout manager. When adding
+      components to a <code>Frame</code> whose <code>layout</code>
+      attribute is set to a <code>Placer</code>, you can supply the
+      following keyword arguments:</para>
+
+      <codelisting>
+	<line>left         -- the Component's left edge</line>
+	<line>right        -- the Component's right edge</line>
+	<line>top          -- the Component's top edge</line>
+	<line>bottom       -- the Component's bottom edge</line>
+	<line>hmove        -- move horizontally on resize</line>
+	<line>vmove        -- move vertically on resize</line>
+	<line>hstretch     -- stretch horizontally on resize</line>
+	<line>vstretch     -- stretch vertically on resize</line>
+	<line>direction    -- 'left', 'right', 'up', or 'down'</line>
+	<line>space        -- spacing between multiple Components</line>
+      </codelisting>
+
+      <para>The geometry specifiers (<code>left</code>,
+      <code>right</code>, <code>top</code>, and <code>bottom</code>)
+      can be set to either <code>None</code> (the default; will use
+      the <code>Component</code>'s existing coordinates), a distance
+      (from the corresponding <code>Frame</code> edge), a
+      <code>Component</code> (will align the edge with the opposite
+      edge of the given component), or a tuple
+      (<emphasis>component</emphasis>, <emphasis>distance</emphasis>)
+      (as with only a <code>Component</code>, except that a gap of
+      size <emphasis>distance</emphasis> is inserted between the
+      two).</para>
+
+      <para>The movement arguments (<code>hmove</code> and
+      <code>vmove</code>) specify (with a Boolean value) whether the
+      <code>Component</code> should be moved (horizontally,
+      vertically, or both) to maintain the given distance to the
+      surrounding <code>Frame</code>'s edges; the stretching arguments
+      (<code>hstretch</code> and <code>vstretch</code>) specify
+      whether the <code>Component</code> may be stretched to maintain
+      these distances.</para>
 
       <para><strong>class RadioButton</strong></para>
       
@@ -1249,15 +1324,22 @@ ANYGUI_SCREENSIZE
           
       <para><strong>class TextArea</strong></para>
 
-      <para>[Under construction]</para>
+      <para>A multiline text-editing <code>Component</code>. Its text
+      is stored in the <code>text</code> attribute, which will be
+      modified (according to the MVC mechanism) when the component
+      loses focus. It also supports the Boolean <code>editable</code>
+      property, which may be used to control whether the user can edit
+      the text area or not.</para>
     
       <para><strong>class TextField</strong></para>
 
-      <para>[Under construction]</para>
+      <para>A one-line text-editing <code>Component</code>. (See also
+      <code>TextArea</code>, above.) If the enter/return key is
+      pressed within a <code>TextField</code>, the
+      <code>TextField</code> will <code>send</code> a
+      <code>enterkey</code> event.</para>
         
       <para><strong>class Window</strong></para>
-
-      <!-- title attribute -->
 
       <para>A window, plain and simple. <code>Window</code> is a type
       of <code>Frame</code>, so you can add components to it and set
@@ -1272,6 +1354,10 @@ ANYGUI_SCREENSIZE
 	<line>app.add(win)</line>
 	<line>app.run()</line>
       </codelisting>
+
+      <para><code>Window</code>s have a <code>title</code> attribute
+      which may be used by the operating system or window
+      manager to identify the window to the user in various ways.</para>
 
     </section>
 
