@@ -18,7 +18,6 @@ __all__ = '''
   inlineResource
 '''.split()
 
-from anygui.Utils import log
 from anygui.Applications import AbstractApplication
 from anygui.Wrappers import AbstractWrapper
 from anygui.Events import *
@@ -737,7 +736,7 @@ class Application(AbstractApplication):
                 WM_CLOSE: _dispatch_WM_CLOSE,
                 WM_SIZE: _dispatch_WM_SIZE,
                 WM_COMMAND: _dispatch_WM_COMMAND,
-                WM_DESTROY: _dispatch_WM_PAINT,
+                WM_PAINT: _dispatch_WM_PAINT,
                 }
 
     def __init__(self):
