@@ -1,4 +1,5 @@
 from anygui import *
+from anygui.Utils import log
 
 app = Application()
 
@@ -9,13 +10,13 @@ app.add(win)
 newbtn = None
 
 def printit1(**ignore_kwds):
-    print 'printit1:',newbtn.on,ignore_kwds
+    log('printit1:',newbtn.on,ignore_kwds)
 
 def printit2(**ignore_kwds):
-    print 'printit2:',newbtn.on,ignore_kwds
+    log('printit2:',newbtn.on,ignore_kwds)
 
 def say_hello(**kw):
-    print "Hello, world!"
+    log("Hello, world!")
     global newbtn
     if newbtn is None:
         newbtn = CheckBox(opt, y = g_y)

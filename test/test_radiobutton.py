@@ -1,9 +1,10 @@
 from anygui import *
+from anygui.Utils import log
 
 app = Application()
 
 def report(**kw):
-    print "Radio button clicked"
+    log("Radio button clicked")
     btn.on = not btn.on
 
 win = Window(width = 160, height = 90)

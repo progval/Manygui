@@ -1,6 +1,7 @@
 from anygui import backend
+from anygui.Utils import log
 import anygui
 
-print 'The current backend is:', backend()
-print "No output below this line indicates success"
+log('The current backend is:', backend())
+log("No output below this line indicates success")
 assert backend() in anygui._backends

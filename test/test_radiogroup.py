@@ -1,4 +1,5 @@
 from anygui import *
+from anygui.Utils import log
 
 labels = ["Banana", "Chocolate", "Strawberry"]
 
@@ -6,11 +7,11 @@ grp = RadioGroup()
 grp1 = RadioGroup()
 
 def report(**kw):
-    print grp.value
-    print labels[grp.value], "selected (%d)" % grp.value
+    log(grp.value)
+    log(labels[grp.value], "selected (%d)" % grp.value)
 
 def report1(**kw):
-    print labels[grp1.value], "selected (%d)" % grp1.value
+    log(labels[grp1.value], "selected (%d)" % grp1.value)
     
 app = Application()
 

@@ -1,4 +1,5 @@
 from anygui import *
+from anygui.Utils import log
 
 app = Application()
 
@@ -9,7 +10,7 @@ app.add(win)
 newbtn = None
 
 def say_hello(**kw):
-    print "Hello, world!"
+    log("Hello, world!")
     global newbtn
     if newbtn is None:
         newbtn = Button(opt, y = g_y)

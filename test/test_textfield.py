@@ -1,4 +1,5 @@
 from anygui import *
+from anygui.Utils import log
 
 def init_field(**kw):
     global tf, lbl
@@ -16,7 +17,7 @@ def update_label(**kw):
 
 def print_contents(**kw):
     global tf
-    print 'Enter was pressed. Field contents:', tf.text
+    log('Enter was pressed. Field contents:', tf.text)
 
 tf = TextField(width=150, height=25)
 link(tf, print_contents)

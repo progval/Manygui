@@ -1,4 +1,5 @@
 from anygui import Window, Label, Application
+from anygui.Utils import log
 
 app = Application()
 

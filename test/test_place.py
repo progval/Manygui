@@ -1,4 +1,5 @@
 from anygui import *
+from anygui.Utils import log
 ##from anygui import Window, View, CheckBox, Button, Label, \
 ##     RadioButton, RadioGroup, application
 ##from TestViews import TestView, BigTestView
@@ -10,13 +11,13 @@ TestView = BigTestView = View = Button
 #import sys
 
 def pushed_it(**kw):
-    print "Button pushed."
+    log("Button pushed.")
 
 def checked_it(**kw):
-    print "Check boxes changed to:", cb1.on, cb2.on
+    log("Check boxes changed to:", cb1.on, cb2.on)
 
 def option_chosen(**kw):
-    print "Hoopy option %d chosen" % rg.value
+    log("Hoopy option %d chosen" % rg.value)
 
 def main():
     global cb1, cb2, rg
@@ -82,7 +83,7 @@ def main():
 #  main()
 #except:
 #  sys.last_traceback = sys.exc_traceback
-#  print sys.exc_type, sys.exc_value
+#  log(sys.exc_type, sys.exc_value)
 #  pdb.pm()
 
 main()

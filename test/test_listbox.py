@@ -1,4 +1,5 @@
 from anygui import *
+from anygui.Utils import log
 
 class SelectionPrinter(ListBox):
 
@@ -7,7 +8,7 @@ class SelectionPrinter(ListBox):
         link(lb, self.print_selection)
 
     def print_selection(self, **kw):
-        print 'Item selected:', self._lb.selection, '(%s)' % self._lb.items[self._lb.selection]
+        log('Item selected:', self._lb.selection, '(%s)' % self._lb.items[self._lb.selection])
 
 app = Application()
 

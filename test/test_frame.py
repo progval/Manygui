@@ -1,4 +1,5 @@
 from anygui import *
+from anygui.Utils import log
 
 app = Application()
 win = Window(size=(280,200))
@@ -46,10 +47,10 @@ for i in range(num):
         for j in range(num):
             if j!=i:
                 fms[j].visible = 0
-                print 'Frame %s hidden' % j
+                log('Frame %s hidden' % j)
             else:
                 fms[j].visible = 1
-                print 'Frame %s shown' % j
+                log('Frame %s shown' % j)
     callbacks.append(callback)
 for i in range(num):
     link(bns[i], callbacks[i])

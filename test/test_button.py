@@ -1,4 +1,5 @@
 from anygui import *
+from anygui.Utils import log
 
 app = Application()
 
@@ -8,7 +9,7 @@ win = Window(width = 110, height = 210)
 app.add(win)
 
 def say_hello(**kw):
-    print "Hello, world!"
+    log("Hello, world!")
     global g_y
     btn = Button(opt, y = g_y, text="New")
     g_y += 5

@@ -1,4 +1,5 @@
 from anygui import *
+from anygui.Utils import log
 
 the_text = """\
 I like chinese,

@@ -1,9 +1,10 @@
 from anygui import *
+from anygui.Utils import log
 
 app = Application()
 
 def report(**kw):
-    print "Check box set to", box.on
+    log("Check box set to", box.on)
 
 win = Window(width = 140, height = 90)
 app.add(win)

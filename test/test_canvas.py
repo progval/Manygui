@@ -1,4 +1,5 @@
 from anygui import *
+from anygui.Utils import log
 from anygui.Colors import *
 
 # Only javagui implements this so far:
@@ -12,9 +13,9 @@ cvs = Canvas(size=win.size)
 win.add(cvs)
 
 def click(x, y, **kw):
-    print '[Mouse clicked at (%i, %i)]' % (x, y)
+    log('[Mouse clicked at (%i, %i)]' % (x, y))
     if 30 <= x <= 100 and 30 <= y <= 100:
-        print 'Yay! You clicked the round rect!'
+        log('Yay! You clicked the round rect!')
 
 link(cvs, 'click', click)
 

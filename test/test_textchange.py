@@ -1,4 +1,5 @@
 from anygui import *
+from anygui.Utils import log
 
 app = Application()
 btn = Button(text='Before')

@@ -1,4 +1,5 @@
 from anygui import *
+from anygui.Utils import log
 
 class MyWindow(Window):
     pass
@@ -24,14 +25,15 @@ btn = Button(text='Create new window', size=(200,25), x=10, y=10)
 link(btn, new_window)
 win.add(btn)
 
-print application()._windows
-print
+log(application()._windows)
+#print
+log("")
 
 #dlog = Window(title = "A Dialog Window", style = 'dialog',
 #	      x = 100, y = 300, width = 300, height = 200)
 
-#print application()._windows
+#log(application()._windows)
 
 app.run()
 
-print application()._windows
+log(application()._windows)
