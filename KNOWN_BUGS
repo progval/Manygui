@@ -1,3 +1,9 @@
+In wxgui, the text cursor doesn't seem to want to leave non-editable
+text areas and text fields... It keeps moving around to the
+correct position (but in the wrong field) if one (after having
+selected portions of an uneditable field) selects parts of an
+editable field. (See test_textfield and test_textarea.)
+
 javagui layout is extremely slow for some reason. Also, some
 components may not be visible before the window is resized (the
 TextArea in test_defaults, for instance). This has not always been so,
