@@ -2,7 +2,7 @@
 
 <!DOCTYPE document SYSTEM "minimal.dtd" [
 <!ENTITY shortversion            "0.1">
-<!ENTITY longversion             "0.1b1">
+<!ENTITY longversion             "0.1">
 <!ENTITY copy                    "<copyright/>">
 <!ENTITY copyrightholders SYSTEM "copyrightholders.xml">
 ]>
@@ -244,10 +244,9 @@
       <code>ANYGUI_FORCE_CURSES</code>; see the API Reference
       below.)</para>
 
-      <para><strong>Note:</strong> The <name>BeOS</name> and
-      <name>GTK</name> backends are not included in the current
-      release (&longversion;), but are scheduled for inclusion in the
-      final release (&shortversion;).</para>
+      <para><strong>BeOS Note:</strong> The BeOS backend
+      (<code>beosgui</code>) is currently not fully functional, but is
+      included nonetheless.</para>
 
       <!--
       Matt's fixes to Bethon:
