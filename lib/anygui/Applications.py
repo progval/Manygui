@@ -5,6 +5,8 @@ import anygui
 
 class AbstractApplication(Attrib):
 
+    _running = 0
+
     # Needed by Attrib:
     def update(self, **ignore): pass
     
@@ -16,8 +18,10 @@ class AbstractApplication(Attrib):
         return self._windows
 
     def add(self, win):
-        win.ensure_created()
         self._windows.append(win)
+        if self._running:
+            win.ensure_created()
+            
 
     def remove(self, win):
         self._windows.remove(win)
@@ -38,11 +42,13 @@ class AbstractApplication(Attrib):
 
     def run(self):
         """Run the application until all windows are destroyed."""
+        self._running = 1
         if not self._windows:
             return
         for win in self._windows:
             win.ensure_created()
         self._mainloop()
+        self._running = 0
 
     def _mainloop(self):
         raise UnimplementedMethod, (self, "mainloop")
