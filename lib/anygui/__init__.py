@@ -100,7 +100,7 @@ if DEBUG:
         pass
 
 _application  = None
-_backend      = None
+backend      = None
 _backend_name = None
 
 def _dotted_import(name):
@@ -135,7 +135,7 @@ def _backend_passthrough():
             continue
         else:
             _backend_name = name
-            _backend      = mod
+            backend       = mod
             return
     # mlh20020321: Temporarily shut off for work on front-end
     #raise RuntimeError, "no usable backend found"

@@ -1,5 +1,7 @@
 "Mixins: mix-in classes for the anygui package"
 
+# FIXME: In need of a major rewrite to match Proxy and Wrapper.
+
 from Exceptions import SetAttributeError, GetAttributeError, UnimplementedMethod, InternalError
 from Events import link, send
 from Utils import topologicalSort
@@ -37,6 +39,8 @@ def _get_all_setters(klass):
     return topologicalSort(setter_names, constraints)
 
 '''
+
+# FIXME: Should store state variables in a dictionary called state.
 
 class Attrib:
     """Attrib: mix-in class to support attribute getting & setting.
@@ -128,6 +132,8 @@ class Attrib:
 
     def modify(self, *args, **kwds):
         return self._set_or_mod(self.__class__.modattr, *args, **kwds)
+
+    # FIXME: Add rawModify...
 
     def modattr(self, name, value):
         if name[0]!='_':

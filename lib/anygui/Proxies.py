@@ -1,33 +1,23 @@
-# TBD: Add Proxy class to interact with AbstractWrapper class. (No
-# need to call it AbstractProxy since, unlike Wrapper, there will only
-# be one "main superclass".)
+from Mixing import Attrib
 
-class Proxy:
+class Proxy(Attrib):
 
-    # Subclass Attrib... Modify Attrib to use state dictionary etc.
-    # Move rawModify and modify to Attrib...
+    # TBD: Add docstring for class
 
-    # Stores state variables in a dictionary named state. When the
-    # state is modified in a manner detectable by the Proxy
-    # (i.e. through __setattr__, set(), or modify()) the sync()
-    # method is called to synchronise with the backend wrapper.
+    def __init__(self, *args, **kwds):
+        Attrib.__init__(self, *args, **kwds)
+        self.wrapper = self.wrapperFactory()
 
-    def rawModify(self, **kwds):
+    def wrapperFactory(self):
         """
-        Performs modification without calling sync().
-        
-        This method is used by the backend Wrapper to perform
-        modifications based on user actions. The modifications are
-        done in-place if possible (as described in the
-        documentation), only rebinding an attribute if the
-        modification fails.
-        """           
+        Creates a backend Wrapper object from the current backend.
 
-    def modify(self, **kwds):
+        Each Proxy subclass should implement this method to return an
+        instance of the correct Wrapper subclass. For instance, in a
+        Button class, this method would return an instance of the
+        class anygui.backend.ButtonWrapper.
         """
-        Similar to rawModify, but also calls sync() with the
-        appropriate attribute names.
-        """
+        raise NotImplementedError, 'should be implemented by subclasses'
 
     def sync(self, *names):
         """
@@ -42,6 +32,12 @@ class Proxy:
         supplied, all state variables must be supplied. If names
         are supplied, these must at a minimum be supplied.
         """
+        state = {}
+        if not names: state.update(self.state)
+        else:
+            for name in names: state[name] = self.state[name]
+        self.wrapper.update(state)
+        
 
     def destroy(self):
         """
@@ -50,5 +46,6 @@ class Proxy:
         This is used by the application programmer in the occasions
         where a native widget must be explicitly destroyed.
         """
+        self.wrapper.destroy()
 
     
