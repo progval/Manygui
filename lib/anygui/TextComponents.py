@@ -1,17 +1,13 @@
 from anygui.Components import AbstractComponent
 from anygui.Exceptions import UnimplementedMethod
-from anygui.Models import TextModel
 
 class AbstractTextComponent(AbstractComponent):
 
-    # _text = ''
-    # _model = None
     _selection = (0, 0)
     _editable = 1
 
     def __init__(self, *arg, **kw):
         AbstractComponent.__init__(self, *arg, **kw)
-        # self.model = TextModel()
         self.text = kw.get('text','')
 
     # text property:

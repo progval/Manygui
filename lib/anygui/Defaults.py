@@ -91,6 +91,8 @@ class ListBox:
     _vstretch = 0
     _visible = 1
     _enabled = 1
+    _items = ()
+    _selection = 0
 
 class RadioButton:
     

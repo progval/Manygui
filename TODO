@@ -33,6 +33,8 @@ Tentative release date: February 28th, 2002
   in Mixins.Attrib, and make sure it's used where applicable
   in the various modules.
 
+* Remove some redundante _ensure_foo calls, due to update()
+
 * Add a dialog class
 
 * Add support for native dialogs (e.g. file dialogs)
