@@ -60,7 +60,7 @@ def _backend_passthrough():
             for key in __all__:
                 globals()[key] = mod.__dict__[key]
         except (ImportError, AttributeError, KeyError):
-            if DEBUG:
+            if DEBUG and not (DEBUG in _backends and not DEBUG==name):
                 import traceback
                 traceback.print_exc()
             continue
