@@ -89,7 +89,7 @@ class ComponentMixin:
 
     def _ensure_destroyed(self):
         if self._tk_comp:
-            #self._tk_comp.Destroy()
+            self._tk_comp.destroy()
             self._tk_comp = None
 
     def _get_tk_text(self):
@@ -493,7 +493,7 @@ class TextArea(ComponentMixin, AbstractTextArea, DisabledTextBindings):
 
 class Frame(ComponentMixin, AbstractFrame):
     _tk_class = Tkinter.Frame
-    _tk_opts = {'relief':'raised','borderwidth':2}
+    #_tk_opts = {'relief':'raised','borderwidth':2}
 
 #from anygui.Frames import FakeFrame
 #class Frame(FakeFrame): pass

@@ -1,5 +1,6 @@
 from anygui.Mixins import Attrib, Action
 from anygui.Exceptions import UnimplementedMethod
+from anygui.LayoutManagers import LayoutData
 
 class AbstractComponent(Attrib):
     """AbstractComponent is an abstract base class representing a visual component of
@@ -12,6 +13,7 @@ class AbstractComponent(Attrib):
     _container = None
 
     def __init__(self, *args, **kw):
+        self.layout_data = LayoutData()
         Attrib.__init__(self, *args, **kw)
 
     def destroy(self):
