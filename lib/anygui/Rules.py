@@ -171,7 +171,7 @@ class RuleEngine:
                     self.setValue(state, key, newValue)
                     del undefs[key]
                     stable = 0
-        return undefs.keys()
+        assert not undefs
         
     def newValue(self, key, state, undefs):
         oldValue = self.getValue(state, key)
