@@ -47,16 +47,8 @@ indicate the sender object and signal name.
 
 """
 
-try:
-    from weakref import ref
-except ImportError:
-    from warnings import warn
-    warn('weakref module not available')
-    class ref:
-        def __init__(self,obj):
-            self.obj = obj
-        def __call__(self):
-            return self.obj
+import Utils
+ref = Utils.import_weakref().ref
 
 class MessageException:
     """ Exception raised when a message can't be delivered. """

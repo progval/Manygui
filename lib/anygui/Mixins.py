@@ -1,19 +1,9 @@
 "Mixins: mix-in classes for the anygui package"
 
 from Exceptions import SetAttributeError, GetAttributeError
+import Utils
 
-try:
-    import weakref
-except ImportError:
-    from warnings import warn
-    warn('weakref module not available')
-    class ref:
-        def __init__(self,obj):
-            self.obj = obj
-        def __call__(self):
-            return self.obj
-    class weakref:
-        ref = ref
+weakref = Utils.import_weakref()
 
 class Attrib:
     """Attrib: mix-in class to support attribute getting & setting
