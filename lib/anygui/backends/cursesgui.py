@@ -236,12 +236,14 @@ class Application(AbstractApplication):
             endwin()
     
     def _mainloop(self):
-        self._redraw_all()
-        while self._check_for_events():
+        try:
             self._redraw_all()
-        echo()
-        nocbreak()
-        endwin()
+            while self._check_for_events():
+                self._redraw_all()
+        finally:
+            echo()
+            nocbreak()
+            endwin()
 
     def _check_for_events(self):
         ch = _scr.getch()
