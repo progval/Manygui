@@ -190,7 +190,11 @@ def setLogFile(fileobj):
 
 def logFlush():
     _logger.flush()
-    
+
+def logTraceback(n):
+    import traceback
+    traceback.print_exc(n,_logger._f)
+
 _jython = sys.platform[:4] == 'java'
 
 if _jython:
