@@ -26,7 +26,7 @@ class AbstractComponent(Attrib, Action):
         Attrib.__init__(self, *args, **kw)
 
     def destroy(self):
-        self._container = None # ???
+        self._set_container(None)
         self._ensure_destroyed()
 
     def ensure_created(self):
