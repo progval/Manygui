@@ -10,8 +10,8 @@ class Button:
     _text = 'Button'
     _x = 0
     _y = 0
-    _width = 50
-    _height = 25
+    _width = 80
+    _height = 30
     _hmove = 0
     _vmove = 0
     _hstretch = 0
@@ -39,7 +39,7 @@ class Label:
     _x = 0
     _y = 0
     _width = 100
-    _height = 50
+    _height = 15
     _hmove = 0
     _vmove = 0
     _hstretch = 0
@@ -97,7 +97,7 @@ class TextField:
     _x = 0
     _y = 0
     _width = 100
-    _height = 25
+    _height = 30
     _hmove = 0
     _vmove = 0
     _hstretch = 0
