@@ -88,10 +88,10 @@ PBM_SETPOS=WM_USER+2
 PBM_SETRANGE=WM_USER+1
 
 GetLastError = kernel32.GetLastError
-_verbose=1
+_verbose=0
 if _verbose:
-    from rlextra.utils.buildutils import STDLOG
-    _stdlog = STDLOG('/tmp/dbg.txt')
+    from anygui.Utils import log, setLogFile
+    setLogFile('/tmp/dbg.txt')
 
 def _lastErrorMessage(n=None):
     msg = windll.cstring('',512)
@@ -173,7 +173,9 @@ class ComponentWrapper(AbstractWrapper):
         return widget
 
     def widgetSetUp(self):
+        if _verbose: log('widgetSetup',str(self))
         self.proxy.container.wrapper.widget_map[self.widget] = self
+        self.proxy.push(blocked=['container'])
         user32.SendMessage(self.widget,
                              WM_SETFONT,
                              self._hfont,
@@ -187,13 +189,13 @@ class ComponentWrapper(AbstractWrapper):
         w = r-l
         h = b-t
 
-        if _verbose: print str(self),'getGeometry',l,t,w,h
+        if _verbose: log(str(self),'getGeometry',l,t,w,h)
         try:
             p = t_point()
             p.point = l,t
             user32.ScreenToClient(self.proxy.container.wrapper.widget,p)
             l,t = p.point
-            if _verbose: print '     -->', l,t,w,h
+            if _verbose: log('   -->', l,t,w,h)
         except AttributeError:
             pass
         except:
@@ -233,13 +235,13 @@ class ComponentWrapper(AbstractWrapper):
 
     def setGeometry(self,x,y,width,height):
         if self.widget:
-            if _verbose: print str(self),'setGeometry', x,y,width,height
+            if _verbose: log(str(self),'setGeometry', x,y,width,height)
             user32.SetWindowPos(self.widget, 0, x, y, width, height, SWP_NOACTIVATE | SWP_NOZORDER)
             user32.UpdateWindow(self.widget)
 
     def setVisible(self,visible):
         if self.widget:
-            if _verbose: print str(self),'setVisible', visible, self.widget
+            if _verbose: log(str(self),'setVisible', visible, self.widget)
             user32.ShowWindow(self.widget, visible and SW_SHOWNORMAL or SW_HIDE)
 
     def setEnabled(self,enabled):
@@ -261,17 +263,17 @@ class ComponentWrapper(AbstractWrapper):
 
     def setText(self,text):
         if not self.widget: return
-        if _verbose: print "%s.SetWindowText('%s'(%s)) hwnd=%s(%s) self=%s" % (self.__class__.__name__,text,type(text),self.widget,type(self.widget),self)
+        if _verbose: log("%s.SetWindowText('%s'(%s)) hwnd=%s(%s) self=%s" % (self.__class__.__name__,text,type(text),self.widget,type(self.widget),self))
         self._i_text = windll.cstring(text)
         user32.SetWindowTextA(self.widget,self._i_text)
 
     def getText(self):
         if not self.widget: return
         n = user32.GetWindowTextLength(self.widget)
-        if _verbose: print 'GetWindowText n=',n
+        if _verbose: log('GetWindowText n=',n)
         t = windll.cstring('',n+1)
         r = user32.GetWindowText(self.widget,t.address(),n+1)
-        if _verbose: print 'GetWindowText n=%d r=%d s=%s'%(n,r,t.trunc())
+        if _verbose: log('GetWindowText n=%d r=%d s=%s'%(n,r,t.trunc()))
         return t.trunc()
 
     def setContainer(self, container):
@@ -563,7 +565,7 @@ class ImageWrapper(ComponentWrapper):
 
     def _WM_PAINT(self, hwnd, msg, wParam, lParam):
         if not self.widget: return
-        if _verbose: print 'in dwImage _WM_PAINT'
+        if _verbose: log('in dwImage _WM_PAINT')
         r = ComponentWrapper._WM_PAINT(self, hwnd, msg, wParam, lParam)
         self.draw()
         return r
@@ -577,14 +579,14 @@ class ImageWrapper(ComponentWrapper):
         if not self.widget: return
         dc = user32.GetDC(self.widget)
         name = windll.cstring('/python/rlextra/distro/demo/RLImage.bmp')
-        if _verbose: print 'in draw widget=%s dc=%s dim=%sx%s' % (hex(self.widget),hex(dc),self.proxy.width,self.proxy.height)
+        if _verbose: log('in draw widget=%s dc=%s dim=%sx%s' % (hex(self.widget),hex(dc),self.proxy.width,self.proxy.height))
         try:
             bmp=user32.LoadImage(0,name,IMAGE_BITMAP,0,0,LR_DEFAULTSIZE|LR_LOADFROMFILE)
         except:
             import traceback
             traceback.print_exc()
             from anygui.backends.dwgui import _lastErrorMessage 
-            print _lastErrorMessage()
+            log(_lastErrorMessage())
         memdc = gdi32.CreateCompatibleDC(dc)
         old = gdi32.SelectObject(memdc,bmp)
         gdi32.BitBlt(dc,0,0,self.proxy.width,self.proxy.height,memdc,0,0,0x00CC0020)
@@ -607,12 +609,12 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
         l,t,r,b = r.rect
         w = r-l-self._extraWidth
         h = b-t-self._extraHeight
-        if _verbose: print str(self),'getGeometry WindowWrapper:', l,t,w,h
+        if _verbose: log(str(self),'getGeometry WindowWrapper:', l,t,w,h)
         return l,t,w,h
 
     def setGeometry(self,x,y,width,height):
         if not self.widget: return
-        if _verbose: print 'WindowWrapper: setGeometry',x,y,width,height
+        if _verbose: log('WindowWrapper: setGeometry',x,y,width,height)
         # take account for title bar and borders
         user32.SetWindowPos(self.widget,
                               0,
@@ -651,7 +653,7 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
                              0)
     def _WM_SIZE(self, hwnd, msg, wParam, lParam):
         w, h = lParam & 0xFFFF, lParam >> 16
-        if _verbose: print 'WindowWrapper: _WM_SIZE _width,_height,w,h=',self._width,self._height,w,h,
+        if _verbose: log('WindowWrapper: _WM_SIZE _width,_height,w,h=',self._width,self._height,w,h,)
         if self._width==0 and self._height==0:
             # This will be the case when the widget is first
             # created. We need to ensure the contents get
@@ -662,7 +664,7 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
         else:
             dw = w - self._width
             dh = h - self._height
-        if _verbose: print 'dw,dh=',dw,dh
+        if _verbose: log('dw,dh=',dw,dh)
 
         self._width = w
         self._height = h
@@ -720,11 +722,11 @@ class Application(AbstractApplication):
         assert self.__class__._wndclass, "RegisterClass --> %d=%s ie\n%s" % (GetLastError(), hex(GetLastError()), _lastErrorMessage())
 
     def _wndproc(self, hwnd, msg, wParam, lParam):
-        if _verbose: print "%s._wndproc called with %s,%s,%s,%s"%(self.__class__.__name__,hex(hwnd),hex(msg),hex(wParam),hex(lParam))
+        if _verbose: log("%s._wndproc called with %s,%s,%s,%s"%(self.__class__.__name__,hex(hwnd),hex(msg),hex(wParam),hex(lParam)))
         try:
             window = self.widget_map[hwnd]
         except:
-            if _verbose: print "\tNO WINDOW TO DISPATCH???"
+            if _verbose: log("\tNO WINDOW TO DISPATCH???")
             return user32.DefWindowProc(hwnd, msg, wParam, lParam)
         # there should probably be a better way to dispatch messages
         if msg == WM_DESTROY:
@@ -732,18 +734,18 @@ class Application(AbstractApplication):
             app.remove(window)
             app.internalRemove()
         if msg == WM_CLOSE:
-            if _verbose: print "\t_WM_COMMAND to %s %s" % (window.__class__.__name__,window)
+            if _verbose: log("\t_WM_COMMAND to %s %s" % (window.__class__.__name__,window))
             return window._WM_CLOSE(hwnd, msg, wParam, lParam)
         if msg == WM_SIZE:
-            if _verbose: print "\t_WM_SIZE to %s %s" % (window.__class__.__name__,window)
+            if _verbose: log("\t_WM_SIZE to %s %s" % (window.__class__.__name__,window))
             return window._WM_SIZE(hwnd, msg, wParam, lParam)
         if msg == WM_COMMAND:
-            if _verbose: print "\t_WM_COMMAND to %s %s" % (window.__class__.__name__,window)
+            if _verbose: log("\t_WM_COMMAND to %s %s" % (window.__class__.__name__,window))
             return window._WM_COMMAND(hwnd, msg, wParam, lParam)
         if msg == WM_PAINT:
-            if _verbose: print "\t_WM_PAINT to %s %s" % (window.__class__.__name__,window)
+            if _verbose: log("\t_WM_PAINT to %s %s" % (window.__class__.__name__,window))
             return window._WM_PAINT(hwnd, msg, wParam, lParam)
-        if _verbose: print "\tDefaultProc() %s %s" % (window.__class__.__name__,window)
+        if _verbose: log("\tDefaultProc() %s %s" % (window.__class__.__name__,window))
         return user32.DefWindowProc(hwnd, msg, wParam, lParam)
 
     def internalRun(self):
@@ -766,7 +768,7 @@ class Application(AbstractApplication):
 
     def internalRemove(self):
         if not self._windows:
-            if _verbose: print 'PostQuitMessage(0)'
+            if _verbose: log('PostQuitMessage(0)')
             user32.PostQuitMessage(0)
 
 ################################################################
