@@ -1,5 +1,7 @@
 'Utility classes for dealing with weak references.'
 
+# WARNING: This module is deprecated
+
 from weakref import ref
 
 # Support for using bound methods and hashable objects

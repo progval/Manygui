@@ -6,6 +6,7 @@ import weakref, UserList, UserDict
 # - Reimplement RefValueList
 
 def ref(obj, weak, plain=0):
+    if obj is None: return None
     if not plain and is_callable(obj):
         return CallableReference(obj, weak)
     if weak:
