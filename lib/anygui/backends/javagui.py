@@ -26,7 +26,9 @@ from anygui.Events import *
 from anygui import application
 from javax import swing
 from java import awt
-import cgi, jarray, java
+import java
+#from synchronize import apply_synchronized
+
 
 # Set the "look-and-feel":
 swing.UIManager.setLookAndFeel(swing.UIManager.getSystemLookAndFeelClassName())
@@ -116,6 +118,7 @@ class ComponentWrapper(Wrapper):
         except AttributeError:
             # FIXME: Handle Application containers differently...
             self.create()
+            self.proxy.push(blocked=['container'])
             return
         try:
             assert parent.isDummy()
@@ -140,9 +143,10 @@ class ComponentWrapper(Wrapper):
                 container = self._container
             except AttributeError: pass
             else:
-                bounds = self.widget.bounds
-                container.remove(self.widget)
-                container.repaint(bounds)
+                if container:
+                    bounds = self.widget.bounds
+                    container.remove(self.widget)
+                    container.repaint(bounds)
             try: self.widget.dispose()
             except AttributeError: pass
             self._container = None
@@ -393,6 +397,14 @@ class WindowWrapper(ComponentWrapper):
             height += insets.top + insets.bottom
             ComponentWrapper.setGeometry(self, x, y, width, height)
 
+    def getGeometry(self):
+        bounds = self.widget.bounds
+        x, y, width, height = bounds.x ,bounds.y, bounds.width, bounds.height
+        insets = self.widget.insets
+        width -= insets.left + insets.right
+        height -= insets.top + insets.bottom
+        return x, y, width, height
+
     def widgetSetUp(self):
         self.widget.windowClosing = self.closeHandler
         self.widget.componentResized = self.resizeHandler
@@ -411,7 +423,12 @@ class WindowWrapper(ComponentWrapper):
         h -= insets.top + insets.bottom
         dw = w - self.proxy.state['width'] # @@@ Avoid invoking pull()...
         dh = h - self.proxy.state['height'] # @@@ Avoid invoking pull()...
-        self.proxy.resized(dw, dh)
+
+        #ensure proxy state is updated
+        self.proxy.height
+        self.proxy.width
+
+        self.proxy.resized(dw,dh)
 
     def closeHandler(self, evt):
         self.destroy()
