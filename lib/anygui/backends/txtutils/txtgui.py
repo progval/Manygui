@@ -261,7 +261,7 @@ class ComponentMixin:
             if _focus_control is self:
                 self.focus = 0
         else:
-            self._gets_focus = 1
+            self._gets_focus = self.__class__._gets_focus
         self._redraw()
 
     def _ensure_destroyed(self):
@@ -491,7 +491,7 @@ class Window(ContainerMixin, AbstractWindow):
 
     def _ensure_destroyed(self):
         ContainerMixin._ensure_destroyed(self)
-        _app._remove_window(self)
+        _app.remove(self)
         _app._window_deleted()
 
     def _move_to_top(self):
@@ -552,7 +552,7 @@ class Window(ContainerMixin, AbstractWindow):
     def _present_winmenu(self):
         x,y = self._x,self._y
         w,h = int(round(12.0/self._horiz_scale)),int(round(8.0/self._vert_scale))
-        self._omenu = Window(title="?Window")
+        self._omenu = MenuWindow(title="?Window")
         self._omenu.geometry=(x,y,w,h)
         sx,sy,sw,sh = self._omenu._get_bounding_rect()
         _support.dbg("omenu geo",(x,y,w,h))
@@ -569,7 +569,7 @@ class Window(ContainerMixin, AbstractWindow):
         self._omenu.add(self._canbtn)
         link(self._canbtn,self._cancel_close)
 
-        self._omenu.open()
+        _app.add(self._omenu)
         self._omenu.focus_capture = 1
         
         self._redraw()
@@ -589,6 +589,10 @@ class Window(ContainerMixin, AbstractWindow):
 
     def _cancel_close(self,*args,**kws):
         self._omenu.destroy()
+
+class MenuWindow(Window):
+
+    _gets_focus = 0
 
 class Application(AbstractApplication):
     def __init__(self):
