@@ -7,6 +7,9 @@ class RadioGroup(Attrib, Defaults.RadioGroup, DefaultEventMixin):
     _items = None
     _value = None
 
+    # Needed by Attrib
+    def update(self, **ignore): pass
+
     def __init__(self, items=[], **kw):
         Attrib.__init__(self, **kw)
         DefaultEventMixin.__init__(self)

@@ -3,7 +3,10 @@ from Exceptions import UnimplementedMethod
 from Mixins import Attrib
 import anygui
 
-class AbstractApplication(Attrib):#(Action): # FIXME: Is Action needed here?
+class AbstractApplication(Attrib):
+
+    # Needed by Attrib:
+    def update(self, **ignore): pass
     
     def __init__(self):
         self._windows = []
