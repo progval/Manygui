@@ -11,7 +11,8 @@ Release 0.3: Less API change, focus on robustness
 Short-term Objectives/FIXMEs
 ----------------------------
 
-* Add test suite for Rectangles.py
+* Add test suite for Rectangles.py. Change calls to self.set to
+  self.modify to correctly interact with models.
 
 * Fix Model classes to work with push/pull mechanism; add 'modified'
   event (or something equivalent) to allow real-time notification to
