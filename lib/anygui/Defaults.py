@@ -111,6 +111,8 @@ class RadioButton:
 
 class RadioGroup:
 
+    _items = None
+    _value = None
     _default_event = 'select'
 
 class TextArea:

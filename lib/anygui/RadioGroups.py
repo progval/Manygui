@@ -4,8 +4,6 @@ from anygui.Events import send
 from anygui import Defaults
 
 class RadioGroup(Attrib, Defaults.RadioGroup, DefaultEventMixin):
-    _items = None
-    _value = None
 
     # Needed by Attrib
     def update(self, **ignore): pass
