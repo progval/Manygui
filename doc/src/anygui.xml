@@ -15,7 +15,7 @@
 
   <author>Magnus Lie Hetland</author>
 
-  <date>October 28, 2001</date>
+  <date>December 3rd, 2001</date>
 
   <section>
     <title>Introduction</title>
@@ -273,7 +273,7 @@
       <title>Avoiding Namespace Pollution</title>
       
       <para>Importing everything from <name>Anygui</name> (as in
-      <code>from anygui import *</code>) is finde for small programs,
+      <code>from anygui import *</code>) is fine for small programs,
       where you're certain that there will be no name clashes. You may
       also simply import the names you need:</para>
 
@@ -741,105 +741,180 @@
   <section>
     <title>API Reference</title>
     
-    <para>[Under construction]</para>
-
-    <!--
-
     <section>
-      <title>Observable</title>
-    </section>
-
-    <section>
-      <title>Common Widget Behaviour and Properties</title>
-
-      <section>
-	<title>Frames</title>
-
-	<para><code>left</code>, <code>right</code>, <code>top</code>,
-	and <code>bottom</code>: These parameters specify the
-	positioning of the edges of a component. If they are set to
-	<code>None</code>, the widgets current position and size will
-	be used to determine where the edge is placed. If a
-	<emphasis>distance</emphasis> is given, the edge will be
-	positioned at the specified distance from the corresponding
-	edge of the containing <code>Frame</code>. If another widget
-	is supplied, the edge is aligned with the opposite edge of
-	that widget. If a tuple (<emphasis>component</emphasis>,
-	<emphasis>distance</emphasis>) is given, the edge is
-	positioned at the specified distance from the opposite edge of
-	the specified component.</para>
-
-      </section>
+      <title>Environment Variables</title>
       
+      <para>Some environment variables affect the behaviour of the
+      <name>Anygui</name> package. These must be set in the
+      environment of the program using <name>Anygui</name>. They may
+      either be set permanently through normal operating system
+      channels (check your OS documentation for this), or possibly
+      just set temporarily when running your program. In
+      <name>Unix</name> shells like <name>bash</name>, you can set the
+      variables on the command line before your comand, like this:</para>
+
+      <codelisting>
+	<line>foo:~$ ANYGUI_SOMEVAR='some value' python someprogram.py</line>
+      </codelisting>
+
+      <para>where <code>ANYGUI_SOMEVAR</code> is some environment
+      variable used by <name>Anygui</name>.</para>
+
+      <para>Since <name>Jython</name> doesn't support OS environment
+      variables, you'll have to supply them with the command-line
+      switch <code>-D</code>: </para>
+
+      <codelisting>
+	<line>foo:~$ jython -DANYGUI_SOMEVAR='some value' someprogram.py</line>
+      </codelisting>
+
+      <para>The environment variables used by <name>Anygui</name>
+      are:</para>
+
+      <para><code>ANYGUI_WISHLIST</code>: A whitespace separated list
+      of backend names in the order you wish for <name>Anygui</name>
+      to try to use them. The backends are identified with a short
+      prefix such as <code>wx</code> for <code>wxgui</code>, or
+      <code>tk</code> for <code>tkgui</code>. For a full list of
+      available backends, see the section "Making Sure You Have a GUI
+      Backend" above. If none of the backends you supplied work,
+      <name>Anygui</name> will continue searching through the other
+      backends for a viable alternative.</para>
+
+      <!--
+      Document default order.
+      Documentation synch problem?
+      -->
+
+      <para>Example:</para>
+
+      <codelisting>
+	<line>foo:~$ ANYGUI_WISHLIST='tk wx qt' python someprogram.py</line>
+      </codelisting>
+      
+      <para><code>ANYGUI_DEBUG</code>: When <name>Anygui</name> tries
+      to import a backend, it hides all exceptions, assuming they are
+      caused by the fact that a given backend doesn't work in your
+      installation (because you don't have it installed or something
+      similar). However, at times this may not be the reason; it may
+      simple be that a given backend contains a bug. To track down the
+      bug, set the <code>ANYGUI_WISHLIST</code> to some true (in a
+      <name>Python</name> sense) value. (If the value supplied can be
+      converted to an integer, it will. Otherwise, it will be treated
+      as a string.) This will make <name>Anygui</name> print out the
+      stack traces from each backend it tries to import.</para>
+
+      <para>Example:</para>
+
+      <codelisting>
+	<line>foo:~$ ANYGUI_DEBUG=1 python someprogram.py</line>
+      </codelisting>
+	
     </section>
 
     <section>
-      <title>Global Functions and Variables</title>
+      <title>Global Functions</title>
 
-      <section>
-	<title>wishlist</title>
-	
-	<para>The module variable <code>wishlist</code> determines the
-	order in which the backends are tried; the first one that
-	works will be used by the application. The default order is
-	[...]. If you have a program where you prefer <code>tk</code>,
-	or, in a pinch <code>wx</code>, you can tell
-	<name>Anygui</name> like this:</para>
+      <!-- Check tag stuff - may not be included in 0.1 -->
 
-	<codelisting>
-	  <line>import anygui; anygui.wishlist = ['tk', 'wx']</line>
-	  <line># The rest of the program goes here</line>
-	</codelisting>
+      <para><code>application():</code> Returns the current
+      <code>Application</code> object.</para>
 
-	<para>If neither <code>tk</code> nor <code>wx</code> is
-        available, <name>Anygui</name> will go on to search the other
-        available backends, in their default order.</para>
-	
-	<para>An alternative to putting the wishlist in your program
-        is to use the environment variable
-        <code>ANYGUI_WISHLIST</code>, which will override
-        <code>anygui.wishlist</code>, e.g:</para>
+      <para><code>link(source, [event,] handler, [weak=0,] [tag=...,] [loop=0]):</code>
+      Creates a link in the <name>Anygui</name> event system, between
+      the <code>source</code> (any object) and the
+      <code>handler</code> (any callable, or a <code>(obj,func)</code>
+      pair, where <code>func</code> is an unbound method or function,
+      and <code>obj</code> is an object which will be supplied as the
+      first parameter to <code>func</code>). Supplying an
+      <code>event</code> (a string) will make the link carry only
+      information about events of that type. If no event is supplied,
+      <code>'default'</code> will be assumed. Setting
+      <code>weak</code> to a true value will use weak references when
+      setting up the link, so that no objects will be "kept alive" by
+      the event system. The <code>tag</code>, if supplied, must be a
+      string which identifies the link. If none is supplied, a unique
+      tag will be generated by the system. Either way, the tag is
+      returned by <code>link</code>. A send-loop occurrs if an object
+      sends an event "to itself" (i.e. it is the source of a call to
+      <code>link</code> which hasn't returned at the point where one
+      of its methods are about to be activated as a handler). The
+      truth value <code>loop</code> decides whether this handler will
+      be activated in such a loop. (If <code>send</code> was called
+      with <code>loop=1</code>, loops will be allowed anyway.)
+      </para>
 
-	<codelisting>
-	  <line>foo:~$ ANYGUI_WISHLIST="tk wx java mac" python someprogram.py</line>
-	</codelisting>
+      <para>Note that <code>source</code>, <code>event</code>, and
+      <code>handler</code> are strictly positional parameters, while
+      the others (<code>weak</code>, <code>tag</code>,
+      <code>loop</code>) must be supplied as keyword parameters.</para>
 
-	<para>Another environment variable that may be useful if you
-	want to know the reason why a certain backend isn't used is
-	<code>ANYGUI_DEBUG</code> if you set this to anythong
-	<emphasis>other</emphasis> than zero or an empty string, the
-	exceptions that occur when <name>Anygui</name> try to import
-	the non-functioning backends will be printed out. For
-	instance:</para>
+      <para>For more information on sending events, see
+      <code>send</code>, below.</para>
 
-	<codelisting>
-	  <line>foo:~$ ANYGUI_DEBUG=1 python someprogram.py</line>
-	</codelisting>
+      <para><code>send(source, [event,] [tag=...,] [loop=0,] [...]):</code>
+      <!-- Add stuff about order, especially any-sources etc. -->
+      When this is called, any handlers (callables) linked to the
+      source, but which will not cause a send-loop (unless
+      <code>loop</code> is true) will be called with all the keyword
+      arguments provided, in the order in which they were linked. If
+      <code>tag</code> is supplied, any handler not linked with the
+      same tag will be disregarded. In addition to the supplied
+      keyword arguments, the event framework will add
+      <code>source</code>, <code>event</code> (defaulting to the
+      string <code>'default'</code>), and the time (as measured by the
+      standard <name>Python</name> function <code>time.time</code>)
+      when <code>send</code> was called.
+      </para>
 
-	<para>To set these environment variables so they work with
-	<code>jython</code>, you'll have to use the <code>-D</code>
-	switch:</para>
+      <para>Note that <code>source</code>, and <code>event</code>, are
+      strictly positional parameters, while the others
+      (<code>tag</code>, <code>loop</code>, and any additional
+      arguments the user might add) must be supplied as keyword
+      parameters.</para>
 
-	<codelisting>
-	  <line>foo:~$ jython -DANYGUI_DEBUG=1 someprogram.py</line>
-	</codelisting>
-	
-      </section>
+      <para>Example:</para>
 
-    -->
+      <codelisting>
+	<line># Link an event handler to a button, and then manually send a</line>
+	<line># default event from the button. This event would have been</line>
+	<line># sent automatically if we clicked the button. Note that we</line>
+	<line># only use the arguments we need, and lump the rest in **kw.</line>
+	<line></line>
+	<line>def click(source, time, **kw):</line>
+	<line>    print 'Button "%s" clicked at %f.' % (source.text, time)</line>
+	<line></line>
+	<line>btn = Button(text='Click me')</line>
+	<line>link(btn, click)</line>
+	<line></line>
+	<line>send(btn) # Fake a button click -- will call click()</line>
+      </codelisting>
+
+      <para><code>unlink(source, [event,] handler, [tag=...,]):</code>
+	Undoes a call to <code>link</code> with the same positional arguments.
+	<!-- TODO: Describe use of tag, and the "any" value -->
+      </para>
+
+      <para><code>unlinkHandler(handler):</code> Removes a handler
+      completely from the event framework.</para>
+
+      <para><code>unlinkMethods(obj):</code> Unlinks all handlers that
+      are methods of <code>obj</code>.</para>
+
+      <para><code>unlinkSource(source):</code> Remove the source (and
+      all handlers linked to it) from the event framework.</para>
+
+    </section>
+
+    <section>
+      <title>Classes</title>
+
+      <para>[Under construction]</para>
+
+    </section>
 
     <!--
-    
-    <para><strong>def application()</strong></para>
-    
-    <para>When an <code>Application</code> is instantiated, it is
-    automatically set as the current application, overwriting any
-    previous ones. If you ever need to get a hold of this current
-    application object, you may do so by using the
-    <code>application</code> function. Calling
-    <code>application</code> when no <code>Application</code> object
-    has been instantiated will raise an exception.</para>
-    
+        
     <para><strong>class Application</strong></para>
 
     <para>[Under construction]</para>
@@ -904,8 +979,8 @@
 
     <para>[Under construction]</para>
     -->
-  </section>
-  
+    </section>
+    
   <section>
     <title>Known Problems</title>
     
@@ -919,15 +994,6 @@
 
     <para>For an overview of future plans, see the <code>TODO</code>
     file found in the distribution.</para>
-
-  </section>
-
-  <section>
-    <title>Frequently Asked Questions</title>
-
-    <para><strong>Q: Which version of Python is required for Anygui?</strong></para>
-
-    <para>A: Anygui requires <name>Python</name> version 2.0 or newer.</para>
 
   </section>
 
