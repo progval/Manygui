@@ -1,4 +1,5 @@
 from anygui.backends import *
+import sys
 
 __all__ = '''
 
@@ -44,9 +45,10 @@ class Wrapper(AbstractWrapper):
         # place_forget)
 
     def enterMainLoop(self): # ...
-        if not isDummy(self.widget):
-            self.widget.destroy()
-        self.proxy.sync() # FIXME: Why is this needed when sync is called in internalProd (by prod)?
+        #if not isDummy(self.widget):
+        #    self.widget.destroy()
+        #    sys.stdout.flush()
+        self.proxy.push() # FIXME: Why is this needed when push is called in internalProd (by prod)?
         
     def internalDestroy(self):
         self.widget.destroy()
@@ -94,7 +96,7 @@ class ComponentWrapper(Wrapper):
         except (AttributeError, AssertionError):
             self.destroy()
             self.create(parent)
-            self.proxy.sync(blocked=['container'])
+            self.proxy.push(blocked=['container'])
 
     def setEnabled(self, enabled):
         if enabled: newstate = Tkinter.NORMAL
@@ -143,7 +145,7 @@ class TkTextMixin:
         self.shift = 0
         self.editable = 1
         widget.bind("<Key>", self.keybinding)
-        widget.bind("<KeyRelease>",self.updateProxy) # Ensure all changes reach Proxy.
+        #widget.bind("<KeyRelease>",self.updateProxy) # Ensure all changes reach Proxy.
         widget.bind("<KeyPress-Control_L>", self.ctldown)
         widget.bind("<KeyRelease-Control_L>", self.ctlup)
         widget.bind("<KeyPress-Alt_L>", self.altdown)
@@ -159,7 +161,7 @@ class TkTextMixin:
 
         # Easy place to put this - not _editable-related, but common
         # to all text widgets.
-        widget.bind("<Leave>", self.updateProxy)
+        #widget.bind("<Leave>", self.updateProxy)
 
     # Track modifier key state.
     def ctldown(self, ev):
@@ -179,7 +181,6 @@ class TkTextMixin:
         """ This method binds all keys, and causes them to be
         ignored when _editable is not set. """
         if self.editable:
-            self.updateProxy()
             return None
         else:
             # This is truly horrid. Please add appropriate
@@ -212,9 +213,10 @@ class TextFieldWrapper(ComponentWrapper,TkTextMixin):
 
     def updateProxy(self,*args,**kws):
         # Inform proxy of text change by the user.
-        self.proxy.rawModify(text=self.widget.get())
-        start,end = self.getSelection()
-        self.proxy.rawModify(selection=(start,end))
+        #self.proxy.rawModify(text=self.widget.get())
+        #start,end = self.getSelection()
+        #self.proxy.rawModify(selection=(start,end))
+        pass
 
     def setText(self,text):
         disabled=0
@@ -225,6 +227,9 @@ class TextFieldWrapper(ComponentWrapper,TkTextMixin):
         self.widget.insert(0,text)
         if disabled:
             self.widget.configure(state=Tkinter.DISABLED)
+
+    def getText(self):
+        return self.widget.get()
 
     def setEditable(self,editable):
         self.editable=editable
@@ -322,9 +327,10 @@ class TextAreaWrapper(ComponentWrapper,TkTextMixin):
     def updateProxy(self,*args,**kws):
         # Ugh, we have to do this on every keystroke! I think
         # we may -really- need -some- kind of laziness.
-        self.proxy.rawModify(text=self.widget.get("1.0","end"))
-        start,end = self.getSelection()
-        self.proxy.rawModify(selection=(start,end))
+        #self.proxy.rawModify(text=self.widget.get("1.0","end"))
+        #start,end = self._getSelection()
+        #self.proxy.rawModify(selection=(start,end))
+        pass
 
     def setEditable(self,editable):
         self.editable=editable
@@ -359,7 +365,7 @@ class WindowWrapper(ComponentWrapper):
         try: self.proxy.container
         except AttributeError: return
         self.create()
-        self.proxy.sync()
+        self.proxy.push()
 
     def closeHandler(self):
         self.destroy()

@@ -1,5 +1,6 @@
 from anygui import application
-from anygui.Utils import topologicalSort, getSetter
+from anygui.Utils import topologicalSort, getSetter, getGetter
+import sys
 
 """
 The back-end wrapper presents a unified and simple interface for
@@ -60,19 +61,19 @@ class AbstractWrapper:
         prod itself. Otherwise, the Proxy should call prod() at some
         later point, when the event loop has been entered.
 
-        The constructor sets up the self.aggregates dictionary with
-        aggregate setters, by calling the setAggregate
-        method. Subclasses wanting to add (or override) aggregates
+        The constructor sets up the self.aggregateSetters dictionary with
+        aggregate setters, by calling the setAggregateSetter
+        method. Subclasses wanting to add (or override) setaggregates
         should use the same method.
         """
         self.proxy = proxy
 
         #@@@ Hm. Some of this could be done globally/class-wide...
         
-        self.aggregates = {}
-        self.setAggregate('position', ('x', 'y'))
-        self.setAggregate('size', ('width', 'height'))
-        self.setAggregate('geometry', ('x', 'y', 'width', 'height'))
+        self.aggregateSetters = {}
+        self.setAggregateSetter('position', ('x', 'y'))
+        self.setAggregateSetter('size', ('width', 'height'))
+        self.setAggregateSetter('geometry', ('x', 'y', 'width', 'height'))
 
         self.constraints = []
         self.addConstraint('text', 'selection')
@@ -82,14 +83,23 @@ class AbstractWrapper:
         self.inMainLoop = 0
         self.prod() #@@@ ?
 
-    def setAggregate(self, name, signature):
+    def setAggregateSetter(self, name, signature):
         """
         Sets the signature of an aggregate setter function.
 
         The resulting mapping is used by getSetters() during setter
         dispatch in update().        
         """
-        self.aggregates[signature] = name
+        self.aggregateSetters[signature] = name
+
+    def setAggregateGetter(self, name, signature):
+        """
+        Sets the signature of an aggregate getter function.
+
+        The resulting mapping is used by getGetters() during getter
+        dispatch in pull().
+        """
+        self.aggregateGetters[signature] = name
 
     def addConstraint(self, before, after):
         """
@@ -98,7 +108,7 @@ class AbstractWrapper:
         This ensures that the before-name is set before the
         after-name, if possible.
         """
-        # FIXME: Should handle aggregates automatically...
+        # FIXME: Should handle setaggregates automatically...
         # E.g. ('geometry', 'visible') should imply ('x', 'visible') and
         # ('x', 'visible') should imply ('geometry', 'visible') etc.
         constraint = before, after
@@ -118,16 +128,16 @@ class AbstractWrapper:
         instance, if both 'x' and 'y' are found in the attrs argument,
         and there is an aggregate setter such as setPosition that
         handles both, it will be preferred over setX and setY
-        individually. The dictionary self.aggregates is used to find
+        individually. The dictionary self.aggregateSetters is used to find
         such aggregate setters.
         """
         result = []
         names = []
-        candidates = self.aggregates.items()
+        candidates = self.aggregateSetters.items()
         attrs = attrs[:]
         def moreSpecific(aggr1, aggr2):
             return cmp(len(aggr1[0]), len(aggr2[0]))
-        # Get the aggregates:
+        # Get the setaggregates:
         candidates.sort(moreSpecific)
         candidates.reverse()
         for candidate in candidates:
@@ -187,6 +197,80 @@ class AbstractWrapper:
                 kwds[key] = state[key]
             setter(**kwds)
 
+    def getGetters(self, attrs):
+        """
+        Returns a pair (getters, unhandled) where getters is a
+        sequence of the form [(getter, attrs), ...] and unhandled is a
+        sequence of unhandled attributes.
+
+        Each pair (getter, attrs) consists of a getter method and the
+        names of the attributes it retrieves. When finding the set of
+        getters, we first attempt to find a simple getAttr() method
+        for each attribute. For any attribute that can't be handled
+        in that manner, we search for an aggregate getter that
+        gets that attribute (among others); if found, we use it.
+        The dictionary self.getAggregates is used to find
+        such aggregate getters.
+        """
+        result = []
+        unhandled = []
+        names = []
+
+        # Get the plain setters:
+        attrs = attrs[:]
+        for attr in attrs:
+            getter = getGetter(self, attr)
+            if getter is not None:
+                result.append((getter, (attr,)))
+            else:
+                unhandled.append(attr)
+
+        if not unhandled:
+            return result,unhandled
+
+        candidates = self.aggregateGetters.items()        
+        def moreSpecific(aggr1, aggr2):
+            return cmp(len(aggr1[0]), len(aggr2[0]))
+        # Get the aggregates:
+        candidates.sort(moreSpecific)
+        candidates.reverse()
+        for candidate in candidates:
+
+            names = []
+            for attr in unhandled:
+                if attr in candidate[0]:
+                    names.append(attr)
+
+            if names:
+                # This getter is good for one or more names.
+                setter = getSetter(self, candidate[1])
+                if setter is not None:
+                    result.append((setter, candidate[0]))
+                    for attr in names:
+                        unhandled.remove(attr)
+
+        return result, unhandled
+
+    def pull(self,state):
+        """
+        Update all the attributes of state using self's getter
+        methods. We may not, however, add keys to state, as that
+        could lead to unexpected changes to the proxy's state.
+        """
+        getters,unhandled = self.getGetters(state.keys())
+
+        lstate = {}
+        for getter,attrs in getters:
+            if len(attrs) == 1:
+                val = getter()
+                lstate[attrs[0]]= val
+            else:
+                vals = zip(attrs,getter())
+                for name,val in vals:
+                    lstate[name] = val
+        for attr in [k for k in state.keys() if k not in unhandled]:
+            state[attr] = lstate[attr]
+    
     def getPrefs(self):
         """
         Return a dictionary with preferences.

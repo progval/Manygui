@@ -1,5 +1,5 @@
 from Events import link, send
-from Utils import getGetter,getSetter
+from Utils import getGetter,getSetter,getterName
 
 # FIXME: Add mechanism for internal attributes (not in state[]). Uses
 # _foo naming convention for now...
@@ -11,13 +11,16 @@ class Attrib:
     # TODO: Add new docstring (see below for old one)
 
     def __init__(self, *args, **kwds):
+        self._getstack=[]
         defaults = getattr(self, 'state', {})
         self.state = defaults.copy()
         self.set(*args, **kwds) # Hm...
         #self.rawSet(*args, **kwds)
-        #self.sync()
+        #self.push()
 
-    def sync(self, *names): pass
+    def push(self, *names): pass
+
+    def pull(self,*names): pass
 
     def __setattr__(self, name, value):
         if name == 'state' or name[0] == '_':
@@ -39,11 +42,21 @@ class Attrib:
                 return method()
         if not self.state.has_key(name):
             raise AttributeError, name
+        try:
+            # Lazy update.
+            if name not in self._getstack:
+                self._getstack.append(name)
+                try:
+                    self.pull(*(name,))
+                finally:
+                    del self._getstack[-1]
+        except (AttributeError,KeyError):
+            pass
         return self.state[name]
 
     def set(self, *args, **kwds):
         names = self.rawSet(*args, **kwds)
-        self.sync(*names)
+        self.push(*names)
 
     def rawSet(self, *args, **kwds):
         names = []
@@ -59,7 +72,7 @@ class Attrib:
 
     def modify(self, *args, **kwds):
         names = self.rawModify(*args, **kwds)
-        self.sync(*names)
+        self.push(*names)
 
     def rawModify(self, *args, **kwds):
         names = []
@@ -93,7 +106,7 @@ def modattr(obj, name, value):
             return
     # in-place modification has succeeded, alert the old_value (if
     # it supplies a suitable method)
-    try: old_value.sync()
+    try: old_value.push()
     except: pass
 
 

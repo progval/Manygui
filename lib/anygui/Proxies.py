@@ -8,7 +8,7 @@ class Proxy(Attrib):
         Attrib.__init__(self, *args, **kwds)
         self.rawSet(container=None)
         self.rawSet(wrapper=self.wrapperFactory()) # wrapper in state?
-        self.sync() # Hm... Move to wrapper.internalProd?
+        self.push() # Hm... Move to wrapper.internalProd?
 
     def wrapperFactory(self):
         """
@@ -21,9 +21,49 @@ class Proxy(Attrib):
         """
         raise NotImplementedError, 'should be implemented by subclasses'
 
-    def sync(self, *names, **kwds):
+    def _partialState(self,*names,**kwds):
         """
-        Synchronises the Proxy and its Wrapper.
+        Create a copy of the Proxy's state dict with only the
+        keys in *names.
+        """
+        state = {}
+        try: blocked = kwds['blocked']
+        except KeyError: blocked = []
+        if not names: state.update(self.state)
+        else:
+            for name in names: state[name] = self.state[name]
+        for name in blocked:
+            try: del state[name]
+            except KeyError: pass
+        return state
+
+    def pull(self,*names,**kws):
+        """
+        Pulls state from the Wrapper to its Proxy.
+
+        The pull is performed by creating a state dictionary
+        containing the names to be pulled and their current
+        values. That dict is passed to the Wrapper's pull()
+        method, which updates it appropriately. (The Wrapper
+        may not add new keys to the state dict, however.)
+        Upon return, the Proxy updates its own state dictionary
+        with the result.
+        """
+        try:
+            # Never pull if our widget is a dummy - we need
+            # to keep all proxy state until a real widget
+            # exists.
+            assert self.wrapper.widget.isDummy()
+            return
+        except (AttributeError, AssertionError):
+            pass
+        state = self._partialState(*names)
+        self.wrapper.pull(state)
+        self.state.update(state)
+
+    def push(self, *names, **kwds):
+        """
+        Pushes state from the Proxy to its Wrapper.
 
         The synchronisation is done by calling the Wrapper's update()
         with the current state dictionary as argument. If any
@@ -33,49 +73,30 @@ class Proxy(Attrib):
         of the interface.) If no names are supplied, all state
         variables must be supplied. If names are supplied, these must
         at a minimum be supplied. Before Proxy/Wrapper
-        synchronisation, the internalSync method is called.
+        synchronisation, the internalPush method is called.
 
         There are two exceptions to the above:
-
-          - Names in the sequence returned by self.blockedNames()
-            should never be supplied to the backend.
 
           - If the keyword argument 'blocked' is used, it must contain
             a sequence of names. These names will not be supplied to
             the backend either.
           
         """
-
         # We may need to modify names, so...
         names = list(names)
+        self.internalPush(names) # @@@ May no longer be needed
+        try:
+            assert(self.wrapper)
+        except (AttributeError,AssertionError):
+            return
+        self.wrapper.update(self._partialState(*names,**kwds))
 
-        self.internalSync(names) # @@@ May no longer be needed
-
-        # FIXME: Acceptable?
-        try: self.wrapper
-        except AttributeError: return
-
-        state = {}
-        try: blocked = kwds['blocked']
-        except KeyError: blocked = []
-        #blocked.extend(self.blockedNames()) # No longer needed
-        if not names: state.update(self.state)
-        else:
-            #for name in names:
-	    #    if name in blocked:
-            #        self.expandAliasedName(names,name)
-            for name in names: state[name] = self.state[name]
-        for name in blocked:
-            try: del state[name]
-            except KeyError: pass
-        self.wrapper.update(state)
-
-    def expandAliasedName(self,names,name):
-        """
-        Expands an aliased attribute into its aliases, and adds
-        the aliases to names.
-        """
-        pass
+    #def expandAliasedName(self,names,name):
+    #    """
+    #    Expands an aliased attribute into its aliases, and adds
+    #    the aliases to names.
+    #    """
+    #    pass
 
     #def blockedNames(self):
     #    """
@@ -86,7 +107,7 @@ class Proxy(Attrib):
     #    """
     #    return []
 
-    def internalSync(self, names): # @@@ May no longer be needed!
+    def internalPush(self, names): # @@@ May no longer be needed!
         """
         Used for internal synchronisation in the Proxy.
 
