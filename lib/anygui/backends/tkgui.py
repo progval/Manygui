@@ -258,7 +258,7 @@ class ListBox(ComponentMixin, AbstractListBox):
 
     def _tk_clicked(self, event):
         #self.do_action()
-        send(self, 'select', loop=1)
+        send(self, 'select')
 
 ################################################################
 
@@ -272,7 +272,7 @@ class Button(ComponentMixin, AbstractButton):
 
     def _tk_clicked(self):
         #self.do_action()
-        send(self, 'click', loop=1)
+        send(self, 'click')
 
     def _ensure_text(self):
         if self._tk_comp:
@@ -299,7 +299,7 @@ class CheckBox(ToggleButtonMixin, AbstractCheckBox):
 
     def _tk_clicked(self):
         self.on = not self.on # FIXME: ??
-        send(self, 'click', loop=1)
+        send(self, 'click')
 
 class RadioButton(ToggleButtonMixin, AbstractRadioButton):
     _tk_class = Radiobutton
@@ -308,7 +308,7 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
     def _tk_clicked(self):
         if self.group is not None:
             self.group.value = self.value
-        send(self, 'click', loop=1)
+        send(self, 'click')
 
     def _ensure_created(self):
         result = ToggleButtonMixin._ensure_created(self)
@@ -431,7 +431,7 @@ class TextField(ComponentMixin, AbstractTextField, DisabledTextBindings):
         pass
 
     def _send_action(self, dummy): # FIXME: dummy...
-        send(self, 'enterkey', loop=1)
+        send(self, 'enterkey')
 
     def _ensure_events(self):
         if self._tk_comp:

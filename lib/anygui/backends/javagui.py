@@ -178,7 +178,7 @@ class Canvas(ComponentMixin, AbstractCanvas):
             self._java_comp.mouseReleased = self._java_clicked
 
     def _java_clicked(self, event):
-        send(self, 'click', loop=1, x=event.x, y=event.y)
+        send(self, 'click', x=event.x, y=event.y)
 
     def clear(self):
         img = awt.image.BufferedImage(self._width,
@@ -319,7 +319,7 @@ class ListBox(ComponentMixin, AbstractListBox):
 
     def _java_clicked(self, event):
         #self.do_action()
-        send(self, 'click', loop=1)
+        send(self, 'click')
 
 ################################################################
 
@@ -342,7 +342,7 @@ class Button(ComponentMixin, AbstractButton):
 
     def _java_clicked(self, evt):
         #self.do_action()
-        send(self, 'click', loop=1)
+        send(self, 'click')
 
 class ToggleButtonMixin(ComponentMixin):
 
@@ -356,7 +356,7 @@ class ToggleButtonMixin(ComponentMixin):
             return
         self.model.value = val
         #self.do_action()
-        send(self, 'click', loop=1)
+        send(self, 'click')
 
 class CheckBox(ToggleButtonMixin, AbstractCheckBox):
     _java_class = swing.JCheckBox
@@ -414,7 +414,7 @@ class TextField(ComponentMixin, AbstractTextField):
 
     def _java_enterkey(self, event):
         #self.do_action()
-        send(self, 'enterkey', loop=1)
+        send(self, 'enterkey')
 
     def _java_focus_lost(self, event):
         if self.model.value != self._java_comp.text:

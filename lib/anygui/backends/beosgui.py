@@ -274,7 +274,7 @@ class Button(ComponentMixin, AbstractButton):
     
     def _beos_clicked(self):
         #print "Hi There!"
-        send(self, 'click', loop=1)
+        send(self, 'click')
 
 
 class ToggleButtonMixin(ComponentMixin):
@@ -296,7 +296,7 @@ class ToggleButtonMixin(ComponentMixin):
         if val == self.on:
             return
         self.model.on = val
-        send(self, 'click', loop=1)
+        send(self, 'click')
 
      
 class CheckBox(ToggleButtonMixin, AbstractCheckBox):

@@ -16,11 +16,6 @@ Tentative release date: December 10th, 2001
 * Only import weakrefs when necessary, to allow programs not
   using them to run in earlier versions of Python/Jython
 
-If time:
-
-* Add Canvas to all backends. Add 'click' event with coords
-  to Canvas.
-
 Objectives for version 0.2:
 ---------------------------
 Tentative release date: February 28th, 2002
@@ -28,7 +23,8 @@ Tentative release date: February 28th, 2002
 * Refactor to reduce code duplication (by moving things to
   the core), simplify the backend API, and reduce coupling
   between core and backends (having only the bare necessities
-  actually _in_ the backends)
+  actually _in_ the backends). Reevaluate the _ensure_foo
+  strategy?
 
 * Add support for __delattr__ (in the form of _del_foobar)
   in Mixins.Attrib, and make sure it's used where applicable
@@ -45,6 +41,8 @@ Tentative release date: February 28th, 2002
 * Add a grid-based layout mechanism
   (May require minimum_size and preferred_size properties)
 
+* Add a Canvas widget for full graphics support
+
 Longer term goals:
 ------------------
 
@@ -54,8 +52,6 @@ Longer term goals:
   size" for all widgets, based on font sizes etc.
 
 * Support accessibility standards
-
-* Add a Canvas widget for full graphics support
 
 * Add support for styled text
 
