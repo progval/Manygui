@@ -63,7 +63,7 @@ class ComponentWrapper(AbstractWrapper):
             parent = 0
         widget = win32gui.CreateWindowEx(self._win_style_ex,
                                          self._wndclass,
-                                         "NO SUCH TEXT",
+                                         "",
                                          self._win_style,
                                          0,
                                          0,
@@ -185,10 +185,7 @@ class ComponentWrapper(AbstractWrapper):
 ##################################################################
 
 class LabelWrapper(ComponentWrapper):
-    #_width = 100 # auto ?
-    #_height = 32 # auto ?
     _wndclass = "STATIC"
-    #_text = "mswLabel"
     _win_style = win32con.SS_LEFT | win32con.WS_CHILD
 
 ##################################################################
@@ -196,7 +193,6 @@ class LabelWrapper(ComponentWrapper):
 class ButtonWrapper(ComponentWrapper):
     _wndclass = "BUTTON"
     _win_style = win32con.BS_PUSHBUTTON | win32con.WS_CHILD
-    #_text = "mswButton"
 
     def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
         #log("Button._WM_COMMAND called, looking for %s==%s"%(wParam>>16,win32con.BN_CLICKED))
@@ -286,13 +282,11 @@ class ToggleButtonWrapper(ComponentWrapper):
 
 class CheckBoxWrapper(ToggleButtonWrapper):
     _wndclass = "BUTTON"
-    #_text = "mswCheckBox"
     _win_style = win32con.BS_AUTOCHECKBOX | win32con.WS_CHILD
 
 
 class RadioButtonWrapper(ToggleButtonWrapper):
     _wndclass = "BUTTON"
-    #_text = "mswCheckBox"
     _win_style = win32con.BS_AUTORADIOBUTTON | win32con.WS_CHILD
 
     def __init__(self,*args,**kws):
@@ -317,18 +311,6 @@ class RadioButtonWrapper(ToggleButtonWrapper):
         # LOWORD(wParam): id of menu item, control, or accelerator
         if (wParam >> 16) != win32con.BN_CLICKED:
             return
-        #val = win32gui.SendMessage(self.widget, win32con.BM_GETSTATE, 0, 0)
-        #val = val & win32con.BST_CHECKED
-        #if val == self.on:
-        #    return
-        #self.modify(on=val)
-        #self.do_action()
-        #if self.group is not None:
-        #    self.group.modify(value=self.value)
-        if self.getOn():
-            for btn in self.proxy.group._items:
-                if btn != self.proxy:
-                    btn.on=0
         send(self.proxy, 'click')
 
 ##################################################################
@@ -343,7 +325,6 @@ class RadioButtonWrapper(ToggleButtonWrapper):
 
 class TextFieldWrapper(ComponentWrapper):
     _wndclass = "EDIT"
-    #_text = "mswTextField"
     _win_style = win32con.ES_NOHIDESEL | win32con.ES_AUTOHSCROLL | \
                  win32con.WS_CHILD | win32con.WS_BORDER
     _win_style_ex = win32con.WS_EX_CLIENTEDGE
@@ -443,8 +424,6 @@ class ContainerMixin:
         w, h = lParam & 0xFFFF, lParam >> 16
         dw = w - self.proxy.width
         dh = h - self.proxy.height
-        self.proxy.rawModify(width=w)
-        self.proxy.rawModify(height=h)
         self.proxy.resized(dw,dh) # @@@ Implement this...
 
 
