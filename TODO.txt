@@ -158,3 +158,6 @@ Smaller issues:
   without using threads.
 
 * Add tags to the event system.
+
+* Allow all arguments to link and send to be supplied as keyword
+  arguments.
