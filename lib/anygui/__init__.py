@@ -1,7 +1,7 @@
 import os
 
 backends = 'x java wx tk beos'
-wishlist = os.getenv('ANYGUI_WISHLIST', 'x java wx tk beos').split()
+wishlist = os.environ.get('ANYGUI_WISHLIST', 'x java wx tk beos').split()
 
 # set to true to see tracebacks when searching for factories
 DEBUG=0
