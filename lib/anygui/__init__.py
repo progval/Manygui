@@ -26,7 +26,7 @@ def setup(self, **kwds):
 import os, sys
 from anygui.Mixins           import Attrib
 from anygui.Utils            import Options
-from anygui.Applications     import Application
+#from anygui.Applications     import AbstractApplication
 from anygui.Windows          import Window
 from anygui.Buttons          import Button
 from anygui.Canvases         import Canvas
@@ -50,6 +50,7 @@ __all__ = """
 
   Application
   Button
+  Options
   Window
   any
   application

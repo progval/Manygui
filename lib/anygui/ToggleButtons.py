@@ -1,12 +1,12 @@
 from anygui.Exceptions import UnimplementedMethod
-from anygui.GenericButtons import AbstractGenericButton
+from anygui.GenericButtons import GenericButton
 
-class AbstractToggleButton(AbstractGenericButton):
+class ToggleButton(GenericButton):
 
     _on = 0
 
     def __init__(self, *args, **kw):
-        AbstractGenericButton.__init__(self, *args, **kw)
+        GenericButton.__init__(self, *args, **kw)
 
     def _get_on(self):
         try: return self._on.value
@@ -17,7 +17,7 @@ class AbstractToggleButton(AbstractGenericButton):
         except: self._on = on
 
     # def _finish_creation(self):
-        # AbstractGenericButton._finish_creation(self)
+        # GenericButton._finish_creation(self)
         # self._ensure_state()
 
     def _ensure_state(self):

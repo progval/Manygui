@@ -1,8 +1,8 @@
 from anygui.Exceptions import UnimplementedMethod
-from anygui.Components import AbstractComponent
+from anygui.Components import Component
 from anygui import Defaults
 
-class AbstractLabel(AbstractComponent, Defaults.Label):
+class Label(Component, Defaults.Label):
 
     _original_text = Defaults.Label._text
 

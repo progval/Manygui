@@ -1,13 +1,13 @@
 from anygui import application
-from anygui.Frames import AbstractFrame
+from anygui.Frames import Frame
 from anygui.Exceptions import UnimplementedMethod
 from anygui import Defaults
 #import inspect
 
-class AbstractWindow(AbstractFrame, Defaults.Window):
+class Window(Frame, Defaults.Window):
 
     def __init__(self, *args, **kw):
-        AbstractFrame.__init__(self, *args, **kw)
+        Frame.__init__(self, *args, **kw)
 
         # Window staggering code:
         # FIXME: Should be offset from current top window, if any

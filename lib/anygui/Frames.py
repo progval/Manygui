@@ -1,15 +1,15 @@
-from anygui.Components import AbstractComponent
+from anygui.Components import Component
 from types import TupleType, InstanceType, IntType, ListType
 from anygui.Exceptions import ArgumentError, UnimplementedMethod
 from anygui.Utils import flatten
 from anygui import Defaults
 from anygui.LayoutManagers import Placer
 
-class AbstractFrame(AbstractComponent, Defaults.Frame):
+class Frame(Component, Defaults.Frame):
 
     def __init__(self, *args, **kw):
         self._contents = []
-        AbstractComponent.__init__(self, *args, **kw)
+        Component.__init__(self, *args, **kw)
         self._layout = None
         self.layout = Placer()
 
@@ -57,7 +57,7 @@ class AbstractFrame(AbstractComponent, Defaults.Frame):
     def destroy(self):
         while self._contents:
             self._contents[0].destroy()
-        AbstractComponent.destroy(self)
+        Component.destroy(self)
 
     def resized(self, dw, dh):
         try:

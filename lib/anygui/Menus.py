@@ -7,7 +7,7 @@ from anygui.Utils import flatten
 # Isn't a Component, but reimplements some Component methods;
 # create common superclass?
 
-class AbstractMenu(Attrib):
+class Menu(Attrib):
 
     _inhibit_refresh = 1         # See Component for explanation
     

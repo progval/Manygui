@@ -1,5 +1,5 @@
-from anygui.TextComponents import AbstractTextComponent
+from anygui.TextComponents import TextComponent
 from anygui import Defaults
 
-class AbstractTextArea(AbstractTextComponent, Defaults.TextArea):
+class TextArea(TextComponent, Defaults.TextArea):
     pass

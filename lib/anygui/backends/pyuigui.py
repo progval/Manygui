@@ -20,10 +20,11 @@ __all__ = '''
 ################################################################
 
 import pyui
+from anygui.Applications import AbstractApplication
 
 wrappers = []
 
-class Application:
+class Application(AbstractApplication):
     
     def run(self):
         not_done = 1

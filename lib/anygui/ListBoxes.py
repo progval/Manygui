@@ -1,4 +1,4 @@
-from anygui.Components import AbstractComponent
+from anygui.Components import Component
 from anygui.Exceptions import UnimplementedMethod
 from anygui.Models import ListModel
 from UserList import UserList
@@ -12,10 +12,10 @@ class AnyguiList(UserList):
     def _set_value(self,items):
         self.data = items
 
-class AbstractListBox(AbstractComponent, Defaults.ListBox):
+class ListBox(Component, Defaults.ListBox):
 
     def __init__(self, *args, **kw):
-        AbstractComponent.__init__(self, *args, **kw)
+        Component.__init__(self, *args, **kw)
 
     def _get_items(self):
         return self._items
@@ -34,7 +34,7 @@ class AbstractListBox(AbstractComponent, Defaults.ListBox):
         # self._ensure_selection()
         
     def _finish_creation(self): # FIXME: Hm...
-        AbstractComponent._finish_creation(self)
+        Component._finish_creation(self)
         # self._ensure_items()
         # self._ensure_selection()
 

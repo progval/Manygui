@@ -1,5 +1,5 @@
 
-from Components import AbstractComponent
+from Components import Component
 from Colors import *
 from Fonts import *
 import Defaults
@@ -11,7 +11,7 @@ figureCurve = 3
 # FIXME: Should include "vcr" functionality, and use a call to
 #        _ensure_graphics in backend.
 
-class AbstractCanvas(AbstractComponent, Defaults.Canvas):
+class Canvas(Component, Defaults.Canvas):
 
     """This is the base class for a drawing canvas.  The backend
     canvases just inherit from this one, and implement the various
@@ -20,7 +20,7 @@ class AbstractCanvas(AbstractComponent, Defaults.Canvas):
     def __init__(self, *args, **kwds):
         '''Initialize the canvas, and set default drawing parameters. 
         Derived classes should be sure to call this method.'''
-        AbstractComponent.__init__(self, *args, **kwds)
+        Component.__init__(self, *args, **kwds)
         # defaults used when drawing
         self.defaultLineColor = black
         self.defaultFillColor = transparent

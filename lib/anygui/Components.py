@@ -3,8 +3,9 @@ from anygui.Exceptions import UnimplementedMethod
 from anygui.LayoutManagers import LayoutData
 
 
-class AbstractComponent(Attrib, DefaultEventMixin):
-    """AbstractComponent is an abstract base class representing a visual 
+class Component(Attrib, DefaultEventMixin):
+    # REWRITE:
+    """Component is an abstract base class representing a visual 
     component of the graphical user interface. A Component owns a rectangular
     region of screen space defined by its x, y, width and height properties.
     It may be contained within another Component, in which case it is clipped

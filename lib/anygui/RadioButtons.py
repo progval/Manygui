@@ -1,9 +1,9 @@
 from anygui.Exceptions import UnimplementedMethod
 from anygui.Mixins import Attrib
-from anygui.ToggleButtons import AbstractToggleButton
+from anygui.ToggleButtons import ToggleButton
 from anygui import Defaults
 
-class AbstractRadioButton(AbstractToggleButton, Defaults.RadioButton):
+class RadioButton(ToggleButton, Defaults.RadioButton):
 
     _group = None
     _value = None
@@ -38,4 +38,4 @@ class AbstractRadioButton(AbstractToggleButton, Defaults.RadioButton):
         group = self._group
         if group:
             group.value = self._value
-        AbstractToggleButton.do_action(self)
+        ToggleButton.do_action(self)

@@ -1,13 +1,13 @@
-from anygui.Components import AbstractComponent
+from anygui.Components import Component
 from anygui.Exceptions import UnimplementedMethod
 
-class AbstractTextComponent(AbstractComponent):
+class TextComponent(Component):
 
     _selection = (0, 0)
     _editable = 1
 
     def __init__(self, *arg, **kw):
-        AbstractComponent.__init__(self, *arg, **kw)
+        Component.__init__(self, *arg, **kw)
 
     # text property:
 
@@ -55,7 +55,7 @@ class AbstractTextComponent(AbstractComponent):
 
 
     # def _finish_creation(self): # FIXME: Hm...
-        # AbstractComponent._finish_creation(self)
+        # Component._finish_creation(self)
         # self._ensure_text()
         # self._ensure_selection()
         # self._ensure_editable()

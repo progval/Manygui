@@ -1,5 +1,5 @@
-from anygui.TextComponents import AbstractTextComponent
+from anygui.TextComponents import TextComponent
 from anygui import Defaults
 
-class AbstractTextField(AbstractTextComponent, Defaults.TextField):
+class TextField(TextComponent, Defaults.TextField):
     pass
