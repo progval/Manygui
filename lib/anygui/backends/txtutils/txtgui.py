@@ -1,5 +1,6 @@
+"""txtgui.py is the curses/text binding for Anygui <http://www.anygui.org>.
+"""
 import sys
-#from curses import *
 
 from anygui.backends import *
 from anygui.Exceptions import Error
@@ -155,11 +156,11 @@ class ComponentMixin:
     # If true for a particular class or component, we'll draw
     # a border around the component when it's displayed.
     _border = 1 # For debugging.
-    _visible = 1
+    #_visible = 1
     _needs_container = 0
-    _title = "txtgui"
+    #_title = "txtgui"
     _gets_focus = 1
-    _text = "txtgui"
+    #_text = "txtgui"
     _use_text = 1
     _textx = 1
     _texty = 1
@@ -691,7 +692,7 @@ class TextMixin(ComponentMixin):
         self._cur_pos=(1,1)
         self._cur_line = 0
         self._cur_col = 0
-        self._curs_selection = (0,0)
+        #self._curs_selection = (0,0)
 
     def _ensure_editable(self):
         #_scr.dbg("ENSURING EDITABLE",self)
@@ -718,12 +719,14 @@ class TextMixin(ComponentMixin):
             _scr.move_cursor(x+tx,y+ty)
 
     def _ensure_selection(self):
-        st,en = self._selection
-        self._curs_selection = (st,en)
+        pass
+        #st,en = self._selection
+        #self._curs_selection = (st,en)
 
     def _backend_selection(self):
-        _scr.dbg("BACKEND_SELECTION",self._curs_selection)
-        return self._curs_selection
+        _scr.dbg("BACKEND_SELECTION",self._selection)
+        #return self._curs_selection
+        return self._selection
 
     def _ensure_editable(self):
         pass
@@ -736,7 +739,8 @@ class TextMixin(ComponentMixin):
         """Erase character before cursor."""
         if not self._editable: return
         if self._tpos < 1: return 1
-        self.modify(text=self._text[:self._tpos-1] + self._text[self._tpos:])
+        #self.modify(text=self._text[:self._tpos-1] + self._text[self._tpos:])
+        self._text=self._text[:self._tpos-1] + self._text[self._tpos:]
         self._tpos -= 1
         self._redraw()
         return 1
@@ -746,7 +750,8 @@ class TextMixin(ComponentMixin):
         if not self._editable: return
         if not chr(ev) in string.printable:
             return 0
-        self.modify(text=self._text[:self._tpos] + chr(ev) + self._text[self._tpos:])
+        #self.modify(text=self._text[:self._tpos] + chr(ev) + self._text[self._tpos:])
+        self._text=self._text[:self._tpos] + chr(ev) + self._text[self._tpos:]
         self._tpos += 1
         self._redraw() # FIXME: only really need to redraw current line.
         return 1
@@ -783,11 +788,12 @@ class TextMixin(ComponentMixin):
     def _select_start(self,ev):
         """Set the start of the selection to the current
         cursor location."""
-        st,en = self._curs_selection
+        st,en = self._selection
         _scr.dbg("SELECTION START 1:",st,en)
         st = self._tpos
         if en<st: en = st
-        self._curs_selection=(st,en)
+        #self._curs_selection=(st,en)
+        self.modify(selection=(st,en))
         _scr.dbg("SELECTION START:",st,en)
         self._redraw()
         return 1
@@ -795,11 +801,12 @@ class TextMixin(ComponentMixin):
     def _select_end(self,ev):
         """Set the end of the selection to the current
         cursor location."""
-        st,en = self._curs_selection
+        st,en = self._selection
         _scr.dbg("SELECTION END 1:",st,en)
         en = self._tpos
         if en<st: st = en
-        self._curs_selection=(st,en)
+        #self._curs_selection=(st,en)
+        self.modify(selection=(st,en))
         _scr.dbg("SELECTION END:",st,en)
         self._redraw()
         return 1
@@ -837,7 +844,7 @@ class TextMixin(ComponentMixin):
         self._redraw()
 
     def _draw_contents(self):
-        if self._screen_height()<2: return
+        if self._screen_height()<3: return
         
         t = self._text
         x=1;y=1
@@ -849,13 +856,66 @@ class TextMixin(ComponentMixin):
         self._cur_line_len = len(lines[line])
 
         startline,startcol = self._find_relative_cpos(line,col,len(lines),len(lines[line]))
-        sh = self._screen_height()
+        sh = self._screen_height()-2
+
+        #st,en = self._curs_selection
+        st,en = self._selection
+        st_line,st_col = self._find_lc_pos(lines,st)
+        en_line,en_col = self._find_lc_pos(lines,en)
+        self._selection_lc = st_line,st_col,en_line,en_col
 
         for li in range(0,min(sh,len(lines)-startline)):
             #_scr.dbg("start,line:",startline,li,self)
             line = lines[startline+li]
-            self._addstr(x,y,line[startcol:])
+            parts = self._partition_line(line,startline+li,startcol)
+            xx = x
+            for (txt,attr) in parts:
+                self._addstr(xx,y,txt,attr)
+                xx += len(txt)
             y+=1
+
+    def _partition_line(self,txt,line,startcol):
+        st_line,st_col,en_line,en_col = self._selection_lc
+        if line<st_line or line>en_line: return ((txt[startcol:],_scr.ATTR_NORMAL),)
+        if line>st_line and line<en_line: return ((txt[startcol:],_scr.ATTR_SELECTED),)
+        if line == st_line and line == en_line:
+            # Case 1: entire selection off left.
+            if en_col < startcol:
+                return ((txt[startcol:],_scr.ATTR_NORMAL),)
+            # Case 2: select start off left, select end in view.
+            if st_col < startcol and en_col >= startcol:
+                return ((txt[startcol:en_col],_scr.ATTR_SELECTED),
+                        (txt[en_col:],_scr.ATTR_NORMAL))
+            # Case 3: start and end in view.
+            if st_col >= startcol and en_col >= startcol:
+                return ((txt[startcol:st_col],_scr.ATTR_NORMAL),
+                        (txt[st_col:en_col],_scr.ATTR_SELECTED),
+                        (txt[en_col:],_scr.ATTR_NORMAL))
+        if line == st_line:
+            if st_col<startcol: return ((txt[startcol:],_scr.ATTR_SELECTED),)
+            return ((txt[startcol:st_col],_scr.ATTR_NORMAL),
+                    (txt[st_col:],_scr.ATTR_SELECTED))
+        if line == en_line:
+            if en_col<startcol: return ((txt[startcol:],_scr.ATTR_NORMAL),)
+            return ((txt[startcol:en_col],_scr.ATTR_SELECTED),
+                    (txt[en_col:],_scr.ATTR_NORMAL))
+
+    def _find_relative_pos(self,line,col,nlines,nchars):
+        lh = self._screen_height()-3
+        startline = 0
+        if lh<nlines:
+            startline = line - lh
+            if startline<0: startline = 0
+            
+        lw = self._screen_width()-3
+        startcol = 0
+        if lw<nchars:
+            startcol = col - lw
+            if startcol<0: startcol = 0
+
+        _scr.dbg("cur_pos:",self._cur_pos,self)
+
+        return startline,startcol,line-startline+1,col-startcol+1
 
     def _find_relative_cpos(self,line,col,nlines,nchars):
         # Take the line,col position of the cursor in self._text
@@ -863,25 +923,12 @@ class TextMixin(ComponentMixin):
         # relative cursor position, which is stored in self._cpos.
         # Then return the line and column of the character that
         # should appear at the top-left corner.
-        lh = self._screen_height()-2
-        startline = 0
-        if lh<nlines:
-            startline = line - lh
-            if startline<0: startline = 0
-            
-        lw = self._screen_width()-2
-        startcol = 0
-        if lw<nchars:
-            startcol = col - lw
-            if startcol<0: startcol = 0
+        tl_line,tl_col,rline,rcol = self._find_relative_pos(line,col,nlines,nchars)
+        self._cur_pos = (rcol, rline)
+        return tl_line,tl_col
 
-        self._cur_pos = (col-startcol+1, line-startline+1)
-        #_scr.dbg("cur_pos:",self._cur_pos,self)
-
-        return startline,startcol
-
-    def _find_cursor_pos(self,lines):
-        tp = self._tpos
+    def _find_lc_pos(self,lines,tp):
+        # Find line/col position of absolute text position.
         ll = 0
         tt = 0
         tl = len(lines)
@@ -893,6 +940,12 @@ class TextMixin(ComponentMixin):
             tt += lastlen
             ll += 1
         col=lastlen-(tt-tp)
+        return line,col
+
+    def _find_cursor_pos(self,lines):
+        # Find line/col position of cursor.
+        tp = self._tpos
+        line,col = self._find_lc_pos(lines,tp)
         self._cur_line = line
         self._cur_col = col
         return line,col
