@@ -1,6 +1,7 @@
 "Mixins: mix-in classes for the anyguy package"
 
 from Exceptions import SetAttributeError, GetAttributeError
+import weakref
 
 class Attrib:
     """Attrib: mix-in class to support attribute getting & setting
