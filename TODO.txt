@@ -144,3 +144,6 @@ Smaller issues:
 * Add a linkMethods (or something) function for callback support?
 
 * Add more distribution types (e.g. windows installers, rpms etc.)
+
+* Add examples on how to implement other types of event systems (with
+  an event path etc.) with the Anygui dispatcher to the documentation.
