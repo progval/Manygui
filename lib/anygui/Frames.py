@@ -34,16 +34,17 @@ class AbstractFrame(AbstractComponent, Defaults.Frame):
 
         items = flatten(items)
 
-        # Inform the layout manager, if any.
-        if self._layout:
-            self._layout.add(items,options,**kws)
-
         # Now add to self._contents.
         for component in items:
             # _set_container() adds component to self._contents.
             # layout manager may have already called it, though.
             if component not in self._contents:
                 component._set_container(self)
+
+        # Inform the layout manager, if any.
+        if self._layout:
+            self._layout.add(items,options,**kws)
+
 
 
     def remove(self, component):
@@ -59,12 +60,15 @@ class AbstractFrame(AbstractComponent, Defaults.Frame):
         AbstractComponent.destroy(self)
 
     def resized(self, dw, dh):
-        self.layout.resized(dw,dh)
-        for item in self._contents:
-            try:
-                item.resized(dw,dh)
-            except:
-                pass
+        try:
+            self.layout.resized(dw,dh)
+            for item in self._contents:
+                try:
+                    item.resized(dw,dh)
+                except:
+                    pass
+        except:
+            pass
 
     def _add(self, comp):
         self._contents.append(comp)

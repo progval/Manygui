@@ -37,15 +37,18 @@ class LayoutManager:
 
     def add(self,items,options=None,**kws):
         items = flatten(items)
-        if options:
-            options.__dict__.update(kws)
-            kws.update(options.__dict__)
-        self.add_components(*items,**kws)
 
         # Add items to container.
         for item in items:
             if item not in self._container._contents:
                 item._set_container(self._container)
+
+        if options:
+            options.__dict__.update(kws)
+            kws.update(options.__dict__)
+        self.add_components(*items,**kws)
+
+        self.resized(0,0)
 
     def remove(self,item):
         if item in self._container._contents:
