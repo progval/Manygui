@@ -94,13 +94,6 @@ class ListBox(ComponentMixin, AbstractListBox):
             # FIXME: Shouldn't be hard-coded like this...
             self._wx_comp.SetClientSize((self._width-6, self._height-6))
 
-    def _backend_items(self):
-        if self._wx_comp:
-            items = []
-            for index in range(self._wx_comp.Number()):
-                items.append(self._wx_comp.GetString(index))
-            return items
-            
     def _backend_selection(self):
         if self._wx_comp:
             return self._wx_comp.GetSelection()

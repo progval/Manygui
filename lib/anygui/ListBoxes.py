@@ -6,9 +6,6 @@ class AbstractListBox(AbstractComponent):
     _selection = 0
 
     def _get_items(self):
-        items = self._backend_items()
-        if items is not None:
-            self._items = items
         return self._items
 
     def _set_items(self, items):

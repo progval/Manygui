@@ -142,10 +142,6 @@ class ScrollableListBox(Tkinter.Frame):
 class ListBox(ComponentMixin, AbstractListBox):
     _tk_class = ScrollableListBox
 
-    def _backend_items(self):
-        if self._tk_comp:
-            return self._tk_comp.get(0, END)
-
     def _backend_selection(self):
         if self._tk_comp:
             selection = self._tk_comp.curselection()[0]

@@ -202,14 +202,6 @@ class ListBox(ComponentMixin, AbstractListBox):
             self._java_comp.setSelectionMode(swing.ListSelectionModel.SINGLE_SELECTION)
         return result
 
-    def _backend_items(self):
-        if self._java_comp:
-            model = self._java_comp.getModel()
-            items = []
-            for i in range(model.size):
-                items.append(model.getElementAt(i))
-            return items
-
     def _backend_selection(self):
         if self._java_comp:
             return self._java_comp.getSelectedIndex()
