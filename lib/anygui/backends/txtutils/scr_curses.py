@@ -59,17 +59,21 @@ class Screen:
         _cur_scr.erase()
     
     def scr_quit(self):
+        global _cur_scr
+        if not Screen._inited:
+            return
         _cur_scr.keypad(0)
         curses.echo()
         curses.nocbreak()
         curses.noraw()
         curses.endwin()
+        Screen._inited = 0
     
     _inited = 0
     _xsize = 80
     _ysize = 24
     def scr_init(self):
-        global _cur_scr, _inited
+        global _cur_scr
         if Screen._inited:
             return
         Screen._inited = 1

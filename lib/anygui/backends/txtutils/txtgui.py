@@ -77,6 +77,7 @@ def _add_to_focus_list(comp):
     _all_components.append(comp)
 
 def _remove_from_focus_list(comp):
+    _scr.dbg("Removing from focus list",comp,'\n')
     if _focus_control is comp:
         _app._change_focus()
     if _focus_control is comp:
@@ -216,10 +217,12 @@ class ComponentMixin:
 
     def _screen_height(self):
         w,h = self._scale_xy(self.width,self.height)
+        if h<1: h=1
         return h
 
     def _screen_width(self):
         w,h = self._scale_xy(self.width,self.height)
+        if w<2: w=2
         return w
 
     def _effective_texty(self):
@@ -271,7 +274,7 @@ class ComponentMixin:
             return 0,0,0,0
         x,y = self._get_screen_coords()
         ##_scr.dbg("%s,%s: %s"%(x,y,self))
-        w,h = self._scale_xy(self.width,self.height)
+        w,h = self._screen_width(), self._screen_height()
         x,y,w,h = self._container_intersect(x,y,w,h)
         return x,y,w,h
 
@@ -299,7 +302,7 @@ class ComponentMixin:
         if not self._curses_created: return
         if not self._border: return
         x,y = self._get_screen_coords()
-        w,h = self._scale_xy(self.width,self.height)
+        w,h = self._screen_width(), self._screen_height()
         ##_scr.dbg("Screen coords %s for %s"%((x,y,w,h),self))
         x,y,w,h = self._container_intersect(x,y,w,h)
         if w == 0 or h == 0: return
@@ -396,7 +399,7 @@ class ComponentMixin:
             self._gets_focus = self.__class__._gets_focus
 
     def _ensure_destroyed(self):
-        ##_scr.dbg("Ensuring destroyed: %s"%self)
+        _scr.dbg("Ensuring destroyed: %s"%self)
         self.focus_capture = 0
         _remove_from_focus_list(self)
         self._erase()
@@ -433,7 +436,7 @@ class ContainerMixin(ComponentMixin):
             comp._redraw()
 
     def _ensure_destroyed(self):
-        ##_scr.dbg("Ensuring destroyed ",self)
+        _scr.dbg("Ensuring destroyed ",self)
         self.focus_capture = 0
         _remove_from_focus_list(self)
         for comp in self._contents:
@@ -540,6 +543,18 @@ class ListBox(ComponentMixin, AbstractListBox):
                    ord('k'):_select_up,
                    ord(' '):_do_click }
 
+class Canvas(ComponentMixin, AbstractCanvas):
+    _text = "Canvas not supported in text mode."
+    _gets_focus = 0
+
+    def __init__(self,*args,**kws):
+        ComponentMixin.__init__(self,*args,**kws)
+        AbstractCanvas.__init__(self,*args,**kws)
+    
+    def drawPolygon(self, pointlist,
+                    edgeColor=None, edgeWidth=None, fillColor=None, closed=0):
+        pass
+
 class Button(ComponentMixin, AbstractButton):
 
     def __init__(self,*args,**kws):
@@ -555,7 +570,7 @@ class Button(ComponentMixin, AbstractButton):
         #self._LRCORNER = ord('>')
         self._attr = _scr.ATTR_UNDERLINE
 
-    def __str__(self): return "Button "+self._text
+    #def __str__(self): return "Button "+self._text
 
     def _do_click(self,ev):
         """Click on button."""
@@ -731,7 +746,10 @@ class TextMixin(ComponentMixin):
         
         t = self._text
         x=1;y=1
-        lines = self._text.split('\n')
+        try:
+            lines = self._text.split('\n')
+        except:
+            lines = "COULD NOT RENDER TEXT IN CONTROL"
         line,col = self._find_cursor_pos(lines)
         self._cur_line_len = len(lines[line])
 
@@ -834,9 +852,8 @@ class Window(ContainerMixin, AbstractWindow):
         ##_scr.dbg("%s:%s"%(self._title,self.geometry))
 
     def _ensure_destroyed(self):
+        _scr.dbg("Ensuring destroyed: %s"%self)
         ContainerMixin._ensure_destroyed(self)
-        self.focus_capture = 0
-        _remove_from_focus_list(self)
         _app.remove(self)
         _app._window_deleted()
 
@@ -872,9 +889,6 @@ class Window(ContainerMixin, AbstractWindow):
         _app.add(self._omenu)
         self._omenu.focus_capture = 1
         
-        self._redraw()
-        self._omenu._redraw()
-
     _event_map = {15:_present_winmenu}
 
     def _curs_resized(self,dw,dh):
@@ -921,6 +935,7 @@ class Window(ContainerMixin, AbstractWindow):
 
     def _close(self,*args,**kws):
         ##_scr.dbg("CLOSING %s"%self)
+        self._omenu._pwin = None
         self._omenu.destroy()
         self.destroy()
 
@@ -1008,6 +1023,9 @@ class HelpWindow(Window):
 
     _event_map = {ord('q'):_dismiss}
 
+# If false, present an initial help window.
+_inithelp = 0
+
 class Application(AbstractApplication):
     def __init__(self):
         AbstractApplication.__init__(self)
@@ -1047,6 +1065,13 @@ class Application(AbstractApplication):
         # Establish the initial focus.
         self._change_focus()
 
+        # Present the initial help screen, without which the
+        # UI remains forever mysterious.
+        global _inithelp
+        if not _inithelp:
+            HelpWindow()
+            _inithelp = 1
+
         # Redraw the screen.
         _refresh_all()
         self._redraw_all()
@@ -1060,6 +1085,9 @@ class Application(AbstractApplication):
         if ch == 7: # ^G
             HelpWindow()
         if ch == 17: # ^Q
+            wins = self._windows[:]
+            for win in wins:
+                win.destroy()
             return 0
         if ch == 6 or ch == 258:  # ^F,down
             self._change_focus(1)
