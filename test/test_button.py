@@ -5,6 +5,7 @@ app = Application()
 g_y = 150
 
 win = Window(width = 200, height = 300)
+app.add(win)
 
 def say_hello(**kw):
     #print "Hello, world!"

@@ -22,6 +22,7 @@ lb.model.value = 'There was a wee cooper of county Fyfe, Nickety, nockety, noo, 
 lb.selection = 2
 
 win = Window(title='ListBox test', width=200, height=200)
+app.add(win)
 
 win.add(lb, left=25, top=25, right=25, bottom=25,
           vstretch=1, hstretch=1)

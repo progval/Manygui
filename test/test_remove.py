@@ -1,6 +1,7 @@
 from anygui import *
 app = Application()
 win = Window(width = 100, height = 100)
+app.add(win)
 
 def add_btn(**kws):
     win.add(b2)

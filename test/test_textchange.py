@@ -17,5 +17,6 @@ def change(**kw):
 link(cng, change)
 
 win = Window(width=btn.width, height=145)
+app.add(win)
 win.add(cmps+(cng,), direction='down')
 app.run()

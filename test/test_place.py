@@ -24,6 +24,7 @@ def main():
     app = Application()
 
     win = Window(title = "Place Me By Your Side", width = 700, height = 500)
+    app.add(win)
 
     view1 = TestView(width = 300, height = 200)
     

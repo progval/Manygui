@@ -34,6 +34,7 @@ link(reset_btn, init_field)
 app = Application()
 
 win = Window(title='TextField test', width=200, height=245)
+app.add(win)
 
 win.add([tf, tf2, lbl], left=25, right=25, top=40, hstretch=1,
           direction='down', space=20)

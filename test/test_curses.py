@@ -5,6 +5,7 @@ import anygui
 app = Application()
 
 win = Window(title="Window 1")
+app.add(win)
 win.geometry=(10,10,400,200)
 
 win.add(Label(text="^F focus; ^Q quit; space click",
@@ -24,6 +25,7 @@ def change_lb1_1(*args,**kws):
 link(b1_1,change_lb1_1)
 
 win2 = Window(title="Window 2")
+app.add(win2)
 win2.geometry=(100,250,400,200)
 
 n = 0

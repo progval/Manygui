@@ -17,6 +17,7 @@ def report1(**kw):
 app = Application()
 
 win = Window(width = 260, height = 150)
+app.add(win)
 for i in xrange(0, 3):
     btn = RadioButton(x = 30, y = (i+1) * 30, width = 100, height = 30, 
                       text = labels[i],

@@ -2,6 +2,7 @@ from anygui import *
 
 app = Application()
 win = Window(size=(280,200))
+app.add(win)
 num = 3
 opt = Options(y=10, width=80, height=25)
 bns = [Button(opt, text='Frame %s' % i, x=(10+i*90)) for i in range(num)]

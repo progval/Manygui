@@ -6,13 +6,6 @@ from anygui import Defaults
 
 class AbstractWindow(AbstractFrame, Defaults.Window):
 
-    #class CreationSentinel:
-    #    'Calls win.ensure_created() when leaving local scope'
-    #    def __init__(self, win):
-    #        self.win = win
-    #    def __del__(self):
-    #        self.win.ensure_created()
-
     def __init__(self, *args, **kw):
         AbstractFrame.__init__(self, *args, **kw)
 
@@ -22,7 +15,7 @@ class AbstractWindow(AbstractFrame, Defaults.Window):
         self._y = Defaults.Window._y
         Defaults.shift_window()
         
-        application()._add_window(self)
+        #application()._add_window(self) # Now done explicitly
 
         """
         Commented out, because it was deemed too magical and unportable.
@@ -41,14 +34,14 @@ class AbstractWindow(AbstractFrame, Defaults.Window):
             pass
         del stack
         """
-
-    def open(self):
-        # FIXME: Tentative method...
-        self.ensure_created()
         
     def destroy(self):
         self._ensure_destroyed()
-        application()._remove_window(self)
+        try:
+            application().remove(self)
+        except ValueError:
+            # Already removed
+            pass
 
     def _set_title(self, text):
         if self._title != text:

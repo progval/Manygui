@@ -7,6 +7,7 @@ from anygui.backends.tkgui import Canvas
 
 app = Application()
 win = Window(size=(300,300))
+app.add(win)
 cvs = Canvas(size=win.size)
 win.add(cvs)
 
