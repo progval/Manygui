@@ -89,3 +89,6 @@ All List- and Text- Views always have scrollbars under BeOS.
 beosgui.py does not implement _ensure_destroyed(). This will
 prevent objects from being removed from a container, and/or
 moved between containers.
+
+test_remove.py fails under mswgui. The "Remove" button's
+event handler is never called.
