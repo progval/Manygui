@@ -192,13 +192,12 @@ class Canvas(ComponentMixin, AbstractCanvas):
             edgeColor = self.defaultLineColor
         if edgeWidth is None:
             edgeWidth = self.defaultLineWidth
-        #if fillColor is None:
-        #    fillColor = self.defaultFillColor
+        if fillColor is None:
+            fillColor = self.defaultFillColor
+
         g2 = self._offscreen.createGraphics()
         
         g2.setStroke(awt.BasicStroke(edgeWidth))
-        c = _convert_color(edgeColor)
-        g2.setPaint(c)
         
         polygon = awt.geom.GeneralPath(self._path_type, int(len(pointlist)/2))
         polygon.moveTo(*pointlist[0])
@@ -206,9 +205,13 @@ class Canvas(ComponentMixin, AbstractCanvas):
             polygon.lineTo(*pt)
         if closed:
             polygon.closePath()
-        g2.draw(polygon)
 
-        if fillColor is not None: # FIXME: Correct behaviour? Check Sping specs
+        if edgeColor is not Colors.transparent:
+            c = _convert_color(edgeColor)
+            g2.setPaint(c)
+            g2.draw(polygon)
+
+        if fillColor is not Colors.transparent:
             c = _convert_color(fillColor)
             g2.setPaint(c)
             g2.fill(polygon)
