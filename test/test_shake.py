@@ -1,5 +1,5 @@
 from anygui import *
-from anygui.Utils import log
+#from anygui.Utils import log
 
 app = Application()
 
@@ -11,7 +11,7 @@ rdb = RadioButton()
 txa = TextArea()
 txf = TextField()
 
-win = Window(size=(120,380))
+win = Window(size=(120,380),position=(10,10))
 app.add(win)
 win.add((btn, cbx, lbl, lst, rdb, txa, txf),
           direction='down',
@@ -58,9 +58,10 @@ def shake_using(comp,aggr1,aggr2):
 
 def shake_comp(comp):
     fail = 0
-    fail += shake_using(comp,'single','geom')
-    fail += shake_using(comp,'single','possize')
-    fail += shake_using(comp,'geom','possize')
+    K = GET.keys()
+    for g in K:
+        for s in K:
+            fail += shake_using(comp,g,s)
     return fail
 
 def shake(event):
@@ -69,6 +70,8 @@ def shake(event):
         fail += shake_comp(comp)
     if not fail:
         print "test passed"
+    else:
+        print 'test failed',fail
 
 
 link(btn,shake)
