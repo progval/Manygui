@@ -10,10 +10,10 @@ Begin doctest cases:
 >>> r1 = Receiver('r1')
 >>> r2 = Receiver('r2')
 >>> r2.listenTo(s2)
->>> def allSigs(name):
-...   print "Signal %s sent"%name
+>>> def allSigs(message):
+...   print "Signal %s sent"%message
 ...
->>> connect(None,None,allSigs,{"signal_name":"name"})
+>>> connect(None,None,allSigs)
 >>> s1.sayHello("joe")
 Saying hello to joe
 Signal HELLO sent
@@ -32,15 +32,23 @@ r1 DYING!!!
 Sender s2 changing name to phil
 r2: phil changed its name from s2 to phil
 Signal NAMECHANGE sent
->>> disconnect(None,"NAMECHANGE",r2.handleNameChange)
+>>> disconnect(None,"NAMECHANGE",adapterFunc,r2)
 >>> s1.changeName("bob")
 Sender carl changing name to bob
 Signal NAMECHANGE sent
 >>> disconnect(None,None,allSigs)
 >>> s1.changeName("fred")
 Sender bob changing name to fred
->>> print "Hi"
-Hi
+>>> del r2
+r2 DYING!!!
+>>> m = SignalAdapter(Model(),["set_state","affinity"])
+>>> connect(None,None,allSigs)
+>>> m.set_state(9)
+Signal set_state sent
+>>> m.affinity=42
+Signal affinity sent
+>>> m.foo="bar"
+>>> 
 """
 
 from anygui.Signals import *
@@ -52,7 +60,7 @@ class Sender:
 
     def sayHello(self,to):
         print "Saying hello to %s"%to
-        signal(self,"HELLO",to=to)
+        signal(self,"HELLO",to=to,occasion="any")
 
     def changeName(self,name):
         print "Sender %s changing name to %s"%(self.name,name)
@@ -60,22 +68,21 @@ class Sender:
         self.name = name
         signal(self,"NAMECHANGE",old=oldname,new=name)
 
+def adapterFunc(self,source,old,new):
+    self.handleNameChange(oldname=old,newname=new,src=source)
+
 class Receiver:
 
     def __init__(self,name):
         self.name = name
         # Register a handler for all name-change events.
-        connect(None,"NAMECHANGE",self.handleNameChange,
-                {"old":"oldname",
-                 "new":"newname",
-                 "signal_source":"src"
-                 })
+        connect(None,"NAMECHANGE",adapterFunc,self)
 
     def __del__(self):
         print "%s DYING!!!"%self.name
 
-    def handleHello(self,signal_source,signal_name,to):
-        print "%s: %s said hello to %s"%(self.name,signal_source.name,to)
+    def handleHello(self,source,message,to):
+        print "%s: %s said hello to %s"%(self.name,source.name,to)
 
     def handleNameChange(self,src,oldname,newname):
         print "%s: %s changed its name from %s to %s"%(self.name,src.name,
@@ -84,6 +91,11 @@ class Receiver:
     def listenTo(self,sndr):
         connect(sndr,"HELLO",self.handleHello)
 
+
+# This code tests the SignalAdapter class.
+class Model:
+    def set_state(self,state):
+        self.state = state
 
 # Do the doctest thing.
 if __name__ == "__main__":
