@@ -194,3 +194,15 @@ class AbstractFrame(AbstractComponent, Defaults.Frame):
     def _remove(self, comp):
         self._contents.remove(comp)
         comp.destroy()
+
+    # We need some special machinery here to ensure subcomponents
+    # get resized properly.
+    def container_resized(self, cdw, cdh):
+        old_w = self._width
+        old_h = self._height
+        AbstractComponent.container_resized(self,cdw,cdh)
+        dw = self._width - old_w
+        dh = self._height - old_h
+        for comp in self._contents:
+            comp.container_resized(dw,dh)
+

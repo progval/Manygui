@@ -1,7 +1,6 @@
 
 from anygui.backends import *
 __all__ = anygui.__all__
-from anygui.Components import AbstractComponent
 
 ################################################################
 
@@ -489,17 +488,6 @@ class TextArea(ComponentMixin, AbstractTextArea, DisabledTextBindings):
 
 class Frame(ComponentMixin, AbstractFrame):
     _tk_class = Tkinter.Frame        
-
-    # We need some special machinery here to ensure subcomponents
-    # get resized properly.
-    def container_resized(self, cdw, cdh):
-        old_w = self._width
-        old_h = self._height
-        AbstractComponent.container_resized(self,cdw,cdh)
-        dw = self._width - old_w
-        dh = self._height - old_h
-        for comp in self._contents:
-            comp.container_resized(dw,dh)
 
 ################################################################
 
