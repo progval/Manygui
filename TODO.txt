@@ -148,8 +148,7 @@ Longer term goals:
 
 * Implement modal (or disabled) windows
 
-* Add support for importing xml files through xslt?
-  (E.g. XUL)
+* Add support for XUL.
 
 * Add instant model update for text widgets, not just on
   "focus lost"?
