@@ -6,12 +6,12 @@ import inspect
 
 class AbstractWindow(AbstractFrame, Defaults.Window):
 
-    class CreationSentinel:
-        'Calls win.ensure_created() when leaving local scope'
-        def __init__(self, win):
-            self.win = win
-        def __del__(self):
-            self.win.ensure_created()
+    #class CreationSentinel:
+    #    'Calls win.ensure_created() when leaving local scope'
+    #    def __init__(self, win):
+    #        self.win = win
+    #    def __del__(self):
+    #        self.win.ensure_created()
 
     def __init__(self, *args, **kw):
         AbstractFrame.__init__(self, *args, **kw)
@@ -24,6 +24,10 @@ class AbstractWindow(AbstractFrame, Defaults.Window):
         
         application()._add_window(self)
 
+        """
+        Commented out, because it was deemed too magical and unportable.
+        Left for its entertainment value ;)
+        
         # If we are inside a function call, set up a CreationSentinel
         # in surrounding local scope -- otherwise, just call
         # ensure_created:                               (mlh20011110)
@@ -34,8 +38,13 @@ class AbstractWindow(AbstractFrame, Defaults.Window):
             while scope.has_key(`name`): name += 1
             scope[`name`] = self.CreationSentinel(self)
         else:
-            pass # Do something here?
-        del stack # Needed to make the sentinel work (odd...)
+            pass
+        del stack
+        """
+
+    def open(self):
+        # FIXME: Tentative method...
+        self.ensure_created()
         
     def destroy(self):
         self._ensure_destroyed()
