@@ -28,7 +28,7 @@ for p in people:
 mode, mask = os.stat(filename)[0], 256
 for p in people:
     for t in types:
-        cbx[p][t].value = mode & mask
+        cbx[p][t].on = mode & mask
         mask = mask >> 1
 
 # Callback
@@ -36,7 +36,7 @@ def chmod():
     mode, mask = 0, 256
     for p in people:
         for t in types:
-            if cbx[p][t].value:
+            if cbx[p][t].on:
                 mode = mode | mask
             mask = mask >> 1
     os.chmod(filename, mode)
