@@ -1,5 +1,7 @@
 
-import weakref, UserList, UserDict
+import UserList, UserDict
+
+weakref = None
 
 # TODO (?):
 # - Add callbacks to CallableReference
@@ -40,6 +42,8 @@ class Reference(Hashable):
 
 class WeakReference(Reference):
     def ref(self, obj, cb):
+        global weakref
+        if not weakref: import weakref
         return weakref.ref(obj, cb)
     def deref(self, obj):
         return obj()
