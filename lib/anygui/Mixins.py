@@ -10,10 +10,10 @@ weakref = None
 # supporting data structures and functions for the purpose:
 
 # _ensure_* methods that it might be dangerous to auto-call
-_no_auto_ensures = '_ensure_created _ensure_destroyed'.split()
+_no_auto_ensures = '_ensure_created _ensure_destroyed _ensure_events'.split()
 
 # _ensure_* methods that must be called no more than once per object
-_ensures_once = '_ensure_events'.split()
+_ensures_once = ()
 
 # pairwise order constraints on _ensure_* method calls
 _ensures_constraints = (

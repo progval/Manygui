@@ -34,6 +34,7 @@ class AbstractComponent(Attrib, DefaultEventMixin):
             self._finish_creation()
 
     def _finish_creation(self):
+        self._ensure_events()
         self._inhibit_update = 0
         self.update()
 
