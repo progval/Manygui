@@ -6,9 +6,12 @@ Goals for version 0.1:
 
 * Add basic support for defaults
 
-* Add Frame class with utility factories (e.g. col/row)
+* Add Frame class with utility factories e.g. col/row (?)
 
-* Add support for the border property
+* Add support for the border property (?)
+
+* Make new Windows invisible until event loop is entered
+  or re-entered (after a callback)?
 
 Goals for version 0.2:
 ----------------------
@@ -36,6 +39,3 @@ Smaller issues:
 ---------------
 
 * Add proportional scaling/positioning?
-
-* Make new Windows invisible until event loop is entered
-  or re-entered (after a callback)?
