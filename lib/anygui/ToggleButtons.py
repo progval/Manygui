@@ -4,42 +4,18 @@ from anygui.Models import BooleanModel
 
 class AbstractToggleButton(AbstractGenericButton):
 
-    #_text = "ToggleButton"
-    #_on = 0
-    _model = None
-
-    # FIXME: When it works, the model stuff should be lifted
-    #        to AbstractComponent
+    _on = 0
 
     def __init__(self, *args, **kw):
-        self._set_model(BooleanModel())
         AbstractGenericButton.__init__(self, *args, **kw)
 
-    # FIXME: Temporary solution. Shouldn't just be alias for model.value
     def _get_on(self):
-        return self._model.value
+        try: return self._on.value
+        except: return self._on
 
-    # FIXME: Temporary solution. Shouldn't just be alias for model.value
     def _set_on(self, on):
-        self._model.value = on
-
-    def _get_model(self):
-        return self._model
-
-    def _set_model(self, model):
-        if self._model is not None:
-            self._model.remove_view(self)
-        self._model = model
-        self._model.add_view(self) # FIXME: Should get all state at this point (?)
-        self._on = model.value # FIXME: use 'not not value' or operator.truth?
-        self._ensure_state()
-
-    def model_changed(self, target, change):
-        if target is self._model:
-            for mname, args, kw in change:
-                if mname == '_set_value':
-                    self._on = args[0]
-                    self._ensure_state()
+        try: self._on.value = on
+        except: self._on = on
 
     def _finish_creation(self):
         AbstractGenericButton._finish_creation(self)

@@ -455,7 +455,10 @@ class TextField(ComponentMixin, AbstractTextField, DisabledTextBindings):
                 self._tk_comp.bind('<KeyRelease-Tab>',self._do_ensure_selection)
 
     def _update_model(self,ev):
-        self.model.value = self._tk_comp.get()
+        # self.model.value = self._tk_comp.get()
+        # AM20011209: changed, less-strong coupling to front-end
+        #     implementation strategies
+        self._get_text()
 
 class ScrollableTextArea(Tkinter.Frame):
 

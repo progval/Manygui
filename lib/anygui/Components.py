@@ -2,6 +2,17 @@ from anygui.Mixins import Attrib, DefaultEventMixin
 from anygui.Exceptions import UnimplementedMethod
 from anygui.LayoutManagers import LayoutData
 
+_noauto = '_ensure_created _ensure_destroyed'.split()
+
+def _get_all_ensures(klass, theset):
+    for x in dir(klass):
+        if x.startswith('_ensure_'):
+            if x in _noauto: continue
+            v = getattr(klass,x)
+            if callable(v):
+                theset[x]=1
+    for b in klass.__bases__: _get_all_ensures(b, theset)
+
 class AbstractComponent(Attrib, DefaultEventMixin):
     """AbstractComponent is an abstract base class representing a visual component of
     the graphical user interface. A Component owns a rectangular region of
@@ -11,11 +22,24 @@ class AbstractComponent(Attrib, DefaultEventMixin):
     """
     
     _container = None
+    _all_ensures = []
+    _inhibit_update = 1
 
     def __init__(self, *args, **kw):
         self.layout_data = LayoutData()
         Attrib.__init__(self, *args, **kw)
         DefaultEventMixin.__init__(self)
+        enset = {}
+        _get_all_ensures(self.__class__, enset)
+        self.__dict__['_all_ensures'] = enset.keys()
+        self._all_ensures.sort()
+
+    def update(self, **ignore_kw):
+        if self._inhibit_update: return
+        print 'compup(%r,%r)'%(self,ignore_kw)
+        for ensure in self._all_ensures:
+            v = getattr(self, ensure)
+            v()
 
     def destroy(self):
         self._set_container(None)
@@ -30,6 +54,7 @@ class AbstractComponent(Attrib, DefaultEventMixin):
         self._ensure_enabled_state()
         self._ensure_events()
         self._ensure_visibility()
+        self._inhibit_update = 0
 
     def _set_visible(self, value):
         """Set the visibility."""

@@ -1,20 +1,40 @@
-from anygui.Mixins import Attrib, Observable
+from anygui.Mixins import Attrib
+from Events import link, unlink, send
 from UserList import UserList
 from UserString import UserString
 
-class BooleanModel(Attrib, Observable):
+class Assignee:
+
+    def __init__(self):
+        self.names = []
+
+    def assigned(self, object, name):
+        update = getattr(object, 'update', None)
+        if update is not None:
+            self.names.append(name)
+            link(self, update)
+
+    def removed(self, object, name):
+        update = getattr(object, 'update', None)
+        if update is not None:
+            unlink(self, update)
+            self.names.remove(name)
+
+    def send(self, **kw):
+        send(self, names=self.names, **kw)
+
+
+class BooleanModel(Attrib, Assignee):
 
     _value = 0
 
     def __init__(self, *arg, **kw):
-        # FIXME: Strangeness wrt. order...
-        Observable.__init__(self)
+        Assignee.__init__(self)
         Attrib.__init__(self, **kw)
 
     def _set_value(self, value):
         self._value = value
-        self.add_hint('_set_value', value)
-        self.notify_views()
+        send(self,_set_value=value)
 
     def _get_value(self):
         return self._value
@@ -23,98 +43,84 @@ class BooleanModel(Attrib, Observable):
 
     def __str__(self): return str(self._value)
 
-class ListModel(Attrib, Observable, UserList):
+
+class ListModel(Attrib, Assignee, UserList):
 
     def __init__(self, *arg, **kw):
-        # FIXME: Order correct?
         Attrib.__init__(self, **kw)
-        Observable.__init__(self)
+        Assignee.__init__(self)
         UserList.__init__(self, *arg, **kw)
 
     def _set_value(self, value):
         self.data = list(value)
-        self.add_hint('_set_value', value)
-        self.notify_views()
+        self.send(_set_value=value)
 
     def _get_value(self):
         return list(self)
 
     def __setitem__(self, i, item):
         UserList.__setitem__(self, i, item)
-        self.add_hint('__setitem__', i, item)
-        self.notify_views()
+        self.send(__setitem__=(i,item))
 
     def __delitem__(self, i):
         UserList.__delitem__(self, i)
-        self.add_hint('__delitem__', i)
-        self.notify_views()
+        self.send(__delitem__=i)
 
     def __setslice__(self, i, j, other):
         UserList.__setslice__(self, i, j, other)
-        self.add_hint('__setslice__', i, j, other)
-        self.notify_views()
+        self.send(__setslice__=(i,j,other))
         
     def __delslice__(self, i, j):
         UserList.__delslice__(self, i, j)
-        self.add_hint('__delslice__', i, j)
-        self.notify_views()
+        self.send(__delslice__=(i,j))
         
     def __iadd__(self, other):
         UserList.__iadd__(self, other)
-        self.add_hint('__iadd__', other)
-        self.notify_views()
+        self.send(__iadd__=other)
         
     def __imul__(self, n):
         UserList.__imul__(self, n)
-        self.add_hint('__imul__', n)
-        self.notify_views()
+        self.send(__imul__=n)
         
     def append(self, item):
         UserList.append(self, item)
-        self.add_hint('append', item)
-        self.notify_views()
+        self.send(append=item)
     
     def insert(self, i, item):
         UserList.insert(self, i, item)
-        self.add_hint('insert', i, item)
-        self.notify_views()
+        self.send(insert=(i,item))
         
     def pop(self, i=-1):
         result = UserList.pop(self, i)
-        self.add_hint('pop', i)
-        self.notify_views()
+        self.send(pop=i)
         return result
     
     def remove(self, item):
         UserList.remove(self, item)
-        self.add_hint('remove', item)
-        self.notify_views()
+        self.send(remove=item)
         
     def reverse(self):
         UserList.reverse(self)
-        self.add_hint('reverse')
-        self.notify_views()
+        self.send(reverse=1)
         
     def sort(self, *args):
         UserList.sort(self, *args)
-        self.add_hint('sort')
-        self.notify_views()
+        self.send(sort=1)
         
     def extend(self, other):
         UserList.extend(self, other)
-        self.add_hint('extend', other)
-        self.notify_views()
+        self.send(extend=other)
+
 
 class TextModel(ListModel):
 
+    data = []
+
     def __init__(self, *arg, **kw):
-        # FIXME: Order correct?
-        Attrib.__init__(self, **kw)
-        Observable.__init__(self)
         # HACK: Make string argument into list:
         if len(arg) > 0:
             arg = (list(arg[0]),) + arg[1:]
-        UserList.__init__(self, *arg, **kw)
+        ListModel.__init__(self, *arg, **kw)
 
     def _get_value(self):
         return str(self)
@@ -122,3 +128,4 @@ class TextModel(ListModel):
     def __repr__(self): return repr(''.join(self.data))
 
     def __str__(self): return ''.join(self.data)
+
