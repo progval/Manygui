@@ -17,11 +17,8 @@ __all__ = '''
 
 ################################################################
 
-#@@@ FIXME: Implement getGeometry and friends...
-
-#@@@ FIXME: Use isDummy instead of repeated try/except :)
 from anygui.Applications import AbstractApplication
-from anygui.Wrappers import AbstractWrapper, DummyWidget, isDummy
+from anygui.Wrappers import AbstractWrapper
 from anygui.Events import *
 from anygui import application
 from javax import swing
@@ -52,6 +49,8 @@ class Wrapper(AbstractWrapper):
         AbstractWrapper.__init__(self, *args, **kwds)
         # @@@ Cookie-cutter from tkgui
         self.setConstraints('container','x','y','width','height','text','selection')
+        self._container = None
+
 
     # @@@ Cookie-cutter from tkgui
     def enterMainLoop(self):
@@ -72,7 +71,7 @@ class Wrapper(AbstractWrapper):
         #entered. That should be fixed, and this method should then
         #probably be removed. [mlh@20020831]
 
-        if self.noWidget():
+        if not self.widget:
             self.widget = self.widgetFactory(*args, **kwds)
             self.widgetSetUp()
 
@@ -83,93 +82,84 @@ class Wrapper(AbstractWrapper):
 class ComponentWrapper(Wrapper):
 
     def setX(self, x):
+        if not self.widget: return
         self.widget.x = x
 
     def setY(self, y):
+        if not self.widget: return
         self.widget.y = y
 
     def setWidth(self, width):
+        if not self.widget: return
         self.widget.width = width
 
     def setHeight(self, height):
+        if not self.widget: return
         self.widget.height = height
 
     def setPosition(self, x, y):
+        if not self.widget: return
         self.widget.position = x, y
 
     def setSize(self, width, height):
+        if not self.widget: return
         self.widget.size = width, height
 
     def setGeometry(self, x, y, width, height):
+        if not self.widget: return
         self.widget.bounds = x, y, width, height
         if self.widget.layout:
             self.widget.validate()
 
     def setVisible(self, visible):
+        if not self.widget: return
         self.widget.visible = visible
 
-    def setContainer(self, container):
-        # Factor out the conditional destruction?
+    def setEnabled(self, enabled):
+        if not self.widget: return
+        self.widget.enabled = enabled
+
+    def setContainer(self, container): # WindowWrapper gets specialized version
         if container is None:
             self.destroy()
             return
-        try:
-            parent = container.wrapper.widget
-        except AttributeError:
-            # FIXME: Handle Application containers differently...
-            self.create()
-            self.proxy.push(blocked=['container'])
-            return
-        try:
-            assert parent.isDummy()
-        except (AttributeError, AssertionError):
+        parent = container.wrapper.widget 
+        if parent:
             self.destroy()
             self.create()
-            try:
+            if isinstance(parent,swing.JFrame): # @@@
                 parent = parent.contentPane
-            except AttributeError: pass
             parent.add(self.widget)
             self._container = parent # Can this be fetched from the widget (later)?
             self.proxy.push(blocked=['container'])
 
-    def setEnabled(self, enabled):
-        self.widget.enabled = enabled
+    def internalDestroy(self): # WindowWrapper gets specialized version
+        if not self.widget: return
+        container = self._container
+        if container:
+            bounds = self.widget.bounds
+            container.remove(self.widget)
+            container.repaint(bounds)
+        self._container = None
 
-    def internalDestroy(self): # Move to Wrapper?
-        try:
-            assert self.widget.isDummy()
-        except (AttributeError, AssertionError):
-            try:
-                container = self._container
-            except AttributeError: pass
-            else:
-                if container:
-                    bounds = self.widget.bounds
-                    container.remove(self.widget)
-                    container.repaint(bounds)
-            try: self.widget.dispose()
-            except AttributeError: pass
-            self._container = None
+################################################################
 
+
+class TextPropMixin:
+    
     def setText(self, text):
-        try:
-            self.widget.setText(text)
-        except AttributeError: pass # FIXME! When does this happen?
-        #self.widget.text = text # FIXME!
-
+        if not self.widget: return
+        self.widget.setText(text)
+ 
     def getText(self):
-        try:
-            assert self.widget.isDummy()
-        except (AttributeError, AssertionError):
-            return self.widget.text
-        else:
-            return "" # @@@ What would be the best behaviour here? Should there be an exception?
+        return self.widget.text
 
 ################################################################
 
 class ToggleButtonMixin:
                 
     def setOn(self, on):
+        if not self.widget: return
         self.widget.selected = on
 
     def getOn(self):
@@ -181,12 +171,12 @@ class ToggleButtonMixin:
     def clickHandler(self, event): # Should perhaps be in a ButtonMixin superclass?
         send(self.proxy, 'click')
 
-class CheckBoxWrapper(ToggleButtonMixin, ComponentWrapper):
+class CheckBoxWrapper(ToggleButtonMixin, TextPropMixin, ComponentWrapper):
 
     def widgetFactory(self, *args, **kwds):
         return swing.JCheckBox()
 
-class RadioButtonWrapper(ToggleButtonMixin, ComponentWrapper):
+class RadioButtonWrapper(ToggleButtonMixin, TextPropMixin, ComponentWrapper):
 
     def widgetFactory(self, *args, **kwds):
         return swing.JRadioButton()
@@ -204,7 +194,7 @@ class RadioButtonWrapper(ToggleButtonMixin, ComponentWrapper):
 
 ################################################################
 
-class ButtonWrapper(ComponentWrapper):
+class ButtonWrapper(TextPropMixin, ComponentWrapper):
 
     def clickHandler(self, event):
         send(self.proxy, 'click')
@@ -219,7 +209,7 @@ class ButtonWrapper(ComponentWrapper):
 
 ################################################################
 
-class LabelWrapper(ComponentWrapper):
+class LabelWrapper(TextPropMixin, ComponentWrapper):
 
     def widgetFactory(self, *args, **kwds):
         widget = swing.JLabel()
@@ -245,13 +235,16 @@ class TextFieldWrapper(ComponentWrapper):
                self.widget.selectionEnd
 
     def setSelection(self, selection):
+        if not self.widget: return
         self.widget.selectionStart = selection[0]
         self.widget.selectionStart = selection[1]
 
     def setEditable(self, editable):
+        if not self.widget: return
         self.widget.editable = editable
 
     def setText(self, text):
+        if not self.widget: return
         self.widget.text = text
 
     def getText(self):
@@ -300,13 +293,16 @@ class TextAreaWrapper(ComponentWrapper):
                self.widget.getSelectionEnd()
 
     def setSelection(self, selection):
+        if not self.widget: return
         self.widget.setSelectionStart(selection[0])
         self.widget.setSelectionStart(selection[1])
 
     def setEditable(self, editable):
+        if not self.widget: return
         self.widget.setEditable(editable)
 
     def setText(self, text):
+        if not self.widget: return
         self.widget.setText(text)
 
     def getText(self):
@@ -351,14 +347,14 @@ class ListBoxWrapper(ComponentWrapper):
         return widget
 
     def setSelection(self, selection):
+        if not self.widget: return
         self.widget.setSelectedIndex(selection)
         
     def getSelection(self):
-        # FIXME: This should be handled differently
-        if isDummy(self.widget): return 0
         return self.widget.getSelectedIndex()
 
     def setItems(self, items):
+        if not self.widget: return
         temp = java.util.Vector()
         for item in items:
             temp.addElement(str(item))
@@ -391,11 +387,11 @@ class WindowWrapper(ComponentWrapper):
         return widget
 
     def setGeometry(self, x, y, width, height):
-        if not isDummy(self.widget):
-            insets = self.widget.insets
-            width += insets.left + insets.right
-            height += insets.top + insets.bottom
-            ComponentWrapper.setGeometry(self, x, y, width, height)
+        if not self.widget: return
+        insets = self.widget.insets
+        width += insets.left + insets.right
+        height += insets.top + insets.bottom
+        ComponentWrapper.setGeometry(self, x, y, width, height)
 
     def getGeometry(self):
         bounds = self.widget.bounds
@@ -405,11 +401,25 @@ class WindowWrapper(ComponentWrapper):
         height -= insets.top + insets.bottom
         return x, y, width, height
 
+    def setContainer(self, container):
+        if container is None:
+            self.destroy()
+            return
+        self.create()
+        self.proxy.push(blocked=['container'])
+        return
+
+    def internalDestroy(self):
+        if not self.widget: return
+        ComponentWrapper.internalDestroy(self)
+        self.widget.dispose()
+
     def widgetSetUp(self):
         self.widget.windowClosing = self.closeHandler
         self.widget.componentResized = self.resizeHandler
 
     def setTitle(self, title):
+        if not self.widget: return
         self.widget.title = title
 
     def getTitle(self):
