@@ -1,8 +1,13 @@
 from Events import link, send
 from Utils import getGetter,getSetter,getterName
 
-# FIXME: Add mechanism for internal attributes (not in state[]). Uses
-# _foo naming convention for now...
+# DONE: Add mechanism for internal attributes (not in state[]). Uses
+# _foo naming convention for now...::
+# @@@ use rawDictSet('attr',val) (put attr in __dict__) in subclass __init__
+# then attrib.attr will get the right value
+# and __setattr__ logic has been changed so that attrib.attr = val
+# will do the right thing (check whether attr in __dict__)
+
 
 # New functionality: if methods set<Attrib> or get<Attrib> are
 # present, use them to get or set "attrib". - jak
@@ -23,8 +28,11 @@ class Attrib:
 
     def pull(self,*names): pass
 
+    def rawDictSet(self,name,value):
+        self.__dict__[name] = value
+
     def __setattr__(self, name, value):
-        if name == 'state' or name[0] == '_':
+        if name == 'state' or name[0] == '_'or self.__dict__.has_key(name):
             self.__dict__[name] = value
         else:
             method = getSetter(self,name)
@@ -48,11 +56,13 @@ class Attrib:
             if name not in self._getstack:
                 self._getstack.append(name)
                 try:
+                    #print "attrib-pull",name # @@@ debug
                     self.pull(*(name,))
                 finally:
                     del self._getstack[-1]
         except (AttributeError,KeyError):
             pass
+        #print "attrib-from-state",name # @@@ debug
         return self.state[name]
 
     def set(self, *args, **kwds):

@@ -4,14 +4,13 @@ class Proxy(Attrib):
 
     # TBD: Add docstring for class
 
-    _wrapper_set = 0 # FIXME: if set get refactored out from Attrib.__init__
-                     # it would be no longer necessary
+    wrapper = None # so self.wrapper is always OK
 
     def __init__(self, *args, **kwds):
         Attrib.__init__(self, *args, **kwds)
         self.rawSet(container=None)
-        self.rawSet(wrapper=self.wrapperFactory()) # wrapper in state ?
-        self._wrapper_set = 1 # FIXME
+        # this way we have a plain wrapper attribute
+        self.rawDictSet('wrapper',self.wrapperFactory())
         self.push() # Hm... Move to wrapper.internalProd?
 
     def wrapperFactory(self):
@@ -53,7 +52,7 @@ class Proxy(Attrib):
         Upon return, the Proxy updates its own state dictionary
         with the result.
         """
-        if not self._wrapper_set: return
+        if not self.wrapper: return
         # Never pull if our widget is non-existent - we need
         # to keep all proxy state until a real widget
         # exists.
@@ -83,10 +82,10 @@ class Proxy(Attrib):
             the backend either.
           
         """
+        if not self.wrapper: return
         # We may need to modify names, so...
         names = list(names)
         ## @@@ unused self.internalPush(names) # @@@ May no longer be needed
-        if not self._wrapper_set: return
         self.wrapper.push(self._partialState(*names,**kwds))
 
 ## @@@ unused
@@ -111,7 +110,7 @@ class Proxy(Attrib):
         """
         # FIXME: try/except not really acceptable... (Create backlog?
         # Rearrange __init__ stuff to avoid loop?
-        if not self._wrapper_set: return
+        if not self.wrapper: return
         self.wrapper.enableEvent(event)
 
     def destroy(self):
@@ -121,5 +120,6 @@ class Proxy(Attrib):
         This is used by the application programmer in the occasions
         where a native widget must be explicitly destroyed.
         """
-        assert self._wrapper_set,"?! absent wrapper in proxy" # @@@ can wrapper be absent/non set?
+        assert self.wrapper,"?! absent wrapper in proxy"
         self.wrapper.destroy()
+        # @@@ do we need del self.wrapper here ?
