@@ -143,11 +143,7 @@ def _backend_passthrough():
             _backend_name = name
             _backend      = mod
             return
-    # mlh20020321: Temporarily shut off for work on front-end
-    #raise RuntimeError, "no usable backend found"
-    # mlh20020321: Temporary alternative to exception:
-    import warnings
-    warnings.warn('no usable backend found')
+    raise RuntimeError, "no usable backend found"
 
 # Pass the backend namespace through:
 _backend_passthrough()

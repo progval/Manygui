@@ -168,13 +168,9 @@ class AbstractWrapper:
         has been entered, since many backend Wrappers will then be
         able to instantiate their native widgets.
         """
-
-        # mlh20020321: Temporarily commented out while working without
-        # any viable backends:
-        import warnings; warnings.warn('Unfixed code in AbstractWrapper.prod()')
-        #if application().isRunning() and not self.inMainLoop:
-        #    self.inMainLoop = 1
-        #    self.enterMainLoop()
+        if application().isRunning() and not self.inMainLoop:
+            self.inMainLoop = 1
+            self.enterMainLoop()
         self.internalProd()
 
     def enterMainLoop(self):

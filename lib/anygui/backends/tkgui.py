@@ -12,6 +12,7 @@ __all__ = '''
 
 import Tkinter
 from anygui.Applications import AbstractApplication
+from anygui.Wrappers import AbstractWrapper
 from anygui.Events import *
 from anygui import application
 
@@ -53,41 +54,33 @@ class DummyWidget:
 
     def __str__(self): return '<DummyWidget>'
 
-class Wrapper:
+class Wrapper(AbstractWrapper):
 
     widget = DummyWidget()
     
-    def __init__(self, proxy):
-        if not self in wrappers: wrappers.append(self)
-        #self.makeSetterMap()
-        self.proxy = proxy
-        if application().isRunning(): #@ Backwards; prod should check whether the app is running
-            self.prod()
+    # in previous __init__: if not self in wrappers: wrappers.append(self)
+    # Put this functionality somewhere...
 
-    def prod(self):
+    def enterMainLoop(self): # ...
         try: assert self.widget.isDummy()
-        except: pass
+        except (AttributeError, AssertionError): pass
         else:
             self.widget.destroy()
             self._prod()
         self.proxy.sync()
 
+    def internalProd(self): pass # ...
+        
     def destroy(self):
-        if self in wrappers: wrappers.remove(self)
+        if self in wrappers: wrappers.remove(self) # ...
         self.widget.destroy() #@ ?
-
-    def update(self, state):
-        # Should be more "intelligent":
-        for key, val in state.iteritems():
-            setter = getattr(self, 'set'+key[1:].capitalize(), None)
-            if setter: setter(val)
 
 class ComponentWrapper(Wrapper):
     pass
 
 class ButtonWrapper(ComponentWrapper):
 
-    def _prod(self):
+    def internalProd(self):
         self.widget = None # Create button
 
     def setText(self, text):
@@ -97,13 +90,13 @@ class ButtonWrapper(ComponentWrapper):
 
 class WindowWrapper(ComponentWrapper):
 
-    def _prod(self):
+    def internalProd(self): # ...
         pass
     
     def setTitle(self, title):
         pass
 
-    def setContainer(self, container):
+    def setContainer(self, container): # ...
         pass # Perhaps allow adding to application object...
 
 
