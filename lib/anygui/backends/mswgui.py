@@ -1,9 +1,12 @@
-
 from anygui.backends import *
 __all__ = anygui.__all__
 
 ################################################################
 import win32gui, win32con
+
+# BUGS:
+#  XXX to be supplied
+#
 
 class ComponentMixin:
     # mixin class, implementing the backend methods
@@ -13,6 +16,9 @@ class ComponentMixin:
     _y = -1
 
     _hwnd = None
+    _win_style_ex = 0
+
+    _hfont = win32gui.GetStockObject(win32con.ANSI_VAR_FONT)
     
     def _is_created(self):
         return self._hwnd is not None
@@ -24,18 +30,24 @@ class ComponentMixin:
                 parent = self._container._hwnd
             else:
                 parent = 0
-            self._hwnd = win32gui.CreateWindow(self._wndclass,
-                                               self._get_wx_text(),
-                                               self._win_style,
-                                               self._x,
-                                               self._y,
-                                               self._width,
-                                               self._height,
-                                               parent,
-                                               0, # hMenu
-                                               0, # hInstance
-                                               None)
+            self._hwnd = win32gui.CreateWindowEx(self._win_style_ex,
+                self._wndclass,
+                self._get_wx_text(),
+                self._win_style,
+                self._x,
+                self._y,
+                self._width,
+                self._height,
+                parent,
+                0, # hMenu
+                0, # hInstance
+                None)
             app._hwnd_map[self._hwnd] = self
+            win32gui.SendMessage(self._hwnd,
+                                 win32con.WM_SETFONT,
+                                 self._hfont,
+                                 0)
+                                 
             return 1
         return 0
 
@@ -90,6 +102,7 @@ class Label(ComponentMixin, AbstractLabel):
 class ListBox(ComponentMixin, AbstractListBox):
     _wndclass = "LISTBOX"
     _win_style = win32con.WS_CHILD | win32con.LBS_STANDARD | win32con.LBS_NOTIFY
+    _win_style_ex = win32con.WS_EX_CLIENTEDGE
 
     def _get_wx_text(self):
         return ""
@@ -191,29 +204,46 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
 ### fixed (e.g. with a common superclass), fixes in one of these
 ### text classes should probably also be done in the other.
 
-##class TextField(ComponentMixin, AbstractTextField):
-##    _wx_class = wxTextCtrl
+class TextField(ComponentMixin, AbstractTextField):
+    _wndclass = "EDIT"
+    _text = "mswTextField"
+    _win_style = win32con.ES_NOHIDESEL | win32con.ES_AUTOHSCROLL | \
+                 win32con.WS_CHILD | win32con.WS_BORDER
+    _win_style_ex = win32con.WS_EX_CLIENTEDGE
 
-##    def _backend_text(self):
-##        if self._hwnd:
-##            return self._hwnd.GetValue()
+    def _backend_text(self):
+        if self._hwnd:
+            return win32gui.GetWindowText(self._hwnd)
 
-##    def _backend_selection(self):
-##        if self._hwnd:
-##            return self._hwnd.GetSelection()
+    def _backend_selection(self):
+        if self._hwnd:
+            result = win32gui.SendMessage(self._hwnd,
+                                          win32con.EM_GETSEL,
+                                          0, 0)
+            start, end = result & 0xFFFF, result >> 16
+            return start, end
             
-##    def _ensure_text(self):
-##        if self._hwnd:
-##            self._hwnd.SetValue(self._text)
+    def _ensure_text(self):
+        if self._hwnd:
+            win32gui.SetWindowText(self._hwnd, self._text)
 
-##    def _ensure_selection(self):
-##        if self._hwnd:
-##            start, end = self.selection
-##            self._hwnd.SetSelection(start, end)
+    def _ensure_selection(self):
+        if self._hwnd:
+            start, end = self.selection
+            win32gui.SendMessage(self._hwnd,
+                                 win32con.EM_SETSEL,
+                                 start, end)
 
-##    def _ensure_editable(self):
-##        if self._hwnd:
-##            self._hwnd.SetEditable(self._editable)
+    def _ensure_editable(self):
+        if self._hwnd:
+            if self._editable:
+                win32gui.SendMessage(self._hwnd,
+                                     win32con.EM_SETREADONLY,
+                                     0, 0)
+            else:
+                win32gui.SendMessage(self._hwnd,
+                                     win32con.EM_SETREADONLY,
+                                     1, 0)
 
 ##    def _ensure_events(self):
 ##        if self._hwnd:
@@ -222,47 +252,35 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
 ##    def _wx_enterkey(self, event):
 ##        self.do_action()
 
-##    def _get_wx_text(self):
-##        # return the text required for creation
-##        return self._text
+    def _get_wx_text(self):
+        # return the text required for creation
+        return self._text
 
+    def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
+        # lParam: handle of control (or NULL, if not from a control)
+        # HIWORD(wParam): notification code
+        # LOWORD(wParam): id of menu item, control, or accelerator
+        pass
 
-### FIXME: 'Copy-Paste' inheritance... TA and TF could have a common wx
-### superclass. The only differences are the _win_style and event handling.
-##class TextArea(ComponentMixin, AbstractTextArea):
-##    _wx_class = wxTextCtrl
-##    _win_style = wxTE_MULTILINE | wxHSCROLL
+class TextArea(TextField, AbstractTextArea):
+    _win_style = TextField._win_style | win32con.ES_MULTILINE | win32con.ES_WANTRETURN
 
-##    def _backend_text(self):
-##        if self._hwnd:
-##            return self._hwnd.GetValue()
+    def _ensure_text(self):
+        if self._hwnd:
+            text = self._text.replace('\n', '\r\n')
+            win32gui.SetWindowText(self._hwnd, text)
 
-##    def _backend_selection(self):
-##        if self._hwnd:
-##            return self._hwnd.GetSelection()
-            
-##    def _ensure_text(self):
-##        if self._hwnd:
-##            self._hwnd.SetValue(self._text)
-
-##    def _ensure_selection(self):
-##        if self._hwnd:
-##            start, end = self.selection
-##            self._hwnd.SetSelection(start, end)
-
-##    def _ensure_editable(self):
-##        if self._hwnd:
-##            self._hwnd.SetEditable(self._editable)
-
-##    def _get_wx_text(self):
-##        # return the text required for creation
-##        return self._text
+    def _backend_text(self):
+        if self._hwnd:
+            text = win32gui.GetWindowText(self._hwnd)
+            return text.replace('\r\n', '\n')
 
 ##################################################################
 
 class Window(ComponentMixin, AbstractWindow):
 
-    _win_style = win32con.WS_OVERLAPPEDWINDOW | win32con.WS_VISIBLE | win32con.WS_CLIPCHILDREN
+    _win_style = win32con.WS_OVERLAPPEDWINDOW | win32con.WS_CLIPCHILDREN
+    _win_style_ex = 0
 
     def __init__(self, *args, **kw):
         self._hwnd_map = {} # maps child window handles to instances
@@ -312,7 +330,11 @@ class Window(ComponentMixin, AbstractWindow):
         # lParam: handle of control (or NULL, if not from a control)
         # HIWORD(wParam): notification code
         # LOWORD(wParam): id of menu item, control, or accelerator
-        child_window = self._hwnd_map[lParam]
+        try:
+            child_window = self._hwnd_map[lParam]
+        except KeyError:
+            print "CHILDWINDOW not found", hex(wParam)
+            return
         child_window._WM_COMMAND(hwnd, msg, wParam, lParam)
 
     def _WM_SIZE(self, hwnd, msg, wParam, lParam):
@@ -324,9 +346,6 @@ class Window(ComponentMixin, AbstractWindow):
         self.resized(dw, dh)
 
 ################################################################
-
-class TextArea: pass
-class TextField: pass
 
 class Application(AbstractApplication):
     _hwnd_map = {} # maps top level window handles to window instances
