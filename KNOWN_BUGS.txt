@@ -1,3 +1,5 @@
+The placer doesn't work properly with right=0 or bottom=0
+
 The from anygui.backends.foogui import * solution doesn't really work
 as described in the docs...
 
