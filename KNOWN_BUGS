@@ -10,6 +10,10 @@ in Jython. This should preferrably be fixed in Jython,
 but failing that, by implementing some other id()
 wraparound in Anygui.
 
+Compiling Anygui apps to jar files seems problematic in
+Jython, giving the error "anygui clashes with package
+of same name".
+
 The defaults for TextArea are overridden by the TextField
 defaults in mswgui.
 
