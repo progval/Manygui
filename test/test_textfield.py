@@ -2,27 +2,27 @@ from anygui import *
 
 def init_field(**kw):
     global tf, lbl
-    tf.model.value = 'This is a TextField test.'
+    tf.text = 'This is a TextField test.'
     tf.selection = (10,19)
     update_label()
 
 def update_label(**kw):
     global tf, lbl
     sel = tf.selection
-    text = tf.model.value
+    text = tf.text
     lbl.text = text[:sel[0]] + \
                '[' + text[sel[0]:sel[1]] + ']' + \
                 text[sel[1]:]
 
 def print_contents(**kw):
     global tf
-    print 'Enter was pressed. Field contents:', tf.model.value
+    print 'Enter was pressed. Field contents:', tf.text
 
 tf = TextField(width=150, height=25)
 link(tf, print_contents)
-tf.model.value = ''
+tf.text = ''
 tf2 = TextField(width=150, height=25, editable=0)
-tf2.model.value = 'Edit me... :P'
+tf2.text = 'Edit me... :P'
 lbl = Label(width = 150, height=25, text = '')
 
 update_btn = Button(width=50, height=30, text='Update')
