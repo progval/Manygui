@@ -395,13 +395,12 @@ class ToggleButtonMixin:
     def __init__(self):
         self._var = Tkinter.IntVar()
         self._var.set(0)
-        self._var = Tkinter.IntVar()
-        self._var.set(0)
 
     def initArgs(self):
         return {'command': self.clickHandler,
-                'variable': self._var}
-
+                'variable': self._var,
+                'anchor':'w'}
+                
     def setOn(self, on):
         if on:
             self.widget.select()
@@ -416,7 +415,6 @@ class ToggleButtonMixin:
 
     def clickHandler(self, *args, **kws): # Should perhaps be in a ButtonMixin superclass?
         send(self.proxy, 'click')
-
 
 class RadioButtonWrapper(ToggleButtonMixin, ComponentWrapper):
 
@@ -458,10 +456,19 @@ class CheckBoxWrapper(ToggleButtonMixin, ComponentWrapper):
         ComponentWrapper.__init__(self, *args, **kws)
         ToggleButtonMixin.__init__(self)
 
+    def initArgs(self):
+        return {'command': self.clickHandler,
+                'variable': self._var,
+                'onvalue':1,
+                'offvalue':0,
+                'anchor':'w'}
+
     def widgetFactory(self, *args, **kws):
         kws.update(self.initArgs())
         return Tkinter.Checkbutton(*args, **kws)
 
+    def getOn(self):
+        return self._var.get() == int(self.widget.cget('onvalue'))
 
 class FrameWrapper(ComponentWrapper):
 
