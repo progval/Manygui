@@ -1,0 +1,77 @@
+  <section>
+    <title>Introduction</title>
+
+    <para><strong>Note:</strong> This version of the manual deals with
+    the upcoming &shortversion; release, and is not usable with the
+    current release. Please consult the documentation in the
+    distribution itself.</para>
+
+    <para>The <name>Python</name> standard library currently does not
+    contain any platform-independent GUI packages. It is the goal of
+    the <name>Anygui</name> project to change this situation. There
+    are many such packages available, but none has been defined as
+    <emphasis>standard</emphasis>, so when writing GUI programs for
+    <name>Python</name>, you cannot assume that your user has the
+    right package installed.</para>
+
+    <para>The problem is that declaring a GUI package as standard
+    would be quite controversial. There are some packages that are
+    quite commonly available, such as <name>Tkinter</name>; but it
+    would not be practical to require all installations to include it,
+    nor would it be desirable to require all <name>Python</name> GUI
+    programs to use it, since there are many programmers who prefer
+    other packages.</para>
+
+    <para><name>Anygui</name> tries to solve this problem in a manner
+    similar to the standard <code>anydbm</code> package. There is no
+    need to choose <emphasis>one</emphasis> package at the expense of
+    all others. Instead, <name>Anygui</name> gives generic access to
+    several popular packages through a simple API, which makes it
+    possible to write GUI applications that work with all these
+    packages. Thus, one gets a platform-independent GUI module which
+    is written entirely in <name>Python</name>.</para>
+
+    <para>To get the latest <name>Anygui</name> distribution, or to
+    get in touch with the developers, please visit the
+    <name>Anygui</name> website:
+    <url>http://www.anygui.org</url>.</para>
+
+    <section>
+      <title>Design Goals</title>
+
+      <para><strong>A</strong>. <name>Anygui</name> should be an easy
+      to use GUI package which may be used to create simple graphical
+      programs, or which may serve as the basis for more complex
+      application frameworks.</para>
+
+      <para><strong>B</strong>. <name>Anygui</name> should be a pure
+      <name>Python</name> package which serves as a front-end for as
+      many as possible of the GUI packages available for
+      <name>Python</name>, in a transparent manner.</para>
+
+      <para><strong>C</strong>. <name>Anygui</name> should include
+      functionality needed to perform most GUI tasks, but should
+      remain as simple and basic as possible.</para>
+
+    </section>
+
+    <section>
+      <title>Warning</title>
+
+      <para>The <name>Anygui</name> API is currently very much in flux
+      as the <name>Anygui</name> team keeps experimenting with
+      it. Because of that, incompatibilities may occur between
+      releases. The current release (&longversion;) should be regarded
+      as a prototype.</para>
+
+    </section>
+
+    <section>
+      <title>Tutorial</title>
+
+      <para>There is also a short tutorial available, which is
+      included in the installation (<code>doc/tutorial.txt</code>) and
+      is available from the website
+      (<url>http://www.anygui.org</url>).</para>
+    </section>
+  </section>

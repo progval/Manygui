@@ -1,0 +1,844 @@
+  <section>
+    <title>API Reference</title>
+
+    <!-- sender() wrapper -->
+
+    <para>The following reference describes the full official API of
+    the current version (&longversion;) of <name>Anygui</name>.</para>
+    
+    <section>
+      <title>Environment Variables</title>
+      
+      <para>Some environment variables affect the behaviour of the
+      <name>Anygui</name> package. These must be set in the
+      environment of the program using <name>Anygui</name>. They may
+      either be set permanently through normal operating system
+      channels (check your OS documentation for this), or possibly
+      just set temporarily when running your program. In
+      <name>Unix</name> shells like <name>bash</name>, you can set the
+      variables on the command line before your comand, like this:</para>
+
+      <codelisting>
+	<line>foo:~$ ANYGUI_SOMEVAR='some value' python someprogram.py</line>
+      </codelisting>
+
+      <para>where <code>ANYGUI_SOMEVAR</code> is some environment
+      variable used by <name>Anygui</name>.</para>
+
+      <para>Since <name>Jython</name> doesn't support OS environment
+      variables, you'll have to supply them with the command-line
+      switch <code>-D</code>: </para>
+
+      <codelisting>
+	<line>foo:~$ jython -DANYGUI_SOMEVAR='some value' someprogram.py</line>
+      </codelisting>
+
+      <para>You can also set these environment variables in your own
+      program, by using code like the following before you import
+      <name>Anygui</name>:</para>
+
+      <codelisting>
+	<line>import os</line>
+	<line>os.environ['ANYGUI_SOMEVAR'] = 'some value'</line>
+      </codelisting>
+
+      <para>This will probably not work well in <name>Jython</name>, though.</para>
+      
+      <para>The environment variables used by <name>Anygui</name>
+      are:</para>
+
+      <para><code>ANYGUI_WISHLIST</code>: A whitespace separated list
+      of backend names in the order you wish for <name>Anygui</name>
+      to try to use them. The backends are identified with a short
+      prefix such as <code>wx</code> for <code>wxgui</code>, or
+      <code>tk</code> for <code>tkgui</code>. For a full list of
+      available backends, see the section "Making Sure You Have a GUI
+      Backend" above. Only the backends in this list will be tried; if
+      you don't set <code>ANYGUI_WISHLIST</code>, then the following
+      is the default:</para>
+
+      <!-- Keep this up to date! -->
+
+      <codelisting>
+	<line>'msw gtk java wx tk beos qt curses text'</line>
+      </codelisting>
+
+      <para>If you insert an asterisk in the wishlist, it will be
+      interpreted as "the rest of the backends, in default order". So,
+      for instance,</para>
+
+      <codelisting>
+	<line>ANYGUI_WISHLIST='tk wx * text curses'</line>
+      </codelisting>
+
+      <para>is equivalent to</para>
+
+      <codelisting>
+	<line>ANYGUI_WISHLIST='tk wx msq gtk java beos qt text curses'</line>
+      </codelisting>
+
+      <para>Example:</para>
+
+      <codelisting>
+	<line>foo:~$ ANYGUI_WISHLIST='tk wx qt' python someprogram.py</line>
+      </codelisting>
+      
+      <para><code>ANYGUI_DEBUG</code>: When <name>Anygui</name> tries
+      to import a backend, it hides all exceptions, assuming they are
+      caused by the fact that a given backend doesn't work in your
+      installation (because you don't have it installed or something
+      similar). However, at times this may not be the reason; it may
+      simple be that a given backend contains a bug. To track down the
+      bug, set the <code>ANYGUI_WISHLIST</code> to some true (in a
+      <name>Python</name> sense) value. (If the value supplied can be
+      converted to an integer, it will. Otherwise, it will be treated
+      as a string.) This will make <name>Anygui</name> print out the
+      stack traces from each backend it tries to import.</para>
+
+      <para>There is one exception to this rule: If the true value
+      supplied is the name of one of the backends (such as
+      <code>tk</code> or <code>curses</code>) only the traceback
+      caused by importing that backend will be shown. This can be
+      useful to make the output somewhat less verbose.</para>
+
+      <para>Example:</para>
+
+      <codelisting>
+	<line>foo:~$ ANYGUI_DEBUG=1 python someprogram.py</line>
+      </codelisting>
+
+      <para><code>ANYGUI_ALTERNATE_BORDER</code>: This Boolean
+      variable affects <code>cursesgui</code>, making it use the same
+      border-drawing characters as <code>textgui</code>
+      (<code>'+'</code>, <code>'-'</code>, and <code>'|'</code>). This
+      may be useful if your terminal can't show the special
+      <code>curses</code> box-drawing characters properly.</para>
+
+      <para><code>ANYGUI_SCREENSIZE</code>: Affects
+      <code>textgui</code>. Gives the terminal ("screen") dimensions,
+      in characters. This should be in the format
+      <var>width</var><code>x</code><var>height</var>,
+      e.g. <code>80x24</code>. If this environment variable is not
+      supplied, the standard <name>Unix</name> variables
+      <code>COLUMNS</code> and <code>LINES</code> will be used. If
+      neither is provided, the default size <code>80x23</code> will be
+      used.</para>
+
+      <para><code>ANYGUI_FORCE_CURSES</code>: Normally,
+      <code>cursesgui</code> will not be selected if you are in the
+      interactive interpreter. If you want to force the normal
+      selection order (trying to use <code>cursesgui</code> before
+      resorting to <code>textgui</code>) you can set this variable to
+      a true value. Note that this is not the same as setting
+      <code>ANYGUI_WISHLIST</code> to <code>'curses'</code>, since
+      that will ignore all other backends.</para>
+
+      <para><code>ANYGUI_CURSES_NOHELP</code>: If you don't want the
+      help-screen that appears when an <name>Anygui</name> application
+      is started using <code>cursesgui</code> (or
+      <code>textgui</code>), you can set this variable to a true
+      value.</para>
+
+      <!--
+      ANYGUI_SKIP # Test script...
+      -->
+	
+    </section>
+
+    <section>
+      <title>Global Functions</title>
+
+      <para><apiname>application</apiname>()</para>
+
+      <para>Returns the current <code>Application</code>
+      object.</para>
+
+      <para><apiname>backend</apiname>()</para>
+
+      <para>Returns the name (as used in <code>ANYGUI_WISHLIST</code>)
+      of the backend currently in use.</para>
+
+      <para>Example:</para>
+
+      <codelisting>
+	<line>if backend() == 'wx':</line>
+	<line>    some_wx_code()</line>
+	<line>else:</line>
+	<line>    some_generic_code()</line>
+      </codelisting>
+
+      <para><apiname>link</apiname>(<var>source</var>,
+      [<var>event</var>,] <var>handler</var>, <var>weak</var>=0,
+      <var>loop</var>=0)</para> <!-- change to []? -->
+
+      <para>Creates a link in the <name>Anygui</name> event system,
+      between the <code>source</code> (any object) and the
+      <code>handler</code> (any callable, or a <code>(obj,func)</code>
+      pair, where <code>func</code> is an unbound method or function,
+      and <code>obj</code> is an object which will be supplied as the
+      first parameter to <code>func</code>). Supplying an
+      <code>event</code> (a string) will make the link carry only
+      information about events of that type. If no event is supplied,
+      <code>'default'</code> will be assumed. Setting
+      <code>weak</code> to a true value will use weak references when
+      setting up the link, so that no objects will be "kept alive" by
+      the link.</para>
+
+      <para>A send-loop occurs if an object sends an event "to itself"
+      (i.e. it is the <code>source</code> argument of a call to
+      <code>send</code> which hasn't returned at the point where one
+      of its methods are about to be activated as a handler). The
+      truth value <code>loop</code> decides whether this handler will
+      be activated in such a loop. (If <code>send</code> was called
+      with <code>loop=1</code>, loops will be allowed anyway.)
+      </para>
+
+      <para>Note that <code>source</code>, <code>event</code>, and
+      <code>handler</code> are strictly positional parameters, while
+      the others (<code>weak</code>, and <code>loop</code>) must be
+      supplied as keyword parameters.</para>
+
+      <para>Sometimes one might want an event handler that reacts to a
+      specific event from <emphasis>any</emphasis> source, or
+      <emphasis>any</emphasis> event from a specific source; or even
+      <emphasis>any</emphasis> event from <emphasis>any</emphasis>
+      source. To do that, simply use the special value
+      <code>any</code> as either source, event, or both.</para>
+
+      <para>Example:</para>
+
+      <codelisting>
+	<line>from anygui import *</line>
+	<line>>>> def monitor_events(event, **kw):</line>
+	<line>...     print 'An event occurred:', event</line>
+	<line>...</line>
+	<line>>>> link(any, any, monitor_events)</line>
+	<line>>>> btn = Button()</line>
+	<line>>>> send(btn, 'foobar')</line>
+	<line>An event occurred: foobar</line>
+      </codelisting>
+
+      <!-- sender() wrapper... -->
+
+      <para>If you use <code>send(btn, 'click')</code> in this
+      example, you will get <emphasis>two</emphasis> events, since the
+      <code>Button</code> will detect the <code>click</code> event
+      (which is its default), and issue a <code>default</code> event
+      as well.</para>
+
+      <para><strong>Note:</strong> You need to explicitly supply the
+      event type if you want to respond to any event type; otherwise
+      you will only respond to the <code>default</code> type.</para>
+
+      <para>Event handlers that react to the same event will be called
+      in the order they were registered (with <code>link</code>),
+      subject to the following: (1) All handlers registered with a
+      specific source will be called before handlers with the value
+      <code>any</code> as source; (2) all handlers registered with a
+      specific event (including <code>default</code>) are called
+      before handlers with the value <code>any</code> as event.</para>
+
+      <para>For more information on sending events, see
+      <code>send</code>, below.</para>
+
+      <para><apiname>send</apiname>(<var>source</var>,
+      <var>event</var>=<code>'default'</code>, <var>loop</var>=0,
+      **<var>kwds</var>)</para> <!-- change to []? -->
+
+      <para>When this is called, any handlers (callables) linked to
+      the source, but which will not cause a send-loop (unless
+      <code>loop</code> is true) will be called with all the keyword
+      arguments provided (except <code>loop</code>), in the order in
+      which they were linked. In addition to the supplied keyword
+      arguments, the event framework will add <code>source</code>,
+      <code>event</code>, and the time (as measured by the standard
+      <name>Python</name> function <code>time.time</code>) when
+      <code>send</code> was called, supplied with the
+      <code>time</code> argument.
+      </para>
+
+      <para>Note that <code>source</code>, and <code>event</code>, are
+      strictly positional parameters, while the others
+      (<code>loop</code>, and any additional arguments the user might
+      add) must be supplied as keyword parameters.</para>
+
+      <para>Example:</para>
+
+      <codelisting>
+	<line># Link an event handler to a button, and then manually send a</line>
+	<line># default event from the button. This event would have been</line>
+	<line># sent automatically if we clicked the button. Note that we</line>
+	<line># only use the arguments we need, and lump the rest in **kw.</line>
+	<line></line>
+	<line>def click(source, time, **kw):</line>
+	<line>    print 'Button %s clicked at %f.' % (source.text, time)</line>
+	<line></line>
+	<line>btn = Button(text='Click me')</line>
+	<line>link(btn, click)</line>
+	<line></line>
+	<line>send(btn) # Fake a button click -- will call click()</line>
+      </codelisting>
+
+      <para>For information about the order in which event handlers
+      are called, see <code>link</code>, above.</para>
+
+      <para><strong>Important:</strong> Due to the current semantics
+      of the <code>any</code> value, using it in <code>send</code> may
+      not be a good idea, since the result might not be what you
+      expect. For instance, calling <code>send(any, any)</code> will
+      only activate event handlers which have been linked to the value
+      <code>any</code> as both source and event, not to "event
+      handlers with any source and any event". This may change in
+      future releases. The current behaviour of <code>send</code> with
+      <code>any</code> is consistent with <code>unlink</code>.</para>
+
+      <para><apiname>unlink</apiname>(<var>source</var>,
+      [<var>event</var>,] <var>handler</var>)</para>
+
+      <para>Undoes a call to <code>link</code> with the same
+      positional arguments. If <var>handler</var> has been registered
+      with either <var>source</var> or <var>event</var> as
+      <code>any</code>, that parameter will be irrelevant when
+      deciding whether or not to remove that link. For instance:
+      </para>
+
+      <codelisting>
+	<line>link(foo, any, bar)</line>
+	<line>unlink(foo, baz, bar)</line>
+      </codelisting>
+
+      <para>Here the link created by <code>link(foo, any, bar)</code>
+      will be removed by the call to <code>unlink</code>.</para>
+
+      <para><strong>Note:</strong> This behaviour (unlinking handlers
+      registered with the <code>any</code> value) may change in future
+      releases.</para>
+
+      <para><strong>Default Events</strong>: When used without the
+      event argument, both <code>link</code> and <code>send</code> use
+      an event type called <code>default</code>. Most event-generating
+      components have a default event type, such as <code>click</code>
+      for <code>Button</code>s. The fact that this event type is
+      default for <code>Button</code> means that when a
+      <code>Button</code> generates a <code>click</code> event it will
+      <emphasis>also</emphasis> generate a <code>default</code>
+      event. So, if you listen to both <code>click</code> events and
+      <code>default</code> events from a <code>Button</code>, your
+      event handler will always be called twice.</para>
+
+      <para><apiname>unlinkHandler</apiname>(<var>handler</var>)</para>
+
+      <para>Removes a handler completely from the event
+      framework.</para>
+
+      <para><apiname>unlinkMethods</apiname>(<var>obj</var>)</para>
+
+      <para>Unlinks all handlers that are methods of
+      <code>obj</code>.</para>
+
+      <para><apiname>unlinkSource</apiname>(<var>source</var>)</para>
+
+      <para>Remove the source (and all handlers linked to it) from the
+      event framework.</para>
+
+    </section>
+
+    <section>
+      <title>Classes</title>
+       
+      <para><strong>Base Classes and Common Behaviour</strong></para>
+
+      <para>All components are subclasses of corresponding abstract
+      components which implement behaviour common to all the
+      backends. So, for instance, <code>Button</code> subclasses
+      <code>AbstractButton</code>. These abstract components, again,
+      subclass <code>AbstractComponent</code>, which implements
+      behaviour common to all components.</para>
+
+      <para>Perhaps the most important behaviour is attribute handling
+      (inherited from the <code>Attrib</code> mixin), which means that
+      setting a components attributes may trigger some internal method
+      calls. For instance,</para>
+
+      <codelisting>
+	<line>win.size = 300, 200</line>
+      </codelisting>
+
+      <para>will automatically resize the component
+      <code>win</code>. Attributes common to all components are:</para>
+
+      <codelisting>
+	<line>x         -- x-coordinate of upper left corner</line>
+	<line>y         -- y-coordinate of upper left corner</line>
+	<line>position  -- equivalent to (x, y)</line>
+	<line>width     -- component width</line>
+	<line>height    -- component height</line>
+	<line>size      -- equivalent to (width, height)</line>
+	<line>geometry  -- equivalent to (x, y, width, height)</line>
+	<line>visible   -- whether the component is visible</line>
+	<line>enabled   -- whether the component is enabled</line>
+	<line>text      -- text associated with the component</line>
+      </codelisting>
+
+      <para>These can all be set as keyword arguments to the component
+      constructors. Also, <code>Options</code> objects (with similar
+      constructors) can be used as positional arguments in the
+      constructor, with all the <code>Options</code>'s attributes
+      being set in the component as well.</para>
+
+      <para>Common to <code>Application</code>, <code>Window</code>,
+      and <code>Frame</code> is the <code>contents</code> attribute,
+      as well as the <code>add</code> and <code>remove</code>
+      methods. These will be described with the individual classes
+      below.</para>
+
+      <para>All <code>Attrib</code> subclasses (including components,
+      <code>Application</code>, and <code>RadioGroup</code>) share the
+      following methods:</para>
+
+      <para><apiname>set</apiname>(*<var>args</var>, **<var>kwds</var>)</para>
+
+      <para>Used to set attributes. Works like the <code>Attrib</code>
+      constructor, setting attributes, and optionally using
+      <code>Options</code> objects.</para>
+
+      <para><apiname>modify</apiname>(*<var>args</var>, **<var>kwds</var>)</para>
+
+      <para>Works like the <code>set</code> method, except that the
+      attributes are modified <emphasis>in place</emphasis>. That
+      means the following (for an attribute named <code>foo</code>):
+      (1) If there exists an internal method (implemented in
+      <name>Anygui</name>) for modifying the attribute inplace (called
+      <code>_modify_foo</code>), use that; otherwise (2) try to use
+      slice assignment to change the value (will work for lists and
+      <code>ListModels</code> etc.); if that doesn't work, (3) assign
+      to the value's <code>value</code> attribute (used to modify
+      <code>Model</code>s. If neither of these approaches work, simply
+      rebind the attribute (equivalent to using the <code>set</code>
+      method).</para>
+
+      <para>As with <code>set</code> and ordinary attribute
+      assignment, the <code>sync</code> method will automatically be
+      called when you use <code>modify</code>.</para>
+
+      <!-- modified; modify(_foo=bar) etc. -->
+
+      <para><apiname>sync</apiname>()</para>
+      
+      <para>When an attribute of a <code>Component</code> (or
+      <code>Application</code>, <code>RadioGroup</code>, or an
+      instance of another <code>Attrib</code> subclass) is assigned a
+      value, the <code>Component</code> is automatically updated to
+      reflect its new state. For instance, if you have a
+      <code>Label</code> <code>lbl</code>, assigning a value to
+      <code>lbl.geometry</code> would immediately change the
+      <code>Label</code>'s geometry, and assigning to
+      <code>lbl.text</code> would change its text.</para>
+
+      <para>This is good enough for most cases, but sometimes an
+      attribute can contain a mutable value, such as a list, and
+      changing that will not update the <code>Component</code>. For
+      instance, if you use a list to hold the <code>items</code> of a
+      <code>ListBox</code>, you could end up in the following
+      situation:</para>
+
+      <codelisting>
+	<line>lbx = ListBox()</line>
+	<line>lbx.items = 'first second third'.split()</line>
+	<line># More code...</line>
+	<line>lbx.items.append('fourth')</line>
+      </codelisting>
+
+      <para>After performing this code, nothing will have happened to
+      the <code>ListBox</code>, because it has no way of knowing that
+      the list has changed. To fix that, you can simply call its
+      <code>sync</code> method:</para>
+
+      <codelisting>
+	<line>lbx.sync()</line>
+      </codelisting>
+
+      <para>This method checks whether any attributes have changed,
+      and make sure that the <code>Component</code> us up to
+      date.</para>
+
+      <para><strong>Updating Automatically</strong></para>
+
+      <para>Updating <code>Components</code> explicitly can be useful,
+      but sometimes you would want it to be done for you,
+      automatically, each time you modify an object that is referred
+      to by a <code>Component</code> attribute. This can be taken care
+      of by <code>link</code> and <code>send</code>. If your object
+      uses <code>send</code> every time it's modified, and you
+      <code>link</code> the object to your <code>Component</code>'s
+      <code>sync</code> method, things will happen by
+      themselves:</para>
+
+      <codelisting>
+	<line>class TriggerList:</line>
+	<line>    def __init__(self):</line>
+	<line>        self.list = []</line>
+	<line>    def append(self, obj):</line>
+	<line>        self.list.append(obj)</line>
+	<line>        send(self)</line>
+	<line>    def __getitem__(self, i):</line>
+	<line>        return self.list[i]</line>
+	<line></line>
+	<line>lbx = ListBox()</line>
+	<line>lbx.items = TriggerList()</line>
+	<line>link(lbx.items, lbx.sync)</line>
+      </codelisting>
+
+      <para>Now, if we call <code>lbx.items.append('fourth')</code>,
+      <code>lbx.sync</code> will automatically be called. To make
+      your life easier, <name>Anygui</name> already contains some
+      classes that send signals whend they are modified; these classes
+      are called <code>Model</code>s.</para>
+
+      <para><strong>Model and Assignee</strong></para>
+
+      <para>The <name>Anygui</name> models (<code>BooleanModel</code>,
+      <code>ListModel</code>, <code>TextModel</code>, and
+      <code>NumberModel</code>) are objects that call
+      <code>send</code> (with the <code>'default'</code> event) when
+      they are modified.</para>
+
+      <para>An <code>Assignee</code> (part of the <name>Anygui</name>
+      Model-View-Controller mechanism) is an object that supports the
+      methods <code>assigned</code> and <code>removed</code>. These
+      are automatically called (if present) when the object is
+      assigned to one of the attributes of an <code>Attrib</code>
+      object (such as a <code>Component</code>). <code>Model</code>s
+      use this behaviour to automatically call <code>link</code> and
+      <code>unlink</code>, so when the <code>Model</code> is modified,
+      the <code>sync</code> method of the <code>Attrib</code> object
+      is called automatically.</para>
+      
+      <!-- document modified() -->
+
+      <para>All models have a <code>value</code> attribute, which
+      contains a "simple" version of its state (such as a number for
+      <code>NumberModel</code>, a list for <code>ListModel</code>,
+      etc.) Assigning to this attribute is a simple way of modifying
+      the model in place.</para>
+
+      <para><strong>class Application</strong></para>
+
+      <para>To instantiate <code>Window</code>s, you must have an
+      <code>Application</code> to manage them. You typically
+      instantiate an application at the beginning of your
+      program:</para>
+
+      <codelisting>
+	<line>app = Application()</line>
+	<line># Build GUI and run application</line>
+      </codelisting>
+
+      <para>In some cases subclassing <code>Application</code> might
+      be a useful way of structuring your program, but it is in no way
+      required.</para>
+
+      <para><code>Application</code> has the following methods:</para>
+
+      <para><apiname>run</apiname>()</para>
+
+      <para>Starts the main event loop of the graphical user
+      interface. Usually called at the end of the program which set up
+      the interface:</para>
+
+      <codelisting>
+	<line>app = Application()</line>
+	<line># Set up interface</line>
+	<line>app.run()</line>
+      </codelisting>
+    
+      <para><apiname>add</apiname>(<var>win</var>)</para>
+
+      <para>Adds a <code>Window</code> to the
+      <code>Application</code>, in the same way
+      <code>Components</code> can be added to <code>Frame</code>s (see
+      below). A <code>Window</code> will not be visible until it has
+      been <code>add</code>ed to the current <code>Application</code>
+      object, and that <code>Application is running</code>. When
+      constructing new <code>Window</code>s after
+      <code>Application.run</code> has been called, you should ensure
+      that you <code>add</code> your <code>Window</code> to your
+      running <code>Application</code> after all the
+      <code>Components</code> have been added to your
+      <code>Window</code>; otherwise, you may see them appearing and
+      moving about as <name>Anygui</name> takes care of the
+      layout. (Before <code>Application.run</code> is called, this is
+      not an issue, since no <code>Window</code>s will be appear
+      before that time.)</para>
+ 
+      <para>The parameter <code>win</code> can be either a single
+      <code>Window</code>, or a sequence of
+      <code>Windows</code>.</para>
+
+      <para><apiname>remove</apiname>(<var>win</var>)</para>
+
+      <para>Removes a <code>Window</code> from the application. This
+      will make the <code>Window</code> disappear.</para>
+
+      <para><apiname>contents</apiname></para>
+
+      <para>A read-only property containing a tuple of the
+      <code>Window</code>s the <code>Application</code> currently
+      manages.</para>
+
+      <para><strong>class Button</strong></para>
+
+      <para>A component which, when pressed, generate a
+      <code>'click'</code> event, as well as a <code>'default'</code>
+      event. Thus, in the following example, both
+      <code>handler1</code> and <code>handler2</code> will be called
+      when the button is pressed:</para>
+
+      <codelisting>
+	<line>btn = Button()</line>
+	<line>def handler1(**kw): print 'Handler 1'</line>
+	<line>def handler2(**kw): print 'Handler 2'</line>
+	<line>link(btn, 'click', handler1)</line>
+	<line>link(btn, handler2)</line>
+      </codelisting>
+    
+      <para><strong>class CheckBox</strong></para>
+
+      <para><code>CheckBox</code> is a kind of button, and thus will
+      also generate <code>'click'</code> and <code>'default'</code>
+      events when clicked. But in addition, each <code>CheckBox</code>
+      has a Boolean attribute <code>on</code>, which is toggled each
+      time the box is clicked. The state of the <code>CheckBox</code>
+      can be altered by assigning to this attribute.</para>
+
+      <para>The <code>on</code> property will be automatically
+      modified (as per the MVC mechanism) when the user clicks the
+      <code>CheckBox</code>. This will also cause the
+      <code>CheckBox</code> to <code>send</code> a <code>click</code>
+      and a <code>default</code>event.</para>
+    
+      <para>The <code>on</code> attribute is a useful place to use a
+      <code>BooleanModel</code>.</para>
+
+      <para><strong>class Frame</strong></para>
+  
+      <para><code>Frame</code> is a component which can contain other
+      components. Components are added to the <code>Frame</code> with
+      the <code>add</code> method:</para>
+
+      <para><apiname>add</apiname>(<var>comp</var>, [<var>opts</var>,] **<var>kwds</var>)</para>
+      
+      <para>Adds one or more components. The parameter
+      <code>comp</code> may be either a single component, or a
+      sequence of components. In the latter case, all the components
+      will be added.</para>
+
+      <para>The <code>opts</code> parameter containes an
+      <code>Options</code> object (see below) which gives information
+      about how the object should be laid out. These options can be
+      overridden with keyword arguments, and all this information will
+      be passed to the <code>LayoutManager</code> (see below) of the
+      <code>Frame</code>, if any. This <code>LayoutManager</code> is
+      stored in the <code>layout</code> property.</para>
+
+      <para><apiname>remove</apiname>(<var>comp</var>)</para>
+
+      <para>Removes a component from the <code>Frame</code>.</para>
+
+      <para><apiname>contents</apiname></para>
+
+      <para>This is a read-only property which contains the contents
+      (a tuple of <code>Components</code>) of the
+      <code>Frame</code>.</para>
+
+      <!-- This property should perhaps behave like other properties? -->
+
+      <para><strong>class Label</strong></para>
+
+      <para>A <code>Label</code> is a simple component which displays
+      a string of text. (<code>Label</code> can only handle one line
+      of text.)</para>
+      
+      <para><strong>class LayoutManager</strong></para>
+
+      <para>A layout manager is responsible for setting the
+      <code>geometry</code> properties of a set of components when
+      their parent <code>Frame</code> changes shape. The default
+      <code>LayoutManager</code> (and the only one supplied with the
+      current release) is the <code>Placer</code> (see below).
+      </para>
+      
+      <para><strong>Note:</strong> Although Anygui &shortversion;
+      comes only with this layout manager, more will appear in the
+      future.</para>
+
+      <para><strong>class ListBox</strong></para>
+      
+      <para>Shows a list of options, of which one may be selected. The
+      <code>ListBox</code> has two special attributes:
+      <code>items</code>, a sequence of items to display, and
+      <code>selection</code>, the currently selected (as an index in
+      the <code>items</code> sequence).</para>
+
+      <para>The <code>selection</code> property will be automatically
+      modified (as per the MVC mechanism) when the user makes a
+      selection. This will also cause the <code>ListBox</code> to
+      <code>send</code> a <code>select</code> and a
+      <code>default</code>event.</para>
+
+      <para><strong>class Model</strong></para>
+
+      <para>See the section on <code>Model</code> and
+      <code>Assignee</code> above.</para>
+
+      <para><strong>class Options</strong></para>
+      
+      <para><code>Options</code> is a very simple class. It is simply
+      used to store a bunch of named values; basically a dictionary
+      with a different syntax. (For more information about the
+      <name>bunch</name> class, see
+      <url>http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52308</url>.)</para>
+           
+      <para>You can set the attributes of an <code>Options</code>
+      object and then supply it as an optional first parameter to the
+      constructors of widgets:</para>
+
+      <codelisting>
+	<line>opt = Options()</line>
+	<line>opt.width = 100</line>
+	<line>opt.height = 50</line>
+	<line>opt.x = 10</line>
+	<line>btn = Button(opt, y=10)</line>
+	<line>lbl = Label(opt, y=70)</line>
+      </codelisting>
+
+      <para>Here <code>btn</code> and <code>lbl</code> will have the
+      same <code>width</code>, <code>height</code>, and <code>x</code>
+      attributes, but differing <code>y</code> attributes.</para>
+
+      <para>You can also set the attributes of an <code>Options</code>
+      object through its constructur, just like with
+      components:</para>
+
+      <codelisting>
+	<line>opt = Options(width=100, height=50, x=10)</line>
+      </codelisting>
+      
+      <para><code>Options</code> objects can also be used when
+      supplying arguments to the <code>add</code> method of
+      <code>Frame</code>:</para>
+
+      <codelisting>
+	<line># Assuming a Placer LayoutManager:</line>
+	<line>opt = Options(left=10, right=10, hstretch=1)</line>
+	<line>win.add(lbl, opt, top=10)</line>
+	<line>win.add(btn, opt, top=(lbl,10))</line>
+      </codelisting>
+
+      <para><strong>class Placer</strong></para>
+
+      <para>A simple but powerful layout manager. When adding
+      components to a <code>Frame</code> whose <code>layout</code>
+      attribute is set to a <code>Placer</code>, you can supply the
+      following keyword arguments:</para>
+
+      <codelisting>
+	<line>left         -- the Component's left edge</line>
+	<line>right        -- the Component's right edge</line>
+	<line>top          -- the Component's top edge</line>
+	<line>bottom       -- the Component's bottom edge</line>
+	<line>hmove        -- move horizontally on resize</line>
+	<line>vmove        -- move vertically on resize</line>
+	<line>hstretch     -- stretch horizontally on resize</line>
+	<line>vstretch     -- stretch vertically on resize</line>
+	<line>direction    -- 'left', 'right', 'up', or 'down'</line>
+	<line>space        -- spacing between multiple Components</line>
+      </codelisting>
+
+      <para>The geometry specifiers (<code>left</code>,
+      <code>right</code>, <code>top</code>, and <code>bottom</code>)
+      can be set to either <code>None</code> (the default; will use
+      the <code>Component</code>'s existing coordinates), a distance
+      (from the corresponding <code>Frame</code> edge), a
+      <code>Component</code> (will align the edge with the opposite
+      edge of the given component), or a tuple
+      (<emphasis>component</emphasis>, <emphasis>distance</emphasis>)
+      (as with only a <code>Component</code>, except that a gap of
+      size <emphasis>distance</emphasis> is inserted between the
+      two).</para>
+
+      <para>The movement arguments (<code>hmove</code> and
+      <code>vmove</code>) specify (with a Boolean value) whether the
+      <code>Component</code> should be moved (horizontally,
+      vertically, or both) to maintain the given distance to the
+      surrounding <code>Frame</code>'s edges; the stretching arguments
+      (<code>hstretch</code> and <code>vstretch</code>) specify
+      whether the <code>Component</code> may be stretched to maintain
+      these distances.</para>
+
+      <para><strong>class RadioButton</strong></para>
+      
+      <para>A <code>RadioButton</code> is a toggle button, just like
+      <code>CheckBox</code>, with slightly different appearance, and
+      with the difference that it belongs to a
+      <code>RadioGroup</code>. Only one <code>RadioButton</code> can
+      be active (have its <code>on</code> attribute be a true Boolean
+      value)in the <code>RadioGroup</code> at one time, so when one is
+      clicked or programmatically turned on, the others are
+      automatically switched off by the <code>RadioGroup</code>. Each
+      <code>RadioButton</code> also has a <code>value</code>
+      attribute, which should be unique within its
+      <code>RadioGroup</code>. When one <code>RadioButton</code> is
+      active, the <code>value</code> attribute of its
+      <code>RadioGroup</code> is automatically set to that of the
+      active <code>RadioButton</code>. The <code>RadioGroup</code> of
+      a <code>RadioButton</code> is set by assigning the
+      <code>RadioGroup</code> to the <code>group</code> attribute of
+      the <code>RadioButton</code>. Setting the <code>value</code>
+      attribute of the <code>RadioGroup</code> will automatically
+      activate the correct <code>RadioButton</code>.</para>
+      
+      <para><strong>class RadioGroup</strong></para>
+      
+      <para>See <code>RadioButton</code> above.</para>
+          
+      <para><strong>class TextArea</strong></para>
+
+      <para>A multiline text-editing <code>Component</code>. Its text
+      is stored in the <code>text</code> attribute, which will be
+      modified (according to the MVC mechanism) when the component
+      loses focus. It also supports the Boolean <code>editable</code>
+      property, which may be used to control whether the user can edit
+      the text area or not.</para>
+    
+      <para><strong>class TextField</strong></para>
+
+      <para>A one-line text-editing <code>Component</code>. (See also
+      <code>TextArea</code>, above.) If the enter/return key is
+      pressed within a <code>TextField</code>, the
+      <code>TextField</code> will <code>send</code> a
+      <code>enterkey</code> event.</para>
+        
+      <para><strong>class Window</strong></para>
+
+      <para>A window, plain and simple. <code>Window</code> is a type
+      of <code>Frame</code>, so you can add components to it and set
+      its <code>layout</code> property etc. To make your window
+      appear, you must remember to add it to your
+      <code>Application</code>, just like you add other components to
+      <code>Frame</code>s and <code>Window</code>s:</para>
+
+      <codelisting>
+	<line>win = Window()</line>
+	<line>app = Application()</line>
+	<line>app.add(win)</line>
+	<line>app.run()</line>
+      </codelisting>
+
+      <para><code>Window</code>s have a <code>title</code> attribute
+      which may be used by the operating system or window
+      manager to identify the window to the user in various ways.</para>
+
+    </section>
+
+  </section>
