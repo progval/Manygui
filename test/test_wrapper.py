@@ -53,7 +53,7 @@ class TestWrapperWithoutAggregates(AbstractWrapper):
 class WrapperWithAggregatesTestCase(TestCase):
 
     def setUp(self):
-        self.wrapper = TestWrapperWithAggregates(Stub())
+        self.wrapper = TestWrapperWithAggregates(Stub(), _test=1)
 
     def genericAggregateTest(self, settername, attrs):
         s, u = self.wrapper.getSetters(attrs)
@@ -100,7 +100,7 @@ class WrapperWithAggregatesTestCase(TestCase):
 class WrapperWithoutAggregatesTestCase(TestCase):
 
     def setUp(self):
-        self.wrapper = TestWrapperWithoutAggregates(Stub())
+        self.wrapper = TestWrapperWithoutAggregates(Stub(), _test=1)
 
     def genericAggregateTest(self, attrs):
         s, u = self.wrapper.getSetters(attrs)
@@ -120,7 +120,7 @@ class WrapperWithoutAggregatesTestCase(TestCase):
 class UpdateTestWrapper(AbstractWrapper):
 
     def __init__(self, proxy):
-        AbstractWrapper.__init__(self, proxy)
+        AbstractWrapper.__init__(self, proxy, _test=1)
         self.reset()
 
     def reset(self):
@@ -159,7 +159,7 @@ class UpdateTestCase(TestCase):
         self.wrapper = UpdateTestWrapper(Stub())
 
     def genericUpdateTest(self, state, testCalled):
-        self.wrapper.update(state)
+        self.wrapper.push(state)
         called = self.wrapper.called
         called.sort()
         self.assertEqual(called, testCalled)
