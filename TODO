@@ -12,6 +12,8 @@ Goals for next release:
 
 * Add a structured testing framework
 
+* Add documentation (including major docstrings)
+
 Longer term goals:
 ------------------
 
