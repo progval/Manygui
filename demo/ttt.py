@@ -72,7 +72,7 @@ def doMove(the_btn = -1):
         return
 
     btns[the_btn].text = 'x'
-    btns[the_btn]._ensure_text()
+    #btns[the_btn]._ensure_text()
     if checkWin():
         return
 

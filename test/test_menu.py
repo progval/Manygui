@@ -3,7 +3,7 @@ from anygui.LayoutManagers import SimpleGridManager
 
 app = Application()
 
-win = Window(geometry=(50,50,100,100))
+win = Window(title='Menu Example', geometry=(50,50,100,100))
 win.layout = SimpleGridManager(1,2)
 
 # A menubar for the window.
