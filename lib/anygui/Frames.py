@@ -25,7 +25,7 @@ class AbstractFrame(AbstractComponent, Defaults.Frame):
         return 0
 
     def _get_contents(self):
-        return self._contents
+        return tuple(self._contents)
         
     def add(self,items,options=None,**kws):
         """ Add the given items to this container, passing the items and
