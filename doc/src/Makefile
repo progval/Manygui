@@ -12,7 +12,7 @@ clean:
 	rm -f *.aux *.toc *.log *~
 
 distclean: clean
-	rm -f *.html *.pdf *.ps *.tex *.txt
+	rm -f ../*.html ../*.pdf ../*.ps *.tex ../*.txt
 
 ../anygui.pdf: anygui.tex anygui.sty
 	pdflatex anygui
