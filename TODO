@@ -109,6 +109,9 @@ Longer term goals:
   implementations in the basic Anygui API (in the vein
   of the piddle/sping API)
 
+  In other words, give a standardised way of integrating
+  backend-specific features into Anygui programs.
+
 * Make Anygui more thread-safe
 
 * Add constructive area geometry to Canvas

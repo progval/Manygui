@@ -617,7 +617,90 @@
       protocol) is described in the API Reference below. Here is a
       short overview on how to use it.</para>
 
-      <!-- @@@ continue here -->
+      <para>A <emphasis>model</emphasis> is an object that can be
+      modified, and that can notify other objects, called
+      <code>views</code>, when it has been modified. A
+      <code>controller</code> is an object that can modify the model,
+      in particular as a direct response to a user action (such as
+      clicking the mouse or typing some text). In <name>Anygui</name>,
+      <code>Component</code>s double as both views (showing a model's
+      state to the user) and controllers (letting the user modify the
+      model). Even though <name>Anygui</name> supports using models
+      this way, you can also create complete application without using
+      them.</para>
+      
+      <para>Models are in general subclasses of the <code>Model</code>
+      class (although they don't have to be; see the API Reference
+      below for a description of how they work). The
+      <code>Model</code>s that are included in <name>Anygui</name>
+      are:</para>
+
+      <codelisting>
+	<line>BooleanModel     -- represents a Boolean value</line>
+	<line>ListModel        -- behaves like a list</line>
+	<line>NumberModel      -- represents a numerical value</line>
+	<line>TextModel        -- acts like a mutable string</line>
+      </codelisting>
+
+      <para>These all have a <code>value</code> attribute which may be
+      used to change their internal value. They also support other
+      operations, such as indexing and slicing etc. for
+      <code>ListModel</code>. These are very easy to use: Just assign
+      them to an attribute of a <code>Component</code>:</para>
+
+      <codelisting>
+	<line># You'll learn about CheckBoxes in a minute</line>
+	<line>cbx = CheckBox(text='Simple model test')</line>
+	<line>state = BooleanModel(value=1)</line>
+	<line>cbx.on = state</line>
+      </codelisting>
+
+      <para>Now, if you change <code>state</code> (e.g. with the
+      statement <code>state.value=0</code>) this will automatically be
+      reflected in the <code>CheckBox</code> (which will be acting
+      like a view). If the user clicks the <code>CheckBox</code>, the
+      model will be changed.</para>
+
+      <para>You can always update views yourself, by calling their
+      <code>update</code> method. This can be useful also if you use a
+      simple value such as a list in an attribute:</para>
+
+      <codelisting>
+	<line>btn = Button()</line>
+	<line>rect = [0, 0, 10, 10]</line>
+	<line>btn.geometry = rect</line>
+	<line>rect[3] = 20</line>
+	<line>btn.update()</line>
+      </codelisting>
+
+      <para>After modifying <code>rect</code>, the button will not
+      have changed, since it can't detect the change by
+      itself. (That's only possible when you use a real model.)
+      Therefore, you call <code>btn.update</code> to tell it to update
+      itself.</para>
+
+      <para>If you assign a value to an attribute, the
+      <code>update</code> method will be called automatically, so
+      another way of doing the same thing is:</para>
+
+      <codelisting>
+	<line>btn = Button()</line>
+	<line>rect = [0, 0, 10, 10]</line>
+	<line>btn.geometry = rect</line>
+	<line>rect[3] = 20</line>
+	<line>btn.geometry = rect</line>
+      </codelisting>
+
+      <para><strong>Warning:</strong> Because of the controller behaviour
+      of <code>Component</code>s, if the <code>Button</code> is
+      resized, <code>rect</code> will be modified. If you don't want
+      this behaviour, use a tuple instead of a list, since tuples
+      can't be modified.</para>
+
+      <para>If you want another object to monitor a model, you can
+      simply use the <code>link</code> method, since all models
+      generate an event (of the type <code>default</code>) when they
+      are modified.</para>
 
     </section>
 
@@ -638,11 +721,9 @@
     <section>
       <title>RadioButtons and RadioGroups</title>
 
-      <para>[update this]</para>
-
       <para><code>RadioButton</code>s are toggle buttons, just like
       <code>CheckBox</code>es. The main differences are that they look
-      slightly different, and that they may belong to a
+      slightly different, and that they should belong to a
       <code>RadioGroup</code>.</para>
 
       <para>A <code>RadioGroup</code> is a set of
@@ -650,7 +731,7 @@
       <code>RadioButton</code> is permitted to be "on" at one
       time. Thus, when one of the buttons in the group is turned on,
       the others are automatically turned off. This can be useful for
-      selecting among different alternatives, for instance.</para>
+      selecting among different alternatives.</para>
 
       <para><code>RadioButton</code>s are added to a
       <code>RadioGroup</code> by setting their <code>group</code>
@@ -667,12 +748,12 @@
 	<line>rbn = RadioButton(group=grp)</line>
       </codelisting>
 
+      <!-- Document RadioGroup add method...? -->
+
     </section>
 
     <section>
       <title>ListBox</title>
-
-      <para>[update this]</para>
 
       <para>A <code>ListBox</code> is a vertical list of items that
       can be selected, either by clicking on them, or by moving the
@@ -687,29 +768,43 @@
       arrow keys until the item you want to select is underlined; then
       select it by pressing the space bar.</para>
 
-      <para>A <code>ListBox</code>'s items are set by manipulating its
-      model (a <code>ListModel</code>). The model can contain any
-      objects, and the text displayed in the widget will be the result
-      of applying the built-in <name>Python</name> function
-      <code>str</code> to each object.</para>
+      <para>A <code>ListBox</code>'s items are stored in its attribute
+      <code>items</code>, a sequence of arbitrary objects. The
+      text displayed in the widget will be the result of applying the
+      built-in <name>Python</name> function <code>str</code> to each
+      object.</para>
 
       <codelisting>
 	<line>lbx = ListBox()</line>
-	<line>lbx.model.value = 'This is a test'.split()</line>
+	<line>lbx.items = 'This is a test'.split()</line>
       </codelisting>
 
       <para>The currently selected item can be queried or set through
       the <code>selection</code> property (an integer index, counting
-      from zero). Also, when an item is selected, the
-      <code>ListBox</code>'s <code>action</code> callback is activated
-      (if present).</para>
+      from zero). Also, when an item is selected, a
+      <code>select</code> event is generated, which is the default
+      event type for a <code>ListBox</code>. This means that you can
+      either do</para>
+
+      <codelisting>
+	<line>link(lbx, 'select', handler)</line>
+      </codelisting>
+
+      <para>or</para>
+
+      <codelisting>
+	<line>link(lbx, handler)</line>
+      </codelisting>
+
+      <para>with the same result. (This is similar to the
+      <code>click</code> event, which is default for
+      <code>Buttons</code>; for more information, see the API
+      Reference below.)</para>
 
     </section>
 
     <section>
       <title>TextField and TextArea</title>
-
-      <para>[update this]</para>
 
       <para><name>Anygui</name>'s two text widgets,
       <code>TextField</code> and <code>TextArea</code> are quite
@@ -717,15 +812,14 @@
       <code>TextField</code> permits neither newlines or tab
       characters to be typed, while <code>TextArea</code> does. Typing
       a tab in a <code>TextField</code> will simply move the focus to
-      another widget, while pressing the enter key will activate the
-      <code>TextField</code>'s <code>action</code> callback (if
-      present).</para>
+      another widget, while pressing the enter key will send an
+      <code>enterkey</code> event (which is the
+      <code>TextField</code>'s default event type).</para>
 
-      <para>The text in a text component is queried or set through its
-      model's <code>value</code> property (a string or equivalent),
-      and the current selection may be queried or set through the
-      <code>selection</code> property (a tuple of two integer
-      indices).</para>
+      <para>The text in a text component is stored in its
+      <code>text</code> property (a string or equivalent), and the
+      current selection is stored in its <code>selection</code>
+      property (a tuple of two integer indices).</para>
     </section>
 
   </section>
@@ -763,12 +857,17 @@
 	<line>foo:~$ jython -DANYGUI_SOMEVAR='some value' someprogram.py</line>
       </codelisting>
 
-      <!--
+      <para>You can also set these environment variables in your own
+      program, by using code like the following before you import
+      <name>Anygui</name>:</para>
 
-      Setting os.environ['SOME_VARIABLE']
+      <codelisting>
+	<line>import os</line>
+	<line>os.environ['ANYGUI_SOMEVAR'] = 'some value'</line>
+      </codelisting>
 
-      -->
-
+      <para>This will probably not work in <name>Jython</name>, though.</para>
+      
       <para>The environment variables used by <name>Anygui</name>
       are:</para>
 
@@ -782,11 +881,8 @@
       <name>Anygui</name> will continue searching through the other
       backends for a viable alternative.</para>
 
-      <!--
-      Document default order.
-      Documentation synch problem?
-      Document the star symbol and the new semantics.
 
+      <!--
       From Joe:
 
 You can now set ANYGUI_ALTERNATE_BORDER=1 in the environment
@@ -795,6 +891,12 @@ mentioned on the initial help screen as well.
 
 ANYGUI_SCREENSIZE
 ANYGUI_SKIP # Test script...
+      -->
+
+      <!--
+      Document default order.
+      Documentation synch problem?
+      Document the star symbol and the new semantics.
       -->
 
       <para>Example:</para>
