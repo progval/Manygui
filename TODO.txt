@@ -52,6 +52,12 @@ Tentative release date: February 28th, 2002
   Should backends access frontend attributes through their
   internal or external names? A standard should be decided on.
 
+  All methods named _refresh_foo should refer to attributes named foo.
+  Most _ensure_foo methods should be renamed to _refresh_foo, though
+  some (like _ensure_created) should be given some other names (or
+  left alone), and some (like _ensure_state) should be renamed to
+  reflect the attribute they are refreshing (e.g. _refresh_on).
+
 * Fix the relationship btw. size, position, and geometry wrt.
   MVC etc. This should be done by making size, position, and geometry
   ordinary attributes, and synchronise them with x, y, width, and
