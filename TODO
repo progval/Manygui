@@ -40,6 +40,8 @@ Tentative release date: February 28th, 2002
 
 * Add a Canvas widget for full graphics support
 
+* Add an optional status bar to Window
+
 Longer term goals:
 ------------------
 
