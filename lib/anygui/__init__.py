@@ -32,8 +32,6 @@ __all__ = """
   unlinkHandler
   unlinkMethods
   unlinkSource
-  AboutDialog
-  OpenFileDialog
 
 """.split()
 
@@ -58,21 +56,10 @@ def backendModule():
         raise RuntimeError, 'no backend exists'
     return _backend
 
-def frontEndWrappers():
-    'Returns the list of available frontend widgets'
-    if not _frontend_wrappers:
-        raise RuntimeError, 'no frontend wrappers exists'
-    return _frontend_wrappers
-
 def setup(self, **kwds):
     'Used to configure Anygui'
     raise NotImplementedError
 
-
-########## Get the list of frontend wrappers ##############################
-import anygui.frontend_wrappers as few
-_frontend_wrappers = few
-########## End get list of frontend wrappers ##############################
 
 ########## Begin Imports ##################################################
 
@@ -97,9 +84,6 @@ from anygui.Events           import *
 from anygui.Frames           import Frame, GroupBox
 from anygui.LayoutManagers   import LayoutManager, Placer
 from anygui.Menus            import MenuBar, Menu, MenuCommand, MenuCheck, MenuSeparator
-
-# import objects from dialogs
-from anygui.dialogs          import *
 
 ########### End Imports ###################################################
 

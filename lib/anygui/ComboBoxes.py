@@ -1,5 +1,6 @@
+import anygui.backends.genericgui
 from anygui.Components import Component
-from anygui import Defaults, backendModule, frontEndWrappers
+from anygui import Defaults, backendModule
 
 class ComboBox(Component, Defaults.ComboBox):
 
@@ -7,4 +8,4 @@ class ComboBox(Component, Defaults.ComboBox):
         try:
             return backendModule().ComboBoxWrapper(self)
         except(AttributeError):
-            return frontEndWrappers().ComboBoxWrapper(self)
+            return anygui.backends.genericgui.ComboBoxWrapper(self)
