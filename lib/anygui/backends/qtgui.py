@@ -8,7 +8,7 @@ from qt import *
 TRUE = 1
 FALSE = 0
 
-DEBUG = 0
+DEBUG = 1
 TMP_DBG = 1
 
 class ComponentMixin:
@@ -65,6 +65,8 @@ class ComponentMixin:
 	def _ensure_destroyed(self):
 		if self._qt_comp:
 			if DEBUG: print 'in qt _ensure_destroyed: ', self._qt_comp
+			try: self._connected = 0
+			except: pass
 			self._qt_comp.destroy()
 			self._qt_comp = None
 
@@ -193,22 +195,6 @@ class TextBase(ComponentMixin, AbstractTextField):
 		if self._qt_comp:
 			self._qt_comp.setReadOnly(not self._editable)
 
-	def _do_ensure_selection(self,ev=None):
-		self._ensure_selection()
-
-	def _backend_selection(self):
-		if self._qt_comp:
-			if self._qt_comp.hasMarkedText():
-				if DEBUG: print 'in _backend_selection of: ', self._qt_comp
-				text = self._backend_text()
-				mtxt = str(self._qt_comp.markedText())
-				start = text.find(mtxt)
-				end = start + len(mtxt)
-				if DEBUG: print 'returning => start: %s | end: %s' %(start,end)
-				return start,  end
-			else:
-				return 0, 0
-
 	def _backend_text(self):
 		if self._qt_comp:
 			return str(self._qt_comp.text())
@@ -230,8 +216,30 @@ class TextField(TextBase):
 
 	def _ensure_selection(self):
 		if self._qt_comp:
+			if DEBUG: print 'in _ensure_selection of: ', self._qt_comp
 			start, end = self._selection
 			self._qt_comp.setSelection(start, end-start)
+
+	def _backend_selection(self):
+		if self._qt_comp:
+			if self._qt_comp.hasMarkedText():
+				if DEBUG: print 'in _backend_selection of: ', self._qt_comp
+				text = self._backend_text()
+				mtxt = str(self._qt_comp.markedText())
+				pos = self._qt_comp.cursorPosition()
+				start, idx = 0, 0
+				for n in range(text.count(mtxt)):
+					if n > 0:
+						idx += 1
+					idx = text.find(mtxt, idx)
+					if idx == pos or idx == pos - len(mtxt):
+						start = idx
+						break
+				end = start + len(mtxt)
+				if DEBUG: print 'returning => start: %s | end: %s' %(start,end)
+				return start,  end
+			else:
+				return 0, 0
 
 	def _qt_key_press_handler(self, newText):
 		if DEBUG: print 'in _qt_key_pressed of: ', self._qt_comp
@@ -252,32 +260,74 @@ class TextArea(TextBase):
 		if self._qt_comp:
 			start, end = self._selection
 			lines = self._qt_get_lines()
-			srow, scol = self._qt_get_row_col(lines,start)
-			erow, ecol = self._qt_get_row_col(lines,end)
+			srow, scol = self._qt_translate_row_col(lines,start)
+			erow, ecol = self._qt_translate_row_col(lines,end)
 			#Enter hack...
 			self._qt_comp.setCursorPosition(srow, scol, FALSE)
 			self._qt_comp.setCursorPosition(erow, ecol, TRUE)
 			#Exit hack...
 			#self._qt_comp.setSelection(srow, scol, erow, ecol)
 
+	def _backend_selection(self):
+		if self._qt_comp:
+			if self._qt_comp.hasMarkedText():
+				if DEBUG: print 'in _backend_selection of: ', self._qt_comp
+				text = self._backend_text()
+				mtxt = str(self._qt_comp.markedText())
+				row, col = self._qt_comp.getCursorPosition()
+				if DEBUG: print 'row, col -> %s, %s' %(row,col) 
+				pos = self._qt_translate_position(row, col)
+				if DEBUG: print 'pos of cursor is: ', pos
+				start, idx = 0, 0
+				for n in range(text.count(mtxt)):
+					if n > 0:
+						idx += 1
+					idx = text.find(mtxt, idx)
+					if DEBUG:
+						print 'idx -> ', idx
+						print 'idx >= pos -> ', idx >= pos
+						print 'pos - len(mtxt) -> ', pos - len(mtxt)
+						print 'idx == pos - len(mtxt) -> ', idx == pos - len(mtxt)
+					if idx == pos or idx == pos - len(mtxt):
+						start = idx
+						break
+				end = start + len(mtxt)
+				if DEBUG: print 'returning => start: %s | end: %s' %(start,end)
+				return start,  end
+			else:
+				return 0, 0
+
 	def _qt_get_lines(self):
 		lines = []
-		for n in range(1,self._qt_comp.numLines()+1):
+		for n in range(1,self._qt_comp.numLines()):
 			lines.append(self._qt_comp.textLine(n))
 		return lines
 
-	def _qt_get_row_col(self, lines, idx):
+	def _qt_translate_row_col(self, lines, pos):
 		row, col, curr_row = 1, 1, 1
 		tot_len = 0
 		for ln in lines:
-			if idx <= len(str(ln)) + tot_len:
+			if pos <= len(str(ln)) + tot_len:
 				row = curr_row
-				col = idx - tot_len
+				col = pos - tot_len
 				return row, col
 			else:
 				curr_row += 1
 				tot_len += len(str(ln))
 		return row, col
+
+	def _qt_translate_position(self, row, col):
+		if DEBUG: print 'translating row/col to pos...'
+		lines = self._qt_get_lines()
+		pos = 0
+		for n in range(len(lines)):
+			if row != n:
+				pos += len(lines[n])
+			else:
+				pos += col
+				break
+		if DEBUG: print 'returning pos -> ', pos
+		return pos
 
 	def _qt_key_press_handler(self):
 		if DEBUG: print 'in _qt_key_pressed of: ', self._qt_comp
@@ -301,7 +351,7 @@ class EventFilter(QObject):
 		self._window_obj = wr(parent)
 
 	def eventFilter(self, object, event):
-		if DEBUG: print 'in eventFilter of: ', self._window_obj()._qt_comp
+		#if DEBUG: print 'in eventFilter of: ', self._window_obj()._qt_comp
 		if not event.type() in [QEvent.Resize]: # More??
 			return 0
 		elif event.type() == QEvent.Resize:
