@@ -89,8 +89,8 @@ class ComponentMixin:
 ##################################################################
 
 class Label(ComponentMixin, AbstractLabel):
-    _width = 100 # auto ?
-    _height = 32 # auto ?
+    #_width = 100 # auto ?
+    #_height = 32 # auto ?
     _wndclass = "STATIC"
     _text = "mswLabel"
     _win_style = win32con.SS_LEFT | win32con.WS_CHILD

@@ -97,7 +97,7 @@ class TextField:
     _x = 0
     _y = 0
     _width = 100
-    _height = 30
+    _height = 25
     _hmove = 0
     _vmove = 0
     _hstretch = 0

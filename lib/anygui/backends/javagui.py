@@ -146,8 +146,8 @@ class JavaGUILayoutManager(awt.LayoutManager):
 ################################################################
 
 class Label(ComponentMixin, AbstractLabel):
-    _width = 100 # auto ?
-    _height = 32 # auto ?
+    #_width = 100 # auto ?
+    #_height = 32 # auto ?
     _java_class = swing.JLabel
     _text = "JLabel"
     _java_style = None

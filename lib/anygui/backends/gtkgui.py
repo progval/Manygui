@@ -71,8 +71,8 @@ class ComponentMixin:
 ################################################################
 
 class Label(ComponentMixin, AbstractLabel):
-    _width = 100 # auto ?
-    _height = 32 # auto ?
+    #_width = 100 # auto ?
+    #_height = 32 # auto ?
     _gtk_class = GtkLabel
     _text = "GtkLabel"
 
