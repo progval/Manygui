@@ -85,8 +85,17 @@ Tentative release date: February 28th, 2002
   In other words, give a standardised way of integrating
   backend-specific features into Anygui programs.
 
+* Add a combobox with a default implementation in terms of simpler
+  components
+
 Longer term goals:
 ------------------
+
+* Add table support with default implementation
+
+* Add tabbed pane support with default implementation
+
+* Add more alignment options etc. to labels
 
 * Add advanced support for default, including default
   "shrink-wrapping" of windows and frames that aren't
@@ -106,6 +115,8 @@ Longer term goals:
 * Make Anygui more thread-safe
 
 * Add constructive area geometry to Canvas
+
+* Add toolbars (button bars) with menu shortcuts etc.
 
 Smaller issues:
 ---------------
