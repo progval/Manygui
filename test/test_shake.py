@@ -11,7 +11,7 @@ rdb = RadioButton()
 txa = TextArea()
 txf = TextField()
 
-win = Window(size=(120,380),position=(10,10))
+win = Window(title="Shake!",size=(120,380),position=(100,100))
 app.add(win)
 win.add((btn, cbx, lbl, lst, rdb, txa, txf),
           direction='down',

@@ -47,8 +47,10 @@ class Frame(Component, Defaults.Frame):
             self.resized(0,0)
 
     def destroy(self):
-        while self.contents:
-            self.contents[0].destroy()
+        "This is used for destroying whole windows from the application."
+        for component in self.contents:
+            self.remove(component)
+            component.destroy()
         Component.destroy(self)
 
     def resized(self, dw, dh):

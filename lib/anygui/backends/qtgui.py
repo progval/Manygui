@@ -48,7 +48,7 @@ TRUE = 1
 FALSE = 0
 
 DEBUG = 0
-TMP_DBG = 1
+TMP_DBG = 0
 
 #==============================================================#
 # Factoring out creational code...
@@ -74,6 +74,7 @@ class Wrapper(AbstractWrapper):
         self.proxy.push()
 
     def internalDestroy(self):
+        if DEBUG: print "in internalDestroy of: ", self
         self.widget.destroy()
 
     def rebuild(self): pass
@@ -95,27 +96,33 @@ class ComponentWrapper(Wrapper):
 
     def setX(self, x):
         if self.widget:
-            self.setGeometry(x,self.y,self.width,self.height)
+            g = self.widget.geometry()
+            self.setGeometry(x, g.y(), g.width(), g.height())
 
     def setY(self, y):
         if self.widget:
-            self.setGeometry(self.x,y,self.width,self.height)
+            g = self.widget.geometry()
+            self.setGeometry(g.x(), y, g.width(), g.height())
 
     def setWidth(self, width):
         if self.widget:
-            self.setGeometry(self.x,self.y,width,self.height)
+            g = self.widget.geometry()
+            self.setGeometry(g.x(), g.y(), width, g.height())
 
     def setHeight(self, height):
         if self.widget:
-            self.setGeometry(self.x,self.y,self.width,height)
+            g = self.widget.geometry()
+            self.setGeometry(g.x() ,g.y(), g.width(), height)
 
     def setPosition(self, x, y):
         if self.widget:
-            self.setGeometry(x,y,self.width,self.height)
+            g = self.widget.geometry()
+            self.setGeometry(x, y, g.width(), g.height())
 
     def setSize(self, width, height):
         if self.widget:
-            self.setGeometry(self.x,self.y,width,height)
+            g = self.widget.geometry()
+            self.setGeometry(g.x(), g.y(), width, height)
 
     def setGeometry(self, x, y, width, height):
         if self.widget:
@@ -517,8 +524,12 @@ class WindowWrapper(ComponentWrapper):
     def __init__(self, proxy):
         ComponentWrapper.__init__(self, proxy)
 
+    def setText(self, text):
+        if self.widget:
+            self.mainWindow.setCaption(QString(str(text)))
+
     def setTitle(self, title):
-        if self.widget is not None:
+        if self.widget:
             self.mainWindow.setCaption(QString(str(title)))
 
     def widgetSetUp(self):
@@ -608,20 +619,16 @@ class WindowWrapper(ComponentWrapper):
             component.container = self.proxy
 
     def internalDestroy(self):
+        if DEBUG: print "in internalDestroy of: ", self
         self.mainWindow.destroy()
+        application().remove(self.proxy)
 
     def setGeometry(self, x, y, width, height):
-        if self.widget is not None:
-            g = self.widget.geometry()
-            dx = -self.widget.x()
-            dy = -self.widget.y()
-            dw = self.mainWindow.width() - g.width()
-            dh = self.mainWindow.height() - g.height()
-            self.mainWindow.setGeometry(x + dx, y + dy,
-                                        width + dw, height + dh)
+        if self.widget:
+             self.mainWindow.setGeometry(x, y, width, height)
 
     def getGeometry(self):
-        if self.widget is not None:
+        if self.widget:
             r = self.widget.geometry()
             p = self.widget.mapToGlobal(QPoint(r.x(), r.y()))
             return (p.x(), p.y(), r.width(), r.height())
@@ -800,8 +807,8 @@ class MenuSeparatorWrapper(MenuItemMixin, AbstractWrapper):
 
 class Application(AbstractApplication, QApplication):
 
-    def __init__(self):
-        AbstractApplication.__init__(self)
+    def __init__(self, **kwds):
+        AbstractApplication.__init__(self, **kwds)
         QApplication.__init__(self,[])
 
     def internalRun(self):
@@ -810,5 +817,8 @@ class Application(AbstractApplication, QApplication):
     def internalRemove(self):
         if not self._windows:
             qApp.quit()
+
+    def quit(self):
+        qApp.quit()
 
 #==============================================================#

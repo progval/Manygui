@@ -49,6 +49,9 @@ from anygui.Frames           import Frame, GroupBox
 from anygui.LayoutManagers   import LayoutManager, Placer
 from anygui.Menus            import MenuBar, Menu, MenuCommand, MenuCheck, MenuSeparator
 
+# import objects from dialogs
+from anygui.dialogs          import *
+
 ########### End Imports ###################################################
 
 # 20020208:mlh -- starting to experiment with new architecture
@@ -81,6 +84,8 @@ __all__ = """
   unlinkHandler
   unlinkMethods
   unlinkSource
+  AboutAnyguiDlg
+  AnyguiOpenFileDlg
 
 """.split()
 

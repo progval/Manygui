@@ -7,12 +7,34 @@ import anygui
 class AbstractApplication(Attrib):
 
     _running = 0
+    _name = "Anygui App"
+    _version = "0"
     
-    def __init__(self):
+    def __init__(self, **kwds):
         Attrib.__init__(self)
+        self.parseKwds(**kwds)
         self._windows = []
         self._wrappers = []
         anygui._application = self
+
+    def parseKwds(self, **kwds):
+        keys = kwds.keys()
+        if 'name' in keys:
+            self._name = kwds['name']
+        if 'version' in keys:
+            self._version = kwds['version']
+
+    def getName(self):
+        return self._name
+
+    def setName(self, name):
+        self._name = name
+
+    def getVersion(self):
+        return self._version
+
+    def setVersion(self, version):
+        self._version = version
 
     def add(self, win):
         for w in flatten(win):
@@ -69,3 +91,6 @@ class AbstractApplication(Attrib):
         try:
             self._wrappers.remove(wrapper)
         except ValueError: pass
+
+    def quit(self):
+        raise UnimplementedMethod, (self, "quit")

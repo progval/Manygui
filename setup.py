@@ -75,4 +75,5 @@ setup (name               = 'anygui',
        cmdclass           = {'uninstall': uninstall},
        package_dir        = {'': 'lib'},
        packages           = ['anygui', 'anygui.backends',
-                              'anygui.backends.txtutils'])
+                             'anygui.backends.txtutils',
+                             'anygui.dialogs'])

@@ -32,8 +32,8 @@ from anygui.Menus import Menu, MenuCommand, MenuCheck, MenuSeparator
 
 class Application(AbstractApplication):
 
-    def __init__(self):
-        AbstractApplication.__init__(self)
+    def __init__(self, **kwds):
+        AbstractApplication.__init__(self, **kwds)
         self._root = Tkinter.Tk()
         self._root.withdraw()
     
