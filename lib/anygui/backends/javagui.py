@@ -5,34 +5,19 @@ __all__ = '''
 
   Application
   ButtonWrapper
+  CheckBoxWrapper
   LabelWrapper
-  TextFieldWrapper
-  TextAreaWrapper
   ListBoxWrapper
+  RadioButtonWrapper
+  TextAreaWrapper
+  TextFieldWrapper
   WindowWrapper
 
 '''.split()
 
-#__all__ = '''
-#
-#  Application
-#  ButtonWrapper
-#  WindowWrapper
-#  LabelWrapper
-#  TextFieldWrapper
-#  TextAreaWrapper
-#  ListBoxWrapper
-#  RadioButtonWrapper
-#  CheckBoxWrapper
-#
-#'''.split()
-
 ################################################################
 
 #@@@ FIXME: Implement getGeometry and friends...
-
-#@@@ FIXME: Components don't seem to appear if they are created before
-#@@@ their containing Window
 
 #@@@ FIXME: Use isDummy instead of repeated try/except :)
 from anygui.Applications import AbstractApplication
@@ -115,7 +100,8 @@ class ComponentWrapper(Wrapper):
 
     def setGeometry(self, x, y, width, height):
         self.widget.bounds = x, y, width, height
-        self.widget.validate() # Needed? Needed in others?
+        if self.widget.layout:
+            self.widget.validate()
 
     def setVisible(self, visible):
         self.widget.visible = visible
@@ -174,6 +160,43 @@ class ComponentWrapper(Wrapper):
             return self.widget.text
         else:
             return "" # @@@ What would be the best behaviour here? Should there be an exception?
+
+################################################################
+
+class ToggleButtonMixin:
+                
+    def setOn(self, on):
+        self.widget.selected = on
+
+    def getOn(self):
+        return self.widget.selected
+
+    def widgetSetUp(self): # Should perhaps be in a ButtonMixin superclass?
+        self.widget.actionPerformed = self.clickHandler
+
+    def clickHandler(self, event): # Should perhaps be in a ButtonMixin superclass?
+        send(self.proxy, 'click')
+
+class CheckBoxWrapper(ToggleButtonMixin, ComponentWrapper):
+
+    def widgetFactory(self, *args, **kwds):
+        return swing.JCheckBox()
+
+class RadioButtonWrapper(ToggleButtonMixin, ComponentWrapper):
+
+    def widgetFactory(self, *args, **kwds):
+        return swing.JRadioButton()
+
+    #FIXME: This is (semi-)eager behaviour, contrary to the current
+    #lazy pull mechanism... [mlh@20020831]
+    def clickHandler(self, event):
+        val = self.widget.selected
+        #FIXME: This doesn't seem right:
+        if val == self.proxy.state['on']:
+            return
+        if self.proxy.group is not None:
+            self.group.modify(value=self.value)
+        send(self.proxy, 'click')
 
 ################################################################
 

@@ -305,7 +305,7 @@ class ToggleButtonMixin(ComponentMixin):
         if val == self.on: # FIXME: this way or == self._on?
             return
         self.modify(on=val)
-        send(self, 'click')
+        send(proxy, 'click')
 
 class CheckBox(ToggleButtonMixin, AbstractCheckBox):
     _java_class = swing.JCheckBox
@@ -321,7 +321,7 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
            self.group.modify(value=self.value)
         else: # FIXME: is this branch needed?
           self.modify(on=val)
-        send(self, 'click')
+        send(proxy, 'click')
 
 ################################################################
 

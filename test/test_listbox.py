@@ -16,7 +16,7 @@ lb = ListBox()
 
 sp = SelectionPrinter(lb)
 
-lb.items = 'There was a wee cooper of county Fyfe, Nickety, nockety, noo, noo, noo'.split()
+lb.items = 'There was a wee cooper who lived in Fyfe, Nickety, nockety, noo, noo, noo'.split()
 #lb.items.value = 'There was a wee cooper of county Fyfe, Nickety, nockety, noo, noo, noo'.split()
 lb.selection = 2
 
