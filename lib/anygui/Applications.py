@@ -57,3 +57,6 @@ class AbstractApplication(Attrib):
 
     def _mainloop(self):
         raise UnimplementedMethod, (self, "mainloop")
+
+    def isRunnint(self):
+        return _running

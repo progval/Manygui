@@ -543,10 +543,10 @@ class Window(ComponentMixin, AbstractWindow):
             self._tk_comp.title(self._title)
 
     def _tk_close_handler(self):
-        global _app
         self._tk_comp.destroy()
         self.destroy()
-        _app._window_deleted()
+        #_app._window_deleted()
+        application()._window_deleted() #?
 
     def _tk_size_handler(self, dummy):
         g = self._tk_comp.geometry()
