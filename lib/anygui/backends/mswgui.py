@@ -281,11 +281,13 @@ class TextField(ComponentMixin, AbstractTextField):
     #        win32gui.SetWindowText(self._hwnd, self._to_native(text))
 
     def _backend_selection(self):
+        #log("TextField._backend_selection")
         if self._hwnd:
             result = win32gui.SendMessage(self._hwnd,
                                           win32con.EM_GETSEL,
                                           0, 0)
             start, end = result & 0xFFFF, result >> 16
+            #log("    start,end=%s,%s"%(start,end))
             # under windows, the natice widget contains
             # CRLF line separators
             text = self.text
@@ -300,11 +302,13 @@ class TextField(ComponentMixin, AbstractTextField):
                 win32gui.SetWindowText(self._hwnd, self._to_native(str(self._text)))
         
     def _ensure_selection(self):
+        #log("TextField._ensure_selection")
         if self._hwnd:
             start, end = self._selection
             text = self.text
             start += text[:start].count('\n')
             end += text[:end].count('\n')
+            #log("    start,end=%s,%s"%(start,end))
             win32gui.SendMessage(self._hwnd,
                                  win32con.EM_SETSEL,
                                  start, end)
@@ -334,6 +338,7 @@ class TextField(ComponentMixin, AbstractTextField):
     def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
         # HIWORD(wParam): notification code
         if (wParam >> 16) == win32con.EN_KILLFOCUS:
+            self.modify(selection=self._backend_selection())
             self.modify(text=self._backend_text())
 
 
