@@ -141,11 +141,17 @@ class JavaGUILayoutManager(awt.LayoutManager):
 ################################################################
 
 class Canvas(ComponentMixin, AbstractCanvas):
-    # FIXME: Needs to be invalidated when resized...
-    _java_class = awt.Canvas # Right wrt. swing?
-    _imt_type = awt.image.BufferedImage.TYPE_INT_RGB
 
-    def __init__(self):
+    # TODO: Implement native versions of other drawing methods,
+    #       e.g. Béziers etc.
+    
+    # FIXME: Needs to be invalidated when resized...
+    
+    _java_class = awt.Canvas # Right wrt. swing?
+    _img_type = awt.image.BufferedImage.TYPE_INT_RGB
+
+    def __init__(self, *args, **kwds):
+        AbstractCanvas.__init__(self, *args, **kwds)
         self.clear()
         
     def paint(g):

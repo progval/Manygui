@@ -14,9 +14,10 @@ class AbstractCanvas(AbstractComponent, Defaults.Canvas):
     canvases just inherit from this one, and implement the various
     drawing methods."""
 
-    def __init__(self):
+    def __init__(self, *args, **kwds):
         '''Initialize the canvas, and set default drawing parameters. 
         Derived classes should be sure to call this method.'''
+        AbstractComponent.__init__(self, *args, **kwds)
         # defaults used when drawing
         self.defaultLineColor = black
         self.defaultFillColor = transparent
