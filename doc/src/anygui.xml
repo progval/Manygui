@@ -9,7 +9,9 @@
 
 <!-- Remember: Windows are now visible per default -->
 
-<!-- TODO: Add special tags for API reference -->
+<!-- TODO: - Add special tags for API reference
+           - Add script for version
+-->
 
 <document version="&longversion;">
 
