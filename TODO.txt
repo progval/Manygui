@@ -30,11 +30,19 @@ Short-term Objectives/FIXMEs
 
 * Fix transformation push('position') -> push('x', 'y') etc.
 
+Objectives for version 0.2a0:
+-----------------------------
+
+* Implement the functionality of release 0.1.1 with the new (0.2)
+  architecture. Model functionality is not required for this release.
+
 Objectives for version 0.2a1:
 -----------------------------
 
 * Fix default events so that their event type is the real type
   (e.g. 'click'), not 'default'.
+
+* Fix Model functionality.
 
 * Create a Container mixin for add() and remove(), and either a
   contents or items attribute? (With items it could be used with
