@@ -1,8 +1,9 @@
 # Curses magic...
 import curses
 
-_f = open("curses.txt","w")
-_debug_messages = 1
+_debug_messages = 0
+if _debug_messages:
+    _f = open("curses.txt","w")
 
 def dbg(*msg):
     if not _debug_messages: return
@@ -81,6 +82,7 @@ def scr_init():
     SCR_LRCORNER = curses.ACS_LRCORNER
 
 def move_cursor(x,y):
+    dbg("Moving cursor",x,y)
     _scr.move(y,x)
 
 def get_char():

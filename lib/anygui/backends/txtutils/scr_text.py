@@ -1,9 +1,16 @@
 # Curses magic simulated on dumb console.
 
-from anygui.backends import *
-from anygui.Exceptions import Error
+_debug_messages = 0
+if _debug_messages:
+    _f = open("txt.txt","w")
 
-__all__ = anygui.__all__
+def dbg(*msg):
+    if not _debug_messages: return
+    for m in msg:
+        _f.write("%s %s"%(m,','))
+    _f.write("\n")
+    _f.flush()
+
 
 from anygui.Utils import flatten
 from string import join
@@ -20,15 +27,6 @@ SCR_LRCORNER = ord('+')
 
 ATTR_NORMAL = 0
 ATTR_UNDERLINE = 0
-
-_f = open("txt.txt","w")
-_debug_messages = 1
-def dbg(*msg):
-    if not _debug_messages: return
-    for m in msg:
-        _f.write("%s %s"%(m,','))
-    _f.write("\n")
-    _f.flush()
 
 # Screen buffer.
 _line = [' ']*80

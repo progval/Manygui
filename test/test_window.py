@@ -6,7 +6,7 @@ class MyWindow(Window):
 app = Application()
 
 win = MyWindow(title="A Standard Window",
-               width=220, height = 45)
+               width=220, height = 150)
 app.add(win)
 
 def new_window(**kw):
@@ -18,7 +18,7 @@ def new_window(**kw):
         win.visible = not win.visible
     win.visible = 1
     
-btn = Button(text='Create new window', size=(200,25), x=10, y=10)
+btn = Button(text='Create new window', size=(200,60), x=10, y=50)
 link(btn, new_window)
 win.add(btn)
 
