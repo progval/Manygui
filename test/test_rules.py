@@ -17,11 +17,17 @@ class RectangleTestCase(TestCase):
         self.eng.addRule('position = geometry[0], geometry[1]')
         self.eng.addRule('size = geometry[2], geometry[3]')
 
-    def testMisc(self): # FIXME: Rewrite as more specific test cases...
+        # How can this be calculated automatically? (Transitive
+        # closure etc. won't work directly...)
+        self.eng.setAffected('x', ['position', 'geometry'])
+        self.eng.setAffected('y', ['position', 'geometry'])
+        self.eng.setAffected('position', ['x', 'y', 'geometry'])
+        self.eng.setAffected('width', ['size', 'geometry'])
+        self.eng.setAffected('height', ['size', 'geometry'])
+        self.eng.setAffected('size', ['width', 'height', 'geometry'])
+        self.eng.setAffected('geometry', ['x', 'y', 'width', 'height', 'position', 'size'])
 
-        geometry_children = self.eng.deps.children('geometry')
-        geometry_children.sort()
-        self.assertEqual(geometry_children, ['height', 'position', 'size', 'width', 'x', 'y'])
+    def testMisc(self): # FIXME: Rewrite as more specific test cases...
 
         vals = {}
         vals['x'] = 10
@@ -56,6 +62,6 @@ class RectangleTestCase(TestCase):
         # If the "illegal state" actually checked the expression and the
         # values etc. (no change), this shouldn't raise an exception...
         # This behaviour may change (to become more intelligent ;)
-        self.assertRaises(IllegalState, self.eng.adjust, (vals, ['x', 'position']))
+        self.assertRaises(IllegalState, self.eng.adjust, vals, ['x', 'position'])
 
 if __name__ == '__main__': main()
