@@ -76,9 +76,9 @@
 
       <para>The <name>Anygui</name> API is currently very much in flux
       as the <name>Anygui</name> team keeps experimenting with
-      it. Because of that, backwards incompatibilities may occur
-      between releases. The current release should be regarded as a
-      prototype.</para>
+      it. Because of that, incompatibilities may occur between
+      releases. The current release (&longversion;) should be regarded
+      as a prototype.</para>
 
     </section>
 
@@ -90,8 +90,8 @@
     <para>The <name>Anygui</name> package comes in the form of a
     <code>gzip</code> compressed <code>tar</code> archive. To install
     it you will first have to uncompress the archive. On
-    <name>Windows</name> this can be done with <name>WinZip</name>. On
-    the Mac, you can use <name>StuffIt Expander</name>. In
+    <name>Windows</name> this can be done with <name>WinZip</name>. in
+    <name>Mac OS</name>, you can use <name>StuffIt Expander</name>. In
     <name>Unix</name>, first move to a directory where you'd like to
     put <name>Anygui</name>, and then do something like the
     following:</para>
@@ -111,6 +111,7 @@
 
     <codelisting>
       <line>foo:~/python$ gunzip anygui-&longversion;.tar.gz</line>
+      <line>foo:~/python$ tar -xvf anygui-&longversion;.tar</line>
     </codelisting>
 
     <para>No matter which version you choose, you should end up with a
@@ -133,10 +134,11 @@
       </codelisting>
 
       <para>This will install <name>Anygui</name> in your standard
-      <name>Python</name> directory structure. If you haven't
-      installed <name>Python</name> yourself, you'll either have to
-      have root access, or install it somewhere else. You can give a
-      prefix with the <code>--prefix</code> option:</para>
+      <name>Python</name> directory structure. If you don't have
+      access to this directory (e.g. because <name>Python</name> was
+      installed by a sysadmin, and you don't have root access) you can
+      install it somewhere else with the <code>--prefix</code>
+      option:</para>
 
       <codelisting>
 	<line>foo:~$ python setup.py install --prefix=${HOME}/python</line>
@@ -150,10 +152,10 @@
       <name>Python</name> code, nothing needs to be compiled. And the
       only thing needed to install <name>Python</name> code is to
       ensure that the packages and modules are found by your
-      <name>Python</name> interpreter. This may be as simple as
-      including the <code>lib</code> directory of the
-      <name>Anygui</name> distribution in your <code>PYTHONPATH</code>
-      environment variable. In <code>bash</code>
+      <name>Python</name> interpreter. This is as simple as including
+      the <code>lib</code> directory of the <name>Anygui</name>
+      distribution in your <code>PYTHONPATH</code> environment
+      variable. In <code>bash</code>
       (<url>http://www.gnu.org/manual/bash/</url>), you could do
       something like this:</para>
 
@@ -165,8 +167,10 @@
       <code>.bash_profile</code> file, or something equivalent. If you
       don't want to mess around with this, and already have a standard
       directory where you place your <name>Python</name> modules, you
-      can simply copy (or move) the <code>lib/anygui</code>
-      there, or possibly place a symlink in that directory to.</para>
+      can simply copy (or move) the <code>anygui</code> package (found
+      in <code>anygui-&longversion;/lib</code>) there, or possibly
+      place a symlink in that directory to the <code>anygui</code>
+      package.</para>
 
     </section>
 
@@ -179,24 +183,25 @@
     -->
 
     <section>
-      <title>Making Sure You Have a GUI Backend</title>
-
-      <!-- document backend() function -->
+      <title>Making Sure You Have a Usable GUI Package</title>
 
       <para>Once you have <name>Anygui</name> installed, you'll want
-      to make sure you have a usable GUI backend. This is easy to
+      to make sure you have a usable GUI package. This is easy to
       check: Simply start an interactive <name>Python</name>
       interpreter and try to execute the following:</para>
 
       <codelisting>
-	<line>>>> from anygui import Application</line>
-	<line>>>> Application()</line>
+	<line>>>> from anygui import *</line>
+	<line>>>> backend()</line>
       </codelisting>
 
-      <para>If this works, you should be all set for making GUI
-      programs with <name>Anygui</name>. If it raises an exception,
-      however, you will have to install a GUI
-      package. <name>Anygui</name> currently supports the following
+      <para>The <code>backend</code> function will return the name of
+      the backend in use. If it is neither <code>'curses'</code> nor
+      <code>'text'</code> you should be all set for making GUI
+      programs with <name>Anygui</name>. (The <code>'curses'</code>
+      and <code>'text'</code> backends use plain text to emulate
+      graphical interfaces on platforms that don't have them.)
+      <name>Anygui</name> currently supports the following
       packages:</para>
 
       <codelisting>
@@ -206,17 +211,16 @@
 	<line>Java Swing (javagui)   <url>http://www.jython.org</url></line>
 	<line>PyGTK      (gtkgui)    <url>http://www.daa.com.au/~james/pygtk</url></line>
 	<line>Bethon     (beosgui)   <url>http://www.bebits.com/app/1564</url></line>
-	<line>Curses     (cursesgui) <url></url></line>
-	<line>Plain text (textgui)   <url></url></line>
 	<line>PyQt       (qtgui)     <url>http://www.thekompany.com/projects/pykde</url></line>
+	<line>Curses     (cursesgui) -- used when no GUI package is available</line>
+	<line>Plain text (textgui)   -- used if curses is not available</line>
       </codelisting>
 
-      <para>All of these backends are named with a short code (such as
-      <code>msw</code> for <code>mswgui</code>, or PythonWin, and
-      <code>wx</code> for <code>wxgui</code>, or
-      <code>wxPython</code>). The code of the backend currently in use
-      by a program can be retrieved with the <code>backend</code>
-      function.</para>
+      <para>Add <code>gui</code> to name returned by the
+      <code>backend</code> function to get the full name of the
+      backend module (in the <code>anygui.backends</code>
+      package). For instance, the <code>msw</code> backend is found in
+      <code>anygui.backends.mswgui</code> module.</para>
 
       <para><strong>Note:</strong> The <name>BeOS</name> backen is not
       included in the current release (&longversion;), but is
@@ -245,22 +249,11 @@
       <name>Jython</name>, the <name>Java</name> implementation of
       <name>Python</name>.</para>
 
-      <para><strong>Note:</strong> <name>Anygui</name> (using
-      <name>Tkinter</name>) works with <name>Mac OS</name> 9 with
-      <name>Python Classic</name>. There seems to be some problems
-      with <name>Python Carbon</name>.</para>
-
-      <para>In the future <name>Anygui</name> should hopefully work in
-      almost any <name>Python</name> installation, even those which do
-      not have a specific GUI package installed, either by using
-      Dynamic HTML together with the standard <code>webbrowser</code>
-      module, or by providing some simple text interface which is
-      logically equivalent to the GUI version.</para>
-
-      <para>If you don't want to bother with all these backends, you
-      may not have to. Just try to use anygui and see if it works. If
-      you have a usable backend, <name>Anygui</name> will
-      automatically detect it and use it.</para>
+      <para><strong>Note:</strong> In <name>Mac OS</name> 9,
+      <name>Anygui</name> (using <name>Tkinter</name>) works with with
+      <name>Python Classic</name> but not with <name>Python
+      Carbon</name>, which seems to be having problems with
+      <name>Tkinter</name>.</para>
 
     </section>
 
@@ -273,11 +266,11 @@
     <name>Anygui</name> code, see the <code>test</code> and
     <code>demo</code> directories of the distribution. Remember that
     the test scripts are written to test certain features of
-    <code>Anygui</code>, not to represent recommended coding
+    <name>Anygui</name>, not to represent recommended coding
     practices.</para>
 
     <para>Using <name>Anygui</name> is simple; it's simply a matter of
-    importing the widgets (GUI elements) you need from the
+    importing the classes and functions you need from the
     <code>anygui</code> module, e.g.:</para>
 
     <codelisting>
@@ -295,8 +288,9 @@
     instance.</para>
 
     <codelisting>
-      <line># Make widgets here</line>
+      <line># Make components here</line>
       <line>win = Window()</line>
+      <line># Add components to the Window</line>
       <line>app = Application()</line>
       <line>app.add(win)</line>
       <line>app.run()</line>
@@ -337,9 +331,8 @@
 	<line>win = gui.Window()</line>
       </codelisting>
 
-      <para>Although I would recommend this practice in general, the
-      examples in this documentation use the starred import, for
-      simplicity.</para>
+      <para>The examples in this documentation use the starred import,
+      for simplicity.</para>
 
     </section>
 
@@ -369,6 +362,10 @@
       (<url>http://www.mcmillan-inc.com/install1.html</url>), or with
       <code>jythonc</code> with the <code>--deep</code> option or
       equivalent.</para>
+
+      <para><strong>Note:</strong> Compiling <code>jar</code> files of
+      <name>Anygui</name> programs with <name>Jython</name> may not
+      work in the current version.</para>
 
       <para>Note that the namespace handling still works just fine:</para>
 
@@ -481,8 +478,9 @@
 
       <para>As you can see, using <code>modify</code> modifies the
       list, while <code>set</code> replaces it. The
-      <code>modify</code> method is very important for implementing
-      Model-View-Controller systems. (More about that later.)</para>
+      <code>modify</code> method is used for (among other things)
+      implementing Model-View-Controller systems. (More about that
+      later.)</para>
 
       <para>The <code>modify</code> method works as follows: If there
       is a specific internal method for modifying an attribute, that
@@ -507,6 +505,13 @@
 	<line>>>> some_list</line>
 	<line>[1, 2, 3]</line>
       </codelisting>
+
+    </section>
+
+    <section>
+      <title>The update Method</title>
+
+      <para>[[@@@ TBD]]</para>
 
     </section>
 
@@ -552,6 +557,8 @@
       containing <code>Frame</code> is resized. (The vertical version
       is <code>vstretch</code>.)</para>
 
+      <para>[[@@@ Options objects]]</para>
+
       <section>
 	<title>Placing More Than One Widget</title>
 
@@ -582,9 +589,9 @@
     <section>
       <title>Buttons and Event Handling</title>
 
-      <para><code>Buttons</code> (as most <code>Components</code>)
-      work more or less the same way as <code>Labels</code>. You can
-      set their <code>size</code>, their <code>position</code>, their
+      <para><code>Buttons</code> (as most components) work more or
+      less the same way as <code>Labels</code>. You can set their
+      <code>size</code>, their <code>position</code>, their
       <code>text</code>, etc. and then <code>add</code> them to a
       <code>Frame</code> (such as a <code>Window</code>). The thing
       that makes them interesting is that they emit
@@ -620,20 +627,22 @@
       <para>A <emphasis>model</emphasis> is an object that can be
       modified, and that can notify other objects, called
       <code>views</code>, when it has been modified. A
-      <code>controller</code> is an object that can modify the model,
-      in particular as a direct response to a user action (such as
-      clicking the mouse or typing some text). In <name>Anygui</name>,
-      <code>Component</code>s double as both views (showing a model's
-      state to the user) and controllers (letting the user modify the
-      model). Even though <name>Anygui</name> supports using models
-      this way, you can also create complete application without using
-      them.</para>
+      <emphasis>controller</emphasis> is an object that can modify the
+      model, in particular as a direct response to a user action (such
+      as clicking the mouse or typing some text). In
+      <name>Anygui</name>, <code>Component</code>s double as both
+      views (showing a model's state to the user) and controllers
+      (letting the user modify the model). Even though
+      <name>Anygui</name> supports using models this way, you can also
+      create complete application without using them.</para>
       
-      <para>Models are in general subclasses of the <code>Model</code>
-      class (although they don't have to be; see the API Reference
-      below for a description of how they work). The
-      <code>Model</code>s that are included in <name>Anygui</name>
-      are:</para>
+      <para>Models are in general instances of some subclass of the
+      <code>Model</code> class, although they don't have to be; see
+      the API Reference below for a description of how they work. (The
+      <code>Model</code> class is currently internal to the
+      <code>Anygui</code> package, but it can be found int he
+      <code>anygui.Models</code> module.) The <code>Model</code>s that
+      are included in <name>Anygui</name> are:</para>
 
       <codelisting>
 	<line>BooleanModel     -- represents a Boolean value</line>
@@ -661,9 +670,10 @@
       like a view). If the user clicks the <code>CheckBox</code>, the
       model will be changed.</para>
 
-      <para>You can always update views yourself, by calling their
-      <code>update</code> method. This can be useful also if you use a
-      simple value such as a list in an attribute:</para>
+      <para>To keep a view up-to-date manually you can call its
+      <code>update</code> method. This can be useful if you use a
+      simple (non-<code>Model</code>) mutable value such as a list in
+      an attribute:</para>
 
       <codelisting>
 	<line>btn = Button()</line>
@@ -702,6 +712,8 @@
       generate an event (of the type <code>default</code>) when they
       are modified.</para>
 
+      <para>[[@@@ Example]]</para>
+
     </section>
 
     <section>
@@ -720,6 +732,8 @@
 
     <section>
       <title>RadioButtons and RadioGroups</title>
+
+      <para>[[@@@ Behaviour undefined for buttons without group]]</para>
 
       <para><code>RadioButton</code>s are toggle buttons, just like
       <code>CheckBox</code>es. The main differences are that they look
@@ -957,7 +971,9 @@
 
       <para><apiname>link</apiname>(<var>source</var>,
       [<var>event</var>,] <var>handler</var>, <var>weak</var>=0,
-      <var>loop</var>=0)</para>
+      <var>loop</var>=0)</para> <!-- change to [] -->
+
+      <para>[[@@@ default events in parallel with standard events]]</para>
 
       <para>Creates a link in the <name>Anygui</name> event system,
       between the <code>source</code> (any object) and the
@@ -970,8 +986,10 @@
       <code>'default'</code> will be assumed. Setting
       <code>weak</code> to a true value will use weak references when
       setting up the link, so that no objects will be "kept alive" by
-      the event system. A send-loop occurs if an object sends an event
-      "to itself" (i.e. it is the source of a call to
+      the event system. [[@@@ the link]].</para>
+
+      <para>[[@@@ Rewrite]] A send-loop occurs if an object sends an
+      event "to itself" (i.e. it is the source of a call to
       <code>link</code> which hasn't returned at the point where one
       of its methods are about to be activated as a handler). The
       truth value <code>loop</code> decides whether this handler will
@@ -989,18 +1007,19 @@
 
       <para><apiname>send</apiname>(<var>source</var>,
       <var>event</var>=<code>'default'</code>, <var>loop</var>=0,
-      **<var>kwds</var>)</para>
+      **<var>kwds</var>)</para> <!-- change to [] -->
 
       <!-- Add stuff about order, especially any-sources etc. -->
 
       <para>When this is called, any handlers (callables) linked to
       the source, but which will not cause a send-loop (unless
       <code>loop</code> is true) will be called with all the keyword
-      arguments provided, in the order in which they were linked. In
-      addition to the supplied keyword arguments, the event framework
-      will add <code>source</code>, <code>event</code>, and the time
-      (as measured by the standard <name>Python</name> function
-      <code>time.time</code>) when <code>send</code> was called.
+      arguments provided [[@@@]], in the order in which they were
+      linked. In addition to the supplied keyword arguments, the event
+      framework will add <code>source</code>, <code>event</code>, and
+      the time (as measured by the standard <name>Python</name>
+      function <code>time.time</code>) when <code>send</code> was
+      called, supplied with the <code>time</code> argument.
       </para>
 
       <para>Note that <code>source</code>, and <code>event</code>, are
@@ -1065,7 +1084,7 @@
       backends. So, for instance, <code>Button</code> subclasses
       <code>AbstractButton</code>. These abstract components, again,
       subclass <code>AbstractComponent</code>, which implements
-      behaviour common to all componnets.</para>
+      behaviour common to all components.</para>
 
       <para>Perhaps the most important behaviour is attribute handling
       (inherited from the <code>Attrib</code> mixin), which means that
@@ -1098,7 +1117,7 @@
       methods. These will be described with the individual classes
       below.</para>
 
-      <para><strong>Assignee and update()</strong></para>
+      <para><apiname>update</apiname>()</para>
       
       <para>When an attribute of a <code>Component</code> (or
       <code>Application</code>, <code>RadioGroup</code>, or an
@@ -1232,8 +1251,8 @@
       constructing new <code>Window</code>s after
       <code>Application.run</code> has been called, you should ensure
       that you <code>add</code> your <code>Window</code> to your
-      running <code>Application</code> <emphasis>after</emphasis> all
-      the <code>Components</code> have been added to your
+      running <code>Application</code> after all the
+      <code>Components</code> have been added to your
       <code>Window</code>; otherwise, you may see them appearing and
       moving about as <name>Anygui</name> takes care of the
       layout. (Before <code>Application.run</code> is called, this is
@@ -1273,6 +1292,8 @@
     
       <para><strong>class CheckBox</strong></para>
 
+      <!-- @@@ see listbox? -->
+
       <para><code>CheckBox</code> is a kind of button, and thus will
       also generate <code>'click'</code> and <code>'default'</code>
       events when clicked. But in addition, each <code>CheckBox</code>
@@ -1300,8 +1321,8 @@
       <code>Options</code> object (see below) which gives information
       about how the object should be laid out. These options can be
       overridden with keyword arguments, and all this information will
-      be passed to the <code>LayougManager</code> (see below) of the
-      <code>Frame</code>, if any. This <code>LayougManager</code> is
+      be passed to the <code>LayoutManager</code> (see below) of the
+      <code>Frame</code>, if any. This <code>LayoutManager</code> is
       stored in the <code>layout</code> property.</para>
 
       <para><apiname>remove</apiname>(<var>comp</var>)</para>
