@@ -2,6 +2,8 @@
 import re
 name_pat = re.compile('[a-zA-Z_][a-zA-Z_0-9]*')
 
+class NoChange(Exception): pass
+
 class Rule:
     
     def __init__(self, ruleString):
@@ -13,11 +15,13 @@ class Rule:
 
     def fire(self, scope):
         name = self.name
+        value = eval(self.expr, scope)
+        if value == scope[name]: raise NoChange
         scope[name] = eval(self.expr, scope)        
 
 # TODO: - Add "rule checks" -- if a rule is satisfied, dependencies
 #         are irrelevant.
-#       - Add iteration mechanism to make rule effects propagate
+#       - Fix iteration mechanism to make rule effects propagate
 #         through several levels -- not just one
 #       - Refactor adjust()
 #       - Write separate test suite
@@ -48,19 +52,18 @@ class RuleEngine:
         for key in undef.keys():
             if not vals.has_key(key):
                 del undef[key]
-        more = 1
-        while undef and more:
-            more = 0
+        stable = 0
+        while undef and not stable:
+            stable = 1
             for name in undef.keys():
                 for rule in self.rules[name]:
                     for dep in rule.deps:
-                        if name == 'geometry': print dep
-                        if undef.has_key(dep):
-                            break
-                    else:
-                        rule.fire(vals)
+                        if undef.has_key(dep): break
+                    else:               
+                        try: rule.fire(vals)
+                        except NoChange: pass
+                        else: stable = 0
                         del undef[name]
-                        more = 1
                         break
         return undef.keys()
 
@@ -86,12 +89,15 @@ if __name__ == '__main__':
     vals['size'] = 9999, 9999
     vals['position'] = 10, 10
     vals['geometry'] = 10, 10, 9999, 9999
-    eng.adjust(vals, ['y', 'x']) # 'x' shouldn't be necessary... Use value checks
+    print eng.adjust(vals, ['y', 'x']) # 'x' shouldn't be necessary... Use value checks
+
+    """
     print vals['position'], vals['geometry'] # Geometry isn't set properly here...
     vals['position'] = 42, 42
-    eng.adjust(vals, ['position'])
+    print eng.adjust(vals, ['position'])
     print (vals['x'], vals['y']), vals['geometry']
 
     vals['geometry'] = 1, 2, 3, 4
-    eng.adjust(vals, ['geometry'])
+    print eng.adjust(vals, ['geometry'])
     print (vals['x'], vals['y'], vals['width'], vals['height']), vals['position']+vals['size']
+    """
