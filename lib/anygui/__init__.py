@@ -1,4 +1,4 @@
-_backends = 'msw gtk x java wx tk beos qt curses text'
+_backends = 'msw gtk java wx tk beos qt curses text'
 
 import os, sys
 

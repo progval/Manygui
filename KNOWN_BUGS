@@ -6,6 +6,10 @@ are shown before their contents has been placed properly. That can be
 fixed by rearranging the order in which the _ensure_* methods are
 called, by calling _ensure_visible last, for instance.)
 
+test_defaults doesn't place the text field correctly in tkinter
+in MacPython. It works with tkinter in Windows, though. (Has this
+got to do with slow updates of layout?)
+
 In test_textfield the update button resets the text field in wxgui.
 
 There seems to be some infinite recursion associated with the text
