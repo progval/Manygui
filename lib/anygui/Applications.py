@@ -9,8 +9,10 @@ class AbstractApplication(Attrib,anygui.Defaults.Application):
     _running = 0
     _name = 'Anygui App'
     _version = '0'
+    #__shared_state = {} # For the Borg pattern
 
     def __init__(self, **kwds):
+        #self.__dict__ = self.__shared_state # Borg behaviour
         Attrib.__init__(self)
         self.parseKwds(**kwds)
         self._windows = []

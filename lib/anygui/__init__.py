@@ -37,11 +37,12 @@ __all__ = """
 
 """.split()
 
+# When the Borg pattern is in use, this is no longer needed:
 def application():
     'Returns the global application object'
     #global _application
     if not _application:
-        #_application = factory()._map['Application']()
+        #_application = backendModule().Application()
         raise RuntimeError, 'no application exists'
     return _application
 
