@@ -256,6 +256,31 @@ class AbstractWrapper:
         but may be used in a future version.        
         """
 
+    def create(self, *args, **kwds):
+        """
+        Create the native widget, if necessary.
+
+        If the application is running and self.widget is non-existent
+        or None or, create a new widget using self.widgetFactory(),
+        optionally supplying the given positional and keyword
+        arguments.
+        """
+        # FIXME: Deal with dummy widgets...
+        if application().isRunning():
+            try:
+                widget = self.widget
+            except AttributeError:
+                widget = None
+            try:
+                assert self.widget.isDummy()
+            except (AttributeError, AssertionError):
+                if widget is None:
+                    self.widget = self.widgetFactory(*args, **kwds)
+                    self.setUp()        
+            else:
+                self.widget = self.widgetFactory(*args, **kwds)
+                self.setUp()
+
     def destroy(self):
         """
         Dispose of the native widget.
@@ -270,8 +295,18 @@ class AbstractWrapper:
         resources. This method is used by the Proxy's destroy()
         method.
         """
-        raise NotImplementedError, 'should be implemented by subclasses'
+        self.tearDown()
+        self.internalDestroy()
+        self.widget = None
 
+    def internalDestroy(self):
+        """
+        Native widget destruction.
+
+        This method should be implemented in subclasses and should
+        invoke the native mechanism for disposing of a widget.
+        """
+        raise NotImplementedError, 'should be implemented by subclasses'
 
     def widgetFactory(self, *args, **kwds):
         """
@@ -281,3 +316,21 @@ class AbstractWrapper:
         Wrapper subclass.
         """
         raise NotImplementedError
+
+    def setUp(self):
+        """
+        Sets up a new native widget. Called by create().
+
+        May be overridden in subclasses to set up native event
+        handlers and the like. (If event handlers are handled through
+        enableEvent, this may not be necessary.)
+        """
+
+    def tearDown(self):
+        """
+        Clears up after a native widget. Called by destroy().
+
+        May be overridden in subclasses to make sure that all native
+        event handlers (those added by setUp and those added by
+        enableEvent) are removed.
+        """
