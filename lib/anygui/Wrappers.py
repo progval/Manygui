@@ -1,6 +1,5 @@
-
 from anygui import application
-from anygui.Utils import getSetter
+from anygui.Utils import getSetters
 
 """
 The back-end wrapper presents a unified and simple interface for
@@ -38,6 +37,8 @@ class AbstractWrapper:
         later point, when the event loop has been entered.
         """
         # TODO: Add to list of wrappers that need to be prodded...
+        #       (In Application, e.g. addWrapper?)
+        #       Should the Wrapper realy prod itself?
         self.proxy = proxy
         self.widget = None
         self.inMainLoop = 0
@@ -54,14 +55,26 @@ class AbstractWrapper:
         Wrapper is free to ignore any or all of the state variables
         supplied. If no native widget has been created, this method
         will have no effect.
+
+        The default implementation automatically looks for setter
+        methods in the Wrapper object (with the function
+        anygui.Utils.getSetters). This will find the most specific set
+        of setters, either setting attributes individually such as
+        setWidth and setHeight (not very specific) or setting more
+        attributes simultaneously like setHeightAndWidth (more
+        specific). The attribute names in the setters can be in any
+        order, but cannot contain the word 'And', since that's used as
+        a separator.
+
+        Any attributes that aren't covered by an appropriate setter
+        method are ignored.
         """
-        
-        # TODO: - Add support for aggregated setter methods
-        #       - Add doc about default implementation
-        
-        for key, val in state.items():
-            setter = getSetter(self, key)
-            if callable(setter): setter(val)
+        setters, unhandled = getSetters(self, state.keys())
+        for setter, params in setters:
+            kwds = {}
+            for key in params:
+                kwds[key] = state[key]
+            setter(**kwds)
 
     def getPrefs(self):
         """

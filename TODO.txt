@@ -146,3 +146,10 @@ Smaller issues:
   an event path etc.) with the Anygui dispatcher to the documentation.
 
 * Document standard way of closing a window programmatically.
+
+* Add a fallback mechanism, making it possible to "fall back" on some
+  other interface, e.g. a cmd.Cmd object. Also add a wrapper mechanism
+  to ease the use of cmd.Cmd objects as event handlers (which double
+  as fallbacks). A possible "callback protocol" is to require the
+  fallback to be callable, and to call it if no suitable backend (save
+  e.g. cursesgui and textgui) is found.
