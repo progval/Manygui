@@ -6,8 +6,8 @@ class AbstractWindow(AbstractFrame):
     _title = "Untitled"
 
     def __init__(self, *args, **kw):
-        AbstractFrame.__init__(self, *args, **kw)
         self.visible = 0
+        AbstractFrame.__init__(self, *args, **kw)
         application()._add_window(self)
         
     def destroy(self):
