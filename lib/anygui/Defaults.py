@@ -20,6 +20,20 @@ class Button:
     _visible = 1
     _enabled = 1
 
+class Canvas:
+
+    _text = 'Canvas' # Hardly needed...
+    _x = 0
+    _y = 0
+    _width = 400
+    _height = 300
+    _hmove = 0
+    _vmove = 0
+    _hstretch = 0
+    _vstretch = 0
+    _visible = 1
+    _enabled = 1
+
 class CheckBox:
 
     _text = 'CheckBox'
