@@ -149,15 +149,8 @@ class ComponentWrapper(AbstractWrapper):
             parent = self.proxy.container.wrapper.widget
         else:
             parent = 0
-        t = self._wndclass
-        if t is None:
-            self._i_wndclass = 0
-        elif type(t) is type(''):
-            self._i_wndclass = c_string(t)
-        elif type(t) is type(0):
-            self._i_wndclass = t
         widget = user32.CreateWindowEx(self._win_style_ex,
-                                         self._i_wndclass,
+                                         self._wndclass,
                                          0,
                                          self._win_style,
                                          0,
