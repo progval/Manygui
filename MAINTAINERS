@@ -6,7 +6,7 @@ Thomas Heller               core, wxgui, mswgui*
 Alex Martelli               dhtmlgui*
 Greg Ewing                  xgui*
 Matthew Schinckel           beosgui
-Kalle Svensson              gtkgui*
+Kalle Svensson              gtkgui
 Joe Knapka                  tkgui
 Just van Rossum             macgui*
 Shanky Tiwari               pyqtgui*, javagui
