@@ -52,7 +52,7 @@ def _backend_passthrough():
             mod = _dotted_import('anygui.backends.%sgui' % name,)
             for key in __all__:
                 globals()[key] = mod.__dict__[key]
-        except (ImportError, AttributeError):
+        except (ImportError, AttributeError, KeyError):
             if DEBUG:
                 import traceback
                 traceback.print_exc()

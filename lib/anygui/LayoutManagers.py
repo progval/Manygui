@@ -17,17 +17,30 @@ class LayoutManager:
     def __init__(self):
         self._container = None
 
-    def add(self,*items,**kws):
+    def add(self,items,options=None,**kws):
+        items = flatten(items)
         for item in items:
             if item not in self._container._contents:
                 item._set_container(self._container)
+        if options:
+            options.__dict__.update(kws)
+            kws.update(options.__dict__)
         self.add_components(*items,**kws)
+
+    def remove(self,item):
+        if item in self._container._contents:
+            return self._container.remove(item)
+        else:
+            self.remove_component(item)
 
     def configure(self,**kws):
         raise UnimplementedMethod(self,"resized")
 
     def add_components(self,*items,**kws):
         raise UnimplementedMethod(self,"add")
+
+    def remove_component(self,item):
+        pass
 
     def resized(self,dw,dh):
         raise UnimplementedMethod(self,"resized")

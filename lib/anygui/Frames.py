@@ -25,12 +25,12 @@ class AbstractFrame(AbstractComponent, Defaults.Frame):
     def _get_contents(self):
         return self._contents
         
-    def add(self,*items,**kws):
+    def add(self,items,options=None,**kws):
         """ Add the given items to this container, passing the items and
         the keyword arguments along to the layout manager, if one is
         present. Note that different layout managers may have different
         expectations about **kwds, and may impose restrictions on the
-        contents of *items. See LayoutManagers.py. """
+        contents of items. See LayoutManagers.py. """
         items = flatten(items)
         for component in items:
             # _set_container() adds component to self._contents.
@@ -38,13 +38,14 @@ class AbstractFrame(AbstractComponent, Defaults.Frame):
 
         # Inform the layout manager, if any.
         if self._layout:
-            self._layout.add(*items,**kws)
+            self._layout.add(items,options,**kws)
 
     def remove(self, component):
         "If the given component is among the contents of this Frame, removes it."
         if component in self._contents:
             component._set_container(None)
-        self.layout.resized(0,0)
+            self.layout.remove(component)
+            #self.layout.resized(0,0)
 
     def destroy(self):
         while self._contents:

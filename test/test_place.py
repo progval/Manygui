@@ -55,7 +55,7 @@ def main():
 
     win.add(view1, position = (10, 10), border = 1)
     
-    win.add(cb1, cb2, left = 10, top = (view1, 20))
+    win.add((cb1, cb2), left = 10, top = (view1, 20))
 
     win.add(rbs, left = (view1, 20), top = 10, direction = 'down')
 
