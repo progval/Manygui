@@ -1,9 +1,9 @@
-from AboutAnyguiDlg import AboutAnyguiDlg
-from AnyguiOpenFileDlg import AnyguiOpenFileDlg
+from AboutDialog import AboutDialog
+from OpenFileDialog import OpenFileDialog
 
 __all__="""
 
-AboutAnyguiDlg
-AnyguiOpenFileDlg
+AboutDialog
+OpenFileDialog
 
 """.split()
