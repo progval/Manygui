@@ -19,21 +19,23 @@ But they're cute, and they're cuddly, and they're ready to please.
 
 def init_field():
     global ta, lbl
-    ta.text = the_text
+    ta.model.value = the_text
     ta.selection = (23,30)
     update_label()
 
 def update_label():
     global ta, lbl
     sel = ta.selection
-    text = ta.text
+    text = ta.model.value
     lbl.text = text[:sel[0]] + \
                '[' + text[sel[0]:sel[1]] + ']' + \
                 text[sel[1]:]
 
-ta = TextArea(size=(150,100), text='')
-ta2 = TextArea(size=ta.size, text='Edit me... :P', editable=0)
-lbl = Label(width=150, height=250, text = '')
+ta = TextArea(size=(150,100))
+ta.model.value = ''
+ta2 = TextArea(size=ta.size, editable=0)
+ta2.model.value = 'Edit me... :P'
+lbl = Label(width=150, height=250, text='')
 
 update_btn = Button(width=50, height=30, text='Update', action=update_label)
 reset_btn = Button(width=50, height=30, text='Reset', action=init_field)

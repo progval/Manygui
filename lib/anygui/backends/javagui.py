@@ -295,9 +295,9 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
 class TextField(ComponentMixin, AbstractTextField):
     _java_class = swing.JTextField
 
-    def _backend_text(self):
-        if self._java_comp:
-            return self._java_comp.text
+    #def _backend_text(self):
+    #    if self._java_comp:
+    #        return self._java_comp.text
 
     def _backend_selection(self):
         if self._java_comp:
@@ -320,15 +320,19 @@ class TextField(ComponentMixin, AbstractTextField):
     def _ensure_events(self):
         if self._java_comp:
             self._java_comp.actionPerformed = self._java_enterkey
+            self._java_comp.focusLost = self._java_focus_lost
 
     def _java_enterkey(self, event):
         self.do_action()
+
+    def _java_focus_lost(self, event):
+        self.model.value = self._java_comp.text # FIXME: Will cause self-update
 
 class ScrollableTextArea(swing.JPanel):
     # Replacement for swing.JTextArea
 
     # FIXME: Constructor doesn't seem to work right, so an
-    # explicit method is needed.
+    # explicit method is needed. (May not be the case...)
     def init(self):
         self._jtextarea = swing.JTextArea()
         self.layout = awt.BorderLayout()
@@ -392,6 +396,14 @@ class TextArea(ComponentMixin, AbstractTextArea):
         # FIXME: Ugly hack!
         if self._java_comp and hasattr(self._java_comp, '_jtextarea'):
             self._java_comp.setEditable(self._editable)
+
+    def _ensure_events(self):
+        # FIXME: Ugly hack!
+        if self._java_comp and hasattr(self._java_comp, '_jtextarea'):
+            self._java_comp._jtextarea.focusLost = self._java_focus_lost
+
+    def _java_focus_lost(self, event):
+        self.model.value = self._java_comp.getText() # FIXME: Will cause self-update
 
 ################################################################
 

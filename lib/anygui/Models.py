@@ -31,6 +31,14 @@ class ListModel(Attrib, Observable, UserList):
         Observable.__init__(self)
         UserList.__init__(self, *arg, **kw)
 
+    def _set_value(self, value):
+        self.data = list(value)
+        self.add_hint('_set_value', value)
+        self.notify_views()
+
+    def _get_value(self):
+        return list(self)
+
     def __setitem__(self, i, item):
         UserList.__setitem__(self, i, item)
         self.add_hint('__setitem__', i, item)
@@ -107,6 +115,9 @@ class TextModel(ListModel):
         if len(arg) > 0:
             arg = (list(arg[0]),) + arg[1:]
         UserList.__init__(self, *arg, **kw)
+
+    def _get_value(self):
+        return str(self)
 
     def __repr__(self): return repr(''.join(self.data))
 

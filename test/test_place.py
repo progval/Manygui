@@ -63,7 +63,9 @@ def main():
 	    hstretch = 1, vstretch = 1)#, border = 1, hscroll = 1, vscroll = 1)
 
   label = Label(text = "Flavour:")
-  entry = TextField(width = 200, height = 28, text="Hi")
+  #entry = TextField(width = 200, height = 28, text="Hi")
+  entry = TextField(width = 200, height = 28)
+  entry.model.value = "Hi"
   win.place(label, left = 10, top = (cb1, 20))
   win.place(entry, left = 10, top = (label, 10), border = 1)
 

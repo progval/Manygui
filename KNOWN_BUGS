@@ -1,3 +1,8 @@
+Only javagui supports TextModel yet.
+
+Setting tf.model.value moves selection to the end of
+textfields/textareas in javagui.
+
 Tabbing between fields and/or other controls doesn't work
 in mswgui.
 
