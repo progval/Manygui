@@ -99,3 +99,6 @@ Smaller issues:
 
 * Remove use of id(), since it doesn't work correctly in
   Jython.
+
+* _Only_ attempt to use the backends in ANYGUI_WISHLIST,
+  if any?

@@ -4,6 +4,8 @@ __all__ = anygui.__all__
 
 ################################################################
 
+# In serious need of a rehaul
+
 from javax import swing
 from java import awt
 import cgi, jarray, java
@@ -15,7 +17,7 @@ class ComponentMixin:
 
     _java_comp = None
     _java_id = None
-    _java_style = 0 # FIXME: Is this applicable in Java?
+    _java_style = 0
     
     def _is_created(self):
         return self._java_comp is not None
@@ -58,7 +60,7 @@ class ComponentMixin:
     def _ensure_events(self):
         pass
 
-    def _ensure_geometry(self): # FIXME: Default handling
+    def _ensure_geometry(self):
         if self._java_comp:
             comp = self._java_comp
             if comp.__class__ == swing.JFrame:
