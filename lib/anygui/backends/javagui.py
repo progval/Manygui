@@ -173,6 +173,13 @@ class Canvas(ComponentMixin, AbstractCanvas):
         self._java_comp.canvas = self
         return result
 
+    def _ensure_events(self):
+        if self._java_comp:
+            self._java_comp.mouseReleased = self._java_clicked
+
+    def _java_clicked(self, event):
+        send(self, 'click', loop=1, x=event.x, y=event.y)
+
     def clear(self):
         img = awt.image.BufferedImage(self._width,
                                       self._height,

@@ -9,6 +9,10 @@ win = Window(size=(300,300))
 cvs = Canvas(size=win.size)
 win.add(cvs)
 
+def click(x, y, **kw):
+    print 'Mouse clicked at (%i, %i)' % (x, y)
+link(cvs, 'click', click)
+
 # Taken from http://piddle.sourceforge.net/sample1.html
 
 # FIXME: Some of this is *definitely* not quite right yet...
