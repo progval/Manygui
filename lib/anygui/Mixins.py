@@ -1,6 +1,6 @@
 "Mixins: mix-in classes for the anygui package"
 
-from Exceptions import SetAttributeError, GetAttributeError
+from Exceptions import SetAttributeError, GetAttributeError, UnimplementedMethod
 from Events import link, send
 #import weakref
 weakref = None
@@ -58,7 +58,8 @@ class Attrib:
 
     def update(self, **kw):
         "this should ALWAYS be overridden by widgets -- here just for debug"
-        print "update(%r,%r)"%(self, kw)
+        #print "update(%r,%r)"%(self, kw)
+        raise UnimplementedMethod, (self, "update")
 
 
 class DefaultEventMixin:

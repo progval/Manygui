@@ -46,6 +46,12 @@ class BooleanModel(Attrib, Assignee):
 
 class ListModel(Attrib, Assignee, UserList):
 
+    # HACK: Dummy implementation of update() Needed because attrib
+    # will call it when we assign to self.data. Should use self._data,
+    # but it's inherited from UserList...
+    
+    def update(self, **ignore): pass
+
     def __init__(self, *arg, **kw):
         Attrib.__init__(self, **kw)
         Assignee.__init__(self)
@@ -117,7 +123,6 @@ class TextModel(ListModel):
     data = []
 
     def __init__(self, *arg, **kw):
-        # HACK: Make string argument into list:
         if len(arg) > 0:
             arg = (list(arg[0]),) + arg[1:]
         ListModel.__init__(self, *arg, **kw)
