@@ -573,7 +573,7 @@ class ToggleButtonMixin(ComponentMixin):
         ComponentMixin.__init__(self,*args,**kws)
         self._value = value
 
-    def _curs_clicked(self):
+    def _curs_clicked(self,ev):
         """Click on button."""
         self.on = not self.on # FIXME: ??
         self._redraw()
@@ -609,7 +609,7 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
         ToggleButtonMixin.__init__(self,*args,**kws)
         AbstractRadioButton.__init__(self,*args,**kws)
 
-    def _curs_clicked(self):
+    def _curs_clicked(self,ev):
         if self.group is not None:
             self.group.value = self.value
         self._redraw()
