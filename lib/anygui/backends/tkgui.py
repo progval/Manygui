@@ -1,6 +1,7 @@
 
 from anygui.backends import *
 __all__ = anygui.__all__
+from anygui.Components import AbstractComponent
 
 ################################################################
 
@@ -62,7 +63,7 @@ class ComponentMixin:
         pass
 
     def _ensure_geometry(self):
-        if self._tk_comp:
+        if self._tk_comp and self._visible:
             # FIXME: Does this work with windows?
             self._tk_comp.place(x=self._x, y=self._y,
                                 width=self._width, height=self._height)
@@ -488,6 +489,17 @@ class TextArea(ComponentMixin, AbstractTextArea, DisabledTextBindings):
 
 class Frame(ComponentMixin, AbstractFrame):
     _tk_class = Tkinter.Frame        
+
+    # We need some special machinery here to ensure subcomponents
+    # get resized properly.
+    def container_resized(self, cdw, cdh):
+        old_w = self._width
+        old_h = self._height
+        AbstractComponent.container_resized(self,cdw,cdh)
+        dw = self._width - old_w
+        dh = self._height - old_h
+        for comp in self._contents:
+            comp.container_resized(dw,dh)
 
 ################################################################
 
