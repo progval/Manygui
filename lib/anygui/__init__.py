@@ -4,7 +4,13 @@ _backends = 'x java wx tk beos'
 wishlist = os.environ.get('ANYGUI_WISHLIST', _backends).split()
 
 # set to true to see tracebacks when searching for factories
-DEBUG=0
+DEBUG = os.environ.get('ANYGUI_DEBUG', 0)
+# Non-empty string may be zero (i.e. false):
+if DEBUG:
+    try:
+        DEBUG = int(DEBUG)
+    except ValueError:
+        pass
 
 _application = None
 _factory = None
