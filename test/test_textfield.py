@@ -1,4 +1,4 @@
-from anygui import Window, TextField, Button, Label, application
+from anygui import Window, TextField, Button, Label, Application
 
 def init_field():
     global tf, lbl
@@ -25,6 +25,8 @@ lbl = Label(width = 150, height=25, text = '')
 update_btn = Button(width=50, height=30, text='Update', action=update_label)
 reset_btn = Button(width=50, height=30, text='Reset', action=init_field)
 
+app = Application()
+
 win = Window(title='TextField test', width=200, height=245)
 
 win.place([tf, tf2, lbl], left=25, right=25, top=40, hstretch=1,
@@ -38,4 +40,4 @@ update_label()
 
 win.show()
 
-application().run()
+app.run()
