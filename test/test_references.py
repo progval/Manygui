@@ -1,8 +1,17 @@
 """
+
+Setup
+
 >>> from anygui.References import *
 >>> class Object:
 ...     def __repr__(self):
 ...         return '<Object>'
+>>> import sys
+>>> def gc():
+...     pass
+>>> if sys.platform[:4] == 'java':
+...     import java.lang
+...     gc = java.lang.System.gc
 
 ref(), WeakReference and StrongReference:
 
@@ -26,7 +35,7 @@ ref(), WeakReference and StrongReference:
 >>> d[w] = 'test'
 >>> d[s]
 'test'
->>> del o, s
+>>> del o, s; gc()
 >>> w()
 >>> d[w]
 'test'
@@ -43,7 +52,7 @@ Reference callbacks:
 >>> r = ref(o, weak=1)
 >>> r.callbacks.append(cb1)
 >>> r.callbacks.append(cb2)
->>> del o
+>>> del o; gc()
 This is callback 1
 This is callback 2
 

@@ -1,5 +1,5 @@
 
-import UserList, UserDict
+import UserList, UserDict, sys, types
 
 weakref = None
 
@@ -67,8 +67,8 @@ class CallableWrapper:
             return self.func(self.obj, *args, **kwds)
 
 def is_callable_instance(obj):
-    return hasattr(obj, '__call__') and \
-           hasattr(obj.__call__, 'im_func')
+    return type(obj) is types.InstanceType and \
+           hasattr(obj, '__call__')
 
 def is_method(obj):
     return hasattr(obj, 'im_self')
