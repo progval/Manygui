@@ -10,8 +10,7 @@ Tentative release date: December 10th, 2001
   signals
 
 * Adjust defaults, and improve window staggering
-
-* Update tests to avoid multiline Labels
+  (needs a mechanism to find the top window)
 
 Objectives for version 0.2:
 ---------------------------

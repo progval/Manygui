@@ -17,6 +17,8 @@ They come from a long way overseas,
 But they're cute, and they're cuddly, and they're ready to please.
 """
 
+# FIXME: Change names -- text area used instead of label
+
 def init_field(**kw):
     global ta, lbl
     ta.model.value = the_text
@@ -35,7 +37,7 @@ ta = TextArea(size=(150,100))
 ta.model.value = ''
 ta2 = TextArea(size=ta.size, editable=0)
 ta2.model.value = 'Edit me... :P'
-lbl = Label(width=150, height=250, text='')
+lbl = TextArea(width=150, height=250, text='', editable=0)
 
 update_btn = Button(width=50, height=30, text='Update')
 link(update_btn, update_label)

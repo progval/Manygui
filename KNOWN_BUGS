@@ -1,4 +1,5 @@
-RadioGroups don't work properly in Jython.
+test_textarea doesn't work properly. (Swap
+from Label to TextArea needs ironing out...)
 
 Some widgets (e.g. buttons) in some backends (e.g.
 mswgui) don't support _ensure_text (and possibly
@@ -14,7 +15,7 @@ don't work properly in tkgui.
 tkgui radiobuttons (and probably checkboxes) don't
 work properly. (See test_radiobutton.py,
 for example.) RadioGroup doesn't work properly in
-wxgui.
+wxgui or javagui.
 
 id() is broken in Jython and will probably not be fixed
 soon. Therefore, any use of id() in Anygui (such as in
