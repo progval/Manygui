@@ -15,5 +15,13 @@ for b in anygui._backends:
         log("[%sgui ignored]" % b)
 
 for mod, name in backends:
-    assert mod.__all__ == anygui.__all__, ('%sgui should export the same API as anygui' % name)
-    log("%sgui OK" % name)
+    if mod.__all__ != anygui.__all__:
+        log('Export error for %sgui' % name )
+        log('anygui exports:')
+        for exp in anygui.__all__:
+            log('\t -%s' % exp)
+        log('%sgui exports:' % name)
+        for exp in mod.__all__:
+            log('\t- %s' % exp)
+    raise AssertionError('%sgui should export the same API as anygui!' % name)
+    log('%sgui OK' % name)
