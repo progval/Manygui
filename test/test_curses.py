@@ -7,6 +7,7 @@ win.geometry=(10,5,40,8)
 
 win2 = Window(geometry=(20,15,40,8),title="Window 2")
 win2.geometry=(20,15,40,8)
+# Test...
 
 lb1 = Label(geometry=(3,3,20,3),text="Label 1")
 win2.add(lb1)
