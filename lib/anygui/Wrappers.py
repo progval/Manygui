@@ -66,7 +66,7 @@ class AbstractWrapper:
         The resulting mapping is used by getSetters() during setter
         dispatch in update().        
         """
-        self.aggregates[setter] = setter
+        self.aggregates[signature] = setter
 
     def getSetters(self, attrs):
         """
@@ -94,8 +94,10 @@ class AbstractWrapper:
             for attr in candidate[0]:
                 if not attr in attrs: break
             else:
-                for attr in candidate[0]: attrs.remove(attr)
-                result.append(attr[1], attr[0])
+                setter = getSetter(self, candidate[1])
+                if not setter is None:
+                    for attr in candidate[0]: attrs.remove(attr)
+                    result.append((setter, attr[0]))
         # Get the plain setters:
         unhandled = []
         for attr in attrs:
