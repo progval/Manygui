@@ -14,7 +14,8 @@ Short-term Objectives/FIXMEs [mlh]
 * Clear up default argument issue
 
 * Use a fixed set of attributes (or something similar)?
-  Remove blocked names?
+  Remove blocked names? Disallow setting non-existant attributes
+  (except possibly with an initial underscore)?
 
 * Find a general scheme for event setup and calling rawModify from
   backend wrappers
