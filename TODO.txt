@@ -13,7 +13,8 @@ Short-term Objectives/FIXMEs [mlh]
 
 * Add test suite for Rectangles.py
 
-* Fix Model classes to work with push/pull mechanism
+* Fix Model classes to work with push/pull mechanism; add 'modified'
+  event (or something equivalent).
 
 * Rewrite AbstractApplication; clear up prodding issue
 
