@@ -3,44 +3,56 @@
                        ANYGUI LICENSE AGREEMENT
                        ------------------------
 
-1. This  LICENSE  AGREEMENT  is  between  the authors  of  the  anygui
-software distribution ("Authors"),  and the Individual or Organization
-("Licensee")  accessing and  otherwise  using the  anygui software  in
-source or binary form and its associated documentation.
+1. This LICENSE AGREEMENT is  between the copyright holders of version
+0.1 of the anygui software distribution ("Copyright Holders"), and the
+Individual or Organization  ("Licensee") accessing and otherwise using
+the anygui  software, version 0.1  ("Anygui 0.1") in source  or binary
+form and its associated documentation.
 
 2. Subject to the terms and  conditions of this License Agreement, the
-Authors hereby grant Licensee a nonexclusive, royalty-free, world-wide
-license to reproduce, analyze,  test, perform and/or display publicly,
-prepare derivative  works, distribute, and otherwise  use anygui alone
-or in  any derivative version,  provided, however, that  the Authors's
-License  Agreement  and  the  Authors's  notice  of  copyright,  i.e.,
-"Copyright (c) 2001 The Anygui Team; All Rights Reserved" are retained
-in anygui alone or in any derivative version prepared by Licensee.
+Copyright Holders hereby  grant Licensee a nonexclusive, royalty-free,
+world-wide license to reproduce, analyze, test, perform and/or display
+publicly,  prepare  derivative works,  distribute,  and otherwise  use
+Anygui 0.1 alone or in any derivative version, provided, however, that
+the Copyright Holders's License  Agreement and the Copyright Holders's
+notice of  copyright, i.e., "Anygui  0.1 Copyright (c) 2001  by Magnus
+Lie Hetland, Thomas Heller,  Alex Martelli, Joseph A.  Knapka, Matthew
+Schinckel, Kalle Svensson, and contributors. All rights reserved." are
+retained in Anygui 0.1 alone  or in any derivative version prepared by
+Licensee.
 
 3. In the event  Licensee prepares a derivative work  that is based on
-or  incorporates anygui or  any part  thereof, and  wants to  make the
+or incorporates Anygui 0.1 or any  part thereof, and wants to make the
 derivative work available to  others as provided herein, then Licensee
 hereby  agrees to  include in  any such  work a  brief summary  of the
-changes made to anygui.
+changes made to Anygui 0.1.
 
-4. The Authors are  making anygui available to Licensee  on an "AS IS"
-basis. THE  AUTHORS MAKE NO REPRESENTATIONS OR  WARRANTIES, EXPRESS OR
-IMPLIED. BY  WAY OF EXAMPLE, BUT  NOT LIMITATION, THE  AUTHORS MAKE NO
-AND  DISCLAIMS ANY  REPRESENTATION OR  WARRANTY OF  MERCHANTABILITY OR
-FITNESS FOR ANY PARTICULAR PURPOSE OR  THAT THE USE OF ANYGUI WILL NOT
-INFRINGE ANY THIRD PARTY RIGHTS.
+4. The Copyright  Holders are making Anygui 0.1  available to Licensee
+on an "AS IS" basis.  THE COPYRIGHT HOLDERS MAKE NO REPRESENTATIONS OR
+WARRANTIES, EXPRESS OR IMPLIED. BY WAY OF EXAMPLE, BUT NOT LIMITATION,
+THE  COPYRIGHT HOLDERS  MAKE NO  AND DISCLAIMS  ANY  REPRESENTATION OR
+WARRANTY OF  MERCHANTABILITY OR FITNESS FOR ANY  PARTICULAR PURPOSE OR
+THAT THE USE OF ANYGUI 0.1 WILL NOT INFRINGE ANY THIRD PARTY RIGHTS.
 
-5. THE AUTHORS SHALL  NOT BE LIABLE TO LICENSEE OR  ANY OTHER USERS OF
-ANYGUI FOR  ANY INCIDENTAL, SPECIAL, OR CONSEQUENTIAL  DAMAGES OR LOSS
-AS A RESULT OF MODIFYING,  DISTRIBUTING, OR OTHERWISE USING ANYGUI, OR
-ANY DERIVATIVE THEREOF, EVEN IF ADVISED OF THE POSSIBILITY THEREOF.
+5. THE COPYRIGHT HOLDERS SHALL NOT  BE LIABLE TO LICENSEE OR ANY OTHER
+USERS  OF ANYGUI  0.1 FOR  ANY INCIDENTAL,  SPECIAL,  OR CONSEQUENTIAL
+DAMAGES OR LOSS  AS A RESULT OF MODIFYING,  DISTRIBUTING, OR OTHERWISE
+USING ANYGUI  0.1, OR ANY DERIVATIVE  THEREOF, EVEN IF  ADVISED OF THE
+POSSIBILITY THEREOF.
 
 6. This License Agreement will automatically terminate upon a material
 breach of its terms and conditions.
 
 7. Nothing in  this License  Agreement shall be  deemed to  create any
 relationship  of agency,  partnership,  or joint  venture between  the
-Authors and Licensee.
+Copyright Holders and Licensee.
 
-8. By copying,  installing or otherwise using  anygui, Licensee agrees
-to be bound by the terms and conditions of this License Agreement.
+8. By  copying, installing  or  otherwise using  Anygui 0.1,  Licensee
+agrees  to  be bound  by  the terms  and  conditions  of this  License
+Agreement.
+
+----------------------------------------------------------------------
+ Anygui Copyright (c) 2001 by Magnus Lie Hetland, Thomas Heller,
+ Alex Martelli, Joseph A. Knapka, Matthew Schinckel, Kalle Svensson,
+ and contributors. All rights reserved.
+----------------------------------------------------------------------
