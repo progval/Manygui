@@ -123,7 +123,7 @@ class AbstractWrapper:
         if not constraint in self.constraints:
             self.constraints.append((before, after))
 
-    def addPrioritizedAttrs(self,*attrs):
+    def addPrioritizedAttrs(self, *attrs):
         """
         Add a prioritized attribute. Prioritized attributes are always
         set first, in the order in which they were added, when they appear
@@ -136,7 +136,7 @@ class AbstractWrapper:
         do it. (Hmm, maybe this mechanism can completely replace
         the constraint mechanism?)
         """
-        self.prioritizedAttrs = self.prioritizedAttrs + list(attrs)
+        self.prioritizedAttrs.extend(list(attrs))
 
     def getSetters(self, attrs):
         """
