@@ -8,6 +8,12 @@ class AbstractWindow(AbstractFrame, Defaults.Window):
     def __init__(self, *args, **kw):
         #self.visible = 0
         AbstractFrame.__init__(self, *args, **kw)
+
+        # Window tiling code:
+        self._x = Defaults.Window._x
+        self._y = Defaults.Window._y
+        Defaults.shift_window()
+        
         application()._add_window(self)
         
     def destroy(self):

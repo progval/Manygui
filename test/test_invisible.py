@@ -2,7 +2,7 @@ from anygui import Window, Button, Label, Application
 
 app = Application()
 
-w1 = Window(title='', size=(200,100))
+w1 = Window(title='', size=(200,100), visible=0)
 
 lab = Label(text='Hello, world!', position=(30, 30))
 
@@ -14,7 +14,5 @@ b = Button(text='Show other window', position=(5, 5),
            size=(190, 90), action=w1.show)
 
 w2.place(b)
-
-w2.show()
 
 app.run()

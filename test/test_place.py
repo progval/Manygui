@@ -69,8 +69,6 @@ def main():
   win.place(label, left = 10, top = (cb1, 20))
   win.place(entry, left = 10, top = (label, 10), border = 1)
 
-  win.show()
-
   app.run()
 
 #pdb.run("main()")

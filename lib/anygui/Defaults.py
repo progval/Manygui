@@ -110,8 +110,8 @@ class TextField:
 class Window:
 
     _text = 'Window'
-    _x = 0
-    _y = 0
+    _x = 30
+    _y = 30
     _width = 400
     _height = 300
     _hmove = 0
@@ -121,3 +121,9 @@ class Window:
     _visible = 1
     _enabled = 1
     _title = 'Untitled'
+
+def shift_window():
+        Window._x += 30
+        Window._x %= 360
+        Window._y += 30
+        Window._y %= 360

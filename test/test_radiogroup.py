@@ -29,6 +29,4 @@ for i in xrange(0, 3):
                       action = report1)
     win.add(btn)
 
-win.show()
-
 app.run()

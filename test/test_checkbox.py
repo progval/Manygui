@@ -12,6 +12,5 @@ box = CheckBox(x = 30, y = 30, width = 80, height = 30,
 	       text = "Check Box", action = report, model=m)
 
 win.add(box)
-win.show()
 
 app.run()

@@ -53,6 +53,4 @@ win.place([reset_btn, update_btn], right=25, bottom=25, vmove=1, hmove=1,
 init_field()
 update_label()
 
-win.show()
-
 app.run()

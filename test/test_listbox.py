@@ -24,6 +24,4 @@ win = Window(title='ListBox test', width=200, height=200)
 win.place(lb, left=25, top=25, right=25, bottom=25,
           vstretch=1, hstretch=1)
 
-win.show()
-
 app.run()

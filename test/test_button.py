@@ -13,6 +13,5 @@ dis = Button(opt, y = 90, text = "Goodbye", enabled = 0)
 
 win.add(btn)
 win.add(dis)
-win.show()
 
 app.run()
