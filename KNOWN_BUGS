@@ -1,3 +1,6 @@
+Label alignment (both vertical and horizontal) varies
+across backends.
+
 Labels display HTML tags in Jython on some platforms. (Old
 Swing versions?)
 
