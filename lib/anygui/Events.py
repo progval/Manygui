@@ -3,6 +3,8 @@
     IRFC 0010 at http://anygui.sf.net/irfc.
 '''
 
+# TODO: Use some internal value instead of None for defaults
+
 __all__ = '''
 
     connect
