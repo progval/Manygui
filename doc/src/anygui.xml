@@ -47,6 +47,10 @@
     packages. Thus, one gets a platform-independent GUI module which
     is written entirely in <name>Python</name>.</para>
 
+    <para>To get the latest <name>Anygui</name> distribution, or to
+    get in touch with the developers, please visit the
+    <name>Anygui</name> website:
+    <url>http://www.anygui.org</url>.</para>
 
     <section>
       <title>Design Goals</title>
@@ -751,6 +755,9 @@
 
   <section>
     <title>API Reference</title>
+
+    <para>The following reference describes the full official API of
+    the current version (&longversion;) of <name>Anygui</name>.</para>
     
     <section>
       <title>Environment Variables</title>
@@ -972,6 +979,98 @@
       methods. These will be described with the individual classes
       below.</para>
 
+      <para><strong>Assignee and update()</strong></para>
+      
+      <para>[Move this to the tutorial section]</para>
+
+      <para>When an attribute of a <code>Component</code> (or
+      <code>Application</code>, <code>RadioGroup</code>, or an
+      instance of another <code>Attrib</code> subclass) is assigned a
+      value, the <code>Component</code> is automatically updated to
+      reflect its new state. For instance, if you have a
+      <code>Label</code> <code>lbl</code>, assigning a value to
+      <code>lbl.geometry</code> would immediately change the
+      <code>Label</code>'s geometry, and assigning to
+      <code>lbl.text</code> would change its text.</para>
+
+      <para>This is good enough for most cases, but sometimes an
+      attribute can contain a mutable value, such as a list, and
+      changing that will not update the <code>Component</code>. For
+      instance, if you use a list to hold the <code>items</code> of a
+      <code>ListBox</code>, you could end up in the following
+      situation:</para>
+
+      <codelisting>
+	<line>lbx = ListBox()</line>
+	<line>lbx.items = 'first second third'.split()</line>
+	<line># More code...</line>
+	<line>lbx.items.append('fourth')</line>
+      </codelisting>
+
+      <para>After performing this code, nothing will have happened to
+      the <code>ListBox</code>, because it has no way of knowing that
+      the list has changed. To fix that, you can simply call its
+      <code>update</code> method:</para>
+
+      <codelisting>
+	<line>lbx.update()</line>
+      </codelisting>
+
+      <para>This method checks whether any attributes have changed,
+      and make sure that the <code>Component</code> us up to
+      date.</para>
+
+      <para><strong>Updating Automatically</strong></para>
+
+      <para>[Move this to the tutorial section]</para>
+
+      <para>Updating <code>Components</code> explicitly can be useful,
+      but sometimes you would want it to be done for you,
+      automatically, each time you modify an object that is referred
+      to by a <code>Component</code> attribute. This can be taken care
+      of by <code>link</code> and <code>send</code>. If your object
+      uses <code>send</code> every time it's modified, and you
+      <code>link</code> the object to your <code>Component</code>'s
+      <code>update</code> method, things will happen by
+      themselves:</para>
+
+      <codelisting>
+	<line>class TriggerList:</line>
+	<line>    def __init__(self):</line>
+	<line>        self.list = []</line>
+	<line>    def append(self, obj):</line>
+	<line>        self.list.append(obj)</line>
+	<line>        send(self)</line>
+	<line></line>
+	<line>lbx = ListBox()</line>
+	<line>lbx.items = TriggerList()</line>
+	<line>link(lbx.items, lbx.update)</line>
+      </codelisting>
+
+      <para>Now, if we call <code>lbx.items.append('fourth')</code>,
+      <code>lbx.update</code> will automatically be called. To make
+      your life easier, <name>Anygui</name> already contains some
+      classes that send signals whend they are modified; these classes
+      are called <code>Model</code>s.</para>
+
+      <para><strong>Model and Assignee</strong></para>
+
+      <para>[Move this to the tutorial section]</para>
+
+      <!-- Add NumberModel - remove BooleanModel? -->
+
+      <para>The <name>Anygui</name> models (<code>BooleanModel</code>,
+      <code>ListModel</code>, and <code>TextModel</code>) are objects
+      that call <code>send</code> (with the <code>'default'</code>
+      event) when they are modified.</para>
+
+      <para>[TBD]</para>
+
+      <!-- More about Models, and then about Attrib and the Model
+      behaviour of calling link() and unlink() -->
+
+      <!-- Make sure Model.update() works -->
+
       <para><strong>class Application</strong></para>
 
       <para>To instantiate <code>Window</code>s, you must have an
@@ -1077,6 +1176,10 @@
 
       <para><strong>class ListBox</strong></para>
       
+      <para>[Under construction]</para>
+
+      <para><strong>class Model</strong></para>
+
       <para>[Under construction]</para>
 
       <para><strong>class Options</strong></para>
@@ -1189,23 +1292,14 @@
     <para>For an overview of known bugs in the current release, see
     the file <code>KNOWN_BUGS</code> found in the distribution.</para>
 
-    <!--
-
-    <para>To find out which backends pass which tests in the current
-    CVS version, take a look at the file <code>status.txt</code> in
-    the CVS directory <code>nondist/admin</code>, available from
-    <url>http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/anygui/nondist/admin/status.txt</url>.</para>
-
-    -->
-
   </section>
 
   <section>
     <title>Plans for Future Releases</title>
 
     <para>For an overview of future plans, see the <code>TODO</code>
-    file found in the distribution. Some plans are also described in
-    the IRFCs (<url>http://anygui.sf.net/irfc</url>).</para>
+    file found in the distribution. <!-- Some plans are also described in
+    the IRFCs (<url>http://anygui.sf.net/irfc</url>). --></para>
 
   </section>
 
@@ -1215,12 +1309,13 @@
     <para>If you want to contribute to the <name>Anygui</name>
     project, we could certainly use your help. First of all, you
     should visit the <name>Anygui</name> web site at
-    <url>http://anygui.sf.net</url>, and subscribe to the developer's
-    mailing list (<code>anygui-devel@lists.sf.net</code>) and try to
-    familiarise yourself with how the package works behind the
-    scenes. Then, you may either help develop the currently supported
-    GUI packages, or you may start writing a backend of your
-    own. Several backend targets may be found at
+    <url>http://www.anygui.org</url>, subscribe to the developer's mailing
+    list (<code>devel@anygui.org</code>) and the user's list
+    (<code>users@anygui.org</code>), and try to familiarise yourself
+    with how the package works behind the scenes. Then, you may either
+    help develop the currently supported GUI packages, or you may
+    start writing a backend of your own. Several potential backend
+    targets may be found at
     <url>http://starbase.neosoft.com/~claird/comp.lang.python/python_GUI.html</url>.
     </para>
 
