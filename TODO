@@ -64,3 +64,5 @@ Smaller issues:
   or re-entered, e.g. after a callback
   (Currently works, more or less "by default", but isn't
   properly designed/implemented.)
+
+* Add .txt endings to README etc.
