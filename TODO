@@ -46,3 +46,6 @@ Smaller issues:
 * Add proportional scaling/positioning?
 
 * Add option objects?
+
+* Merge .add() and .place() and allow several widgets as
+  positional arguments?
