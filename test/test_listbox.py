@@ -1,4 +1,4 @@
-from anygui import Window, ListBox, application
+from anygui import Window, ListBox, Application
 
 class SelectionPrinter(ListBox):
 
@@ -8,6 +8,8 @@ class SelectionPrinter(ListBox):
 
     def print_selection(self):
         print 'Item selected:', self.selection, '(%s)' % self.items[self.selection]
+
+app = Application()
 
 lb = SelectionPrinter()
 
@@ -21,4 +23,4 @@ win.place(lb, left=25, top=25, right=25, bottom=25,
 
 win.show()
 
-application().run()
+app.run()

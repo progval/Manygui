@@ -1,14 +1,12 @@
 from Mixins import Action
 from Exceptions import UnimplementedMethod
+import anygui
 
 class AbstractApplication(Action):
-    ## Uses the lightweight proxy pattern; see
-    ## http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/66531
-    #__shared_state = {}
     
     def __init__(self):
-    #    self.__dict__ = self.__shared_state
         self._windows = []
+        anygui._application = self
 
     def _add_window(self, win):
         self._windows.append(win)

@@ -1,6 +1,5 @@
 from anygui import *
 
-
 the_text = """\
 I like chinese,
 I like chinese,
@@ -39,6 +38,8 @@ lbl = Label(width=150, height=250, text = '')
 update_btn = Button(width=50, height=30, text='Update', action=update_label)
 reset_btn = Button(width=50, height=30, text='Reset', action=init_field)
 
+app = Application()
+
 win = Window(title='TextArea test', width=400, height=670)
 
 win.place([ta, ta2, lbl], left=25, right=25, top=40, hstretch=1,
@@ -52,4 +53,4 @@ update_label()
 
 win.show()
 
-application().run()
+app.run()

@@ -1,4 +1,6 @@
-from anygui import Window, RadioButton, application
+from anygui import Window, RadioButton, Application
+
+app = Application()
 
 def report():
   print "Radio button clicked"
@@ -10,4 +12,4 @@ btn = RadioButton(x = 30, y = 30, width = 100, height = 30,
 win.add(btn)
 win.show()
 
-application().run()
+app.run()

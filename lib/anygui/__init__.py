@@ -93,7 +93,8 @@ def application():
     """Return the global application object"""
     global _application
     if not _application:
-        _application = factory()._map['Application']()
+        #_application = factory()._map['Application']()
+        raise RuntimeError, 'no application exists'
     return _application
 
 def factory():

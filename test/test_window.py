@@ -3,6 +3,8 @@ from anygui import *
 class MyWindow(Window):
     pass
 
+app = Application()
+
 win = MyWindow(title = "A Standard Window",
 	     width = 300, height = 200)
 win.show()

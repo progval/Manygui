@@ -1,4 +1,6 @@
-from anygui import Window, CheckBox, application
+from anygui import Window, CheckBox, Application
+
+app = Application()
 
 def report():
   print "Check box set to", box.on
@@ -9,4 +11,4 @@ box = CheckBox(x = 30, y = 30, width = 80, height = 30,
 win.add(box)
 win.show()
 
-application().run()
+app.run()

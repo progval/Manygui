@@ -1,4 +1,6 @@
-from anygui import Window, Button, Label, application
+from anygui import Window, Button, Label, Application
+
+app = Application()
 
 w1 = Window(title='', size=(200,100))
 
@@ -15,4 +17,4 @@ w2.place(b)
 
 w2.show()
 
-application().run()
+app.run()

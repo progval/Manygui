@@ -1,4 +1,4 @@
-from anygui import Window, Button, CheckBox, Label, application, RadioButton, RadioGroup, TextField
+from anygui import Window, Button, CheckBox, Label, Application, RadioButton, RadioGroup, TextField
 ##from anygui import Window, View, CheckBox, Button, Label, \
 ##     RadioButton, RadioGroup, application
 ##from TestViews import TestView, BigTestView
@@ -20,6 +20,8 @@ def option_chosen():
 
 def main():
   global cb1, cb2, rg
+
+  app = Application()
 
   win = Window(title = "Place Me By Your Side", width = 700, height = 500)
 
@@ -67,7 +69,7 @@ def main():
 
   win.show()
 
-  application().run()
+  app.run()
 
 #pdb.run("main()")
 

@@ -1,4 +1,4 @@
-from anygui import Window, RadioButton, RadioGroup, application
+from anygui import Window, RadioButton, RadioGroup, Application
 
 labels = ["Banana", "Chocolate", "Strawberry"]
 
@@ -11,6 +11,8 @@ def report():
 def report1():
     print labels[grp1.value], "selected (%d)" % grp1.value
     
+app = Application()
+
 win = Window(width = 260, height = 150)
 for i in xrange(0, 3):
     btn = RadioButton(x = 30, y = (i+1) * 30, width = 100, height = 30, 
@@ -28,4 +30,4 @@ for i in xrange(0, 3):
 
 win.show()
 
-application().run()
+app.run()
