@@ -96,6 +96,9 @@ class ComponentMixin:
         if self._hwnd:
             win32gui.DestroyWindow(self._hwnd)
 
+    def _ensure_text(self):
+        pass
+
 ##################################################################
 
 class Label(ComponentMixin, AbstractLabel):

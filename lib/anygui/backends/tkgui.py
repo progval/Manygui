@@ -98,6 +98,9 @@ class ComponentMixin:
         # depending on the subclass
         return self._text
 
+    def _ensure_text(self):
+        pass
+
 ################################################################
 
 class Label(ComponentMixin, AbstractLabel):

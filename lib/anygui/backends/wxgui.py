@@ -65,6 +65,9 @@ class ComponentMixin:
             self._wx_comp.Destroy()
             self._wx_comp = None
 
+    def _ensure_text(self):
+        pass
+
 ################################################################
 
 class Label(ComponentMixin, AbstractLabel):

@@ -100,6 +100,9 @@ class ComponentMixin:
         # depending on the subclass
         return self._text
 
+    def _ensure_text(self):
+        pass
+
 class JavaGUILayoutManager(awt.LayoutManager):
 
     '''A custom layout manager for anygui. For more information
