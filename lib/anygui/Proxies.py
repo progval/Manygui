@@ -56,7 +56,14 @@ class Proxy(Attrib):
         blocked.extend(self.blockedNames())
         if not names: state.update(self.state)
         else:
-            for name in names: state[name] = self.state[name]
+	    # @@@ Temporary solution to sync(aggregate) problem:
+            for name in names:
+	        if name in blocked:
+		    state.update(self.state)
+		    break
+            else:
+	    # @@@ End temporary solution
+                for name in names: state[name] = self.state[name]
         for name in blocked:
             try: del state[name]
             except KeyError: pass
