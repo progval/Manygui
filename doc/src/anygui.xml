@@ -751,6 +751,12 @@ so the user can see clipped parts of the Anygui presentation.
 	<line>foo:~$ jython -DANYGUI_SOMEVAR='some value' someprogram.py</line>
       </codelisting>
 
+      <!--
+
+      Setting os.environ['SOME_VARIABLE']
+
+      -->
+
       <para>The environment variables used by <name>Anygui</name>
       are:</para>
 
