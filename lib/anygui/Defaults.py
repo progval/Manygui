@@ -33,6 +33,20 @@ class CheckBox:
     _visible = 1
     _enabled = 1
 
+class Frame:
+
+    _text = 'Frame'
+    _x = 0
+    _y = 0
+    _width = 400
+    _height = 300
+    _hmove = 0
+    _vmove = 0
+    _hstretch = 0
+    _vstretch = 0
+    _visible = 1
+    _enabled = 1
+
 class Label:
 
     _text = 'Label'

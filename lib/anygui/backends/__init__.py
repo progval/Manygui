@@ -13,4 +13,5 @@ from anygui.TextAreas import AbstractTextArea
 from anygui.ListBoxes import AbstractListBox
 from anygui.Models import BooleanModel, ListModel, TextModel
 from anygui.Signals import signal, connect, disconnect
+from anygui.Frames import AbstractFrame
 import anygui

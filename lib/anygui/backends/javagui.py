@@ -408,7 +408,12 @@ class TextArea(ComponentMixin, AbstractTextArea):
 
 ################################################################
 
-class Window(ComponentMixin, AbstractWindow): # FIXME: Add dialog functionality
+class Frame(ComponentMixin, AbstractFrame):
+    _java_class = swing.JPanel
+
+################################################################
+
+class Window(ComponentMixin, AbstractWindow):
     _java_class = swing.JFrame
     _java_style = None #wxDEFAULT_FRAME_STYLE
 

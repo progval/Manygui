@@ -15,7 +15,7 @@ def flatten(seq):
         result += flatten(item)
     return result
 
-class AbstractFrame(AbstractComponent):
+class AbstractFrame(AbstractComponent, Defaults.Frame):
 
     def __init__(self, *args, **kw):
         self._contents = []

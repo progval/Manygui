@@ -482,8 +482,12 @@ class TextArea(ComponentMixin, AbstractTextArea, DisabledTextBindings):
 
 ################################################################
 
-class Window(ComponentMixin, AbstractWindow):
+class Frame(ComponentMixin, AbstractFrame):
+    _tk_class = Tkinter.Frame
 
+################################################################
+
+class Window(ComponentMixin, AbstractWindow):
     _tk_class = Toplevel
     _tk_style = 0
 
