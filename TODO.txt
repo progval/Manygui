@@ -149,3 +149,5 @@ Smaller issues:
 * Add support for borders?
 
 * Add a linkMethods (or something) function for callback support?
+
+* Add more distribution types (e.g. windows installers, rpms etc.)
