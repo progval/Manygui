@@ -1,6 +1,8 @@
 from anygui.backends import *
+from anygui.Exceptions import Error
 __all__ = anygui.__all__
 
+import sys
 import curses
 from curses import *
 
@@ -12,15 +14,23 @@ def dbg(msg):
     _f.write(msg+"\n")
     _f.flush()
 
+class CursesGUIException(Error):
+
+    def __init__(self,**kws):
+        self.__dict__.update(kws)
+
 _scr = None
 _refresh_all = 0
 _focus_control = None
 def _addstr(x,y,ch,n=0):
     #dbg("adding at %s,%s: <%s>"%(x,y,ch))
-    if n != 0:
-        _scr.addnstr(y,x,ch,n)
-    else:
-        _scr.addstr(y,x,ch)
+    try:
+        if n != 0:
+            _scr.addnstr(y,x,ch,n)
+        else:
+            _scr.addstr(y,x,ch)
+    except:
+        raise CursesGUIException(value="addstr/addnstr error: %d,%d <- \"%s\""%(x,y,ch))
 def _erase(x,y,w,h):
     #dbg("Erasing %s,%s,%s,%s"%(x,y,w,h))
     for xx in range(x,x+w):
@@ -335,11 +345,18 @@ class Window(ContainerMixin, AbstractWindow):
         ContainerMixin._redraw(self)
         self._addstr(2,0,self._title)
 
-    def _ensure_title(self): pass
+    def _ensure_title(self): self._redraw()
+
+def _curses_quit():
+    _scr.keypad(1)
+    echo()
+    nocbreak()
+    endwin()
 
 class Application(AbstractApplication):
     def __init__(self):
         AbstractApplication.__init__(self)
+        #sys.excepthook = _curses_excepthook
         global _scr
         _scr = initscr()
         noecho()
@@ -348,25 +365,35 @@ class Application(AbstractApplication):
 
     def _window_deleted(self):
         if not self._windows:
-            echo()
-            nocbreak()
-            nodelay(0)
-            endwin()
+            _curses_quit()
+            sys.exit()
         else:
             if self._windows:
                 self._windows[0]._change_focus()
 
+    def run(self):
+        try:
+            AbstractApplication.run(self)
+        except:
+            # In the event of an error, restore the terminal
+            # to a sane state.
+            _curses_quit()
+
+            # Pass the exception upwards
+            (exc_type, exc_value, exc_traceback) = sys.exc_info()
+            print "Exception value:",exc_value.value
+            raise exc_type, exc_value, exc_traceback
+        else:
+            # In the event of an error, restore the terminal
+            # to a sane state.
+            _curses_quit()
+
     def _mainloop(self):
         if self._windows:
             self._windows[0]._change_focus()
-        try:
+        self._redraw_all()
+        while self._check_for_events():
             self._redraw_all()
-            while self._check_for_events():
-                self._redraw_all()
-        finally:
-            echo()
-            nocbreak()
-            endwin()
 
     def _check_for_events(self):
         ch = _scr.getch()
