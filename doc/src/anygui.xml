@@ -2,7 +2,7 @@
 
 <!DOCTYPE document SYSTEM "minimal.dtd" [
 <!ENTITY shortversion            "0.1">
-<!ENTITY longversion             "0.1a3">
+<!ENTITY longversion             "0.1b1">
 <!ENTITY copy                    "<copyright/>">
 <!ENTITY copyrightholders SYSTEM "copyrightholders.xml">
 ]>
@@ -212,9 +212,9 @@
 	<line>Java Swing (javagui)   <url>http://www.jython.org</url></line>
 	<line>PyGTK      (gtkgui)    <url>http://www.daa.com.au/~james/pygtk</url></line>
 	<line>Bethon     (beosgui)   <url>http://www.bebits.com/app/1564</url></line>
-	<!-- PyQt - qtgui -->
-	<!-- curses - cursesgui -->
-	<!-- textgui -->
+	<line>Curses     (cursesgui) <url>...</url></line>
+	<line>Plain text (textgui)   <url>...</url></line>
+	<line>PyQt       (qtgui)     <url>http://www.thekompany.com/projects/pykde</url></line>
       </codelisting>
 
       <!--
@@ -225,7 +225,48 @@
 
       Also available at anygui.sf.net/files
 
-      Rebuild Bethon with these. (Copy to anygui website?)
+      Rebuild Bethon with these.
+      -->
+
+      <!--
+
+From Joe:
+
+Update of /cvsroot/anygui/anygui/lib/anygui/backends/txtutils
+In directory usw-pr-cvs1:/tmp/cvs-serv27433
+
+Modified Files:
+scr_curses.py scr_text.py txtgui.py 
+Log Message:
+Completely redid curses/text focus model, AGAIN. Now ^F moves focus
+forward, ^B backward. In curses, up/down arrow have the same effect.
+I think this is the last time this will need to change.
+
+^O opens a window "O"ption menu, which lets you close the window.
+While the window is open, hjkl move the window left-down-up-right,
+and HJKL resize the window. This works best in curses, naturally.
+
+Made erase() fast. This lets focus changes and window
+restacking/resizing/repositioning feasible, performance-wise.
+
+Removed border for checkboxes and radiobuttons; they obscured
+the meaning of the indicator in textgui, and look fine in
+both text backends now.
+
+Windows are now clipped to the screen. This differs from the
+old strategy, which was to crash when a window extended past
+the screen edge.
+
+z,Z now scale the entire screen up/down by a factor of 2.
+So if a button is invisible, hit z to expand the presentation.
+(Need to add screen-scrolling for presentations that are
+larger than the physical screen.)
+
+Buttons now get drawn nicely when they are only one line
+tall. 2-line-tall buttons still suck, though.
+
+Fixed focus indicator in textgui - it now always shows up.
+
       -->
 
       <para>Of these, <name>Tkinter</name> is compiled in by default
@@ -261,8 +302,11 @@
     <para>[To be rewritten shortly]</para>
 
     <para><emphasis>Note</emphasis>: For some examples of working
-    <name>Anygui</name> code, see the <code>test</code> directory of
-    the distribution.</para>
+    <name>Anygui</name> code, see the <code>test</code> and
+    <code>demo</code> directories of the distribution. Remember that
+    the test scripts are written to test certain features of
+    <code>Anygui</code>, not to represent recommended coding
+    practices.</para>
 
     <para>Using <name>Anygui</name> is simple; it's simply a matter of
     importing the widgets (GUI elements) you need from the
@@ -272,15 +316,21 @@
       <line>from anygui import *</line>
     </codelisting>
 
-    <para>After doing this you must first create an
-    <code>Application</code> object; then you may instantiate the
-    widgets and combine them in various ways. When you're satisfied,
-    you call the <code>run</code> method of your
-    <code>Application</code> instance.</para>
+    <para>After doing this you must create an <code>Application</code>
+    object, at least one <code>Window</code>, and probably a few
+    components such as <code>Button</code>s and
+    <code>TextField</code>s. The <code>Window</code>s are added to the
+    <code>Application</code> (through its <code>add</code> method),
+    and the various components are added to the
+    <code>Window</code>. When you have done this, you call the
+    <code>run</code> method of your <code>Application</code>
+    instance.</para>
 
     <codelisting>
-      <line>app = Application()</line>
       <line># Make widgets here</line>
+      <line>win = Window()</line>
+      <line>app = Application()</line>
+      <line>app.add(win)</line>
       <line>app.run()</line>
     </codelisting>
 
@@ -364,70 +414,35 @@
       <title>Creating a Window</title>
 
       <para>One of the most important classes in <name>Anygui</name>
-	is <code>Window</code>. Without a <code>Window</code> you have
-	no GUI; all the other widgets are added to
-	<code>Window</code>s. Knowing this, we may suspect that the
-	following is a minimal <name>Anygui</name> program (and we
-	would be right):</para>
+      is <code>Window</code>. Without a <code>Window</code> you have
+      no GUI; all the other widgets are added to
+      <code>Window</code>s. Knowing this, we may suspect that the
+      following is a minimal <name>Anygui</name> program (and we would
+      be right):</para>
 
       <codelisting>
 	<line>from anygui import *</line>
 	<line>app = Application()</line>
 	<line>win = Window()</line>
+	<line>app.add(win)</line>
 	<line>app.run()</line>
       </codelisting>
-
-      <!-- New visibility defaults; show()/hide() removed...? -->
  
-      <para>The problem with this code is that the window would be
-      invisible. At the time of creation, windows are hidden, so that
-      we may add widgets to them etc. before showing them to the
-      user. To show a window we simply call its
-      <code>show</code> method or set its
-      <code>visible</code> property to true
-      (e.g. <code>1</code>). <code>w.show()</code> is
-      actually just a shortcut for <code>w.visible = 1</code>.
-      (Similarly, <code>w.visible = 0</code> can be written
-      <code>w.hide()</code>.) So, our program becomes:</para>
-
-      <codelisting>
-	<line>from anygui import *</line>
-	<line>app = Application()</line>
-	<line>win = Window()</line>
-	<line>win.show()</line>
-	<line>app.run()</line>
-      </codelisting>
-
-      <para>If you don't mind having your window popping up when it's
-      created (this can be problematic if you create your window after
-      starting your application, because it may be visible before your
-      finished adding other widgets to it), you can simply specify
-      that it should be visible to begin with:</para>
-
-      <codelisting>
-	<line>from anygui import *</line>
-	<line>app = Application()</line>
-	<line>win = Window(visible=1)</line>
-	<line>app.run()</line>
-      </codelisting>
-
       <para>This example gives us a rather uninteresting default
       window. You may customise it by setting some of its properties,
-      like <code>title</code> and <code>size</code>
-      (<code>import</code> and <code>show</code> removed
-      in the interest of brevity):</para>
+      like <code>title</code> and <code>size</code>:</para>
 
       <codelisting>
-	<line>w = Window(visible=1)</line>
+	<line>w = Window()</line>
 	<line>w.title = 'Hello, world!'</line>
 	<line>w.size = (200, 100)</line>
       </codelisting>
       
-      <para>If we want to, we can supply all the widget properties as
+      <para>If we want to, we can supply the widget properties as
       keyword arguments to the constructor:</para>
 
       <codelisting>
-	<line>w = Window(title='Hello, world!', size=(200,100), visible=1)</line>
+	<line>w = Window(title='Hello, world!', size=(200,100))</line>
       </codelisting>
     </section>
 
@@ -470,10 +485,10 @@
     </section>
 
     <section>
-      <title>Baby Steps: Adding a Label</title>
+      <title>Adding a Label</title>
 
-      <para>Simple (multiline) labels are created with the
-      <code>Label</code> class:</para>
+      <para>Simple labels are created with the <code>Label</code>
+      class:</para>
 
       <codelisting>
 	<line>lab = Label(text='Hello, again!', position=(10,10))</line>
@@ -491,26 +506,15 @@
     </section>
 
     <section>
-      <title>Placing Widgets in a Frame</title>
+      <title>Layout: Placing Widgets in a Frame</title>
 
-      <para>We don't have to specify the widget's position like we did
-      with our label. Instead, we can use the <code>place</code>
-      method of <code>Window</code>. (Actually, it's a method of a
-      more generic class, <code>Frame</code>, which isn't currently
-      available to the user of <name>Anygui</name>, but will be in
-      future releases.)</para>
-
-      <para>The <code>place</code> method allows us to specify several
-      constraints (in the form of keyword arguments) that will affect
-      where the widget is placed. Fore detailed information about
-      this, see the API reference. Here are some examples, using only
-      <code>Label</code>s:</para>
+      <para>[TBD: intro]</para>
 
       <codelisting>
-	<line>win.place(lab, position=(10,10))</line>
-	<line>win.place(lab, left=10, top=10)</line>
-	<line>win.place(lab, top=10, right=10)</line>
-	<line>win.place(lab, position=(10,10), right=10, hstretch=1)</line>
+	<line>win.add(lab, position=(10,10))</line>
+	<line>win.add(lab, left=10, top=10)</line>
+	<line>win.add(lab, top=10, right=10)</line>
+	<line>win.add(lab, position=(10,10), right=10, hstretch=1)</line>
       </codelisting>
 
       <para>In the last example <code>hstretch</code> is a Boolean
@@ -521,9 +525,9 @@
 
       <!-- hmove and vmove -->
 
-      <para><emphasis>Note</emphasis>: <code>add</code> and
-      <code>place</code> may be merged in a future release, making
-      <code>add</code> unavailable.</para>
+      <!-- more about generic layout -->
+
+      <!--
 
       <section>
 	<title>Placing More Than One Widget</title>
@@ -540,7 +544,7 @@
 	  <line>          direction='right', space=10)</line>
 	</codelisting>
 
-	<!-- positional arguments -->
+	# positional arguments
 
 	<para><emphasis>Note</emphasis>: When using
         <code>direction</code> and <code>space</code> like this, you
@@ -549,109 +553,27 @@
         decent system of defaults) in future releases.</para>
 
       </section>
+      -->
+    </section>
+
+    <section>
+      <title>Buttons and Event Handling</title>
+
+      <para>[TBD]</para>
 
     </section>
 
     <section>
-      <title>Adding a Button</title>
+      <title>About Models, Views, and Controllers</title>
 
-      <para><code>Button</code>s are quite similar to
-      <code>Label</code>s, except that they may perform an
-      <emphasis>action</emphasis> when clicked. (They also look
-      different, of course.)</para>
-
-      <codelisting>
-	<line>def callback(): print 'Hello, world!'</line>
-	<line>btn = Button(text='Press me', action=callback)</line>
-      </codelisting>
-
-      <para>When this button is pressed, it will execute the function
-      stored in its <code>action</code> property (if there is
-      one).</para>
-
-      <para><emphasis>Note</emphasis>: This system of
-      <emphasis>callbacks</emphasis> in the various widgets is all the
-      event handling which is available in the current version of
-      <name>Anygui</name> (&longversion;). In future releases a more
-      thorough system will be implemented.</para>
-
-    </section>
-
-    <section>
-      <title>About Models and Views</title>
-
-      <para>Some widgets, such as <code>TextField</code> or
-      <code>CheckBox</code>, reflect some state in the program, be it
-      a text value or a binary (Boolean) value. These widgets are
-      called <emphasis>views</emphasis> since they are ways of viewing
-      the underlying state, which is called a
-      <emphasis>model</emphasis>. In the current version of
-      <name>Anygui</name> (&longversion;) there are three types of
-      model:</para>
-
-      <para><code>BooleanModel</code>: This represents a Boolean value
-      (true or false), and is the underlying model for
-      <code>CheckBox</code> and <code>RadioButton</code>.</para>
-
-      <para><code>ListModel</code>: This represents a sequence, and
-      supports all the normal list methods. It is the underlying model
-      for <code>ListBox</code>.</para>
-
-      <para><code>TextModel</code>: This represents a mutable string,
-      and also supports standard list methods. (It is, in fact, a
-      subclass of <code>ListModel</code>.) It is the underlying model
-      of <code>TextField</code> and <code>TextArea</code>.</para>
-
-      <para>Each widget which functions as a view, has an attribute
-      called <code>model</code>, which contains its model. The widget
-      will always reflect the current state of the model, and changes
-      in the widget (such as editin the text of a
-      <code>TextField</code>) will automatically be reflected in the
-      model. (Thus, in the terminology of the
-      <emphasis>Model-View-Controller</emphasis> paradigm, these views
-      are actually controllers as well.)</para>
-
-      <para>The models have an attribute called <code>value</code>
-      which is a representation of the model as a primitive value. By
-      assigning to this attribute you will change the model.</para>
-
-      <para><emphasis>Note</emphasis>: The following example is not
-      safe:</para>
-
-      <codelisting>
-	<line>lb = ListBox()</line>
-	<line>some_list = [1, 2, 3]</line>
-	<line>lb.model.value = some_list</line>
-	<line>some_list[1] = 'foo'</line>
-      </codelisting>
-
-      <para>Since <code>some_list</code> is a normal list, changing it
-      (in the last line) will not afect the <code>ListBox</code> in
-      any way. A better version of the last line would be</para>
-
-      <codelisting>
-	<line>lb.model[1] = 'foo'</line>
-      </codelisting>
-
-      <para>The <code>model</code> property will contain a default
-      ("empty") model when the widget is created, so code like this is
-      possible:</para>
-
-      <codelisting>
-	<line>lb = ListBox()</line>
-	<line>lb.model.append('This is the first item')</line>
-      </codelisting>
-
-      <para>Note that one of the advantages of using models like this
-      is that you can use the models separately from the GUI, not
-      worrying about updating the views etc. In a complex program you
-      probably wouldn't use code like the above where you explicitly
-      refer to the model of a specific widget.</para>
+      <para>[TBD]</para>
 
     </section>
 
     <section>
       <title>Using CheckBoxes</title>
+
+      <para>[update this]</para>
 
       <para>A <code>CheckBox</code> is a <emphasis>toggle
       button</emphasis>, a button which can be in one of two states,
@@ -666,6 +588,8 @@
 
     <section>
       <title>RadioButtons and RadioGroups</title>
+
+      <para>[update this]</para>
 
       <para><code>RadioButton</code>s are toggle buttons, just like
       <code>CheckBox</code>es. The main differences are that they look
@@ -698,6 +622,8 @@
 
     <section>
       <title>ListBox</title>
+
+      <para>[update this]</para>
 
       <para>A <code>ListBox</code> is a vertical list of items that
       can be selected, either by clicking on them, or by moving the
@@ -733,6 +659,8 @@
 
     <section>
       <title>TextField and TextArea</title>
+
+      <para>[update this]</para>
 
       <para><name>Anygui</name>'s two text widgets,
       <code>TextField</code> and <code>TextArea</code> are quite
