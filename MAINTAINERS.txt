@@ -32,4 +32,5 @@ Just van Rossum
 Sebastien Keim
 Andrew McKenzie
 François Granger
+Lalo Martins
 Other members of the Anygui development mailing list
