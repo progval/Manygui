@@ -91,6 +91,7 @@ app = Application()
 
 win = Window(width = 160, height = 250)
 win.layout = SimpleGridManager(3,4)
+app.add(win)
 
 b1 =  Button(height = 32, width=32, text = "")
 link(b1, makeMove(0))

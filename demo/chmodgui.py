@@ -5,6 +5,7 @@ filename = sys.argv[1]
 
 app = Application()
 win = Window(title='chmod '+filename, size=(280,175))
+app.add(win)
 
 types  = 'Read Write Execute'.split()
 people = 'User Group Others '.split()

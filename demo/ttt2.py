@@ -95,6 +95,7 @@ app = Application()
 
 win = Window(width = 180, height = 180)
 win.layout = GridManager(3)
+app.add(win)
 
 b1 =  Button(height = 32, width=32, text = "")
 link(b1,makeMove(0))
