@@ -4,8 +4,6 @@ __all__ = anygui.__all__
 
 ################################################################
 
-# In serious need of a overhaul
-
 from javax import swing
 from java import awt
 import cgi, jarray, java
@@ -16,6 +14,7 @@ swing.UIManager.setLookAndFeel(swing.UIManager.getSystemLookAndFeelClassName())
 class ComponentMixin:
 
     _java_comp = None
+    _java_container = None
     _java_id = None
     _java_style = 0
     
@@ -30,15 +29,12 @@ class ComponentMixin:
                 parent = None
             frame = self._java_class()
             if parent:
+                frame.visible = 0
                 if parent.__class__ == swing.JFrame:
-                    parent.contentPane.add(frame)
+                    self._java_container = parent.contentPane
                 else:
-                    parent.add(frame)
-            if frame.__class__ == swing.JFrame:
-                frame.contentPane.layout = JavaGUILayoutManager(self)
-            try:
-                frame.layout = JavaGUILayoutManager(self)
-            except: pass
+                    self._java_container = parent
+                self._java_container.add(frame)
             self._java_comp = frame
             return 1
         return 0
@@ -48,19 +44,10 @@ class ComponentMixin:
 
     def _ensure_geometry(self):
         if self._java_comp:
-            comp = self._java_comp
-            if comp.__class__ == swing.JFrame:
-                comp.pack() # To make insets available
-                insets = comp.insets
-                comp.bounds = (self._x,
-                               self._y,
-                               self._width + insets.left + insets.right,
-                               self._height + insets.top + insets.bottom)
-            else:
-                comp.bounds = (self._x,
-                               self._y,
-                               self._width,
-                               self._height)
+            self._java_comp.bounds = (self._x,
+                                      self._y,
+                                      self._width,
+                                      self._height)
 
     def _ensure_visibility(self):
         if self._java_comp:
@@ -72,8 +59,15 @@ class ComponentMixin:
 
     def _ensure_destroyed(self):
         if self._java_comp:
-            if hasattr(self._java_comp, 'dispose'):
-                self._java_comp.dispose()
+            comp = self._java_comp
+            container = self._java_container
+            if container:
+                bounds = comp.bounds
+                container.remove(comp)
+                container.repaint(bounds)
+            if hasattr(comp, 'dispose'):
+                comp.dispose()
+            self._java_container = None
             self._java_comp = None
 
     def _get_java_text(self):
@@ -81,51 +75,11 @@ class ComponentMixin:
         # returns the text required for creation.
         # This may be the _text property, or _title, ...,
         # depending on the subclass
-        return self._text
+        return str(self._text)
 
     def _ensure_text(self):
         if self._java_comp and hasattr(self._java_comp, 'text'):
-            self._java_comp.text = self._text
-
-class JavaGUILayoutManager(awt.LayoutManager):
-
-    '''A custom layout manager for anygui. For more information
-    about implementing custom Java layout managers, see
-    "Creating a Custom Layout Manager" [1] from the Java Tutorial.
-
-    [1] http://java.sun.com/docs/books/tutorial/uiswing/layout/custom.html'''
-
-    def __init__(self, python_parent):
-        self.components = []
-        self.parent = python_parent
-        self.first_time = 1
-
-    def addLayoutComponent(self, name, java_component):
-        self.components.append(component)
-
-    def removeLayoutComponent(self, java_component):
-        if component in self.components:
-            self.components.remove(java_component)
-        
-    def minimumLayoutSize(self, java_parent):
-        return awt.Dimension(0,0) # FIXME: Is this OK?
-
-    def preferredLayoutSize(self, java_parent):
-        return awt.Dimension(0,0) # FIXME: Is this OK?
-
-    def layoutContainer(self, java_parent):
-        'Called when the panel is first displayed and on every resize.'
-        if self.first_time:
-            self.first_time = 0
-        else:
-            w = java_parent.width
-            h = java_parent.height
-            dw = w - self.parent._width
-            dh = h - self.parent._height
-            self.parent._width = w
-            self.parent._height = h
-            if hasattr(self.parent, 'resized'):
-                self.parent.resized(dw, dh)
+            self._java_comp.text = self._get_java_text()
 
 ################################################################
 
@@ -226,29 +180,30 @@ class Label(ComponentMixin, AbstractLabel):
     #_width = 100 # auto ?
     #_height = 32 # auto ?
     _java_class = swing.JLabel
-    _text = "JLabel"
     _java_style = None
+
+    def _ensure_created(self):
+        result = ComponentMixin._ensure_created(self)
+        if result:
+            self._java_comp.horizontalAlignment = swing.SwingConstants.LEFT
+            self._java_comp.verticalAlignment = swing.SwingConstants.TOP
+        return result
 
     def _ensure_text(self):
         if self._java_comp:
-            text = self._text
+            text =  self._get_java_text()
             #text = cgi.escape(text)
             #text = text.replace('\n', '<br>')
             #text = text.replace('\r', '<br>')
             #text = '<html>' + text + '</html>'
             self._java_comp.text = text
-            self._java_comp.horizontalAlignment = swing.SwingConstants.LEFT # FIXME: Wrong place
-            self._java_comp.verticalAlignment = swing.SwingConstants.TOP # FIXME: Wrong place
 
 ################################################################
 
 class ScrollableListBox(swing.JPanel):
     # Replacement for swing.JList
 
-    # FIXME: Constructor doesn't seem to work right, so an explicit
-    # method is needed.
-    # mlh20011213: Is this true anymore?
-    def init(self):
+    def __init__(self):
         self._jlist = swing.JList()
         self.layout = awt.BorderLayout()
         self._jscrollpane = swing.JScrollPane(self._jlist)
@@ -278,7 +233,6 @@ class ListBox(ComponentMixin, AbstractListBox):
     def _ensure_created(self):
         result = ComponentMixin._ensure_created(self)
         if result:
-            self._java_comp.init()
             self._java_comp.setSelectionMode(swing.ListSelectionModel.SINGLE_SELECTION)
         return result
 
@@ -309,13 +263,12 @@ class ListBox(ComponentMixin, AbstractListBox):
 
     def _java_clicked(self, event):
         #self.do_action()
-        send(self, 'click')
+        send(self, 'select')
 
 ################################################################
 
 class Button(ComponentMixin, AbstractButton):
     _java_class = swing.JButton
-    _text = "JButton"
 
     def _ensure_created(self):
         result = ComponentMixin._ensure_created(self)
@@ -337,36 +290,33 @@ class ToggleButtonMixin(ComponentMixin):
 
     def _ensure_state(self):
         if self._java_comp is not None:
-            self._java_comp.selected = self._on
-    
+            self._java_comp.selected = self.on
+
+    def _ensure_events(self):
+        self._java_comp.actionPerformed = self._java_clicked
+
     def _java_clicked(self, evt):
         val = self._java_comp.selected
-        if val == self._on:
+        if val == self.on: # FIXME: this way or == self._on?
             return
         self.on = val
         send(self, 'click')
 
 class CheckBox(ToggleButtonMixin, AbstractCheckBox):
     _java_class = swing.JCheckBox
-    _text = "JCheckBox"
-
-    def _ensure_events(self):
-        # FIXME: This could be inherited from Button...
-        self._java_comp.actionPerformed = self._java_clicked
 
 class RadioButton(ToggleButtonMixin, AbstractRadioButton):
     _java_class = swing.JRadioButton
-    _text = "JRadioButton"
 
-    # @@@ FIXME: Add click handler which interacts with RadioGroup
-    
-    def _ensure_created(self):
-        #if self._group and 0 == self._group._items.index(self):
-        return ToggleButtonMixin._ensure_created(self)
-
-    def _ensure_events(self):
-        # FIXME: Again, straight from Button...
-        self._java_comp.actionPerformed = self._java_clicked
+    def _java_clicked(self, evt):
+        val = self._java_comp.selected
+        if val == self.on: # FIXME: this way or == self._on?
+            return
+        if self.group is not None:
+	   self.group.value = self.value
+	else: # FIXME: is this branch needed?
+          self.on = val
+        send(self, 'click')
 
 ################################################################
 
@@ -381,10 +331,6 @@ class TextField(ComponentMixin, AbstractTextField):
         if self._java_comp:
             return self._java_comp.selectionStart, \
                    self._java_comp.selectionEnd
-
-    #def _ensure_text(self):
-    #    if self._java_comp:
-    #        self._java_comp.text = self._text
 
     def _ensure_selection(self):
         if self._java_comp:
@@ -403,17 +349,13 @@ class TextField(ComponentMixin, AbstractTextField):
     def _java_enterkey(self, event):
         send(self, 'enterkey')
 
-    def _java_focus_lost(self, event):
-        if self._text != self._java_comp.text:
-            self._text = self._java_comp.text
-
+    def _java_focus_lost(self, event): #FIXME
+        self._text = self._java_comp.text
+        
 class ScrollableTextArea(swing.JPanel):
     # Replacement for swing.JTextArea
 
-    # FIXME: Constructor doesn't seem to work right, so an
-    # explicit method is needed. (May not be the case...)
-    # mlh20011213: Is this true anymore?
-    def init(self):
+    def __init__(self):
         self._jtextarea = swing.JTextArea()
         self.layout = awt.BorderLayout()
         self._jscrollpane = swing.JScrollPane(self._jtextarea)
@@ -444,12 +386,6 @@ class ScrollableTextArea(swing.JPanel):
 class TextArea(ComponentMixin, AbstractTextArea):
     _java_class = ScrollableTextArea
 
-    def _ensure_created(self):
-        result = ComponentMixin._ensure_created(self)
-        if result:
-            self._java_comp.init()
-        return result
-    
     def _backend_text(self):
         if self._java_comp and hasattr(self._java_comp, '_jtextarea'):
             return self._java_comp.getText()
@@ -461,7 +397,7 @@ class TextArea(ComponentMixin, AbstractTextArea):
 
     def _ensure_text(self):
         if self._java_comp and hasattr(self._java_comp, '_jtextarea'):
-            self._java_comp.setText(self._text)
+            self._java_comp.setText(self._get_java_text())
 
     def _ensure_selection(self):
         if self._java_comp and hasattr(self._java_comp, '_jtextarea'):
@@ -476,7 +412,7 @@ class TextArea(ComponentMixin, AbstractTextArea):
         if self._java_comp and hasattr(self._java_comp, '_jtextarea'):
             self._java_comp._jtextarea.focusLost = self._java_focus_lost
 
-    def _java_focus_lost(self, event):
+    def _java_focus_lost(self, event): # FIXME
         self._text = self._java_comp.getText()
 
 ################################################################
@@ -484,6 +420,12 @@ class TextArea(ComponentMixin, AbstractTextArea):
 class Frame(ComponentMixin, AbstractFrame):
     _java_class = swing.JPanel
 
+    def _ensure_created(self):
+       result = ComponentMixin._ensure_created(self)
+       if result:
+           self._java_comp.layout=None
+       return result
+ 
 ################################################################
 
 class Window(ComponentMixin, AbstractWindow):
@@ -492,14 +434,40 @@ class Window(ComponentMixin, AbstractWindow):
 
     def _ensure_created(self):
         result = ComponentMixin._ensure_created(self)
+        if result:
+            self._java_comp.addNotify() # make correct insets vals avail
+            self._java_comp.contentPane.layout=None
         return result
+
+    def _ensure_geometry(self):
+        if self._java_comp:
+            comp = self._java_comp
+            insets = comp.insets
+            comp.bounds = (self._x,
+                           self._y,
+                           self._width + insets.left + insets.right,
+                           self._height + insets.top + insets.bottom)
+
     
     def _ensure_events(self):
         self._java_comp.windowClosing = self._java_close_handler
+        self._java_comp.componentResized = self._java_resize_handler
 
     def _ensure_title(self):
         if self._java_comp:
             self._java_comp.title = self._title
+
+    def _java_resize_handler(self,evt):
+        w = self._java_comp.width
+        h = self._java_comp.height
+        insets = self._java_comp.insets
+        w -= insets.left + insets.right
+        h -= insets.top + insets.bottom
+        dw = w - self._width
+        dh = h - self._height
+        self._width = w
+        self._height = h
+        self.resized(dw, dh)
 
     def _java_close_handler(self, evt):
         self.destroy()
