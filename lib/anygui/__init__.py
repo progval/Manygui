@@ -1,5 +1,5 @@
 
-wishlist = 'x java wx tk'.split()
+wishlist = 'x java wx tk beos'.split()
 
 # set to true to see tracebacks when searching for factories
 DEBUG=0
