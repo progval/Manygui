@@ -713,11 +713,11 @@ class Application(AbstractApplication):
                 WM_PAINT: _dispatch_WM_PAINT,
                 }
 
-    def __init__(self):
+    def __init__(self,**kwds):
         global _app
         if not _app:
             if _verbose: log('Application.__init__:start',str(self))
-            AbstractApplication.__init__(self)
+            AbstractApplication.__init__(self,**kwds)
             if not self._wndclass: self._register_class()
             WindowWrapper._wndclass = self._wndclass
             FrameWrapper._wndclass = self._wndclass
