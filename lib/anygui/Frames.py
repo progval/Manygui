@@ -195,7 +195,8 @@ class AbstractFrame(AbstractComponent, Defaults.Frame):
     def _add(self, comp):
         self._contents.append(comp)
         if self._is_created():
-            comp._ensure_created()
+            if comp._ensure_created():
+                comp._finish_creation()
 
     def _remove(self, comp):
         self._contents.remove(comp)
