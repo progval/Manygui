@@ -159,6 +159,8 @@ class Observable:
                 else:
                     # No custom callback, so just try to notify().
                     view.model_changed(self,*args,**kw)
+        
+        self._last_updater = None
 
     def add_hint(self,meth,*args,**kw):
         """
