@@ -2,6 +2,8 @@ Only strings are currently permitted as text in TextField and
 TextArea. In general, there should be as little type checking
 as possible (i.e. converting with str(), like in ListBox).
 
+Alt-F4 doesn't work for javagui Windows in MS Windows.
+
 Importing tkgui in jython gives a non-intuitive error message. It
 (tkgui) should simply be ignored.
 
