@@ -3,6 +3,7 @@ from Events import link, unlink, send
 from UserList import UserList
 from UserString import UserString
 
+
 class Assignee:
 
     def __init__(self):
@@ -24,17 +25,22 @@ class Assignee:
         send(self, names=self.names, **kw)
 
 
-class BooleanModel(Attrib, Assignee):
+class Model(Attrib, Assignee):
 
-    _value = 0
+    def update(self, **kwds):
+        self.send(**kwds)
 
     def __init__(self, *arg, **kw):
         Assignee.__init__(self)
         Attrib.__init__(self, **kw)
 
+
+class BooleanModel(Model):
+
+    _value = 0
+
     def _set_value(self, value):
         self._value = value
-        send(self,_set_value=value)
 
     def _get_value(self):
         return self._value
@@ -44,22 +50,14 @@ class BooleanModel(Attrib, Assignee):
     def __str__(self): return str(self._value)
 
 
-class ListModel(Attrib, Assignee, UserList):
-
-    # HACK: Dummy implementation of update() Needed because attrib
-    # will call it when we assign to self.data. Should use self._data,
-    # but it's inherited from UserList...
-    
-    def update(self, **ignore): pass
+class ListModel(Model, UserList):
 
     def __init__(self, *arg, **kw):
-        Attrib.__init__(self, **kw)
-        Assignee.__init__(self)
+        Model.__init__(self, **kw)
         UserList.__init__(self, *arg, **kw)
 
     def _set_value(self, value):
-        self.data = list(value)
-        self.send(_set_value=value)
+        self.data[:] = list(value)
 
     def _get_value(self):
         return list(self)
@@ -133,4 +131,49 @@ class TextModel(ListModel):
     def __repr__(self): return repr(''.join(self.data))
 
     def __str__(self): return ''.join(self.data)
+
+
+class NumberModel(Model):
+
+    _value = 0
+
+    def __abs__(self): return abs(self.value)
+    def __add__(self, other): return self.value + other
+    def __and__(self, other): return self.value & other
+    def __cmp__(self, other): return cmp(self.value, other)
+    def __coerce__(self, other): return coerce(self.value, other)
+    def __div__(self, other): return self.value/other
+    def __divmod__(self, other): return divmod(self.value, other)
+    def __float__(self): return float(self.value)
+    def __hash__(self): return hash(self.value)
+    def __hex__(self): return hex(self.value)
+    def __int__(self): return int(self.value)
+    def __invert__(self): return ~ self.value
+    def __long__(self): return long(self.value)
+    def __lshift__(self, other): return self.value << other
+    def __mod__(self, other): return self.value % other
+    def __mul__(self, other): return self.value * other
+    def __neg__(self): return - self.value
+    def __nonzero__(self): return self.value != 0
+    def __oct__(self): return oct(self.value)
+    def __or__(self, other): return self.value | other
+    def __pos__(self): return self.value
+    def __pow__(self, other): return self.value ** other
+    def __radd__(self, other): return other + self.value
+    def __rand__(self, other): return other & self.value
+    def __rdiv__(self, other): return other / self.value
+    def __rdivmod__(self, other): return divmod(other, self.value)
+    def __repr__(self): return repr(self.value)
+    def __rlshift__(self, other): return other << self.value
+    def __rmod__(self, other): return other % self.value
+    def __rmul__(self, other): return other * self.value
+    def __ror__(self, other): return other | self.value
+    def __rpow__(self, other): return other ** self.value
+    def __rrshift__(self, other): return other >> self.value
+    def __rshift__(self, other): return self.value >> other
+    def __rsub__(self, other): return other - self.value
+    def __rxor__(self, other): return other ^ self.value
+    def __str__(self): return str(self.value)
+    def __sub__(self, other): return self.value - other
+    def __xor__(self, other): return self.value ^ other
 

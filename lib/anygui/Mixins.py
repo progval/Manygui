@@ -5,6 +5,21 @@ from Events import link, send
 #import weakref
 weakref = None
 
+# _ensure_* methods that it might be dangerous to auto-call
+_no_auto_ensures = '_ensure_created _ensure_destroyed'.split()
+
+# get all names of methods starting with _ensure_ for a class & its bases,
+# except those listed in _no_auto_ensures
+def _get_all_ensures(klass, theset):
+    for x in dir(klass):
+        if x.startswith('_ensure_'):
+            if x in _no_auto_ensures: continue
+            v = getattr(klass,x)
+            if callable(v):
+                theset[x]=1
+    for b in klass.__bases__: _get_all_ensures(b, theset)
+
+
 class Attrib:
     """Attrib: mix-in class to support attribute getting & setting
 
@@ -16,7 +31,16 @@ class Attrib:
     after the attribute assignment; if the previously-set value exposes
     a method .removed, it's called just before the attribute assignment.
     This supports Models as values for widget attributes.
+
+    Attrib also supplies a default update method, which calls all the
+    relevant methods named _ensure_* if flag _inhibit_update is false.
+    In this release, all _ensure_* are called; eventually, some kind
+    of mechanism will use the hints to be more selective/optimizing.
     """
+
+    _all_ensures = []
+    _inhibit_update = 0         # default Attribs are always update-enabled
+
     def __setattr__(self, name, value):
         if name[0]!='_':
             try:
@@ -54,19 +78,25 @@ class Attrib:
             setattr(self, name, value)
 
     def __init__(self, *args, **kwds):
+        enset = {}
+        _get_all_ensures(self.__class__, enset)
+        self.__dict__['_all_ensures'] = enset.keys()
+        self._all_ensures.sort()
         self.set(*args, **kwds)
 
-    def update(self, **kw):
-        "this should ALWAYS be overridden by widgets -- here just for debug"
-        #print "update(%r,%r)"%(self, kw)
-        raise UnimplementedMethod, (self, "update")
+    def update(self, **ignore_kw):
+        if self._inhibit_update: return
+        for ensure_name in self._all_ensures:
+            getattr(self, ensure_name)()
 
 
 class DefaultEventMixin:
+
     def __init__(self):
         if hasattr(self, '_default_event'):
             link(self, self._default_event, self._default_event_handler,
                  weak=1, loop=1)
+
     def _default_event_handler(self, **kw):
         kw = kw.copy()
         del kw['event']

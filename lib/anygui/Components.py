@@ -2,44 +2,28 @@ from anygui.Mixins import Attrib, DefaultEventMixin
 from anygui.Exceptions import UnimplementedMethod
 from anygui.LayoutManagers import LayoutData
 
-_noauto = '_ensure_created _ensure_destroyed'.split()
-
-def _get_all_ensures(klass, theset):
-    for x in dir(klass):
-        if x.startswith('_ensure_'):
-            if x in _noauto: continue
-            v = getattr(klass,x)
-            if callable(v):
-                theset[x]=1
-    for b in klass.__bases__: _get_all_ensures(b, theset)
 
 class AbstractComponent(Attrib, DefaultEventMixin):
-    """AbstractComponent is an abstract base class representing a visual component of
-    the graphical user interface. A Component owns a rectangular region of
-    screen space defined by its x, y, width and height properties.
+    """AbstractComponent is an abstract base class representing a visual 
+    component of the graphical user interface. A Component owns a rectangular
+    region of screen space defined by its x, y, width and height properties.
     It may be contained within another Component, in which case it is clipped
     to the boundaries of its container.
     """
+
+    # AMLC20011212: note most _ensure_* methods are now auto-called via
+    # Attrib's mechanisms (except _ensure_created and _ensure_destroyed!)
+    # so the _ensure_* calls are commented out here and in fact several
+    # of the getters/setters (except those for geometry, probably) can
+    # also be eventually removed (and backends fixed accordingly)
     
+    _inhibit_update = 1         # Components start out update-inhibited
     _container = None
-    _all_ensures = []
-    _inhibit_update = 1
 
     def __init__(self, *args, **kw):
         self.layout_data = LayoutData()
-        Attrib.__init__(self, *args, **kw)
         DefaultEventMixin.__init__(self)
-        enset = {}
-        _get_all_ensures(self.__class__, enset)
-        self.__dict__['_all_ensures'] = enset.keys()
-        self._all_ensures.sort()
-
-    def update(self, **ignore_kw):
-        if self._inhibit_update: return
-        #print 'compup(%r,%r)'%(self,ignore_kw)
-        for ensure in self._all_ensures:
-            v = getattr(self, ensure)
-            v()
+        Attrib.__init__(self, *args, **kw)
 
     def destroy(self):
         self._set_container(None)
@@ -50,25 +34,22 @@ class AbstractComponent(Attrib, DefaultEventMixin):
             self._finish_creation()
 
     def _finish_creation(self):
-        self._ensure_geometry()
-        self._ensure_enabled_state()
-        self._ensure_events()
-        self._ensure_visibility()
         self._inhibit_update = 0
+        self.update()
 
     def _set_visible(self, value):
         """Set the visibility."""
         if value == self._visible:
             return
         self._visible = value
-        self._ensure_visibility()
+        # self._ensure_visibility()
 
     def _set_enabled(self, value):
         """Enable or disable the component."""
         if value == self._enabled:
             return
         self._enabled = value
-        self._ensure_enabled_state()
+        # self._ensure_enabled_state()
 
     def _get_visible(self):
         """Return whether the component is currently visible."""
@@ -79,7 +60,7 @@ class AbstractComponent(Attrib, DefaultEventMixin):
         if x == self._x:
             return
         self._x = x
-        self._ensure_geometry()
+        # self._ensure_geometry()
 
     def _get_x(self):
         "Return the current horizontal position."""
@@ -90,7 +71,7 @@ class AbstractComponent(Attrib, DefaultEventMixin):
         if y == self._y:
             return
         self._y = y
-        self._ensure_geometry()
+        # self._ensure_geometry()
 
     def _get_y(self):
         "Return the current vertical position."""
@@ -101,7 +82,7 @@ class AbstractComponent(Attrib, DefaultEventMixin):
         if w == self._width:
             return
         self._width = w
-        self._ensure_geometry()
+        # self._ensure_geometry()
 
     def _get_width(self):
         "Return the current width."""
@@ -112,7 +93,7 @@ class AbstractComponent(Attrib, DefaultEventMixin):
         if h == self._height:
             return
         self._height = h
-        self._ensure_geometry()
+        # self._ensure_geometry()
 
     def _get_height(self):
         "Return the current height."""
@@ -124,7 +105,7 @@ class AbstractComponent(Attrib, DefaultEventMixin):
             return
         self._width = w
         self._height = h
-        self._ensure_geometry()
+        # self._ensure_geometry()
 
     def _get_size(self):
         """Return the current size."""
@@ -136,7 +117,7 @@ class AbstractComponent(Attrib, DefaultEventMixin):
             return
         self._x = x
         self._y = y
-        self._ensure_geometry()
+        # self._ensure_geometry()
 
     def _get_position(self):
         """Return the current position."""
@@ -150,7 +131,7 @@ class AbstractComponent(Attrib, DefaultEventMixin):
         self._y = y
         self._width = w
         self._height = h
-        self._ensure_geometry()
+        # self._ensure_geometry()
 
     def _get_geometry(self):
         """Return position and size."""
