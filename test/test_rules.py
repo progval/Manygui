@@ -112,5 +112,16 @@ class RectangleTestCase(TestCase):
         state['x'] = 42
         state['position'] = 42, 10
         self.assertEqual(self.eng.sync(state, ['x', 'position']), [])        
+        self.checkState(42, 10, 9999, 9999)
+
+    def testIndependentSyncList(self):
+        "Syncing on two independent values"
+        state = self.state
+        
+        # Generalize...
+        state['position'] = 42, 42
+        state['size'] = 42, 42
+        self.assertEqual(self.eng.sync(state, ['position', 'size']), [])
+        self.checkState(42, 42, 42, 42)
 
 if __name__ == '__main__': main()

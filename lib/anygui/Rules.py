@@ -1,7 +1,7 @@
 
 class IllegalState(Exception): pass
-class ValueUnchanged(Exception): pass
 class CannotCalculate(Exception): pass
+class ValueUnchanged(Exception): pass
 
 def addSubKey(dict, key, subkey):
     dict.setdefault(key, {})[subkey] = 1
@@ -52,8 +52,9 @@ class RuleEngine:
 
     def check(self, state, names, undef):
         for name in names:
-            try: newValue = self.newValue(name, state, undef)
+            try: self.newValue(name, state, undef)
             except ValueUnchanged: pass
+            except CannotCalculate: pass # Hm...
             else: raise IllegalState('inconsistent attribute values')
 
     def checkAll(self, state):
@@ -63,6 +64,25 @@ class RuleEngine:
         self.check(state, names, {})
     
     def sync(self, state, defs):
+        """
+        Sync a state dictionary according to the defined rules.
+
+        This method works as follows:
+
+          1. For each defined name, add all dependents to the set of
+             undefined names.
+
+          2. If any of the defined names are also in the set of
+             undefined names, remove them from the set of undefined
+             names and schedule them for checking.
+
+          3. For each name scheduled for checking, check that it will
+             not receive a new value from the newValue method.
+
+          4. ... [FIXME]
+          
+        """
+        # Probably not quite correct yet
         undef = {}
         for name in defs:
             undef.update(self.getChildren(name))
@@ -91,18 +111,42 @@ class RuleEngine:
         return undef.keys()
 
     def newValue(self, name, state, undef):
+        """
+        Calculates a new value for a given name.
+
+        This method may do one of three things:
+
+        1. Return a new value
+
+        If a rule is found that defines the given name and that
+        doesn't have any undefined dependencies, the new value is
+        calculated. If it is different from the previous value, it is
+        returned.
+
+        2. Raise ValueUnchanged
+
+        If a value is calculated as per alternative 1 but it is
+        equivalent (as defined by the equiv function) to the current
+        value, ValueUnchanged is raised.
+
+        3. Raise CannotCalculate
+
+        If no rule is found that defines the given name and that
+        doesn't have any undefined dependencies, CannotCalculate is
+        raised.
+        """
         for parent in self.getParents(name).keys():
             if not undef.has_key(parent):
                 pos = self.rules[parent].index(name)
                 value = state[parent][pos]
-                if equiv(state[name], value): raise ValueUnchanged
-                return value
-        value = []
-        for child in self.getOrderedChildren(name):
-            if undef.has_key(child):
-                raise CannotCalculate
-            else:
-                value.append(state[child])
-        value = tuple(value)
+                break
+        else:
+            value = []
+            for child in self.getOrderedChildren(name):
+                if undef.has_key(child):
+                    raise CannotCalculate
+                else:
+                    value.append(state[child])
+            value = tuple(value)
         if equiv(state[name], value): raise ValueUnchanged
         return value
