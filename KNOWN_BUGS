@@ -1,13 +1,6 @@
-The wxgui RadioButton seems to react to both mouse press and
-mouse release (by sending out 'click' events and updating its
-RadioGroup) while it should only react to one of these (probably
-press).
-
 In wxgui, RadioButtons need to have a group when they are
 created - otherwise they won't work properly. Thus they cannot
 be moved from RadioGroup to RadioGroup.
-
-_wx_size_handler seems to be causing infinite recursion.
 
 In wxgui, the text cursor doesn't seem to want to leave non-editable
 text areas and text fields... It keeps moving around to the
@@ -17,30 +10,19 @@ editable field. The bug sometimes goes the other way too (not
 leaving the editable field). It may not have anything to do with
 the "editability" at all... (See test_textfield and test_textarea.)
 
-
-javagui layout is extremely slow for some reason. Also, some
-components may not be visible before the window is resized (the
-TextArea in test_defaults, for instance). This has not always been so,
-and is probably caused by a bug. (This may in part be because windows
-are shown before their contents has been placed properly. That can be
-fixed by rearranging the order in which the _ensure_* methods are
-called, by calling _ensure_visible last, for instance.)
+javagui layout is extremely slow. Also, some components may not be
+visible before the window is resized (the TextArea in test_defaults,
+for instance). This has not always been so, and is probably caused by a
+bug. (This may in part be because windows are shown before their contents
+has been placed properly. That can be fixed by rearranging the order in
+which the _ensure_* methods are called, by calling _ensure_visible last,
+for instance.)
 
 test_defaults doesn't place the text field correctly in tkinter
-in MacPython. It works with tkinter in Windows, though. (Has this
-got to do with slow updates of layout?)
+in MacPython. It works with tkinter in Windows, though.
 
 Windows created after app.run() seem to have only default
 geometry (i.e. size == (0, 0)) in tkgui/MacPython.
-
-There seems to be some infinite recursion associated with the text
-components in javagui.
-
-For some reason, it's impossible to set the width of the window in
-test_textchange below a certain value...
-
-test_textarea doesn't work properly. (Swap from Label to TextArea
-needs ironing out...)
 
 test_references.py and test_events don't work in Jython 2.1b1.
 (References and Events should still work, though...)
@@ -50,41 +32,25 @@ lost. [jknapka: this is not actually true. However, on Windows
 (not Unix), the visual indication of the selection is erased.
 The selection is still present, however.]
 
-RadioGroup doesn't work properly in wxgui or javagui.
-
 id() is broken in Jython and will probably not be fixed soon.
-Therefore, any use of id() in Anygui (such as in anygui.References)
-can not be guaranteed to be correct in Jython. This should preferrably
-be fixed in Jython, but failing that, by implementing some other id()
-wraparound in Anygui.
+This will probably not affect the correctness of the hashing
+of references (in anygui.References), but care should be
+taken not to store things with id(obj) as key.
 
 Compiling Anygui apps to jar files seems problematic in Jython, giving
 the error "anygui clashes with package of same name".
 
-The defaults for TextArea are overridden by the TextField defaults in
-mswgui.
-
 Label alignment (both vertical and horizontal) varies across backends.
 
-Setting tf.model.value moves selection to the end of
+Setting tf.text moves selection to the end of
 textfields/textareas in javagui.
 
 Tabbing between fields and/or other controls doesn't work in mswgui.
 
-Only strings are currently permitted as text in TextField and
-TextArea. In general, there should be as little type checking as
-possible (i.e. converting with str(), like in ListBox).
-
 Alt-F4 doesn't work for javagui Windows in MS Windows.
-
-Importing tkgui in jython gives a non-intuitive error message. It
-(tkgui) should simply be ignored.
 
 The cursor position and the end marker of the selection should always
 be the same in tkgui. That is not currently the case.
-
-Programs running javagui don't always quit, because of some unstable
-thread code (which may wait for the wrong thread).
 
 Selecting items in a ListBox with the arrow keys in javagui doesn't
 cause the callback to be activated. (Using the JListModel in a more
@@ -121,9 +87,6 @@ behaviour in other backends.)
 beosgui.py does not implement _ensure_destroyed(). This will prevent
 objects from being removed from a container, and/or moved between
 containers.
-
-test_remove.py fails under mswgui. The "Remove" button's event handler
-is never called.
 
 In cursesgui/textgui, text controls are always editable, even if
 _editable == 0. It seems _ensure_editable() never being called.
