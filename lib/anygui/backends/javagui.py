@@ -7,6 +7,7 @@ __all__ = '''
   ButtonWrapper
   LabelWrapper
   TextFieldWrapper
+  TextAreaWrapper
   ListBoxWrapper
   WindowWrapper
 
@@ -228,6 +229,63 @@ class TextFieldWrapper(ComponentWrapper):
 
     def getText(self):
         return self.widget.text
+
+################################################################
+
+class JScrollableTextArea(swing.JPanel):
+    # Replacement for swing.JTextArea
+
+    def __init__(self):
+        self._jtextarea = swing.JTextArea()
+        self.layout = awt.BorderLayout()
+        self._jscrollpane = swing.JScrollPane(self._jtextarea)
+        self.add(self._jscrollpane, awt.BorderLayout.CENTER)
+
+    def getText(self):
+        return self._jtextarea.text
+
+    def setText(self, text):
+        self._jtextarea.text = text
+
+    def getSelectionStart(self):
+        return self._jtextarea.selectionStart
+
+    def getSelectionEnd(self):
+        return self._jtextarea.selectionEnd
+
+    def setSelectionStart(self, index):
+        self._jtextarea.selectionStart = index
+
+    def setSelectionEnd(self, index):
+        self._jtextarea.selectionEnd = index
+
+    def setEditable(self, editable):
+        self._jtextarea.editable = editable
+
+# FIXME: 'Copy-Paste' inheritance...
+def TextAreaWrapper(ComponentWrapper):
+
+    #[mlh@20020831] It seems that this is never called...
+    def widgetFactory(self, *args, **kwds):
+        return JScrollableTextArea()
+
+    def getSelection(self):
+        return self.widget.getSelectionStart(), \
+               self.widget.getSelectionEnd()
+
+    def setSelection(self, selection):
+        self.widget.setSelectionStart(selection[0])
+        self.widget.setSelectionStart(selection[1])
+
+    def setEditable(self, editable):
+        self.widget.setEditable(editable)
+
+    def setText(self, text):
+        self.widget.setText(text)
+
+    def getText(self):
+        return self.widget.getText()
+
 
 ################################################################
 
