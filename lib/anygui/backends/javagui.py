@@ -1,6 +1,5 @@
 
 from anygui.backends import *
-__all__ = anygui.__all__
 
 ################################################################
 
@@ -434,18 +433,3 @@ class Application(AbstractApplication):
             raise RuntimeError, 'unable to find AWT thread'
 
 ################################################################
-
-class factory:
-    _map = {'Window': Window,
-            'Button': Button,
-            'RadioButton': RadioButton,
-            'RadioGroup': RadioGroup,
-            'CheckBox': CheckBox,
-            'Application': Application,
-            'Label': Label,
-            'ListBox': ListBox,
-            'TextField': TextField,
-            'TextArea': TextArea,
-            }
-    def get_class(self, name):
-        return self._map[name]

@@ -1,6 +1,5 @@
 
 from anygui.backends import *
-__all__ = anygui.__all__
 
 ################################################################
 
@@ -507,18 +506,3 @@ class Application(AbstractApplication):
         self._root.mainloop()
 
 ################################################################
-
-class factory:
-    _map = {'Window': Window,
-            'Button': Button,
-            'RadioButton': RadioButton,
-            'RadioGroup': RadioGroup,
-            'CheckBox': CheckBox,
-            'Application': Application,
-            'Label': Label,
-            'TextField': TextField,
-            'TextArea': TextArea,
-            'ListBox': ListBox,
-            }
-    def get_class(self, name):
-        return self._map[name]
