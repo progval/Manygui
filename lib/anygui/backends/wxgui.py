@@ -1,4 +1,6 @@
 from anygui.backends import *
+import sys
+
 #__all__ = anygui.__all__
 
 __all__ = '''
@@ -13,6 +15,11 @@ __all__ = '''
   FrameWrapper
   RadioButtonWrapper
   CheckBoxWrapper
+  MenuBarWrapper
+  MenuWrapper
+  MenuCommandWrapper
+  MenuCheckWrapper
+  MenuSeparatorWrapper
 
 '''.split()
 
@@ -32,6 +39,9 @@ from anygui.Applications import AbstractApplication
 from anygui.Wrappers import AbstractWrapper, DummyWidget, isDummy
 from anygui.Events import *
 from anygui import application
+
+from anygui.Windows import Window
+from anygui.Menus import Menu, MenuCommand, MenuCheck, MenuSeparator
 
 class ComponentWrapper(AbstractWrapper):
     # mixin class, implementing the backend methods
@@ -447,5 +457,267 @@ class Application(AbstractApplication, wxApp):
 
     def internalRun(self):
         self.MainLoop()
+
+################################################################
+# Menus
+
+class WxMenuDummy:
+    # No native widget for menu items, but we still need to provide
+    # -something- for create() to chew on.
+    pass
+
+class MenuItemMixin:
+
+    def widgetFactory(self,*args,**kws):
+        return WxMenuDummy()
+
+    _idSrc = 0
+    def getId(self):
+        MenuItemMixin._idSrc = MenuItemMixin._idSrc + 1
+        return MenuItemMixin._idSrc
+
+    def createIfNeeded(self):
+        if self.noWidget():
+            self.create()
+            self._id = self.getId()
+
+    def setEnabled(self,enabled):
+        #print "setEnabled",self,enabled
+        if self.proxy.container is None or self.proxy.container.wrapper.noWidget():
+            return
+        self.rebuild_all()
+
+    def setContainer(self,container):
+        #print "MenuItemMixin.setContainer",self,container
+        if not container:
+            if self.proxy.container is None:
+                return
+            if self.proxy in self.proxy.container.contents:
+                self.proxy.container.contents.remove(self.proxy)
+            self.widget = DummyWidget()
+            self.proxy.container.wrapper.rebuild()
+        else:
+            self.createIfNeeded()
+            self.proxy.container.wrapper.rebuild()
+
+    def setText(self,text):
+        if self.proxy.container is None or self.proxy.container.wrapper.noWidget():
+            return
+        try:
+            self.rebuild_all()
+        except:
+            pass
+
+    def enterMainLoop(self): # ...
+        pass
+
+    def internalDestroy(self):
+        pass
+
+    def __str__(self):
+        if self.noWidget():
+            widg = "NOWIDGET"
+        else:
+            widg = self.widget
+        return "%s %s@%s w%s"%(self.__class__.__name__.split('.')[-1],self.proxy.state.get('text','NONE'),id(self),widg)
+
+class MenuBarWrapper(MenuItemMixin,AbstractWrapper):
+
+    def __init__(self,*args,**kws):
+        AbstractWrapper.__init__(self,*args,**kws)
+        self.full = 0
+
+    def widgetFactory(self,*args,**kws):
+        return wxMenuBar(*args,**kws)
+
+    def setContainer(self,container):
+        if not container:
+            if self.noWidget:
+                return
+            #print "DESTROYING",self
+            #self.widget.destroy()
+            self.widget = DummyWidget()
+        else:
+            if container.wrapper.noWidget():
+                return
+            #print "Adding menubar",self,"to",self.proxy.container.wrapper
+            self.createIfNeeded()
+            container.wrapper.widget.SetMenuBar(self.widget)
+            self.full = 0
+            self.rebuild()
+
+    def setContents(self,contents):
+        self.rebuild()
+
+    def rebuild_all(self):
+        self.rebuild()
+
+    def rebuild(self):
+        #print "REBUILDING",self
+        if self.proxy.container is None:
+            return
+        if self.proxy.container.wrapper.noWidget():
+            return
+
+        self.removeAll()
+
+        self.full = 1
+
+        pos = 0
+        for item in self.proxy.contents:
+            item.wrapper.widget = DummyWidget()
+            item.wrapper.rebuild()
+            #print "\tAdding",item.wrapper
+            self.widget.Append(item.wrapper.widget,item.text)
+            if not item.enabled:
+               self.widget.Enable(pos,0)
+            pos = pos+1
+
+    def removeAll(self):
+        if self.full:
+            for item in range(len(self.proxy.contents)):
+                self.widget.Remove(0)
+
+    def enterMainLoop(self): # ...
+        self.proxy.push() # FIXME: Why is this needed when push is called in internalProd (by prod)?
+
+class MenuWrapper(MenuItemMixin,AbstractWrapper):
+
+    def __init__(self,*args,**kws):
+        AbstractWrapper.__init__(self,*args,**kws)
+        self.full = 0
+
+    def widgetFactory(self,*args,**kws):
+        return wxMenu(*args,**kws)
+
+    def setContainer(self,container):
+        if not container:
+            if self.noWidget:
+                return
+            #if self.proxy in self.proxy.container.contents:
+            #    self.proxy.container.contents.remove(self.proxy)
+            #print "DESTROYING",self
+            #self.widget.destroy()
+            self.widget = DummyWidget()
+            self.proxy.container.wrapper.rebuild()
+        else:
+            if container.wrapper.noWidget():
+                return
+            self.full = 0
+            self.rebuild()
+
+    def setContents(self,contents):
+        self.rebuild_all()
+
+    def rebuild_all(self):
+        """
+        Rebuild the entire menu structure starting from the toplevel menu.
+        """
+        if self.proxy.container is None:
+            return
+        if self.noWidget():
+            return
+        if self.proxy.container.wrapper.noWidget():
+            return
+        proxies = [self.proxy]
+        while not isinstance(proxies[-1],Window):
+            proxies.append(proxies[-1].container)
+        proxies[-2].wrapper.rebuild()
+
+    def rebuild(self):
+        """
+        Rebuild the menu structure of self and all children; re-add
+        self to parent.
+        """
+        if self.proxy.container is None:
+            return
+        if self.proxy.container.wrapper.noWidget():
+            return
+
+        #print "\tREBUILDING",self,self.proxy.contents
+        if not self.noWidget() and self.full:
+            #print "\t\tDELETING CONTENTS OF",self.widget
+            ids = [p.wrapper._id for p in self.proxy.contents]
+            for id in ids:
+                try:
+                    #print '\t\t\tTRYING To DELETE',id
+                    self.widget.Delete(id)
+                    #print "\t\t\tDeleted",id
+                except:
+                    #print "\t\t\tEXCEPTION while deleting",id,sys.exc_info()
+                    pass
+        #print "\t\tCREATING WIDGET"
+        self.createIfNeeded()
+        #print "\t\t\tDONE",self.widget
+
+        self.full = 1
+
+        for item in self.proxy.contents:
+            if isinstance(item,Menu):
+                item.wrapper.widget = DummyWidget()
+                item.wrapper.rebuild()
+                #print "\t\t\tADDING",item.wrapper,item.wrapper._id
+                self.widget.AppendMenu(item.wrapper._id,item.text,item.wrapper.widget)
+                if not item.enabled:
+                    self.widget.Enable(item.wrapper._id,0)
+                continue
+            item.wrapper.createIfNeeded()
+            #print "\t\t\tADDING",item.wrapper,item.wrapper._id
+            if isinstance(item,MenuCommand):
+                self.widget.Append(item.wrapper._id,item.text,"",0)
+                EVT_MENU(self.widget,item.wrapper._id,item.wrapper.clickHandler)
+                if not item.enabled:
+                    self.widget.Enable(item.wrapper._id,0)
+            if isinstance(item,MenuCheck):
+                self.widget.Append(item.wrapper._id,item.text,"",1)
+                EVT_MENU(self.widget,item.wrapper._id,item.wrapper.clickHandler)
+                if not item.enabled:
+                    self.widget.Enable(item.wrapper._id,0)
+                try:
+                    on = item.state['on']
+                except KeyError:
+                    on=0
+                self.widget.Check(item.wrapper._id,on)
+            if isinstance(item,MenuSeparator):
+                self.widget.AppendSeparator()
+                #print "Adding separator",item.wrapper,"to",self
+                pass
+
+    def enterMainLoop(self): # ...
+        self.proxy.push() # FIXME: Why is this needed when push is called in internalProd (by prod)?
+
+class MenuCommandWrapper(MenuItemMixin,AbstractWrapper):
+
+    def __init__(self,*args,**kws):
+        AbstractWrapper.__init__(self,*args,**kws)
+
+    def clickHandler(self,*args,**kws):
+        #print "CLICKED",self
+        send(self.proxy,'click',text=self.proxy.text)
+
+class MenuCheckWrapper(MenuCommandWrapper):
+
+    def __init__(self,*args,**kws):
+        MenuCommandWrapper.__init__(self,*args,**kws)
+        # FIX ME! self.var = Tkinter.IntVar()
+
+    def setOn(self,on):
+        if self.noWidget():
+            return
+        #print "setOn",self.proxy,self.proxy.container
+        #print "MenuCheck.setOn",self,on
+        # FIX ME! self.var.set(on)
+        self.proxy.container.wrapper.widget.Check(self._id,on)
+
+    def getOn(self):
+        if self.noWidget():
+            return
+        #print "getOn",self.proxy,self.proxy.container
+        #print "MenuCheck.getOn",self,self.var.get()
+        # FIX ME! return self.var.get()
+        return self.proxy.container.wrapper.widget.IsChecked(self._id)
+
+class MenuSeparatorWrapper(MenuItemMixin,AbstractWrapper):
+    pass
 
 ################################################################

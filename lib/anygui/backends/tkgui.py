@@ -16,6 +16,7 @@ __all__ = '''
   MenuCommandWrapper
   MenuCheckWrapper
   MenuSeparatorWrapper
+  MenuBarWrapper
 
 '''.split()
 
@@ -691,6 +692,7 @@ class TkMenuDummy:
 class MenuWrapper(MenuItemMixin,AbstractWrapper):
 
     def widgetFactory(self,*args,**kws):
+        kws.update({'tearoff':0})
         return Tkinter.Menu(*args,**kws)
 
     def setContainer(self,container):
@@ -772,6 +774,9 @@ class MenuWrapper(MenuItemMixin,AbstractWrapper):
 
     def enterMainLoop(self): # ...
         self.proxy.push() # FIXME: Why is this needed when push is called in internalProd (by prod)?
+
+class MenuBarWrapper(MenuWrapper):
+    pass
 
 class MenuCommandWrapper(MenuItemMixin,AbstractWrapper):
 

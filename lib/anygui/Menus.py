@@ -89,3 +89,34 @@ class Menu(Proxy, DefaultEventMixin, Defaults.Menu):
         if item in self.contents:
             self.contents.remove(item)
             self.push()
+
+class MenuBar(Proxy, DefaultEventMixin, Defaults.MenuBar):
+    
+    def __init__(self, *args, **kwds):
+        DefaultEventMixin.__init__(self)
+        Proxy.__init__(self, *args, **kwds)
+        self.contents = []
+
+    def wrapperFactory(self):
+        return backendModule().MenuBarWrapper(self)
+
+    # Adders.
+    def addMenu(self,text="MENU",enabled=1,index=None,*args,**kws):
+        mnu = Menu(text=text,enabled=enabled,*args,**kws)
+        self.add(mnu,index)
+        return mnu
+
+    def add(self,items,index=None):
+        if index is None:
+            index = len(self.contents)
+        items = flatten(items)
+        for item in items:
+            self.contents.insert(index,item)
+            index = index+1
+            item.container = self
+        self.push('contents')
+
+    def remove(self, item):
+        if item in self.contents:
+            self.contents.remove(item)
+            self.push()

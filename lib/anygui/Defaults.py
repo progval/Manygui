@@ -199,19 +199,32 @@ class TextArea:
         'selection' : (0, 0),
         }
 
+class MenuBar:
+    state = {
+        'contents' : [],
+        'enabled': 1
+        }
+
 class Menu:
     _defaultEvent = 'click'
     state = {
-        'contents' : []
+        'contents' : [],
+        'enabled': 1
         }
 
 class MenuCommand:
     _defaultEvent = 'click'
-    state = {}
+    state = {
+        'enabled': 1
+        }
 
 class MenuCheck:
     _defaultEvent = 'click'
-    state = {}
+    state = {
+        'enabled': 1
+        }
 
 class MenuSeparator:
-    state = {}
+    state = {
+        'enabled': 1
+        }
