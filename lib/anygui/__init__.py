@@ -1,9 +1,9 @@
-#_backends = 'msw gtk java wx tk beos qt curses text'
-# beos and gtk removed for first beta:
-_backends = 'msw java wx tk qt curses text'
+_backends = 'msw gtk java wx tk beos qt curses text'
 
 import os, sys
 
+# 20020208:mlh -- started working on
+"""
 __all__ = ['application', 'Application',
            'Window', 'Button', 'CheckBox', 'Label',
            'RadioButton', 'RadioGroup', 'ListBox', 'TextField', 'TextArea',
@@ -12,6 +12,7 @@ __all__ = ['application', 'Application',
            'send', 'link', 'unlink', 'any', 'unlinkSource', 'unlinkHandler',
            'unlinkMethods', 'Frame', 'Placer', 'backend'
            ] # FIXME: Add stuff from Colors and Fonts
+"""
 
 # Try to get the environment variables ANYGUI_WISHLIST (overrides
 # anygui.wishlist), and ANYGUI_DEBUG (to print out stacktraces when

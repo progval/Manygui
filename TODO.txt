@@ -113,6 +113,8 @@ Objectives for version 0.2:
 * Add font, alignment, and colour (etc.) attributes to all relevant
   components.
 
+* Move main event loop to a separate GUI thread?
+
 Longer term goals:
 ------------------
 
