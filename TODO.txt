@@ -153,3 +153,6 @@ Smaller issues:
   as fallbacks). A possible "callback protocol" is to require the
   fallback to be callable, and to call it if no suitable backend (save
   e.g. cursesgui and textgui) is found.
+
+* Add idle events, to facilitate "weaving" with other periodic tasks
+  without using threads.
