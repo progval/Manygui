@@ -3,24 +3,15 @@ from Attribs import Attrib
 from Utils import flatten
 import anygui
 
-# FIXME: Update to work with Wrapper and. Proxy Should maintain a list
-# of proxies, to be able to prod them when entering the main event
-# loop.
-
 class AbstractApplication(Attrib):
 
     _running = 0
-
-    # Needed by Attrib:
-    def refresh(self, **ignore): pass
     
     def __init__(self):
         Attrib.__init__(self)
         self._windows = []
+        self._wrappers = []
         anygui._application = self
-
-    def _get_contents(self):
-        return tuple(self._windows)
 
     def add(self, win):
         for w in flatten(win):
@@ -30,33 +21,49 @@ class AbstractApplication(Attrib):
     def remove(self, win):
         try:
             self._windows.remove(win)
+            self.internalRemove()
         except: pass
 	# FIXME: Temporary(?) fix to cover problem in mswgui _wndproc
         # FIXME: Destroy the window?
 
-    #def _add_window(self, win):
-    #    self._windows.append(win)
+    def internalRemove(self):
+        pass
 
-    #def _remove_window(self, win):
-    #    if win in self._windows:
-    #        self._windows.remove(win)
-
-    #def windows(self):
-    #    """Return a list of all the currently existing window objects."""
-    #    # XXX Or should ApplicationImp also derive from Attrib,
-    #    # and implement a _get_windows method?
-    #    return self._windows
+    # FIXME: Allow external access to list of windows?
 
     def run(self):
-        """Run the application until all windows are destroyed."""
+        """
+        Run the application until all windows are removed.
+        """
         self._running = 1
         if not self._windows:
             return
-        self._mainloop()
+        for wrapper in self._wrappers[:]: # FIXME: Paranoid?
+            wrapper.prod()
+        self.internalRun()
         self._running = 0
 
-    def _mainloop(self):
+    def internalRun(self):
         raise UnimplementedMethod, (self, "mainloop")
 
     def isRunning(self):
         return self._running
+
+    def manage(self, wrapper):
+        """
+        Tells the Application to manage a Wrapper.
+
+        This means that when the Application is run, the Wrapper will
+        be prodded.
+        """
+        if not wrapper in self._wrappers:
+            self._wrappers.append(wrapper)
+
+    # FIXME: Is this method really necessary?
+    def ignore(self, wrapper):
+        """
+        Tells the Application to stop managing a Wrapper.
+        """
+        try:
+            self._wrappers.remove(wrapper)
+        except ValueError: pass

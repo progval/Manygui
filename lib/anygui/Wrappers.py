@@ -22,11 +22,25 @@ The only methods that should be explicitly called by the Proxy are:
 
 """
 
-# TODO:
-# - In __init__:
-#   Add to list of wrappers that need to be prodded...
-#   (In Application, e.g. addWrapper?)
-#   Should the Wrapper realy prod itself?
+def isDummy(obj):
+    try: return obj.isDummy()
+    except AttributeError: return 0
+
+class DummyWidget:
+    """
+    A dummy object used when a wrapper currently has no native widget
+    instantiated.
+    """
+    def isDummy(self): return 1
+    
+    def dummyMethod(self, *args, **kwds): pass
+
+    def __getattr__(self, name): return self.dummyMethod
+
+    def __setattr__(self, name): pass
+
+    def __str__(self): return '<DummyWidget>'
+
 
 class AbstractWrapper:
 
@@ -35,6 +49,8 @@ class AbstractWrapper:
     again, are generic superclasses for the more specific backend
     wrappers (such as ButtonWrapper etc.).
     """
+
+    widget = DummyWidget()
 
     def __init__(self, proxy):
         """
@@ -50,7 +66,6 @@ class AbstractWrapper:
         should use the same method.
         """
         self.proxy = proxy
-        # Move DummyWidget code to front-end?
 
         #@@@ Hm. Some of this could be done globally/class-wide...
         
@@ -62,7 +77,8 @@ class AbstractWrapper:
         self.constraints = []
         self.addConstraint('text', 'selection')
         # 'container' before everything... Handler through added sync call?
-
+        
+        application().manage(self)
         self.inMainLoop = 0
         self.prod() #@@@ ?
 
@@ -297,7 +313,8 @@ class AbstractWrapper:
         """
         self.tearDown()
         self.internalDestroy()
-        self.widget = None
+        try: del self.widget # Restore DummyWidget
+        except AttributeError: pass
 
     def internalDestroy(self):
         """

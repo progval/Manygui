@@ -11,17 +11,7 @@ Release 0.3: Less API change, focus on robustness
 Short-term Objectives/FIXMEs [mlh]
 ----------------------------------
 
-* Clear up default argument issue
-
-* Use a fixed set of attributes (or something similar)?
-  Remove blocked names? Disallow setting non-existant attributes
-  (except possibly with an initial underscore)?
-
 * Rewrite AbstractApplication; clear up prodding issue
-
-* Clear up _foo issue
-
-* Document tentative API for all components
 
 * Clean up exception use (Exceptions module -- perhaps not needed)
 
@@ -200,3 +190,5 @@ Smaller issues:
 * Add a "resizable" (or something) attribute to windows?
 
 * Add scrollbars or scrollable frames (or both)
+
+* Use default constructor arguments instead of Defaults module?

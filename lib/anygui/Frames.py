@@ -17,11 +17,13 @@ class Frame(Component, Defaults.Frame):
         return backend().FrameWrapper(self)
         
     def add(self,items,options=None,**kws):
-        """ Add the given items to this container, passing the items and
+        """
+        Add the given items to this container, passing the items and
         the keyword arguments along to the layout manager, if one is
-        present. Note that different layout managers may have different
-        expectations about **kwds, and may impose restrictions on the
-        contents of items. See LayoutManagers.py. """
+        present. Note that different layout managers may have
+        different expectations about **kwds, and may impose
+        restrictions on the contents of items. See LayoutManagers.py.
+        """
 
         items = flatten(items)
 
