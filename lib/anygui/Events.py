@@ -7,8 +7,7 @@
 
 # If weakref stuff is to be used, registry should use
 # WeakKeyDictionaries (which means the (src,type) tuple solution won't
-# work anymore) and dead handler references should be removed at some
-# point (when?).
+# work anymore)
 
 __all__ = '''
 
