@@ -27,7 +27,7 @@ class ComponentMixin:
             else:
                 parent = None
             if self._wx_id is None:
-                self._wx_id = NewId()
+                self._wx_id = wxNewId()
             if hasattr(self, '_get_wx_text'):
                 frame = self._wx_class(parent,
                                        self._wx_id,
@@ -289,7 +289,7 @@ class Window(ComponentMixin, AbstractWindow):
             # is itself contained in the wxFrame)
             # Using the default style gives us proper handling
             # of TAB to move between the controls.
-            self._wx_frame = wxPanel(self._wx_comp, NewId())
+            self._wx_frame = wxPanel(self._wx_comp, wxNewId())
         return result
     
     def _ensure_events(self):
