@@ -29,8 +29,8 @@ fixes the problem.
 Put more comments - with the other available values, ie in
 _beos_mode, _beos_flags, etc.
 
-Read through the BeBook looking for more info that might be useful.
-(May need to work on some more *.dx files...)
+Work out sizes a bit more: I'm currently just using the widget's
+preferred size, which is okay for now, except in test_place.py
 
 New Classes to implement:
 
@@ -137,7 +137,7 @@ class ComponentMixin(WrapThis):
                                    self._beos_mode,
                                    self._beos_flags)
             self.wrap(self._beos_class(*self._init_args))
-            self._beos_comp.ResizeToPreferred()
+            self._ensure_geometry()
             #print self._beos_class, self._beos_id
             self._ensure_enabled_state()
             if self._container is not None:
@@ -154,14 +154,23 @@ class ComponentMixin(WrapThis):
             self._beos_msg = BMessage.BMessage(ACTION) # Create a BMessage instance
             self._beos_msg.AddString('self_id', str(self._beos_id)) # Add the id of the object
             # also need to add the args and keywords ?
+            # Perhaps pickle the args and add, pickle kwargs and add?
 
     def _ensure_geometry(self):
         self._beos_bounds = (float(self._x),
                 float(self._y),
-                float(self._width)*1.3, # Needs this?
+                float(self._width), # Needs this?
                 float(self._height))
         if self._beos_comp:
             self._beos_comp.ResizeToPreferred()
+            '''
+            # Should be something a bit like...
+            width, height = self._beos_comp.GetPreferredSize()
+            if width>self._width:
+                self._beos_comp.ResizeToPreferred()
+            elif height > self._height:
+                self._beos_comp.ResizeToPreferred()
+            '''
 
 
     def _ensure_visibility(self):
@@ -214,7 +223,7 @@ class Label(ComponentMixin, AbstractLabel):
     def _ensure_text(self):
         if self._beos_comp:
             self._beos_comp.SetText(self._text)
-            self._beos_comp.ResizeToPreferred()
+            self._ensure_geometry()
 
 ##################################################################
 
@@ -662,5 +671,6 @@ class Application(WrapThis, AbstractApplication):
     
     def _mainloop(self):
         self._beos_comp.Run()
+
     
 #####################################################################
