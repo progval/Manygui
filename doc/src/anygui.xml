@@ -13,7 +13,7 @@
 
 <document version="&longversion;">
 
-  <title>Anygui : Generic GUI for Python</title>
+  <title>Anygui: Generic GUI for Python</title>
 
   <author>Magnus Lie Hetland</author>
 
@@ -79,6 +79,13 @@
       it. Because of that, incompatibilities may occur between
       releases. The current release (&longversion;) should be regarded
       as a prototype.</para>
+
+      <para>One planned change in the API is renaming the
+      <code>update</code> method, since clashes with the dictionary
+      method of the same name. This method will probably be called
+      <code>refresh</code> in the final release (&shortversion;). The
+      naming of some of the environment variables used by
+      <name>Anygui</name> may also be changed.</para>
 
     </section>
 
@@ -221,6 +228,18 @@
       backend module (in the <code>anygui.backends</code>
       package). For instance, the <code>msw</code> backend is found in
       <code>anygui.backends.mswgui</code> module.</para>
+
+      <para>In general, if you end up with a text-based solution,
+      <code>cursesgui</code> will be preferred over
+      <code>textgui</code>if your <name>Python</name>-installation has
+      a wrorking <code>curses</code> module. The exception is if you
+      are using <name>Anygui</name> in the interactive interpreter, in
+      which <code>textgui</code> will be preferred, to avoid
+      interfering with the terminal and locking up the interpreter
+      prompt. (If you'd like to, for some reason, you can override
+      this behaviour with the environment variable
+      <code>ANYGUI_FORCE_CURSES</code>; see the API Reference
+      below.)</para>
 
       <para><strong>Note:</strong> The <name>BeOS</name> backen is not
       included in the current release (&longversion;), but is
@@ -896,9 +915,12 @@
       backends for a viable alternative.</para>
 
       <!--
+      Document the star symbol and the new semantics.
+      -->
+
+      <!--
       Document default order.
       Documentation synch problem?
-      Document the star symbol and the new semantics.
       -->
 
       <para>Example:</para>
@@ -919,9 +941,11 @@
       as a string.) This will make <name>Anygui</name> print out the
       stack traces from each backend it tries to import.</para>
 
-      <!--
-      Document new star semantics
-      -->
+      <para>There is one exception to this rule: If the true value
+      supplied is the name of one of the backends (such as
+      <code>tk</code> or <code>curses</code>) only the traceback
+      caused by importing that backend will be shown. This can be
+      useful to make the output somewhat less verbose.</para>
 
       <para>Example:</para>
 
@@ -929,22 +953,40 @@
 	<line>foo:~$ ANYGUI_DEBUG=1 python someprogram.py</line>
       </codelisting>
 
-      <para><code>ANYGUI_ALTERNATE_BORDER</code>: </para>
+      <para><code>ANYGUI_ALTERNATE_BORDER</code>: This Boolean
+      variable affects <code>cursesgui</code>, making it use the same
+      border-drawing characters as <code>textgui</code>
+      (<code>'+'</code>, <code>'-'</code>, and <code>'|'</code>). This
+      may be useful if your terminal can't show the special
+      <code>curses</code> box-drawing characters properly.</para>
 
-      <para><code>ANYGUI_SCREENSIZE</code>: </para>
+      <para><code>ANYGUI_SCREENSIZE</code>: Affects
+      <code>textgui</code>. Gives the terminal ("screen") dimensions,
+      in characters. This should be in the format
+      <var>width</var><code>x</code><var>height</var>,
+      e.g. <code>80x24</code>. If this environment variable is not
+      supplied, the standard <name>Unix</name> variables
+      <code>COLUMNS</code> and <code>LINES</code> will be used. If
+      neither is provided, the default size <code>80x23</code> will be
+      used.</para>
 
-      <para><code>ANYGUI_FORCE_CURSES</code>: </para>
+      <para><code>ANYGUI_FORCE_CURSES</code>: Normally,
+      <code>cursesgui</code> will not be selected if you are in the
+      interactive interpreter. If you want to force the normal
+      selection order (trying to use <code>cursesgui</code> before
+      resorting to <code>textgui</code>) you can set this variable to
+      a true value. Note that this is not the same as setting
+      <code>ANYGUI_WISHLIST</code> to <code>'curses'</code>, since
+      that will ignore all other backends.</para>
+
+      <para><code>ANYGUI_CURSES_NOHELP</code>: If you don't want the
+      help-screen that appears when an <name>Anygui</name> application
+      is started using <code>cursesgui</code> (or
+      <code>textgui</code>), you can set this variable to a true
+      value.</para>
 
       <!--
-      From Joe:
-
-      You can now set ANYGUI_ALTERNATE_BORDER=1 in the environment
-      to get +-| borders on strange terminal emulators. This is
-      mentioned on the initial help screen as well.
-
-      ANYGUI_SCREENSIZE
       ANYGUI_SKIP # Test script...
-      ANYGUI_CURSES_NOHELP=1
       -->
 	
     </section>
