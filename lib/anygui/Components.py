@@ -173,22 +173,22 @@ class AbstractComponent(Attrib, Action):
     # backend api
 
     def _is_created(self):
-        raise UnimplementedMethod, "_is_created"
+        raise UnimplementedMethod, (self, "_is_created")
 
     def _ensure_created(self):
-        raise UnimplementedMethod, "_ensure_created"
+        raise UnimplementedMethod, (self, "_ensure_created")
 
     def _ensure_geometry(self):
-        raise UnimplementedMethod, "_ensure_geometry"
+        raise UnimplementedMethod, (self, "_ensure_geometry")
 
     def _ensure_visibility(self):
-        raise UnimplementedMethod, "_ensure_visibility"
+        raise UnimplementedMethod, (self, "_ensure_visibility")
 
     def _ensure_enabled_state(self):
-        raise UnimplementedMethod, "_ensure_enabled_state"
+        raise UnimplementedMethod, (self, "_ensure_enabled_state")
 
     def _ensure_destroyed(self):
-        raise UnimplementedMethod, "_ensure_destroyed"
+        raise UnimplementedMethod, (self, "_ensure_destroyed")
 
     def _ensure_events(self):
-        raise UnimplementedMethod, "_ensure_events"
+        raise UnimplementedMethod, (self, "_ensure_events")

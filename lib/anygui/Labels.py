@@ -28,10 +28,10 @@ class AbstractLabel(AbstractComponent):
             self._ensure_color()
 
     def _ensure_text(self):
-        return UnimplementedMethod, "_ensure_text"
+        raise UnimplementedMethod, (self, "_ensure_text")
 
     def _ensure_font(self):
-        return UnimplementedMethod, "_ensure_font"
+        raise UnimplementedMethod, (self, "_ensure_font")
 
     def _ensure_color(self):
-        return UnimplementedMethod, "_ensure_color"
+        raise UnimplementedMethod, (self, "_ensure_color")

@@ -30,4 +30,4 @@ class AbstractApplication(Action):
         self._mainloop()
 
     def _mainloop(self):
-        raise UnimplementedMethod, "mainloop"
+        raise UnimplementedMethod, (self, "mainloop")

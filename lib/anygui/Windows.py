@@ -31,4 +31,4 @@ class AbstractWindow(AbstractFrame):
         return self._title
 
     def _ensure_title(self):
-        raise UnimplementedMethod, "_ensure_title"
+        raise UnimplementedMethod, (self, "_ensure_title")
