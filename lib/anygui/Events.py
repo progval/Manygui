@@ -45,6 +45,7 @@ def link(*args, **kwds):
         source, event, handler = args
     weak = kwds.get('weak', 0)
     tag  = kwds.get('tag', void)
+    #loop = kwds.get('loop', 0)
     s = ref(source, weak)
     h = ref(handler, weak)
     #if tag is not void: h.tag = tag
@@ -81,7 +82,7 @@ def lookup(source, event, tag=void):
         for e in events:
             try:
                 h = registry[s][e]
-                if tag == void or getattr(h,'tag',void):
+                if tag == void or tag == getattr(h,'tag',void):
                     lists.append(registry[s][e])
             except KeyError: pass
     return lists
@@ -89,18 +90,21 @@ def lookup(source, event, tag=void):
 def send(source, event='default', tag=void, loop=0, **kw):
     'Call the appropriate event handlers with the supplied arguments. \
     As a side-effect, dead handlers are removed from the candidate lists.'
-    args = {'source': source, 'event': event, 'loop': loop}
+    args = {'source': source, 'event': event}
     args.update(kw)
-    if not loop: source_stack.append(id(source))
+    if tag is not void: args['tag'] = tag
+    source_stack.append(id(source))
     try:
         results = []
         args.setdefault('time', time.time())
         for handlers in lookup(source, event, tag):
             live_handlers = []
+            if loop: print handlers
             for r in handlers:
                 obj = r.obj
-                if obj is not None: obj = obj()
-                if obj is not None and id(obj) in source_stack: continue
+                if obj is not None:
+                    obj = obj()
+                    if not loop and id(obj) in source_stack: continue
                 if not r.is_dead():
                     live_handlers.append(r)
                     handler = r()
@@ -109,7 +113,7 @@ def send(source, event='default', tag=void, loop=0, **kw):
             handlers[:] = live_handlers
         if results: return results
     finally:
-        if not loop: source_stack.pop()
+        source_stack.pop()
 
 def unlinkSource(source):
     'Unlink all handlers linked to a given source.'
