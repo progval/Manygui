@@ -10,6 +10,7 @@ class Rule:
         assert '"' not in ruleString and "'" not in ruleString
         name, expr = ruleString.split('=', 1)
         self.name = name.strip()
+        self.DEBUG = expr.strip() # DELETE ME
         self.expr = compile(expr.strip(), '', 'eval')
         self.deps = name_pat.findall(expr)
 
@@ -20,9 +21,8 @@ class Rule:
         scope[name] = eval(self.expr, scope)        
 
 # TODO: - Add "rule checks" -- if a rule is satisfied, dependencies
-#         are irrelevant.
-#       - Fix iteration mechanism to make rule effects propagate
-#         through several levels -- not just one
+#         are irrelevant (which means that the name may indeed be
+#         "defined")...
 #       - Refactor adjust()
 #       - Write separate test suite
 
@@ -57,12 +57,17 @@ class RuleEngine:
             stable = 1
             for name in undef.keys():
                 for rule in self.rules[name]:
+                    #print 'rule:', name, '=', rule.DEBUG # FIXME
                     for dep in rule.deps:
-                        if undef.has_key(dep): break
+                        if undef.has_key(dep):
+                            #print 'dropping rule (%s is undefined)\n' % dep # FIXME
+                            break
                     else:               
                         try: rule.fire(vals)
                         except NoChange: pass
                         else: stable = 0
+                        #print 'DEFINED:', name # FIXME
+                        #print # FIXME
                         del undef[name]
                         break
         return undef.keys()
@@ -89,15 +94,13 @@ if __name__ == '__main__':
     vals['size'] = 9999, 9999
     vals['position'] = 10, 10
     vals['geometry'] = 10, 10, 9999, 9999
-    print eng.adjust(vals, ['y', 'x']) # 'x' shouldn't be necessary... Use value checks
+    print eng.adjust(vals, ['y', 'x', 'size']) # 'x' and 'size' shouldn't be necessary... Use value checks
 
-    """
     print vals['position'], vals['geometry'] # Geometry isn't set properly here...
     vals['position'] = 42, 42
-    print eng.adjust(vals, ['position'])
+    print eng.adjust(vals, ['position', 'size']) # 'size' shouldn't be necessary...
     print (vals['x'], vals['y']), vals['geometry']
 
     vals['geometry'] = 1, 2, 3, 4
     print eng.adjust(vals, ['geometry'])
     print (vals['x'], vals['y'], vals['width'], vals['height']), vals['position']+vals['size']
-    """
