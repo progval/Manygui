@@ -5,9 +5,6 @@ Tentative release date: December 10th, 2001
 
 * Finalise signal system/API
 
-* Integrate the signal system into the basic callback
-  mechanism
-
 * Simplify the widget API by detaching models, using
   signals
 
@@ -19,9 +16,6 @@ Tentative release date: December 10th, 2001
   the place() method), using signals
 
 * Resolve the single-line/multi-line Label issue
-
-* Make it possible to create widgets while the program is
-  running (by improving use of ensure_created etc.)
 
 Objectives for version 0.2:
 ---------------------------
