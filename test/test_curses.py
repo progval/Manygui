@@ -31,6 +31,13 @@ def change_b3(*args,**kws):
     b3.text = "Button %d"%n
 link(b2,change_b3)
 
+def toggle_b2(*args,**kws):
+    if b2 in win._contents:
+        win.remove(b2)
+    else:
+        win.add(b2)
+link(b3,toggle_b2)
+
 win.add(b2)
 win.add(b3)
 win.add(lb2)
