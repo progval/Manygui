@@ -1,4 +1,4 @@
-_backends = 'msw gtk x java wx tk beos'
+_backends = 'msw gtk x java wx tk beos qt'
 
 # Try to get the environment variables ANYGUI_WISHLIST (used
 # before anygui.wishlist), and ANYGUI_DEBUG (to print out
