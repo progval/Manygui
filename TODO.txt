@@ -12,7 +12,6 @@ Release 0.3: Less API change, focus on robustness
 
 Remaining objectives for version 0.1:
 -------------------------------------
-Tentative release date: Mid-December, 2001
 
 * Fix remaining bugs and make sure the tests work in all
   backends
@@ -37,7 +36,6 @@ Tentative release date: Mid-December, 2001
 
 Objectives for version 0.2:
 ---------------------------
-Tentative release date: February 28th, 2002
 
 * Refactor to reduce code duplication (by moving things to
   the core), simplify the backend API, and reduce coupling
@@ -96,13 +94,14 @@ Tentative release date: February 28th, 2002
 
 * Change add() signature?
 
-* Add support for complex widgets (like wx tree widget,
-  notebook, PMW-style widgets etc) with default
-  implementations in the basic Anygui API (in the vein
-  of the piddle/sping API)
+* Add support for complex widgets ("megawidgets") with default
+  implementations in the basic Anygui API (in the vein of the
+  piddle/sping API)
 
   In other words, give a standardised way of integrating
   backend-specific features into Anygui programs.
+
+* Add tree widget and notebook widget
 
 * Add a combobox with a default implementation in terms of simpler
   components
@@ -141,7 +140,5 @@ Smaller issues:
 ---------------
 
 * Add support for borders?
-
-* Add .txt endings to README etc.
 
 * Add a linkMethods (or something) function for callback support?
