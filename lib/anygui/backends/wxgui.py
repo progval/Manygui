@@ -363,6 +363,7 @@ class WindowWrapper(ComponentWrapper):
             # Using the default style gives us proper handling
             # of TAB to move between the controls.
             self._wx_frame = wxPanel(result, wxNewId())
+            self._wx_frame.SetSize((1,1))
         return result
     
     def widgetSetUp(self):
@@ -390,14 +391,18 @@ class WindowWrapper(ComponentWrapper):
         self.destroy()
 
     def _wx_size_handler(self, evt):
-        w, h = evt.GetSize()
+        #w, h = evt.GetSize()
+        w,h = self.widget.GetClientSize()
         ow,oh = self._wx_frame.GetSize()
         self._wx_frame.SetSize((w, h))
+        if (ow,oh) == (1,1):
+            return
         dw = w - ow
         dh = h - oh
-        #self.proxy.resized(dw, dh)
-        print "Resizing..."
-        self.proxy.resized(0,0)
+        if (dw,dh) == (0,0):
+            return
+        print "Resizing...",dw,dh
+        self.proxy.resized(dw,dh)
 
 ################################################################
 
