@@ -556,7 +556,7 @@ class ListBox(ComponentMixin, AbstractListBox):
         """Move listbox selection down."""
         self._selection += 1
         if self._selection >= len(self._items):
-            self._selection = 0
+            self.modify(selection=0)
         self._redraw()
         return 1
 
@@ -564,7 +564,7 @@ class ListBox(ComponentMixin, AbstractListBox):
         """Move listbox selection up."""
         self._selection -= 1
         if self._selection < 0:
-            self._selection = len(self._items)-1
+            self.modify(selection=len(self._items)-1)
         self._redraw()
         return 1
 
@@ -619,11 +619,11 @@ class ToggleButtonMixin(ComponentMixin):
 
     def __init__(self,value=0,*args,**kws):
         ComponentMixin.__init__(self,*args,**kws)
-        self._value = value
+        self.modify(value=value)
 
     def _curs_clicked(self,ev):
         """Click on button."""
-        self.on = not self.on # FIXME: ??
+        self.modify(on=not self.on) # FIXME: ??
         self._redraw()
         send(self, 'click')
 
@@ -661,7 +661,7 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
     def _curs_clicked(self,ev):
         """Click on button."""
         if self.group is not None:
-            self.group.value = self.value
+            self.group.modify(value=self.value)
         send(self, 'click')
 
     _event_map = { ord(' '):_curs_clicked }
@@ -708,7 +708,7 @@ class TextMixin(ComponentMixin):
     def _backspace(self,ev):
         """Erase character before cursor."""
         if self._tpos < 1: return 1
-        self._text = self._text[:self._tpos-1] + self._text[self._tpos:]
+        self.modify(text=self._text[:self._tpos-1] + self._text[self._tpos:])
         self._tpos -= 1
         self._redraw()
         return 1
@@ -717,7 +717,7 @@ class TextMixin(ComponentMixin):
         """Insert character before cursor."""
         if not chr(ev) in string.printable:
             return 0
-        self._text = self._text[:self._tpos] + chr(ev) + self._text[self._tpos:]
+        self.modify(text=self._text[:self._tpos] + chr(ev) + self._text[self._tpos:])
         self._tpos += 1
         self._redraw() # FIXME: only really need to redraw current line.
         return 1
@@ -879,7 +879,7 @@ class Frame(ContainerMixin, AbstractFrame):
     def __init__(self,*args,**kws):
         ContainerMixin.__init__(self,*args,**kws)
         AbstractFrame.__init__(self,*args,**kws)
-        self._text = ""
+        self.modify(text="")
 
 class Window(ContainerMixin, AbstractWindow):
 
@@ -889,7 +889,7 @@ class Window(ContainerMixin, AbstractWindow):
     def __init__(self,*args,**kws):
         ContainerMixin.__init__(self,*args,**kws)
         AbstractWindow.__init__(self,*args,**kws)
-        self._text = ""
+        self.modify(text="")
         ##_scr.dbg("%s:%s"%(self._title,self.geometry))
 
     def _ensure_destroyed(self):
@@ -1029,10 +1029,10 @@ class HelpWindow(Window):
         self._prev_ctrl = _focus_control
         self._prev_focus_capture = _focus_capture_control
         self._title = "INFORMATION (press 'Q' to dismiss)"
-        self._x = 0
-        self._y = 0
-        self._width = 600
-        self._height = 400
+        self.modify(x=0)
+        self.modify(y=0)
+        self.modify(width=600)
+        self.modify(height=400)
         lb = ListBox(geometry=(10,10,580,380))
         self.add(lb)
         self._populate_lb(lb)
