@@ -17,6 +17,9 @@ Tentative release date: Mid-December, 2001
 * Fix remaining bugs and make sure the tests work in all
   backends
 
+* Make sure all backends convert attribute values so they
+  are acceptable to the backend widgets
+
 Objectives for version 0.2:
 ---------------------------
 Tentative release date: February 28th, 2002

@@ -8,10 +8,6 @@ from wxPython.wx import *
 
 class ComponentMixin:
     # mixin class, implementing the backend methods
-    #_height = -1 # -1 means default size in wxPython
-    #_width = -1
-    #_x = -1
-    #_y = -1
 
     _wx_comp = None
     _wx_id = None
@@ -49,16 +45,16 @@ class ComponentMixin:
 
     def _ensure_geometry(self):
         if self._wx_comp:
-            self._wx_comp.SetPosition((self._x, self._y))
-            self._wx_comp.SetSize((self._width, self._height))
+            self._wx_comp.SetPosition((int(self._x), int(self._y)))
+            self._wx_comp.SetSize((int(self._width), int(self._height)))
 
     def _ensure_visibility(self):
         if self._wx_comp:
-            self._wx_comp.Show(self._visible)
+            self._wx_comp.Show(int(self._visible))
 
     def _ensure_enabled_state(self):
         if self._wx_comp:
-            self._wx_comp.Enable(self._enabled)
+            self._wx_comp.Enable(int(self._enabled))
 
     def _ensure_destroyed(self):
         if self._wx_comp:
@@ -71,19 +67,16 @@ class ComponentMixin:
 ################################################################
 
 class Label(ComponentMixin, AbstractLabel):
-    #_width = 100 # auto ?
-    #_height = 32 # auto ?
     _wx_class = wxStaticText
-    #_text = "wxLabel"
     _wx_style = wxALIGN_LEFT
 
     def _ensure_text(self):
         if self._wx_comp:
-            self._wx_comp.SetLabel(self._text)
+            self._wx_comp.SetLabel(str(self._text))
 
     def _get_wx_text(self):
         # return the text required for creation
-        return self._text
+        return str(self._text)
 
 ################################################################
 
@@ -104,63 +97,57 @@ class ListBox(ComponentMixin, AbstractListBox):
     def _ensure_selection(self):
         if self._wx_comp:
             if self._wx_comp.Number() > 0:
-                self._wx_comp.SetSelection(self._selection) # Does not cause an event
+                self._wx_comp.SetSelection(int(self._selection)) # Does not cause an event
 
     def _ensure_events(self):
         if self._wx_comp:
             EVT_LISTBOX(self._wx_comp, self._wx_id, self._wx_clicked)
 
     def _wx_clicked(self, event):
-        #self.do_action()
         send(self, 'select')
 
 ################################################################
 
 class Button(ComponentMixin, AbstractButton):
     _wx_class = wxButton
-    #_text = "wxButton"
 
     def _ensure_events(self):
         EVT_BUTTON(self._wx_comp, self._wx_id, self._wx_clicked)
 
     def _wx_clicked(self, evt):
-        #self.do_action()
         send(self, 'click')
 
     def _get_wx_text(self):
-        # return the text required for creation
-        return self._text
+        return str(self._text)
 
 
 class ToggleButtonMixin(ComponentMixin):
 
     def _ensure_state(self):
         if self._wx_comp is not None:
-            self._wx_comp.SetValue(self.on)
-    
+            self._wx_comp.SetValue(int(self.on))
+
+    # FIXME: This may not be correct
     def _wx_clicked(self, evt):
         val = self._wx_comp.GetValue()
         if val == self.on:
             return
         self.on = val
-        #self.do_action()
         send(self, 'click')
 
     def _get_wx_text(self):
         # return the text required for creation
-        return self._text
+        return str(self._text)
 
 
 class CheckBox(ToggleButtonMixin, AbstractCheckBox):
     _wx_class = wxCheckBox
-    #_text = "wxCheckBox"
 
     def _ensure_events(self):
         EVT_CHECKBOX(self._wx_comp, self._wx_id, self._wx_clicked)
 
 class RadioButton(ToggleButtonMixin, AbstractRadioButton):
     _wx_class = wxRadioButton
-    #_text = "wxRadioButton"
     
     def _ensure_created(self):
         # The first radiobutton in a group must have the wxRB_GROUP style
@@ -194,16 +181,16 @@ class TextField(ComponentMixin, AbstractTextField):
             # XXX Recursive updates seem to be no problem here,
             # wx does not seem to trigger the EVT_TEXT handler
             # when a new text equal to the old one is set.
-            self._wx_comp.SetValue(self._text)
+            self._wx_comp.SetValue(str(self._text))
 
     def _ensure_selection(self):
         if self._wx_comp:
             start, end = self._selection
-            self._wx_comp.SetSelection(start, end)
+            self._wx_comp.SetSelection(int(start), int(end))
 
     def _ensure_editable(self):
         if self._wx_comp:
-            self._wx_comp.SetEditable(self._editable)
+            self._wx_comp.SetEditable(int(self._editable))
 
     def _ensure_events(self):
         EVT_TEXT_ENTER(self._wx_comp, self._wx_id, self._wx_enterkey)
@@ -213,13 +200,12 @@ class TextField(ComponentMixin, AbstractTextField):
         self.on = self._wx_comp.GetValue()
 
     def _wx_enterkey(self, event):
-        #self.do_action()
         send(self, 'enterkey')
 
     def _get_wx_text(self):
         # return the text required for creation
         # XXX From here or from model?
-        return self._text
+        return str(self._text)
 
 
 # FIXME: 'Copy-Paste' inheritance... TA and TF could have a common wx
@@ -232,7 +218,7 @@ class TextArea(ComponentMixin, AbstractTextArea):
         if self._wx_comp:
             start, end = self._wx_comp.GetSelection()
             if sys.platform[:3] == 'win':
-                # under windows, the natice widget contains
+                # under windows, the native widget contains
                 # CRLF line separators
                 # XXX Is this a wxPython bug?
                 text = self.text
@@ -249,7 +235,7 @@ class TextArea(ComponentMixin, AbstractTextArea):
             # XXX Recursive updates seem to be no problem here,
             # wx does not seem to trigger the EVT_TEXT handler
             # when a new text equal to the old one is set.
-            self._wx_comp.SetValue(self._text)
+            self._wx_comp.SetValue(str(self._text))
 
     def _ensure_selection(self):
         if self._wx_comp:
@@ -261,11 +247,11 @@ class TextArea(ComponentMixin, AbstractTextArea):
                 text = self.text
                 start += text[:start].count('\n')
                 end += text[:end].count('\n')
-            self._wx_comp.SetSelection(start, end)
+            self._wx_comp.SetSelection(int(start), int(end))
 
     def _ensure_editable(self):
         if self._wx_comp:
-            self._wx_comp.SetEditable(self._editable)
+            self._wx_comp.SetEditable(int(self._editable))
 
     def _ensure_events(self):
         EVT_KILL_FOCUS(self._wx_comp, self._wx_killfocus)
@@ -276,7 +262,7 @@ class TextArea(ComponentMixin, AbstractTextArea):
     def _get_wx_text(self):
         # return the text required for creation
         # XXX From here or from model?
-        return self._text
+        return str(self._text)
 
 ################################################################
 
@@ -294,8 +280,8 @@ class Window(ComponentMixin, AbstractWindow):
         # override this to set the CLIENT size (not the window size)
         # to take account for title bar, borders and so on.
         if self._wx_comp:
-            self._wx_comp.SetPosition((self._x, self._y))
-            self._wx_comp.SetClientSize((self._width, self._height))
+            self._wx_comp.SetPosition((int(self._x), int(self._y)))
+            self._wx_comp.SetClientSize((int(self._width), int(self._height)))
 
     def _get_panel(self):
         return self._wx_frame
@@ -316,7 +302,7 @@ class Window(ComponentMixin, AbstractWindow):
 
     def _ensure_title(self):
         if self._wx_comp:
-            self._wx_comp.SetTitle(self._title)
+            self._wx_comp.SetTitle(str(self._title))
 
     # wxPython event handlers receive an event as parameter
     def _wx_close_handler(self, evt):
@@ -333,7 +319,7 @@ class Window(ComponentMixin, AbstractWindow):
 
     def _get_wx_text(self):
         # return the text required for creation
-        return self._title
+        return str(self._title)
 
 ################################################################
 
