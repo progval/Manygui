@@ -22,9 +22,6 @@ from anygui.Wrappers import AbstractWrapper, DummyWidget, isDummy
 from anygui.Events import *
 from anygui import application
 
-RadioButtonWrapper = 5
-CheckBoxWrapper = 6
-
 ################################################################
 import win32gui, win32con
 
@@ -252,16 +249,7 @@ class ListBoxWrapper(ComponentWrapper):
 
 ##################################################################
 
-'''JKJKJK
-class ToggleButtonMixin(ComponentMixin):
-
-    def _get_msw_text(self):
-        # return the text required for creation
-        return str(self._text)
-
-    def _ensure_text(self):
-        if self.widget:
-            win32gui.SetWindowText(self.widget, str(self._text))
+class ToggleButtonWrapper(ComponentWrapper):
 
     def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
         # lParam: handle of control (or NULL, if not from a control)
@@ -269,16 +257,23 @@ class ToggleButtonMixin(ComponentMixin):
         # LOWORD(wParam): id of menu item, control, or accelerator
         if (wParam >> 16) == win32con.BN_CLICKED:
             #self.do_action()
-            send(self, 'click')
+            send(self.proxy, 'click')
 
-    def _ensure_state(self):
-        if not self.widget:
+    def setOn(self,on):
+        if self.noWidget():
             return
-        if self.on:
+        if on:
             val = win32con.BST_CHECKED
         else:
             val = win32con.BST_UNCHECKED
         win32gui.SendMessage(self.widget, win32con.BM_SETCHECK, val, 0)
+        self._on = on
+
+    def getOn(self):
+        val = win32gui.SendMessage(self.widget, win32con.BM_GETSTATE, 0, 0)
+        val = val & win32con.BST_CHECKED
+        if val: return 1
+        return 0
 
     def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
         # lParam: handle of control (or NULL, if not from a control)
@@ -286,31 +281,35 @@ class ToggleButtonMixin(ComponentMixin):
         # LOWORD(wParam): id of menu item, control, or accelerator
         if (wParam >> 16) != win32con.BN_CLICKED:
             return
-        val = win32gui.SendMessage(self.widget, win32con.BM_GETSTATE, 0, 0)
-        val = val & win32con.BST_CHECKED
-        if val == self.on:
-            return
-        self.modify(on=val)
-        #self.do_action()
-        send(self, 'click')
+        send(self.proxy, 'click')
 
 
-class CheckBox(ToggleButtonMixin, AbstractCheckBox):
+class CheckBoxWrapper(ToggleButtonWrapper):
     _wndclass = "BUTTON"
     #_text = "mswCheckBox"
     _win_style = win32con.BS_AUTOCHECKBOX | win32con.WS_CHILD
 
 
-class RadioButton(ToggleButtonMixin, AbstractRadioButton):
+class RadioButtonWrapper(ToggleButtonWrapper):
     _wndclass = "BUTTON"
     #_text = "mswCheckBox"
     _win_style = win32con.BS_AUTORADIOBUTTON | win32con.WS_CHILD
+
+    def __init__(self,*args,**kws):
+        self._value = -2
+        ToggleButtonWrapper.__init__(self,*args,**kws)
     
-    def _ensure_created(self):
+    def widgetFactory(self,*args,**kws):
         # The first radiobutton in a group must have the wxRB_GROUP style
-        if self._group and 0 == self._group._items.index(self):
+        if self.proxy.group and self.proxy.group._items.index(self.proxy) == 0:
             self._win_style |= win32con.WS_GROUP
-        return ToggleButtonMixin._ensure_created(self)
+        return ToggleButtonWrapper.widgetFactory(self,*args,**kws)
+
+    def setGroup(self,group):
+        if group == None:
+            return
+        if self.proxy not in group._items:
+            group._items.append(self.proxy)
 
     def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
         # lParam: handle of control (or NULL, if not from a control)
@@ -324,16 +323,19 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
         #    return
         #self.modify(on=val)
         #self.do_action()
-        if self.group is not None:
-            self.group.modify(value=self.value)
-        send(self, 'click')
+        #if self.group is not None:
+        #    self.group.modify(value=self.value)
+        if self.getOn():
+            for btn in self.proxy.group._items:
+                if btn != self.proxy:
+                    btn.on=0
+        send(self.proxy, 'click')
 
 ##################################################################
 
 ### IMPORTANT NOTE: Until the 'copy-paste' structure has been
 ### fixed (e.g. with a common superclass), fixes in one of these
 ### text classes should probably also be done in the other.
-'''
 
 ##################################################################
 
