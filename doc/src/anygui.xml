@@ -713,6 +713,15 @@
   </section>
 
   <section>
+    <title>Frequently Asked Questions</title>
+
+    <para><strong>Q: Which version of Python is required for Anygui?</strong></para>
+
+    <para>A: Anygui requires <name>Python</name> version 2.0 or newer.</para>
+
+  </section>
+
+  <section>
     <title>Contributing</title>
 
     <para>If you want to contribute to the <name>Anygui</name>
