@@ -1,6 +1,19 @@
-
 from anygui.backends import *
-__all__ = anygui.__all__
+import sys
+
+__all__ = '''
+
+  Application
+  ButtonWrapper
+  WindowWrapper
+  LabelWrapper
+  TextFieldWrapper
+  TextAreaWrapper
+  ListBoxWrapper
+  RadioButtonWrapper
+  CheckBoxWrapper
+
+'''.split()
 
 ################################################################
 
@@ -11,176 +24,114 @@ import cgi, jarray, java
 # Set the "look-and-feel":
 swing.UIManager.setLookAndFeel(swing.UIManager.getSystemLookAndFeelClassName())
 
-class ComponentMixin:
+################################################################
 
-    _java_comp = None
-    _java_container = None
-    _java_id = None
-    _java_style = 0
+class Application(AbstractApplication):
+    
+    def internalRun(self):
+        # Ignores the possibility of delayed window-creating events:
+        from time import sleep
+        while self._windows:
+            sleep(0.5)
 
-    def _is_created(self):
-        return self._java_comp is not None
+          
+################################################################
 
-    def _ensure_created(self):
-        if self._java_comp is None:
-            if self._container is not None:
-                parent = self._container._java_comp
-            else:
-                parent = None
-            frame = self._java_class()
-            if parent:
-                frame.visible = 0
-                if parent.__class__ == swing.JFrame:
-                    self._java_container = parent.contentPane
-                else:
-                    self._java_container = parent
-                self._java_container.add(frame)
-            self._java_comp = frame
-            return 1
-        return 0
+class Wrapper(AbstractWrapper):
 
-    def _ensure_events(self):
-        pass
+    def __init__(self, *args, **kwds):
+        AbstractWrapper.__init__(self, *args, **kwds)
+        # @@@ Cookie-cutter from tkgui
+        self.setConstraints('container','x','y','width','height','text','selection')
 
-    def _ensure_geometry(self):
-        if self._java_comp:
-            self._java_comp.bounds = (self._x,
-                                      self._y,
-                                      self._width,
-                                      self._height)
-            if self._java_comp.layout:
-                self._java_comp.validate()
+    # @@@ Cookie-cutter from tkgui
+    def enterMainLoop(self):
+        self.proxy.push() 
 
-    def _ensure_visibility(self):
-        if self._java_comp:
-            self._java_comp.visible = self._visible
-
-    def _ensure_enabled_state(self):
-        if self._java_comp:
-            self._java_comp.enabled = self._enabled
-
-    def _ensure_destroyed(self):
-        if self._java_comp:
-            comp = self._java_comp
-            container = self._java_container
-            if container:
-                bounds = comp.bounds
-                container.remove(comp)
-                container.repaint(bounds)
-            if hasattr(comp, 'dispose'):
-                comp.dispose()
-            self._java_container = None
-            self._java_comp = None
-
-    def _get_java_text(self):
-        # helper function for creation
-        # returns the text required for creation.
-        # This may be the _text property, or _title, ...,
-        # depending on the subclass
-        return str(self._text)
-
-    def _ensure_text(self):
-        if self._java_comp and hasattr(self._java_comp, 'text'):
-            self._java_comp.text = self._get_java_text()
+    # internalDestroy?
 
 ################################################################
 
-class JavaCanvasWrapper(awt.Canvas):
+class ComponentWrapper(Wrapper):
 
-    def __init__(self):
-        awt.Canvas.__init__(self)
-        self.background = awt.Color.white
+    def setX(self, x):
+        self.widget.x = x
 
-    def paint(self, g2):
-        img = self.canvas._offscreen
-        h = img.height
-        w = img.width
-        g2.drawImage(img, 0, 0, w, h, self)        
+    def setY(self, y):
+        self.widget.y = y
 
-class Canvas(ComponentMixin, AbstractCanvas):
+    def setWidth(self, width):
+        self.widget.width = width
 
-    # TODO: Implement native versions of other drawing methods,
-    #       e.g. Béziers etc.
-    
-    # FIXME: Needs to be invalidated when resized,
-    #        while retaining the graphics...
-    
-    _java_class = JavaCanvasWrapper
-    _img_type = awt.image.BufferedImage.TYPE_INT_RGB
-    _path_type = awt.geom.GeneralPath.WIND_EVEN_ODD
+    def setHeight(self, height):
+        self.widget.height = height
 
-    def __init__(self, *args, **kwds):
-        AbstractCanvas.__init__(self, *args, **kwds)
-        self.clear()
+    def setPosition(self, x, y):
+        self.widget.position = x, y
 
-    def _ensure_created(self):
-        result = ComponentMixin._ensure_created(self)
-        self._java_comp.canvas = self
-        return result
+    def setSize(self, width, height):
+        self.widget.size = width, height
 
-    def _ensure_events(self):
-        if self._java_comp:
-            self._java_comp.mouseReleased = self._java_clicked
+    def setGeometry(self, x, y, width, height):
+        self.widget.bounds = x, y, width, height
+        self.widget.validate() # Needed? Needed in others?
 
-    def _java_clicked(self, event):
-        send(self, 'click', x=event.x, y=event.y)
+    def setVisible(self, visible):
+        self.widget.visible = visible
 
-    def clear(self):
-        img = awt.image.BufferedImage(self._width,
-                                      self._height,
-                                      self._img_type)
-        g2 = img.createGraphics()
-        w, h = img.width, img.height
-        rect = awt.geom.Rectangle2D.Double(0, 0, w, h)
-        p = g2.getPaint()
-        g2.setPaint(awt.Color.white)
-        g2.fill(rect)
-        g2.setPaint(p)
-        self._offscreen = img
+    def setContainer(self, container):
+        # Factor out the conditional destruction?
+        if container is None:
+            self.destroy()
+            return
+        parent = container.wrapper.widget
+        try:
+            assert parent.isDummy()
+        except (AttributeError, AssertionError):
+            self.destroy()
+            self.create()
+            try:
+                container = container.contentPane
+            except AttributeError: pass
+            container.add(self.widget)
+            self._container = container # Can this be fetched from the widget (later)?
+            self.proxy.push(blocked=['container'])
 
-    def flush(self): # FIXME: Do something useful :)
-        pass
+    def setEnabled(self, enabled):
+        self.widget.enabled = enabled
 
-    def drawPolygon(self, pointlist,
-                    edgeColor=None, edgeWidth=None, fillColor=None, closed=0):
-        if edgeColor is None:
-            edgeColor = self.defaultLineColor
-        if edgeWidth is None:
-            edgeWidth = self.defaultLineWidth
-        if fillColor is None:
-            fillColor = self.defaultFillColor
+    def internalDestroy(self): # Move to Wrapper?
+        try:
+            assert self.widget.isDummy()
+        except (AttributeError, AssertionError):
+            try:
+                container = self._container
+            except AttributeError: pass
+            else:
+                bounds = comp.bounds
+                container.remove(self.widget)
+                container.repaint(bounds)
+            if hasattr(self.widget, 'dispose'):
+            try: comp.dispose()
+            except AttributeError: pass
+            self._container = None
 
-        g2 = self._offscreen.createGraphics()
-        
-        g2.setStroke(awt.BasicStroke(edgeWidth))
-        
-        polygon = awt.geom.GeneralPath(self._path_type, int(len(pointlist)/2))
-        polygon.moveTo(*pointlist[0])
-        for pt in pointlist[1:]:
-            polygon.lineTo(*pt)
-        if closed:
-            polygon.closePath()
+    def setText(self, text):
+        self.widget.text = text
 
-        if fillColor is not Colors.transparent:
-            c = _convert_color(fillColor)
-            g2.setPaint(c)
-            g2.fill(polygon)
+    def getText(self):
+        try:
+            assert self.widget.isDummy()
+        except (AttributeError, AssertionError):
+            return self.widget.text
+        else:
+            return "" # @@@ What would be the best behaviour here? Should there be an exception?
 
-        if edgeColor is not Colors.transparent:
-            c = _convert_color(edgeColor)
-            g2.setPaint(c)
-            g2.draw(polygon)
-
-def _convert_color(c):
-    # Hack to appease Jython polymorphism
-    c = int(c.red*255) << 16 | int(c.green*255) << 8 | int(c.blue*255)
-    return awt.Color(c)
+# @@@ -------------------- Continue here --------------------
           
 ################################################################
 
 class Label(ComponentMixin, AbstractLabel):
-    #_width = 100 # auto ?
-    #_height = 32 # auto ?
     _java_class = swing.JLabel
     _java_style = None
 
@@ -194,10 +145,6 @@ class Label(ComponentMixin, AbstractLabel):
     def _ensure_text(self):
         if self._java_comp:
             text =  self._get_java_text()
-            #text = cgi.escape(text)
-            #text = text.replace('\n', '<br>')
-            #text = text.replace('\r', '<br>')
-            #text = '<html>' + text + '</html>'
             self._java_comp.text = text
 
 ################################################################
@@ -479,32 +426,3 @@ class Window(ComponentMixin, AbstractWindow):
 
     def _get_java_text(self):
         return self._title
-
-################################################################
-
-class Application(AbstractApplication):
-    
-    def _mainloop(self):
-        """
-        # Non-portable code:
-        
-        from java.lang import Thread
-        curthread = Thread.currentThread()
-
-        threads = jarray.zeros(curthread.activeCount(), Thread)
-        curthread.enumerate(threads)
-
-        for thread in threads:
-            if thread.name.find('AWT-EventQueue') != -1:
-                thread.join() # Wait for AWT thread to finish
-                break
-        else:
-            raise RuntimeError, 'unable to find AWT thread'
-        """
-
-        # Ignores the possibility of delayed window-creating events:
-        from time import sleep
-        while self._windows:
-            sleep(0.5)
-
-################################################################
