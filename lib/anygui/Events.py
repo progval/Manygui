@@ -110,6 +110,7 @@ def dispatch(event):
         src, type = key
         for cat in categories:
             if not compatible(evt_cat, cat): continue
+            # FIXME: Use something like: keys = matching_keys(key, registry[cat]) which removes dead keys
             handlers = registry[cat].get(key, []) # FIXME: This doesn't retrieve all the lists that it should!
             live_handlers = []
             for weak_handler in handlers:
