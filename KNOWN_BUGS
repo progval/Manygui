@@ -8,6 +8,9 @@ Window positioning doesn't work properly in javagui and tkgui.
 Setting editable=0 makes it impossible to select/copy text in tkgui.
 This should be fixed.
 
+The cursor position and the end marker of the selection should always
+be the same in tkgui. That is not currently the case.
+
 Setting the selection of a wxgui TextField or TextArea doesn't work.
 
 Programs running javagui don't always quit, because of some unstable
