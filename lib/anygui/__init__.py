@@ -2,14 +2,36 @@ _backends = 'msw gtk java wx tk beos qt curses text'
 
 import os, sys
 
+# 20020208:mlh -- starting to experiment with new architecture
+__all__ = """
+
+  Application
+  Button
+  Window
+  any
+  application
+  backend
+  link
+  send
+  sender
+  unlink
+  unlinkHandler
+  unlinkMethods
+  unlinkSource
+
+""".split()
+
+"""
+# 'Real' export list:
 __all__ = ['application', 'Application',
            'Window', 'Button', 'CheckBox', 'Label',
            'RadioButton', 'RadioGroup', 'ListBox', 'TextField', 'TextArea',
            'BooleanModel', 'ListModel', 'TextModel', 'Options',
            'LayoutManager', 'Placer',
-           'send', 'link', 'unlink', 'any', 'unlinkSource', 'unlinkHandler',
+           'send', 'sender', 'link', 'unlink', 'any', 'unlinkSource', 'unlinkHandler',
            'unlinkMethods', 'Frame', 'Placer', 'backend'
            ] # FIXME: Add stuff from Colors and Fonts
+"""
 
 # Try to get the environment variables ANYGUI_WISHLIST (overrides
 # anygui.wishlist), and ANYGUI_DEBUG (to print out stacktraces when
