@@ -44,7 +44,6 @@ class Application(AbstractApplication, QApplication):
     def __init__(self):
         AbstractApplication.__init__(self)
         QApplication.__init__(self,[])
-        self.connect(qApp, SIGNAL('lastWindowClosed()'), qApp, SLOT('quit()'))
 
     def internalRun(self):
         qApp.exec_loop()
@@ -72,14 +71,15 @@ class Wrapper(AbstractWrapper):
         # Also, this scheme will cause flashing... (place before
         # place_forget)
 
-    def enterMainLoop(self): # ...
-        #if not isDummy(self.widget):
-        #    self.widget.destroy()
-        #    sys.stdout.flush()
-        self.proxy.push() # FIXME: Why is this needed when push is called in internalProd (by prod)?
+    def enterMainLoop(self):
+        self.proxy.push()
 
     def internalDestroy(self):
         self.widget.destroy()
+
+    def rebuild(self): pass
+
+    def rebuildAll(self): pass
 
 #==============================================================#
 
@@ -90,26 +90,33 @@ class ComponentWrapper(Wrapper):
 
     visible=1
 
+    def __init__(self, *args, **kwds):
+        Wrapper.__init__(self, *args, **kwds)
+
     def setX(self, x):
-        self.widget.setGeometry(x,self.y,self.width,self.heigth)
+        self.setGeometry(x,self.y,self.width,self.height)
 
     def setY(self, y):
-        self.widget.setGeometry(self.x,y,self.width,self.heigth)
+        self.setGeometry(self.x,y,self.width,self.height)
 
     def setWidth(self, width):
-        self.widget.setGeometry(self.x,self.y,width,self.heigth)
+        self.setGeometry(self.x,self.y,width,self.height)
 
     def setHeight(self, height):
-        self.widget.setGeometry(self.x,self.y,self.width,heigth)
+        self.setGeometry(self.x,self.y,self.width,height)
 
     def setPosition(self, x, y):
-        self.widget.setGeometry(x,y,self.width,self.heigth)
+        self.setGeometry(x,y,self.width,self.height)
 
     def setSize(self, width, height):
-        self.widget.setGeometry(self.x,self.y,width,heigth)
+        self.setGeometry(self.x,self.y,width,height)
 
     def setGeometry(self, x, y, width, height):
-        self.widget.setGeometry(x,y,width,heigth)
+        self.widget.setGeometry(x,y,width,height)
+
+    def getGeometry(self):
+        r = self.widget.geometry()
+        return (r.x(), r.y(), r.width(), r.height())
 
     def setVisible(self, visible):
         if visible:
@@ -118,34 +125,34 @@ class ComponentWrapper(Wrapper):
             self.widget.hide()
 
     def setContainer(self, container):
-        if container is None:
-            try:
-                self.destroy()
-            except:
-                pass
-            return
+        if container is None: return
+        # if container is None:
+        #     try:
+        #         self.destroy()
+        #     except:
+        #         pass
+        #     return
         parent = container.wrapper.widget
         try:
             assert parent.isDummy()
         except (AttributeError, AssertionError):
-            self.destroy()
+            # self.destroy()
             self.create(parent)
             self.proxy.push(blocked=['container'])
+            self.setupChildWidgets()
 
     def setEnabled(self, enabled):
            self.widget.setEnabled(enabled)
 
-
     def setText(self, text):
-        try:
-            self.widget.setText(QString(text))
+        pass
 
     def getText(self):
-        try:
-            return str(self.widget.text())
-        except:
-            # Widget has no text.
-            return ""
+        return ""
+
+    def setupChildWidgets(self):
+        pass
+
 
 
 #==============================================================#
@@ -170,14 +177,27 @@ class EventFilter(QObject):
 
 class LabelWrapper(ComponentWrapper):
 
+    def __init__(self, *args, **kwds):
+        ComponentWrapper.__init__(self, *args, **kwds)
+
     def widgetFactory(self, *args, **kws):
         widget = QLabel(*args, **kws)
-        self.widget.self.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        widget.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         return widget
+
+    def setText(self, text):
+        self.widget.setText(QString(text))
+
+    def getText(self):
+        try:
+            return str(self.widget.text())
+        except:
+            # Widget has no text.
+            return ""
 
 #==============================================================#
 
-class ListBox(ComponentWrapper):
+class ListBoxWrapper(ComponentWrapper):
     connected = 0
 
     def __init__(self, *args, **kws):
@@ -185,12 +205,13 @@ class ListBox(ComponentWrapper):
         self.items = []
 
     def widgetFactory(self, *args, **kws):
-        widget= QListbox(*args, **kws)
+        return QListBox(*args, **kws)
+
+    def widgetSetUp(self):
         if not self.connected:
             qApp.connect(self.widget, SIGNAL('highlighted(int)'),
                          self.clickHandler)
             self.connected = 1
-        return widget
 
     def setItems(self, items):
         self.widget.clear()
@@ -217,24 +238,43 @@ class ListBox(ComponentWrapper):
 class ButtonWrapperBase(ComponentWrapper):
     connected = 0
 
+    def __init__(self, *args, **kws):
+        ComponentWrapper.__init__(self, *args, **kws)
+
     def widgetSetUp(self):
-        if not self._connected:
+        if not self.connected:
             qApp.connect(self.widget,SIGNAL('clicked()'),self.clickHandler)
             self.connected = 1
+
+    def setText(self, text):
+        self.widget.setText(QString(text))
+
+    def getText(self):
+        try:
+            return str(self.widget.text())
+        except:
+            # Widget has no text.
+            return ""
+
+    def clickHandler(self):
+        send(self.proxy,'click')
 
 #--------------------------------------------------------------#
 
 class ButtonWrapper(ButtonWrapperBase):
 
+    def __init__(self, *args, **kws):
+        ButtonWrapperBase.__init__(self, *args, **kws)
+
     def widgetFactory(self, *args, **kwds):
         return QPushButton(*args, **kwds)
-
-    def clickHandler(self):
-        send(self,'click')
 
 #--------------------------------------------------------------#
 
 class ToggleButtonWrapperBase(ButtonWrapperBase):
+
+    def __init__(self, *args, **kws):
+        ButtonWrapperBase.__init__(self, *args, **kws)
 
     def setOn(self, on):
         self.widget.setChecked(on)
@@ -242,15 +282,16 @@ class ToggleButtonWrapperBase(ButtonWrapperBase):
     def getOn(self):
         return self.widget.isChecked()
 
-    def clickHandler(self, *args, **kws): # Should perhaps be in a ButtonMixin superclass?
-        send(self.proxy, 'click')
-
 #--------------------------------------------------------------#
 
-class CheckBox(ToggleButtonWrapperBase):
+class CheckBoxWrapper(ToggleButtonWrapperBase):
+
+    def __init__(self, *args, **kws):
+        ToggleButtonWrapperBase.__init__(self, *args, **kws)
 
     def widgetFactory(self, *args, **kwds):
         return QCheckBox(*args, **kwds)
+
 
 #--------------------------------------------------------------#
 
@@ -259,21 +300,23 @@ class RadioButtonWrapper(ToggleButtonWrapperBase):
 
     def __init__(self, *args, **kws):
         ComponentWrapper.__init__(self, *args, **kws)
-        ToggleButtonMixin.__init__(self)
 
     def widgetFactory(self, *args, **kwds):
-        return QCheckBox(*args, **kwds)
+        return QRadioButton(*args, **kwds)
 
     def setGroup(self, group):
-        if not group._items:
-            group._items.append(self.proxy)
-            btnGroup = QButtonGroup(self.text, self.container.widget)
-            RadioButtonWrapper.groupMap[group] = btnGroup
-            btnGroup.insert(this.widget)
-        elif self.proxy not in group._items:
-            group._items.append(self.proxy)
-            btnGroup = RadioButtonWrapper.groupMap[group]
-            btnGroup.insert(this.widget)
+        if group:
+            if not group._items:
+                if self.proxy.container:
+                    group._items.append(self.proxy)
+                    container = self.proxy.container
+                    btnGroup = QButtonGroup(container.wrapper.widget)
+                    RadioButtonWrapper.groupMap[group] = btnGroup
+                    btnGroup.insert(self.widget)
+            elif self.proxy not in group._items:
+                group._items.append(self.proxy)
+                btnGroup = RadioButtonWrapper.groupMap[group]
+                btnGroup.insert(self.widget)
 
     def setValue(self, value):
         self.widget.setChecked(int(value))
@@ -286,8 +329,11 @@ class RadioButtonWrapper(ToggleButtonWrapperBase):
 class TextWrapperBase(ComponentWrapper):
     connected = 0
 
+    def __init__(self, *args, **kws):
+        ComponentWrapper.__init__(self, *args, **kws)
+
     def widgetSetUp(self):
-        if not self._connected:
+        if not self.connected:
             events = {QEvent.KeyRelease: self.keyPressHandler.im_func,
                       QEvent.FocusIn:    self.gotFocusHandler.im_func,
                       QEvent.FocusOut:   self.lostFocusHandler.im_func}
@@ -303,7 +349,7 @@ class TextWrapperBase(ComponentWrapper):
 
     def keyPressHandler(self, event):
         if DEBUG: print 'in keyPressHandler of: ', self.widget
-        self.text = self.text()
+        self.text = self.widget.text()
         #self.modify(text=self._backend_text())
         if int(event.key()) == 0x1004: #Qt Return Key Code
             send(self, 'enterkey')
@@ -324,16 +370,29 @@ class TextWrapperBase(ComponentWrapper):
         start, idx = 0, -1
         for n in range(text.count(mtxt)):
             idx = text.find(mtxt, idx+1)
-            if idx == pos or idx == pos - len(mtxt):
+            if idx <= pos <= idx + len(mtxt):
                 start = idx
                 break
         end = start + len(mtxt)
         if DEBUG: print 'returning => start: %s | end: %s' %(start,end)
         return start,  end
 
+    def setText(self, text):
+        self.widget.setText(QString(text))
+
+    def getText(self):
+        try:
+            return str(self.widget.text())
+        except:
+            # Widget has no text.
+            return ""
+
 #--------------------------------------------------------------#
 
 class TextFieldWrapper(TextWrapperBase):
+
+    def __init__(self, *args, **kws):
+        TextWrapperBase.__init__(self, *args, **kws)
 
     def widgetFactory(self, *args, **kwds):
         return QLineEdit(*args, **kwds)
@@ -348,7 +407,7 @@ class TextFieldWrapper(TextWrapperBase):
         if DEBUG: print 'in _backend_selection of: ', self.widget
         pos = self.widget.cursorPosition()
         if self.widget.hasMarkedText():
-            text = self.text()
+            text = str(self.widget.text())
             mtxt = str(self.widget.markedText())
             return self.qtCalcStartEnd(text,mtxt,pos)
         else:
@@ -357,6 +416,9 @@ class TextFieldWrapper(TextWrapperBase):
 #--------------------------------------------------------------#
 
 class TextAreaWrapper(TextWrapperBase):
+
+    def __init__(self, *args, **kws):
+        TextWrapperBase.__init__(self, *args, **kws)
 
     def widgetFactory(self, *args, **kwds):
         return QMultiLineEdit(*args, **kwds)
@@ -382,7 +444,7 @@ class TextAreaWrapper(TextWrapperBase):
         pos = self.qtTranslatePosition(row, col)
         if DEBUG: print 'pos of cursor is: ', pos
         if self.widget.hasMarkedText():
-            text = self.text()
+            text = str(self.widget.text())
             mtxt = str(self.widget.markedText())
             return self.qtCalcStartEnd(text,mtxt,pos)
         else:
@@ -390,8 +452,9 @@ class TextAreaWrapper(TextWrapperBase):
 
     def qtGetLines(self):
         lines = []
-        for n in range(0,self.widget.numLines()):
-            lines.append(str(self.widget.textLine(n)) + '\n')
+        if not self.noWidget():
+            for n in range(0, self.widget.numLines()):
+                lines.append(str(self.widget.textLine(n)) + '\n')
         if DEBUG: print 'lines are: \n', lines
         return lines
 
@@ -399,7 +462,7 @@ class TextAreaWrapper(TextWrapperBase):
         if DEBUG: print 'translating pos to row/col...'
         row, col, currRow, totLen = 0, 0, 0, 0
         for ln in self.qtGetLines():
-            if pos <= len(str(ln)) + tot_len:
+            if pos <= len(str(ln)) + totLen:
                 row = currRow
                 col = pos - totLen
                 if DEBUG: print 'returning => row: %s| col: %s' %(row,col)
@@ -427,32 +490,44 @@ class TextAreaWrapper(TextWrapperBase):
 
 class FrameWrapper(ComponentWrapper):
 
+    def __init__(self, *args, **kws):
+        ComponentWrapper.__init__(self, *args, **kws)
+
     def widgetFactory(self, *args, **kws):
         widget = QFrame(*args, **kws)
         widget.setFrameStyle(QFrame.Plain)
         return widget
 
+    def setupChildWidgets(self):
+        for component in self.proxy.contents:
+            component.container = self.proxy
+
+
 #==============================================================#
 
-class QWindow(QWidget): pass #Alias for clarity
-
-class Window(ComponentMixin, AbstractWindow):
+class WindowWrapper(ComponentWrapper):
     connected = 0
     destroyingSelf = 0
+    mainWindow = None
+
+    def __init__(self, proxy):
+        ComponentWrapper.__init__(self, proxy)
 
     def setTitle(self, title):
-        if self.widget:
-            self.widget.setCaption(QString(title))
+        if not self.noWidget():
+            self.mainWindow.setCaption(QString(title))
 
     def widgetSetUp(self):
         if not self.connected:
             events = {QEvent.Resize: self.resizeHandler.im_func,
-                      QEvent.Move:   self.moveHandler.im_func,
-                      QEvent.Close:  self.closeHandler.im_func}
+                      QEvent.Move:   self.moveHandler.im_func}
             self.eventFilter = EventFilter(self, events)
             self.widget.installEventFilter(self.eventFilter)
+            self.mainWinEventFilter = EventFilter(self,
+                                                  {QEvent.Close:
+                                                   self.closeHandler.im_func})
+            self.mainWindow.installEventFilter(self.mainWinEventFilter)
             self.connected = 1
-
 
     def getTitle(self):
         return str(self.widget.title())
@@ -494,8 +569,248 @@ class Window(ComponentMixin, AbstractWindow):
         self.destroyingSelf = 0
         self.connected = 0
         self.widget = None
+        self.mainWindow = None
         application().remove(self.proxy)
-        return 0
+        return 1
+
+    def setContainer(self, container):
+        if container is None: return
+        try:
+            assert(self.widget.isDummy())
+            self.create()
+        except (AttributeError):
+            self.create()
+        except (AssertionError):
+            pass
+        self.proxy.push(blocked=['container'])
+        self.setupChildWidgets()
+
+    def widgetFactory(self, *args, **kwds):
+        self.mainWindow = QMainWindow(*args, **kwds)
+        widget = QFrame(self.mainWindow)
+        widget.setFrameStyle(QFrame.Plain)
+        self.mainWindow.setCentralWidget(widget)
+        return widget
+
+    def setVisible(self, visible):
+        if self.mainWindow:
+            if visible:
+                self.mainWindow.show()
+            else:
+                self.mainWindow.hide()
+
+    def setupChildWidgets(self):
+        for component in self.proxy.contents:
+            component.container = self.proxy
+
+    def internalDestroy(self):
+        self.mainWindow.destroy()
+
+    def setGeometry(self, x, y, width, height):
+        if not self.noWidget():
+            g = self.widget.geometry()
+            dx = -self.widget.x()
+            dy = -self.widget.y()
+            dw = self.mainWindow.width() - g.width()
+            dh = self.mainWindow.height() - g.height()
+            self.mainWindow.setGeometry(x + dx, y + dy,
+                                        width + dw, height + dh)
+
+    def getGeometry(self):
+        if not self.noWidget():
+            r = self.widget.geometry()
+            p = self.widget.mapToGlobal(QPoint(r.x(), r.y()))
+            return (p.x(), p.y(), r.width(), r.height())
+        else:
+            return (0, 0, 0, 0)
 
 
 #==============================================================#
+
+class GroupBoxWrapper(ComponentWrapper):
+
+    def __init__(self, *args, **kws):
+        ComponentWrapper.__init__(self, *args, **kws)
+
+    def widgetFactory(self, *args, **kws):
+        widget = QButtonGroup(*args, **kws)
+        # widget.setFrameStyle(QFrame.Plain)
+        return widget
+
+    def setupChildWidgets(self):
+        for component in self.proxy.contents:
+            component.container = self.proxy
+
+    def setText(self, text):
+        self.widget.setTitle(QString(text))
+
+    def getText(self):
+        try:
+            return str(self.widget.title())
+        except:
+            # Widget has no text.
+            return ""
+
+
+#==============================================================#
+
+class MenuItemMixin:
+
+    itemId = -1
+    parentWidget = None
+
+    def widgetFactory(self,*args,**kws):
+        return QtMenuDummy()
+
+    def createIfNeeded(self):
+        if self.noWidget(): self.create()
+
+    def setEnabled(self,enabled):
+        if self.proxy.container is None or self.proxy.container.wrapper.noWidget():
+            return
+        self.proxy.container.wrapper.rebuild()
+
+    def setContainer(self,container):
+        if not container:
+            if self.proxy.container is None:
+                return
+            if self.proxy in self.proxy.container.contents:
+                self.proxy.container.contents.remove(self.proxy)
+            self.widget = DummyWidget()
+            self.proxy.container.wrapper.rebuild()
+        else:
+            self.createIfNeeded()
+            self.proxy.container.wrapper.rebuild()
+
+    def setText(self,text):
+        if self.proxy.container is None or self.proxy.container.wrapper.noWidget():
+            return
+
+        self.proxy.container.wrapper.rebuild()
+
+    def getText(self):
+        return self.proxy.text
+
+    def enterMainLoop(self): # ...
+        pass
+
+    def internalDestroy(self):
+        pass
+
+class QtMenuDummy:
+    pass
+
+class MenuWrapper(MenuItemMixin, ComponentWrapper):
+
+    def widgetFactory(self,*args,**kws):
+        return QPopupMenu(*args,**kws)
+
+    def setContainer(self,container):
+        if not container:
+            if self.noWidget:
+                return
+            if self.proxy in self.proxy.container.contents:
+                self.proxy.container.contents.remove(self.proxy)
+            #print "DESTROYING",self
+            self.widget.destroy()
+            self.widget = DummyWidget()
+            self.proxy.container.wrapper.rebuild()
+        else:
+            if container.wrapper.noWidget():
+                return
+            self.rebuild()
+
+    def setContents(self,contents):
+        self.rebuild()
+
+    def rebuildAll(self):
+        """
+        Rebuild the entire menu structure starting from the toplevel menu.
+        """
+        if self.proxy.container is None:
+            return
+        if self.noWidget():
+            return
+        if self.proxy.container.wrapper.noWidget():
+            return
+        proxies = [self.proxy]
+        while not isinstance(proxies[-1],Window):
+            proxies.append(proxies[-1].container)
+            proxies[-2].wrapper.rebuild()
+
+    def rebuild(self):
+        """
+        Rebuild the menu structure of self and all children; re-add
+        self to parent.
+        """
+        if self.proxy.container is None:
+            return
+        if self.proxy.container.wrapper.noWidget():
+            return
+
+        parent = self.proxy.container.wrapper.widget
+        #print "\nREBUILDING",self,self.proxy.contents
+        if not self.noWidget():
+            self.widget.clear()
+        else:
+            if isinstance(self.proxy.container, Window):
+                self.create(parent)
+            else:
+                self.create(None)
+            
+        for item in self.proxy.contents:
+            item.wrapper.createIfNeeded()
+            item.wrapper.insertInto(self.widget)
+            if item.wrapper.itemId != -1:
+                self.widget.setItemEnabled(item.wrapper.itemId, item.enabled)
+
+    def enterMainLoop(self): # ...
+        self.proxy.push() # FIXME: Why is this needed when push is called in internalProd (by prod)?
+
+    def insertInto(self, widget):
+        self.rebuild()
+        self.itemId = widget.insertItem(self.proxy.text, self.widget)
+
+class MenuBarWrapper(MenuWrapper):
+    def widgetFactory(self,*args,**kws):
+        parent = args[0].parent()
+        widget = parent.menuBar()
+        widget.clear()
+        return widget
+    
+
+class MenuCommandWrapper(MenuItemMixin, AbstractWrapper):
+
+    def insertInto(self, widget):
+        self.parentWidget = widget
+        self.itemId = widget.insertItem(self.proxy.text, self.clickHandler)
+
+    def clickHandler(self,*args,**kws):
+        #print "CLICKED",self
+        send(self.proxy,'click',text=self.proxy.text)
+
+class MenuCheckWrapper(MenuCommandWrapper):
+    checked = 0
+
+    def insertInto(self, widget):
+        MenuCommandWrapper.insertInto(self, widget)
+        self.parentWidget.setItemChecked(self.itemId, self.checked)
+
+    def setOn(self,on):
+        self.checked = on
+        if self.parentWidget:
+            self.parentWidget.setItemChecked(self.itemId, on)
+
+    def getOn(self):
+        return self.checked
+
+    def clickHandler(self,*args,**kws):
+        self.setOn(not self.getOn())
+        MenuCommandWrapper.clickHandler(self,*args,**kws) 
+
+
+class MenuSeparatorWrapper(MenuItemMixin, AbstractWrapper):
+    
+    def insertInto(self, widget):
+        widget.insertSeparator()
+
