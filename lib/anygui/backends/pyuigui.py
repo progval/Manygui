@@ -1,7 +1,7 @@
 '''
 Experimental backend using the new 0.2 backend API.
 
-Magnus Lie Hetland, 2002-02-09
+Magnus Lie Hetland, 2002-02-09, 2002-02-11
 
 '''
 
@@ -14,16 +14,16 @@ wrappers = []
 class Application:
     
     def run(self):
-        done = 1
+        not_done = 1
 
         pyui.init(800, 600, fullscreen=1)
         
         for wrapper in wrappers:
             wrapper.prod()
         
-        while done:
+        while not_done:
             pyui.draw()
-            done = pyui.update()
+            not_done = pyui.update()
 
         pyui.quit()
 
@@ -43,6 +43,24 @@ class DummyWidget:
 
     def __str__(self): return '<DummyWidget>'
 
+class ReallyAbsoluteLayoutManager(pyui.layouts.LayoutManager):
+    '''
+    A layout manager which is more absolute than the pyui.layouts.AbsoluteLayoutManager.
+    '''
+    def setPanel(self, panel):
+        self.panel = panel
+
+    def begin(self):
+        pass
+
+    def end(self):
+        pass
+
+    def placeChild(self, child, option):
+        child.moveto(option[0], option[1])
+
+    def canResize(self):
+        return 1
 
 class Wrapper:
 
@@ -100,7 +118,7 @@ class ComponentWrapper(Wrapper):
         if widget is not None:
             try: assert self.widget.isDummy()
             except:
-                widget.addChild(self.widget, (self._x, self._y)) # ...
+                widget.addChild(self.widget, (self._x, self._y)) # ... How about moving it later?
 
 
 class ButtonWrapper(ComponentWrapper):
@@ -119,9 +137,7 @@ class ButtonWrapper(ComponentWrapper):
 class WindowWrapper(ComponentWrapper):
 
     def _prod(self):
-        # This is really a "relative layout manager"...
-        # How does one get absolute positioning?
-        layout = pyui.layouts.AbsoluteLayoutManager()
+        layout = ReallyAbsoluteLayoutManager()
         self.widget = pyui.widgets.Frame(10, 10, 100, 100, 'Untitled')
         self.widget.setLayout(layout)
 
@@ -211,8 +227,17 @@ def test():
 
     win.add(btn)
 
+    win2 = Window()
+    win2.x = 150
+    win2.y = 150
+    win2.width = 300
+    win2.height = 200
+    win2.title = 'Testing 2'
+    win2.refresh() # Not needed with Attrib mixin
+
+    # app.add(win, win2)...
+
     app = Application()
     app.run()
-
 
 if __name__ == '__main__': test()
