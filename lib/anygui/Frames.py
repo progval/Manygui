@@ -82,3 +82,15 @@ class Frame(Component, Defaults.Frame):
                 self.remove(item)
         self.state['layout'] = lo
         lo.container = self
+
+class GroupBox(Frame):
+    """A widget for grouping components.  Draws a labeled box around
+    the components it contains.  The label is obtained from the text
+    attribute.  Otherwise behaves like a normal frame.  Behaves like
+    a normal frame for back-ends that do not support group boxes
+    natively."""
+    def wrapperFactory(self):
+        try:
+            return backendModule().GroupBoxWrapper(self)
+        except AttributeError:
+            return Frame.wrapperFactory(self)

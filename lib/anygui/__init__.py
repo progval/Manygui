@@ -1,5 +1,5 @@
 #_backends = 'msw gtk java wx tk beos qt curses text'
-_backends = 'java tk msw wx'
+_backends = 'java tk msw wx qt'
 
 def application():
     'Returns the global application object'
@@ -45,7 +45,7 @@ from anygui.TextAreas        import TextArea
 from anygui.ListBoxes        import ListBox
 #from anygui.Models           import BooleanModel, ListModel, TextModel
 from anygui.Events           import *
-from anygui.Frames           import Frame
+from anygui.Frames           import Frame, GroupBox
 from anygui.LayoutManagers   import LayoutManager, Placer
 from anygui.Menus            import MenuBar, Menu, MenuCommand, MenuCheck, MenuSeparator
 
@@ -56,6 +56,7 @@ __all__ = """
 
   Application
   Frame
+  GroupBox
   Button
   CheckBox
   Options
