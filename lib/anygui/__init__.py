@@ -38,7 +38,7 @@ from anygui.Buttons          import Button
 #from anygui.Canvases         import Canvas
 #from anygui                  import Colors
 from anygui.Labels           import Label
-#from anygui.CheckBoxes       import CheckBox
+from anygui.CheckBoxes       import CheckBox
 from anygui.RadioButtons     import RadioButton
 from anygui.RadioGroups      import RadioGroup
 from anygui.TextFields       import TextField
@@ -55,7 +55,9 @@ from anygui.LayoutManagers   import LayoutManager, Placer
 __all__ = """
 
   Application
+  Frame
   Button
+  CheckBox
   Options
   Window
   Label

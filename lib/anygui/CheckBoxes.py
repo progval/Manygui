@@ -1,5 +1,7 @@
 from anygui.ToggleButtons import ToggleButton
-from anygui import Defaults
+from anygui import Defaults, backendModule
 
 class CheckBox(ToggleButton, Defaults.CheckBox):
-    pass
+
+    def wrapperFactory(self):
+        return backendModule().CheckBoxWrapper(self)

@@ -11,6 +11,7 @@ __all__ = '''
   TextAreaWrapper
   ListBoxWrapper
   RadioButtonWrapper
+  CheckBoxWrapper
 
 '''.split()
 
@@ -108,7 +109,7 @@ class ComponentWrapper(Wrapper):
             # Widget doesn't support -state
             pass
 
-    def setText(self,text):
+    def setText(self, text):
         try:
             self.widget.configure(text=text)
         except:
@@ -138,30 +139,31 @@ class ButtonWrapper(ComponentWrapper):
 
 class LabelWrapper(ComponentWrapper):
 
-    def widgetFactory(self,*args,**kws):
-        return Tkinter.Label(*args,**kws)
+    def widgetFactory(self, *args, **kws):
+        return Tkinter.Label(*args, **kws)
 
     def setText(self, text):
         self.widget.configure(text=text)
 
 class TkTextMixin:
-    """ Mixin that abstracts out all behavior needed to get
-    selectable-but-not-editable behavior out of Tk text widgets.
-    We bind all keystrokes, passing them through to the underlying
-    control when editable is true, and ignoring all but select
-    and copy keystrokes when editable is false. The mixed-in
-    class must provide an updateProxy() method, called as a
-    Tk event handler when focus leaves the control; and a
-    setEditable() method, called from update(), that manages
-    the self.editable property. """
+    """
+    Mixin that abstracts out all behavior needed to get
+    selectable-but-not-editable behavior out of Tk text widgets.  We
+    bind all keystrokes, passing them through to the underlying
+    control when editable is true, and ignoring all but select and
+    copy keystrokes when editable is false. The mixed-in class must
+    provide an updateProxy() method, called as a Tk event handler when
+    focus leaves the control; and a setEditable() method, called from
+    update(), that manages the self.editable property.
+    """
 
-    def install_bindings(self,widget):
+    def install_bindings(self, widget):
         self.ctl = 0
         self.alt = 0
         self.shift = 0
         self.editable = 1
         widget.bind("<Key>", self.keybinding)
-        #widget.bind("<KeyRelease>",self.updateProxy) # Ensure all changes reach Proxy.
+        #widget.bind("<KeyRelease>", self.updateProxy) # Ensure all changes reach Proxy.
         widget.bind("<KeyPress-Control_L>", self.ctldown)
         widget.bind("<KeyRelease-Control_L>", self.ctlup)
         widget.bind("<KeyPress-Alt_L>", self.altdown)
@@ -206,7 +208,7 @@ class TkTextMixin:
                 return None
             return "break"
 
-    def insertbinding(self,ev):
+    def insertbinding(self, ev):
         # Overrides keybinding for the Insert key.
         if self.editable:
             return None
@@ -215,42 +217,42 @@ class TkTextMixin:
             return None
         return "break"
 
-    def arrowbinding(self,ev):
+    def arrowbinding(self, ev):
         # This method's sole reason for existence is to allow arrows
         # to work even when self.editable is false.
         return None
 
-class TextFieldWrapper(ComponentWrapper,TkTextMixin):
+class TextFieldWrapper(ComponentWrapper, TkTextMixin):
 
-    def widgetFactory(self,*args,**kws):
-        theWidge=Tkinter.Entry(*args,**kws)
-        self.install_bindings(theWidge)
-        return theWidge
+    def widgetFactory(self, *args, **kws):
+        widget=Tkinter.Entry(*args, **kws)
+        self.install_bindings(widget)
+        return widget
 
-    def updateProxy(self,*args,**kws):
+    def updateProxy(self, *args, **kws):
         # Inform proxy of text change by the user.
         #self.proxy.rawModify(text=self.widget.get())
-        #start,end = self.getSelection()
-        #self.proxy.rawModify(selection=(start,end))
+        #start, end = self.getSelection()
+        #self.proxy.rawModify(selection=(start, end))
         pass
 
-    def setText(self,text):
+    def setText(self, text):
         disabled=0
         if self.widget.cget('state') != Tkinter.NORMAL:
             self.widget.configure(state=Tkinter.NORMAL)
             disabled=1
-        self.widget.delete(0,Tkinter.END)
-        self.widget.insert(0,text)
+        self.widget.delete(0, Tkinter.END)
+        self.widget.insert(0, text)
         if disabled:
             self.widget.configure(state=Tkinter.DISABLED)
 
     def getText(self):
         return self.widget.get()
 
-    def setEditable(self,editable):
+    def setEditable(self, editable):
         self.editable=editable
 
-    def setSelection(self,selection):
+    def setSelection(self, selection):
         self.widget.selection_range(*selection)
 
     def getSelection(self):
@@ -259,7 +261,7 @@ class TextFieldWrapper(ComponentWrapper,TkTextMixin):
             end = self.widget.index('sel.last')
         else:
             start = end = self.widget.index('insert')
-        return start,end
+        return start, end
 
 class ScrollableTextArea(Tkinter.Frame):
 
@@ -288,12 +290,12 @@ class ScrollableTextArea(Tkinter.Frame):
         for delegate in self._delegated_methods:
             setattr(self, delegate, getattr(self._textarea, delegate))
 
-class TextAreaWrapper(ComponentWrapper,TkTextMixin):
+class TextAreaWrapper(ComponentWrapper, TkTextMixin):
 
-    def widgetFactory(self,*args,**kws):
-        theWidge=ScrollableTextArea(*args,**kws)
-        self.install_bindings(theWidge)
-        return theWidge
+    def widgetFactory(self, *args, **kws):
+        widget=ScrollableTextArea(*args, **kws)
+        self.install_bindings(widget)
+        return widget
 
     def getText(self):
         return self.widget.get(1.0, Tkinter.END)[:-1] # Remove the extra newline. (Always?)
@@ -325,7 +327,7 @@ class TextAreaWrapper(ComponentWrapper,TkTextMixin):
         end = self._to_char_index(end)
         return start, end
 
-    def setText(self,text):
+    def setText(self, text):
         disabled=0
         if self.widget.cget('state') != Tkinter.NORMAL:
             self.widget.config(state=Tkinter.NORMAL) # Make sure we can change the text
@@ -335,35 +337,35 @@ class TextAreaWrapper(ComponentWrapper,TkTextMixin):
         if disabled:
             self.widget.config(state=Tkinter.DISABLED)
 
-    def setSelection(self,selection):
+    def setSelection(self, selection):
         start, end = selection
         self.widget.tag_remove('sel', '1.0', 'end')
         self.widget.tag_add('sel', '1.0 + %s char' % start, '1.0 + %s char' % end)
 
-    def updateProxy(self,*args,**kws):
+    def updateProxy(self, *args, **kws):
         # Ugh, we have to do this on every keystroke! I think
         # we may -really- need -some- kind of laziness.
-        #self.proxy.rawModify(text=self.widget.get("1.0","end"))
-        #start,end = self._getSelection()
-        #self.proxy.rawModify(selection=(start,end))
+        #self.proxy.rawModify(text=self.widget.get("1.0", "end"))
+        #start, end = self._getSelection()
+        #self.proxy.rawModify(selection=(start, end))
         pass
 
-    def setEditable(self,editable):
+    def setEditable(self, editable):
         self.editable=editable
 
 class ListBoxWrapper(ComponentWrapper):
 
-    def __init__(self,*args,**kws):
-        ComponentWrapper.__init__(self,*args,**kws)
+    def __init__(self, *args, **kws):
+        ComponentWrapper.__init__(self, *args, **kws)
         self.items = []
 
-    def widgetFactory(self,*args,**kws):
-        theWidge=Tkinter.Listbox(*args,**kws)
-        theWidge.bind('<ButtonRelease-1>', self._tk_clicked)
-        theWidge.bind('<KeyRelease-space>', self._tk_clicked)
-        return theWidge
+    def widgetFactory(self, *args, **kws):
+        widget=Tkinter.Listbox(*args, **kws)
+        widget.bind('<ButtonRelease-1>', self.clickHandler)
+        widget.bind('<KeyRelease-space>', self.clickHandler)
+        return widget
 
-    def setItems(self,items):
+    def setItems(self, items):
         self.widget.delete(0, Tkinter.END)
         self.items = items[:]
         for item in self.items:
@@ -372,8 +374,8 @@ class ListBoxWrapper(ComponentWrapper):
     def getItems(self):
         return self.items
 
-    def setSelection(self,selection):
-        self.widget.select_clear(0,Tkinter.END)
+    def setSelection(self, selection):
+        self.widget.select_clear(0, Tkinter.END)
         self.widget.select_set(selection)
 
     def getSelection(self):
@@ -383,25 +385,24 @@ class ListBoxWrapper(ComponentWrapper):
         except ValueError:
             pass
         return selection
-    def _tk_clicked(self, event):
+
+    def clickHandler(self, event):
         send(self.proxy, 'select')
 
-class RadioButtonWrapper(ComponentWrapper):
 
-    groupMap = {}
-    
-    def __init__(self,*args,**kws):
-        ComponentWrapper.__init__(self,*args,**kws)
+class ToggleButtonMixin:
+
+    def __init__(self):
+        self._var = Tkinter.IntVar()
+        self._var.set(0)
         self._var = Tkinter.IntVar()
         self._var.set(0)
 
-    def widgetFactory(self,*args,**kws):
-        kws['command'] = self._tk_clicked
-        kws['variable'] = self._var
-        theWidge=Tkinter.Radiobutton(*args,**kws)
-        return theWidge
+    def initArgs(self):
+        return {'command': self.clickHandler,
+                'variable': self._var}
 
-    def setOn(self,on):
+    def setOn(self, on):
         if on:
             self.widget.select()
         else:
@@ -410,7 +411,26 @@ class RadioButtonWrapper(ComponentWrapper):
     def getOn(self):
         return self._var.get() == int(self.widget.cget('value'))
 
-    def setGroup(self,group):
+    def setUp(self): # Should perhaps be in a ButtonMixin superclass?
+        self.widget.configure(command=self.clickHandler)
+
+    def clickHandler(self, *args, **kws): # Should perhaps be in a ButtonMixin superclass?
+        send(self.proxy, 'click')
+
+
+class RadioButtonWrapper(ToggleButtonMixin, ComponentWrapper):
+
+    groupMap = {}
+    
+    def __init__(self, *args, **kws):
+        ComponentWrapper.__init__(self, *args, **kws)
+        ToggleButtonMixin.__init__(self)
+
+    def widgetFactory(self, *args, **kws):
+        kws.update(self.initArgs())
+        return Tkinter.Radiobutton(*args, **kws)
+
+    def setGroup(self, group):
         if group is None:
             self._var = Tkinter.IntVar()
             self.widget.configure(variable=self._var)
@@ -425,24 +445,33 @@ class RadioButtonWrapper(ComponentWrapper):
         self._var = var
         self.widget.configure(variable=self._var)
 
-    def setValue(self,value):
+    def setValue(self, value):
         self.widget.configure(value=int(value))
 
     def getValue(self):
         return int(self.widget.cget('value'))
 
-    def _tk_clicked(self,*args,**kws):
-        send(self.proxy,'click')
+
+class CheckBoxWrapper(ToggleButtonMixin, ComponentWrapper):
+  
+    def __init__(self, *args, **kws):
+        ComponentWrapper.__init__(self, *args, **kws)
+        ToggleButtonMixin.__init__(self)
+
+    def widgetFactory(self, *args, **kws):
+        kws.update(self.initArgs())
+        return Tkinter.Checkbutton(*args, **kws)
+
 
 class FrameWrapper(ComponentWrapper):
 
-    def widgetFactory(self,*args,**kws):
+    def widgetFactory(self, *args, **kws):
         kws['relief'] = 'sunken'
         kws['borderwidth'] = 2
-        theWidge=Tkinter.Frame(*args,**kws)
-        return theWidge
+        widget=Tkinter.Frame(*args, **kws)
+        return widget
 
-    def setContainer(self,*args,**kws):
+    def setContainer(self, *args, **kws):
         """
         Ensure all contents are properly created. This looks like it could
         be handled at the Proxy level, but it probably *shouldn't* be -
@@ -450,14 +479,14 @@ class FrameWrapper(ComponentWrapper):
         widgets must be created. (I did it the Proxy way too. This way
         is definitely "the simplest thing that could possibly work.") - jak
         """
-        ComponentWrapper.setContainer(self,*args,**kws)
+        ComponentWrapper.setContainer(self, *args, **kws)
         for component in self.proxy.contents:
             component.container = self.proxy
 
 class WindowWrapper(ComponentWrapper):
 
-    def __init__(self,proxy):
-        ComponentWrapper.__init__(self,proxy)
+    def __init__(self, proxy):
+        ComponentWrapper.__init__(self, proxy)
 
     def internalProd(self):
         # Should check for None, but not properly implemented yet...
@@ -475,13 +504,13 @@ class WindowWrapper(ComponentWrapper):
         # setGeometry that call resized() or something? - mlh
         # No, we've already got new geometry, no need to
         # set it. - jak
-        x,y,w,h = self.getGeometry()
+        x, y, w, h = self.getGeometry()
         dw = w - self.proxy.width
         dh = h - self.proxy.height
 
         # Weird: why doesn't self.proxy.geometry give us the same values???
         oldGeo = self.proxy.x,self.proxy.y,self.proxy.width,self.proxy.height
-        if (x,y,w,h) == oldGeo:
+        if (x, y, w, h) == oldGeo:
             # Do nothing unless we've actually changed size or position.
             # (Configure events happen for all kinds of wacky reasons,
             # most of which are already dealt with by Proxy code.) - jak
@@ -500,11 +529,11 @@ class WindowWrapper(ComponentWrapper):
     #def getGeometry(self):
     #    geo = self.widget.geometry()
     #    if not geo:
-    #        return 100,100,10,10
+    #        return 100, 100, 10, 10
     #    geo = geo.split('+')
     #    geo[0:1] = geo[0].split('x')
-    #    w,h,x,y = map(int,geo)
-    #    return x,y,w,h
+    #    w, h, x, y = map(int, geo)
+    #    return x, y, w, h
 
     def getGeometry(self):
         g = self.widget.geometry()
@@ -513,32 +542,32 @@ class WindowWrapper(ComponentWrapper):
         h = int(m.group(2))
         x = int(m.group(3))
         y = int(m.group(4))
-        return x,y,w,h
+        return x, y, w, h
     
     def setX(self, x):
-        ox,y,w,h = self.getGeometry()
-        self.setGeometry(x,y,w,h)
+        ox, y, w, h = self.getGeometry()
+        self.setGeometry(x, y, w, h)
 
     def setY(self, y):
-        x,oy,w,h = self.getGeometry()
-        self.setGeometry(x,y,w,h)
+        x, oy, w, h = self.getGeometry()
+        self.setGeometry(x, y, w, h)
 
     def setWidth(self, width):
-        x,y,ow,h = self.getGeometry()
-        self.setGeometry(x,y,width,h)
+        x, y, ow, h = self.getGeometry()
+        self.setGeometry(x, y, width, h)
 
     def setHeight(self, height):
-        x,y,w,oh = self.getGeometry()
-        self.setGeometry(x,y,w,height)
+        x, y, w, oh = self.getGeometry()
+        self.setGeometry(x, y, w, height)
 
     def setPosition(self, x, y):
-        ox,oy,w,h = self.getGeometry()
-        geometry = "%dx%d+%d+%d" % (w,h,x, y)
+        ox, oy, w, h = self.getGeometry()
+        geometry = "%dx%d+%d+%d" % (w, h, x, y)
         self.widget.geometry(geometry)
 
     def setSize(self, width, height):
-        x,y,ow,oh = self.getGeometry()
-        geometry = "%dx%d+%d+%d" % (width, height,x,y)
+        x, y, ow, oh = self.getGeometry()
+        geometry = "%dx%d+%d+%d" % (width, height, x, y)
         self.widget.geometry(geometry)        
     
     def setGeometry(self, x, y, width, height):
