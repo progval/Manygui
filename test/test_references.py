@@ -112,6 +112,13 @@ The global function will not die:
 >>> getrefcount(wc1()) > 0
 1
 
+>>> r1 = ref(lambda x: x*x, weak=0)
+>>> r2 = ref(lambda x: x*x, weak=1)
+>>> r1()(2)
+4
+>>> r2()
+>>>
+
 RefKeyDictionary:
 
 >>> d = RefKeyDictionary()
