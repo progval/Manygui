@@ -90,6 +90,8 @@ Longer term goals:
 
 * Make Anygui more thread-safe
 
+* Add constructive area geometry to Canvas
+
 Smaller issues:
 ---------------
 
