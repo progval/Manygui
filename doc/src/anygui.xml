@@ -933,6 +933,8 @@
 
       <para><code>ANYGUI_SCREENSIZE</code>: </para>
 
+      <para><code>ANYGUI_FORCE_CURSES</code>: </para>
+
       <!--
       From Joe:
 
