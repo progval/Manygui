@@ -179,10 +179,10 @@
       packages:</para>
 
       <codelisting>
-	<line>Tkinter                      <url>http://www.python.org/topics/tkinter</url></line>
-	<line>wxPython                     <url>http://www.wxpython.org</url></line>
-	<line>Jython (with Java Swing)     <url>http://www.jython.org</url></line>
-	<line>Bethon                       <url>http://www.bebits.com/app/1564</url></line>
+	<line>Tkinter   (tkgui)     <url>http://www.python.org/topics/tkinter</url></line>
+	<line>wxPython  (wxgui)     <url>http://www.wxpython.org</url></line>
+	<line>Jython    (javagui)   <url>http://www.jython.org</url></line>
+	<line>Bethon    (beosgui)   <url>http://www.bebits.com/app/1564</url></line>
       </codelisting>
 
       <para>In the future <name>Anygui</name> should hopefully work in
@@ -222,6 +222,33 @@
       <line># Make widgets here</line>
       <line>app.run()</line>
     </codelisting>
+
+
+    <section>
+      <title>Using Anygui in Standalone Executables</title>
+
+      <para>You may use <name>Anygui</name> in standalone executables
+      built with tools like <code>py2exe</code>
+      (<url>http://starship.python.net/crew/theller/py2exe/</url>) or
+      the McMillan installer
+      (<url>http://www.mcmillan-inc.com/install1.html</url>), but then
+      you have to specify which backend you want to use, and "hardwire
+      it" into your program, by importing it directly. So, for
+      instance, if you wanted to use the <name>wxPython</name>
+      backend, <code>wxgui</code>, you'd replace
+      </para>
+
+      <codelisting>
+	<line>from anygui import *</line>
+      </codelisting>
+
+      <para>with</para>
+
+      <codelisting>
+	<line>from anygui.backends.wxgui import *</line>
+      </codelisting>
+
+    </section>
 
     <section>
       <title>Creating a Window</title>
