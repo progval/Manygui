@@ -3,6 +3,9 @@ Version 0.2     (...)
    * Event handlers no longer take keyword arguments, but receive a
      single event object
 
+   * A layout bug (affecting the Placer when supplied with 0 for
+     either left, right, top, or bottom) has been fixed
+
 Version 0.1     (06 February 2002)
 
    * Initial release
