@@ -163,7 +163,7 @@ class Label(ComponentMixin, AbstractLabel):
     
     def _ensure_text(self):
         if self._beos_comp:
-            print self._text
+            #print self._text
             self._beos_comp.SetText(self._text)
             self._beos_comp.ResizeToPreferred()
 
@@ -282,7 +282,7 @@ class BRadioGroup(RadioGroup, ComponentMixin):
     
     def _ensure_created(self):
         self._beos_id = str(self._beos_id)
-        print self._beos_id
+        #print self._beos_id
         self._init_args = (self._beos_bounds,
                            self._beos_id,
                            self._beos_mode,
@@ -460,7 +460,7 @@ class Window(ComponentMixin, AbstractWindow):
     def MessageReceived(self, msg):
         if msg.what == ACTION:
             id = msg.FindString('self_id')
-            print id
+            #print id
             for item in self._contents:
                 if item._beos_id == id:
                     item._action()
@@ -474,7 +474,7 @@ class Window(ComponentMixin, AbstractWindow):
         if self._beos_comp is None:
             self._ensure_created()
         if object._beos_comp is None:
-            print object, object.geometry
+            #print object, object.geometry
             object._ensure_geometry()
             object._ensure_created()
         #print issubclass(object._beos_class, BListView.BListView)
