@@ -543,11 +543,12 @@ class WindowWrapper(ComponentWrapper):
             # (Configure events happen for all kinds of wacky reasons,
             # most of which are already dealt with by Proxy code.) - jak
             return
-        
-        self.proxy.rawModify(width=w)
-        self.proxy.rawModify(height=h)
-        self.proxy.rawModify(x=x)
-        self.proxy.rawModify(y=y)
+
+        #@@@ These should be handled by pull()
+        #self.proxy.rawModify(width=w)
+        #self.proxy.rawModify(height=h)
+        #self.proxy.rawModify(x=x)
+        #self.proxy.rawModify(y=y)
         self.proxy.resized(dw, dh) # @@@ Implement this...
 
     def widgetSetUp(self):
