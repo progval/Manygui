@@ -31,21 +31,27 @@ class AbstractFrame(AbstractComponent, Defaults.Frame):
         present. Note that different layout managers may have different
         expectations about **kwds, and may impose restrictions on the
         contents of items. See LayoutManagers.py. """
+
         items = flatten(items)
-        for component in items:
-            # _set_container() adds component to self._contents.
-            component._set_container(self)
 
         # Inform the layout manager, if any.
         if self._layout:
             self._layout.add(items,options,**kws)
+
+        # Now add to self._contents.
+        for component in items:
+            # _set_container() adds component to self._contents.
+            # layout manager may have already called it, though.
+            if component not in self._contents:
+                component._set_container(self)
+
 
     def remove(self, component):
         "If the given component is among the contents of this Frame, removes it."
         if component in self._contents:
             component._set_container(None)
             self.layout.remove(component)
-            #self.layout.resized(0,0)
+            self.layout.resized(0,0)
 
     def destroy(self):
         while self._contents:

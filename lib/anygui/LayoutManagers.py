@@ -37,13 +37,15 @@ class LayoutManager:
 
     def add(self,items,options=None,**kws):
         items = flatten(items)
-        for item in items:
-            if item not in self._container._contents:
-                item._set_container(self._container)
         if options:
             options.__dict__.update(kws)
             kws.update(options.__dict__)
         self.add_components(*items,**kws)
+
+        # Add items to container.
+        for item in items:
+            if item not in self._container._contents:
+                item._set_container(self._container)
 
     def remove(self,item):
         if item in self._container._contents:
@@ -65,6 +67,7 @@ class LayoutManager:
 
 ##############################################################################
 
+from math import sin,cos,sqrt
 class CircleManager(LayoutManager):
     """ A simple layout manager to demonstrate how to implement one.
     All components are spaced equiradially in a circle; all components
@@ -76,7 +79,6 @@ class CircleManager(LayoutManager):
     def resized(self,dw,dh):
         # Here we just compute where all the container's contents
         # should be and assign the geometry.
-        from math import sin,cos,sqrt
         w = self._container.width
         h = self._container.height
 
