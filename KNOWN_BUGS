@@ -1,58 +1,60 @@
-In test_textfield the update button resets the text
-field in wxgui.
+javagui layout is extremely slow for some reason. Also, some
+components may not be visible before the window is resized (the
+TextArea in test_defaults, for instance). This has not always been so,
+and is probably caused by a bug. (This may in part be because windows
+are shown before their contents has been placed properly. That can be
+fixed by rearranging the order in which the _ensure_* methods are
+called, by calling _ensure_visible last, for instance.)
 
-There seems to be some infinite recursion associated with
-the text components in javagui.
+In test_textfield the update button resets the text field in wxgui.
 
-For some reason, it's impossible to set the width of the
-window in test_textchange below a certain value...
+There seems to be some infinite recursion associated with the text
+components in javagui.
 
-test_textarea doesn't work properly. (Swap
-from Label to TextArea needs ironing out...)
+For some reason, it's impossible to set the width of the window in
+test_textchange below a certain value...
 
-test_textchange fails in some backends (e.g. wx) because
-_ensure_text isn't supported on the relevant widgets
+test_textarea doesn't work properly. (Swap from Label to TextArea
+needs ironing out...)
 
-test_references.py and test_events don't work in Jython
-2.1b1. (References and Events should still work, though...)
+test_textchange fails in some backends (e.g. wx) because _ensure_text
+isn't supported on the relevant widgets
 
-The updates in test_textarea and test_textfield
-don't work properly in tkgui.
+test_references.py and test_events don't work in Jython 2.1b1.
+(References and Events should still work, though...)
 
-When moving the mouse out of a text area in tkgui,
-the selection is lost.
+The updates in test_textarea and test_textfield don't work properly in
+tkgui.
 
-tkgui radiobuttons (and probably checkboxes) don't
-work properly. (See test_radiobutton.py,
-for example.) RadioGroup doesn't work properly in
+When moving the mouse out of a text area in tkgui, the selection is
+lost.
+
+tkgui radiobuttons (and probably checkboxes) don't work properly. (See
+test_radiobutton.py, for example.) RadioGroup doesn't work properly in
 wxgui or javagui.
 
-id() is broken in Jython and will probably not be fixed
-soon. Therefore, any use of id() in Anygui (such as in
-anygui.References) can not be guaranteed to be correct
-in Jython. This should preferrably be fixed in Jython,
-but failing that, by implementing some other id()
+id() is broken in Jython and will probably not be fixed soon.
+Therefore, any use of id() in Anygui (such as in anygui.References)
+can not be guaranteed to be correct in Jython. This should preferrably
+be fixed in Jython, but failing that, by implementing some other id()
 wraparound in Anygui.
 
-Compiling Anygui apps to jar files seems problematic in
-Jython, giving the error "anygui clashes with package
-of same name".
+Compiling Anygui apps to jar files seems problematic in Jython, giving
+the error "anygui clashes with package of same name".
 
-The defaults for TextArea are overridden by the TextField
-defaults in mswgui.
+The defaults for TextArea are overridden by the TextField defaults in
+mswgui.
 
-Label alignment (both vertical and horizontal) varies
-across backends.
+Label alignment (both vertical and horizontal) varies across backends.
 
 Setting tf.model.value moves selection to the end of
 textfields/textareas in javagui.
 
-Tabbing between fields and/or other controls doesn't work
-in mswgui.
+Tabbing between fields and/or other controls doesn't work in mswgui.
 
 Only strings are currently permitted as text in TextField and
-TextArea. In general, there should be as little type checking
-as possible (i.e. converting with str(), like in ListBox).
+TextArea. In general, there should be as little type checking as
+possible (i.e. converting with str(), like in ListBox).
 
 Alt-F4 doesn't work for javagui Windows in MS Windows.
 
@@ -75,12 +77,14 @@ The backends don't behave consistently wrt. setting or not setting
 focus when the selection of a TextField or TextArea is set
 programmatically.
 
-Focus of TextArea is displayed properly under beosgui - click on another
-window and back again to see selection/cursor. [Bug belongs to Bethon]
+Focus of TextArea is displayed properly under beosgui - click on
+another window and back again to see selection/cursor. [Bug belongs to
+Bethon]
 
-Anygui will not work [well|at all?] with a vanilla Bethon installation.
-The updated files can be found at http://anygui.sourceforge.net/files.
-Email matt@null.net for details on how to build, if you need help.
+Anygui will not work [well|at all?] with a vanilla Bethon
+installation. The updated files can be found at
+http://anygui.sourceforge.net/files. Email matt@null.net for details
+on how to build, if you need help.
 
 test/test.py crashes under systems where more than one application
 object is not permitted.  [beosgui and wxgui]
@@ -92,12 +96,12 @@ RadioGroups don't work properly under BeOS.  BeOS will not allow
 multiple groups within the one view - hence, at this stage, all radio
 buttons are in the same group.
 
-All List- and Text- Views always have scrollbars under BeOS.
-(Similar behaviour in other backends.)
+All List- and Text- Views always have scrollbars under BeOS. (Similar
+behaviour in other backends.)
 
-beosgui.py does not implement _ensure_destroyed(). This will
-prevent objects from being removed from a container, and/or
-moved between containers.
+beosgui.py does not implement _ensure_destroyed(). This will prevent
+objects from being removed from a container, and/or moved between
+containers.
 
-test_remove.py fails under mswgui. The "Remove" button's
-event handler is never called.
+test_remove.py fails under mswgui. The "Remove" button's event handler
+is never called.
