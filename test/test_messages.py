@@ -1,3 +1,6 @@
+
+# DEPRECATED
+
 """
 Test the Messages.py message/handler logic.
 

@@ -17,7 +17,7 @@ for frm, i in zip(fms,range(num)):
     win.add(frm)
 callbacks = []
 for i in range(num):
-    def callback(i=i): # Store the index
+    def callback(i=i, **kw): # Store the index
         for j in range(num):
             if j!=i:
                 fms[j].visible = 0
@@ -27,5 +27,5 @@ for i in range(num):
                 print 'Frame %s shown' % j
     callbacks.append(callback)
 for i in range(num):
-    bns[i].action = callbacks[i]
+    link(bns[i], 'action', callbacks[i])
 app.run()

@@ -1,3 +1,6 @@
+
+# DEPRECATED
+
 from anygui import *
 from anygui.Mixins import Observable
 import unittest

@@ -1,4 +1,4 @@
-from anygui import Window, Button, Label, Application
+from anygui import *
 
 app = Application()
 
@@ -10,11 +10,12 @@ w1.place(lab)
 
 w2 = Window(title='This Window is visible', size=(200, 100))
 
-def show():
+def show(**kw):
     w1.visible = 1
 
 b = Button(text='Show other window', position=(5, 5),
-           size=(190, 90), action=show)
+           size=(190, 90))
+link(b, 'action', show)
 
 w2.place(b)
 

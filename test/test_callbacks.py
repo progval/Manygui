@@ -1,3 +1,6 @@
+
+# DEPRECATED
+
 """
 Test the message handling callback adapter
 

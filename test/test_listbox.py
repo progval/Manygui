@@ -1,17 +1,19 @@
-from anygui import Window, ListBox, ListModel, Application
+from anygui import *
 
 class SelectionPrinter(ListBox):
 
-    def __init__(self, *arg, **kw):
-        ListBox.__init__(self, *arg, **kw)
-        self.action = self.print_selection
+    def __init__(self, lb):
+        self._lb = lb
+        link(lb, 'action', self.print_selection)
 
-    def print_selection(self):
-        print 'Item selected:', self.selection, '(%s)' % self.model[self.selection]
+    def print_selection(self, **kw):
+        print 'Item selected:', self._lb.selection, '(%s)' % self._lb.model[self._lb.selection]
 
 app = Application()
 
-lb = SelectionPrinter()
+lb = ListBox()
+
+sp = SelectionPrinter(lb)
 
 # These are redundant:
 lb.model.extend('There was a wee cooper of county Fyfe, Nickety, nockety, noo, noo, noo'.split())

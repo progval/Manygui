@@ -17,13 +17,13 @@ They come from a long way overseas,
 But they're cute, and they're cuddly, and they're ready to please.
 """
 
-def init_field():
+def init_field(**kw):
     global ta, lbl
     ta.model.value = the_text
     ta.selection = (23,30)
     update_label()
 
-def update_label():
+def update_label(**kw):
     global ta, lbl
     sel = ta.selection
     text = ta.model.value
@@ -37,8 +37,11 @@ ta2 = TextArea(size=ta.size, editable=0)
 ta2.model.value = 'Edit me... :P'
 lbl = Label(width=150, height=250, text='')
 
-update_btn = Button(width=50, height=30, text='Update', action=update_label)
-reset_btn = Button(width=50, height=30, text='Reset', action=init_field)
+update_btn = Button(width=50, height=30, text='Update')
+link(update_btn, 'action', update_label)
+
+reset_btn = Button(width=50, height=30, text='Reset')
+link(reset_btn, 'action', init_field)
 
 app = Application()
 

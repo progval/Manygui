@@ -9,17 +9,15 @@ Basic functionality:
 
 >>> s = Test()
 >>> q = Test()
->>> connect(Event(source=s), q.handle, weak=1)
->>> dispatch(Event(source=s))
+>>> link(s, q.handle, weak=1)
+>>> send(s)
 Handled!
 
 >>> t = Test()
 >>> evt1 = Event()
 >>> evt1.type = 'something'
->>> connect(evt1, t.handle, weak=1)
->>> evt2 = Event()
->>> evt2.type = 'something'
->>> dispatch(evt2)
+>>> link(event='something', t.handle, weak=1)
+>>> send(event='something')
 Handled!
 
 [More comparison demonstrations?]
@@ -27,29 +25,29 @@ Handled!
 Disconnecting:
 
 >>> t = Test()
->>> connect(Event(), t.handle, weak=1)
->>> dispatch(Event())
+>>> link(handler=t.handle, weak=1)
+>>> send()
 Handled!
->>> disconnect(Event(), t.handle)
->>> dispatch(Event())
+>>> unlink(handler=t.handle)
+>>> send()
 >>>
 
 Weak handlers:
 
 >>> t = Test()
->>> connect(Event(), t.handle, weak=1)
->>> dispatch(Event())
+>>> link(handler=t.handle, weak=1)
+>>> send()
 Handled!
 >>> del t
->>> dispatch(Event())
+>>> send()
 >>>
 
 Strong handlers:
 
 >>> t = Test()
->>> connect(Event(type='strong-handlers'), t.handle)
+>>> link(event='strong-handlers'), handler=t.handle)
 >>> del t
->>> dispatch(Event(type='strong-handlers'))
+>>> send(event='strong-handlers')
 Handled!
 
 Weak sources:
@@ -60,11 +58,11 @@ Loop blocking:
 
 >>> t = Test()
 >>> s = Test()
->>> connect(Event(), t.handle, weak=1)
->>> dispatch(Event(source=s, tag='debug'))
+>>> link(handler=t.handle, weak=1)
+>>> send(s)
 Handled!
->>> dispatch(Event(source=t))
->>> disconnect(Event(), t.handle)
+>>> send(t)
+>>> unlink(handler=t.handle)
 
 Wrapper functions:
 
@@ -73,8 +71,8 @@ Wrapper functions:
 ...     obj.handle(None)
 ...     print '</wrapper>'
 ...
->>> connect(Event(type='wrapper-event'), (t, wrapper_test), weak=1)
->>> dispatch(Event(type='wrapper-event'))
+>>> link(event='wrapper-event', handler=(t, wrapper_test), weak=1)
+>>> send(event='wrapper-event')
 <wrapper>
 Handled!
 </wrapper>
@@ -87,11 +85,10 @@ Return values from event handlers:
 ...
 >>> def handler3(event): return 3
 ...
->>> evt = Event(type='return-values')
->>> connect(evt, handler1)
->>> connect(evt, handler2)
->>> connect(evt, handler3)
->>> dispatch(evt)
+>>> link(event='return-values', handler=handler1)
+>>> link(event='return-values', handler=handler2)
+>>> link(event='return-values', handler=handler3)
+>>> send(event='return-values')
 [1, 2, 3]
 
 [Other API functions]

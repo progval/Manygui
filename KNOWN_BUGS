@@ -1,3 +1,8 @@
+tkgui radiobuttons (and probably checkboxes) don't
+work properly. (See test_radiobutton.py,
+for example.) test_radiogroup.py doesn't work
+properly in wxgui.
+
 id() is broken in Jython and will probably not be fixed
 soon. Therefore, any use of id() in Anygui (such as in
 anygui.References) can not be guaranteed to be correct
