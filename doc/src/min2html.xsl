@@ -166,4 +166,18 @@ h1, .author, .date      { text-align: center }
     <xsl:text>&copy;</xsl:text>
   </xsl:template>
 
+  <xsl:template match="apiname">
+    <code>
+      <b>
+        <xsl:value-of select="."/>
+      </b>
+    </code>
+  </xsl:template>
+
+  <xsl:template match="var">
+    <i>
+      <xsl:value-of select="."/>
+    </i>
+  </xsl:template> 
+
 </xsl:stylesheet>

@@ -137,4 +137,13 @@
     <xsl:text>&copy;</xsl:text>
   </xsl:template>
 
+
+  <xsl:template match="apiname">
+    <xsl:value-of select="."/>
+  </xsl:template>
+
+  <xsl:template match="var">
+    <xsl:value-of select="."/>
+  </xsl:template> 
+
 </xsl:stylesheet>

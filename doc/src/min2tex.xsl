@@ -123,7 +123,19 @@
   </xsl:template>
 
   <xsl:template match="copyright">
-    <xml:text>\copyright{}</xml:text>
+    <xsl:text>\copyright{}</xsl:text>
   </xsl:template>
+
+  <xsl:template match="apiname">
+    <xsl:text>{\tt\bf </xsl:text>
+      <xsl:value-of select="."/>
+    <xsl:text>}</xsl:text>
+  </xsl:template>
+
+  <xsl:template match="var">
+    <xsl:text>\textit{</xsl:text>
+      <xsl:value-of select="."/>
+    <xsl:text>}</xsl:text>
+  </xsl:template> 
 
 </xsl:stylesheet>
