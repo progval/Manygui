@@ -1,6 +1,6 @@
 #_backends = 'msw gtk java wx tk beos qt curses text'
 # beos and gtk removed for first beta:
-_backends = 'msw java wx tk qt curses text'
+_backends = 'msw java wx tk qt beos curses text'
 
 import os, sys
 

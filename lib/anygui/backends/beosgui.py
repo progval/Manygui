@@ -1,29 +1,3 @@
-"""
-beosgui.py, a part of anygui that allows anygui applications to directly drive BeOS GUI functions.
-
-beosgui.py (possibly) requires Bethon (0.4), Python (2.2) and BeOS (5.0) to function.
-Bethon can be found at:  www.bebits.net/app/1564
-Python can be found at:  www.python.org
-BeOS might be found at:  free.be.com
-           
-beosgui.py is the work of Matthew Schinckel, and the WrapThis feature is the work of Donn Cave.
-
-This version of beosgui.py (and the anygui it is part of) are a work in progress.  Please visit anygui.sf.net to see if there is a newer version.
-
-29/08/2001
-"""
-
-TODO = """
-To Do List:
-
-Make RadioGroups work.
-Stage 1: dodgy system assuming only one group per window [DONE]
-Stage 2: proper system using seperate BViews for each group
-
-Put more comments - with the other available values, ie in
-_beos_mode, _beos_flags, etc.
-
-"""
 
 from anygui.backends import *
 __all__ = anygui.__all__
@@ -120,6 +94,7 @@ class ComponentMixin(WrapThis):
                 self._container._ensure_created()
                 self._container._beos_comp.AddChild(self._beos_comp)
             ComponentMixin._beos_id += 1 # Gives each component a unique id
+            self._finish_creation()
             return 1
         return 0
     
@@ -145,7 +120,15 @@ class ComponentMixin(WrapThis):
                 float(self._height+self._y))
 
     def _ensure_visibility(self):
-        pass
+        if self._beos_comp:
+            if self._visible:
+                if self._beos_comp.IsHidden():
+                    self._beos_comp.Show()
+            else:
+                if self._beos_comp.IsHidden():
+                    pass # Don't Hide stuff twice...
+                else:
+                    self._beos_comp.Hide()
         
     def _ensure_enabled_state(self):
         pass
@@ -183,9 +166,9 @@ class Label(ComponentMixin, AbstractLabel):
     def _ensure_text(self):
         if self._beos_comp:
             pass
-            self._beos_comp.LockLooper()
+            #self._beos_comp.LockLooper()
             self._beos_comp.SetText(str(self._text))
-            self._beos_comp.UnlockLooper()
+            #self._beos_comp.UnlockLooper()
             self._ensure_geometry()
             #self._beos_comp.ResizeToPreferred()
     
@@ -409,10 +392,10 @@ class TextField(ComponentMixin, AbstractTextField):
     def _backend_text(self):
         if self._beos_comp:
             return self._beos_comp.Text()
-        
+    
     def _backend_selection(self):
         if self._beos_comp:
-            return self._beos_comp.TextView().GetSelection()
+             return self._beos_comp.TextView().GetSelection()
     
     def _ensure_selection(self):
         if self._beos_comp:
@@ -446,7 +429,6 @@ class TextArea(ComponentMixin, AbstractTextArea):
     _beos_border = B_FANCY_BORDER
     
     def _ensure_created(self):
-        self._dummy = 0 # Error checking device, for infinite loop in MakeFocus()
         self._focus = 0
         self._beos_id = str(self._beos_id)
         self._ensure_geometry()
@@ -527,7 +509,8 @@ class Frame(ComponentMixin, AbstractFrame):
     def _ensure_visibility(self):
         if self._beos_comp:
             if self._visible:
-                if self._beos_comp.IsHidden(): self._beos_comp.Show()
+                if self._beos_comp.IsHidden():
+                    self._beos_comp.Show()
             else:
                 if self._beos_comp.IsHidden():
                     pass # Don't Hide stuff twice...
@@ -557,7 +540,6 @@ class Window(ComponentMixin, AbstractWindow):
         if self._beos_comp is None:
             self._ensure_style()
             self._ensure_title()
-            self._ensure_visibility()
             self._ensure_geometry()
             self.wrap(self._beos_class(
                       self._beos_bounds,
@@ -569,8 +551,8 @@ class Window(ComponentMixin, AbstractWindow):
                 item._ensure_created()
             self._ensure_geometry()
             self._ensure_visibility()
-
-                      
+            self._finish_creation()
+                  
     def _ensure_title(self):
         if self._beos_comp:
             self._beos_comp.SetTitle(self._title)
@@ -645,6 +627,7 @@ class Window(ComponentMixin, AbstractWindow):
 ###################################################################
 
 class Application(WrapThis, AbstractApplication):
+    _beos_running = 0
 
     def __init__(self):
         "Every application needs a constructor code.  What should this be?"
@@ -667,12 +650,14 @@ class Application(WrapThis, AbstractApplication):
         about = BAlert.BAlert("About", __doc__, "Dismiss")
         about.Go()
     
-    #def add(self, win):
-    #    AbstractApplication.add(self, win)
-    #    win._ensure_created()
-    #    win._beos_comp.Show()
+    def add(self, win):
+        AbstractApplication.add(self, win)
+        #win._ensure_created()
+        if self._beos_running:
+            win._beos_comp.Show()
         
     def _mainloop(self):
+        self._beos_running = 1
         self._beos_comp.Run()
 
     def QuitRequested(self):
