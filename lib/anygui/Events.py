@@ -10,10 +10,6 @@
 # work anymore) and dead handler references should be removed at some
 # point (when?).
 
-# To make weak references optional, we should probably have
-# WeakMethod(h) == h, etc. so the only place we need to worry about it
-# is in connect()
-
 __all__ = '''
 
     connect
@@ -50,10 +46,10 @@ def locators(event):
     key = source, type
     return cat, key
 
-def connect(event, handler):
+def connect(event, handler, weak=0):
     'Connect an event pattern to an event handler.'
     cat, key = locators(event)
-    handler = WeakMethod(handler)
+    handler = WeakMethod(handler, weak)
     try:
         registry[cat][key].append(handler)
     except KeyError:

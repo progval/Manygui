@@ -73,7 +73,7 @@ class WeakMethod:
         if self.dead(): return None
         obj = self.obj
         if obj is not None and self.weak: obj = obj()
-        return WeakCallable(obj, self.meth)
+        return WeakCallable(obj, self.meth, weak=self.weak)
     def dead(self):
         return self.obj is not None and \
                self.weak and self.obj() is None
