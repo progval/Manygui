@@ -973,6 +973,8 @@ Fixed focus indicator in textgui - it now always shows up.
 	<line>    def append(self, obj):</line>
 	<line>        self.list.append(obj)</line>
 	<line>        send(self)</line>
+	<line>    def __getitem__(self, i):</line>
+	<line>        return self.list[i]</line>
 	<line></line>
 	<line>lbx = ListBox()</line>
 	<line>lbx.items = TriggerList()</line>
