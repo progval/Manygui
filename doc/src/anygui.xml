@@ -285,6 +285,21 @@ to handle text controls very well.
 if scr_curses can't be loaded properly. I don't know if that
 will help Andrew's probelm, but one can hope.
 
+...
+
+- Now interpret escape sequences "by hand". Among other things, this
+means arrow keys now work in textgui, and in general everything now
+works the same in both backends, except that in textgui you must
+type <Return> to get input processed.
+
+- Replaced most use of control characters with escape sequences:
+ESC-w to get a window menu, ESC-? to open the help window.
+
+- Up, down arrow now change listbox selection.
+
+- Added the ability to scroll the entire screen using ESC-<arrows>,
+so the user can see clipped parts of the Anygui presentation.
+
       -->
 
       <para>Of these, <name>Tkinter</name> is compiled in by default

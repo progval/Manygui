@@ -16,8 +16,10 @@ class AbstractFrame(AbstractComponent, Defaults.Frame):
     def ensure_created(self):
         if self._ensure_created():
             for item in self._contents:
-                if item.ensure_created():
-                    item._finish_creation()
+                item.ensure_created()
+                # Redundant:
+                #if item.ensure_created():
+                #    item._finish_creation()
             self._finish_creation()
             return 1
         return 0
@@ -71,8 +73,10 @@ class AbstractFrame(AbstractComponent, Defaults.Frame):
     def _add(self, comp):
         self._contents.append(comp)
         if self._is_created():
-            if comp.ensure_created():
-                comp._finish_creation()
+            comp.ensure_created()
+            # Redundant:
+            #if comp.ensure_created():
+            #    comp._finish_creation()
 
     def _remove(self, comp):
         try:
