@@ -8,7 +8,7 @@ import os, sys
 
 __all__ = ['application', 'Application',
            'Window', 'Button', 'CheckBox', 'Label',
-           'RadioButton', 'RadioGroup', 'ListBox', 'TextField', 'TextArea']
+           'RadioButton', 'RadioGroup', 'ListBox', 'TextField', 'TextArea', 'ListModel']
 
 if hasattr(sys, 'registry'):
     # Jython:

@@ -1,3 +1,6 @@
+ListBox items get jumbled in mswgui when using current (experimental)
+ListModel implementation, for some reason.
+
 Only strings are currently permitted as text in TextField and
 TextArea. In general, there should be as little type checking
 as possible (i.e. converting with str(), like in ListBox).

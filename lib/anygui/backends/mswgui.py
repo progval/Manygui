@@ -48,7 +48,7 @@ class ComponentMixin:
                 parent = 0
             self._hwnd = win32gui.CreateWindowEx(self._win_style_ex,
                 self._wndclass,
-                self._get_wx_text(),
+                self._get_msw_text(),
                 self._win_style,
                 self._x,
                 self._y,
@@ -112,7 +112,7 @@ class Label(ComponentMixin, AbstractLabel):
         if self._hwnd:
             win32gui.SetWindowText(self._hwnd, self._text)
 
-    def _get_wx_text(self):
+    def _get_msw_text(self):
         # return the text required for creation
         return self._text
 
@@ -123,7 +123,7 @@ class ListBox(ComponentMixin, AbstractListBox):
     _win_style = win32con.WS_CHILD | win32con.LBS_STANDARD | win32con.LBS_NOTIFY
     _win_style_ex = win32con.WS_EX_CLIENTEDGE
 
-    def _get_wx_text(self):
+    def _get_msw_text(self):
         return ""
 
     def _backend_selection(self):
@@ -138,6 +138,7 @@ class ListBox(ComponentMixin, AbstractListBox):
             win32gui.SendMessage(self._hwnd,
                                  win32con.LB_RESETCONTENT, 0, 0)
             for item in map(str, list(self._items)):
+                # FIXME: This doesn't work! Items get jumbled...
                 win32gui.SendMessage(self._hwnd,
                                      win32con.LB_ADDSTRING,
                                      0,
@@ -164,7 +165,7 @@ class Button(ComponentMixin, AbstractButton):
     _win_style = win32con.BS_PUSHBUTTON | win32con.WS_CHILD
     _text = "mswButton"
 
-    def _get_wx_text(self):
+    def _get_msw_text(self):
         # return the text required for creation
         return self._text
 
@@ -177,7 +178,7 @@ class Button(ComponentMixin, AbstractButton):
 
 class ToggleButtonMixin(ComponentMixin):
 
-    def _get_wx_text(self):
+    def _get_msw_text(self):
         # return the text required for creation
         return self._text
 
@@ -277,12 +278,12 @@ class TextField(ComponentMixin, AbstractTextField):
 
 ##    def _ensure_events(self):
 ##        if self._hwnd:
-##            EVT_TEXT_ENTER(self._hwnd, self._wx_id, self._wx_enterkey)
+##            EVT_TEXT_ENTER(self._hwnd, self._msw_id, self._msw_enterkey)
 
-##    def _wx_enterkey(self, event):
+##    def _msw_enterkey(self, event):
 ##        self.do_action()
 
-    def _get_wx_text(self):
+    def _get_msw_text(self):
         # return the text required for creation
         return self._text
 
@@ -345,7 +346,7 @@ class Window(ComponentMixin, AbstractWindow):
             self._hwnd_map[comp._hwnd] = comp
         AbstractWindow._finish_creation(self)
 
-    def _get_wx_text(self):
+    def _get_msw_text(self):
         return self._title
 
     def _ensure_title(self):

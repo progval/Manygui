@@ -1,4 +1,4 @@
-from anygui import Window, ListBox, Application
+from anygui import Window, ListBox, ListModel, Application
 
 class SelectionPrinter(ListBox):
 
@@ -7,13 +7,14 @@ class SelectionPrinter(ListBox):
         self.action = self.print_selection
 
     def print_selection(self):
-        print 'Item selected:', self.selection, '(%s)' % self.items[self.selection]
+        print 'Item selected:', self.selection, '(%s)' % self.model[self.selection]
 
 app = Application()
 
 lb = SelectionPrinter()
 
-lb.items = 'There was a wee cooper of county Fyfe, Nickety, nockety, noo, noo, noo'.split()
+lb.model.extend('There was a wee cooper of county Fyfe, Nickety, nockety, noo, noo, noo'.split())
+
 lb.selection = 2
 
 win = Window(title='ListBox test', width=200, height=200)

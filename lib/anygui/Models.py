@@ -49,8 +49,8 @@ class ListModel(Attrib, Observable, UserList):
         self.notify_views()
         
     def append(self, item):
-        UserList.__append__(self, item)
-        self.add_hint('__append__', item)
+        UserList.append(self, item)
+        self.add_hint('append', item)
         self.notify_views()
     
     def insert(self, i, item):
