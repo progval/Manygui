@@ -51,11 +51,11 @@ def main():
 
   win.place(view1, position = (10, 10), border = 1)
 
-  win.place([cb1, cb2], left = 10, top = (view1, 20))
+  win.place(cb1, cb2, left = 10, top = (view1, 20))
 
   win.place(rbs, left = (view1, 20), top = 10, direction = 'down')
 
-  win.place([pb], right = 20, bottom = 10, hmove = 1, vmove = 1)
+  win.place(pb, right = 20, bottom = 10, hmove = 1, vmove = 1)
 
   win.place([view2], 
 	    left = (rbs[0], 20), top = 10, 

@@ -2,6 +2,18 @@ from anygui.Components import AbstractComponent
 from types import TupleType, InstanceType, IntType, ListType
 from anygui.Exceptions import ArgumentError, UnimplementedMethod
 
+def flatten(seq):
+    'Utility function used to flatten sequences'
+    try:
+        if len(seq) > 0:
+            seq[0]
+    except:
+        return [seq]
+    result = []
+    for item in seq:
+        result += flatten(item)
+    return result
+
 class AbstractFrame(AbstractComponent):
 
     def __init__(self, *args, **kw):
@@ -34,18 +46,22 @@ class AbstractFrame(AbstractComponent):
             self._contents[0].destroy()
         AbstractComponent.destroy(self)
 
-    def place(self, items,
-              left = None, right = None,
-              top = None, bottom = None,
-              position = None, # Shortcut for (left, top)
-              hmove = 0, vmove = 0,
-              hstretch = 0, vstretch = 0,
-##              hscroll = 0, vscroll = 0,
-              direction = 'right', space = 0,
-              border = 0):
+    def place(self, *items, **kwds):
         """Add a list of components to the Frame with positioning,
         resizing  and scrolling options. See the manual for details.
         (Yes, I'm too lazy to write it all out here again.)"""
+
+        left       = kwds.get('left',       None)
+        right      = kwds.get('right',      None)
+        top        = kwds.get('top',        None)
+        bottom     = kwds.get('bottom',     None)
+        position   = kwds.get('position',   None) # Shortcut for (left, top)
+        hmove      = kwds.get('hmove',      None)
+        vmove      = kwds.get('vmove',      None)
+        hstretch   = kwds.get('hstretch',   None)
+        vstretch   = kwds.get('vstretch',   None)
+        direction  = kwds.get('direction',  'right')
+        space      = kwds.get('space',      0)
 
         def side(spec, name, self=self):
             if spec:
@@ -75,8 +91,7 @@ class AbstractFrame(AbstractComponent):
         top_obj, top_off = side(top, 'top')
         bottom_obj, bottom_off = side(bottom, 'bottom')
         # Process the items
-        if type(items) != ListType:
-            items = [items]
+        items = flatten(items)
         for item in items:
             x = item.x
             y = item.y
@@ -156,7 +171,7 @@ class AbstractFrame(AbstractComponent):
             item._vmove = vmove
             item._hstretch = hstretch
             item._vstretch = vstretch
-            item._border = border
+            #item._border = border
             # Step to the next item
             if dir == 0:
                 left_obj = item
