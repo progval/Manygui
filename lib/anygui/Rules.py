@@ -2,6 +2,12 @@
 class IllegalState(Exception): pass
 class CannotCalculate(Exception): pass
 class ValueUnchanged(Exception): pass
+class Undefined: pass
+Undefined = Undefined()
+
+# FIXME: Fix the Undefined stuff. Fetch a value for the Undefineds
+# from the others in the same class, or remove them all from state if
+# they are all Undefined. (Or something...)
 
 class EquivalencePartition:
     """
@@ -58,6 +64,18 @@ class RuleEngine:
         self.equiv = EquivalencePartition()
         self.sizes = {}
 
+    def complete(self, state):
+        """
+        Adds placeholder values for missing names covered by the
+        engine.
+        """
+        for name, size in self.sizes.items():
+            try: state[name]
+            except KeyError:
+                if size == 1: state[name] = Undefined
+                else:
+                    state[name] = [Undefined]*size
+
     def define(self, rule):
         """
         Assert an equation of the form x = y, z, w.
@@ -83,7 +101,9 @@ class RuleEngine:
     def explode(self, names):
         result = []
         for name in names:
-            if self.sizes[name] is None:
+            try: size = self.sizes[name]
+            except KeyError: continue
+            if size is None:
                 result.append((name, None))
             else:
                 for i in xrange(self.sizes[name]):
@@ -105,6 +125,7 @@ class RuleEngine:
     def getUndefs(self, state, defs):
         undefs = {}
         for key in defs:
+            print state
             value = self.getValue(state, key)
             c = self.equiv.getClass(key)
             for other in c.keys():
@@ -123,13 +144,15 @@ class RuleEngine:
                     break
             else:
                 if c:
-                    c = c.copy()
                     k, v = c.popitem()
                     value = self.getValue(state, k)
                     while 1:
                         try: k, v = c.popitem()
                         except KeyError: break
-                        if value != self.getValue(state, k):
+                        if value is Undefined:
+                            pass
+                            #print 'UNDEFINED' # ...
+                        elif value != self.getValue(state, k):
                             raise IllegalState
 
     def sync(self, state, defs):
@@ -155,9 +178,14 @@ class RuleEngine:
              modify all the others so they are equal to these
              elements.
 
+        If a name covered by the rules is not found in the state
+        dictionary, it is treated as undefined, and if a successful
+        sync is performed, the name will be given a value.
+
         One important property of the sync method is that it (unlike
         define) does not alter the state of the RuleEngine.
         """
+        self.complete(state)
         defs = self.explode(defs)
         undefs = self.getUndefs(state, defs)
         self.check(state, defs)

@@ -24,8 +24,8 @@ class AbstractApplication(Attrib):
     def add(self, win):
         for w in flatten(win):
             self._windows.append(w)
-        if self._running:
-            win.ensure_created()
+        #if self._running:
+        #    win.wrapper.prod()
             
 
     def remove(self, win):
@@ -53,8 +53,6 @@ class AbstractApplication(Attrib):
         self._running = 1
         if not self._windows:
             return
-        for win in self._windows:
-            win.ensure_created()
         self._mainloop()
         self._running = 0
 
@@ -62,4 +60,4 @@ class AbstractApplication(Attrib):
         raise UnimplementedMethod, (self, "mainloop")
 
     def isRunning(self):
-        return _running
+        return self._running

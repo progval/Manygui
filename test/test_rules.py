@@ -1,9 +1,9 @@
-# Temporary:
-import warnings
-warnings.filterwarnings('ignore')
-
 from unittest import TestCase, main
 from anygui.Rules import RuleEngine, IllegalState
+
+# TODO: Test the addition of undefined values (that are not present
+# when sync is called)
+# Check that defs that are not in state raise IllegalState
 
 class RectangleTestCase(TestCase):
     def __init__(self, *args, **kwds):

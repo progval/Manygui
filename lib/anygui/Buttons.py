@@ -1,5 +1,5 @@
 from Components import Component
-from anygui import Defaults
+from anygui import Defaults, backendModule
 
 class Button(Component, Defaults.Button):
 

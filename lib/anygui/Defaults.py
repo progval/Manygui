@@ -13,24 +13,67 @@ that lists the attributes which need to be set explicitly per instance
 direction = 'right'
 space = 10
 
-def _list_attributes(klass):
-    klass.explicit_attributes = klass.__dict__.keys()
+#def _list_attributes(klass):
+#    klass.explicit_attributes = klass.__dict__.keys()
 
 class Button:
-    _text = 'Button'
-    _default_event = 'click'
-    _x = 0
-    _y = 0
-    _width = 80
-    _height = 30
-    _hmove = 0
-    _vmove = 0
-    _hstretch = 0
-    _vstretch = 0
-    _visible = 1
-    _enabled = 1
-_list_attributes(Button)
+    state = {
+        'text': 'Button',
+        'default_event': 'click',
+        'x': 0,
+        'y': 0,
+        'width': 80,
+        'height': 30,
+        'hmove': 0,
+        'vmove': 0,
+        'hstretch': 0,
+        'vstretch': 0,
+        'visible': 1,
+        'enabled': 1
+        }
 
+class Frame:
+    state = {
+        'text': 'Frame', # Hardly needed...
+        'x': 0,
+        'y': 0,
+        'width': 400,
+        'height': 300,
+        'hmove': 0,
+        'vmove': 0,
+        'hstretch': 0,
+        'vstretch': 0,
+        'visible': 1,
+        'enabled': 1
+    }
+
+class Window:
+    state = {
+        'text': 'Window',
+        'x': 30,
+        'y': 30,
+        'width': 400,
+        'height': 300,
+        'hmove': 0,
+        'vmove': 0,
+        'hstretch': 0,
+        'vstretch': 0,
+        'visible': 1,
+        'enabled': 1,
+        'title': 'Untitled'
+        }
+
+# FIXME: Should be improved -- base new placement on top window etc.
+
+winX, winY = 0, 0
+def shift_window():
+    global winX, winY
+    winX += 30
+    winX %= 360
+    winY += 30
+    winY %= 360
+
+"""
 class Canvas:
     _text = 'Canvas' # Hardly needed...
     _x = 0
@@ -59,20 +102,6 @@ class CheckBox:
     _visible = 1
     _enabled = 1
 _list_attributes(CheckBox)
-
-class Frame:
-    _text = 'Frame' # Hardly needed...
-    _x = 0
-    _y = 0
-    _width = 400
-    _height = 300
-    _hmove = 0
-    _vmove = 0
-    _hstretch = 0
-    _vstretch = 0
-    _visible = 1
-    _enabled = 1
-_list_attributes(Frame)
 
 class Label:
     _text = 'Label'
@@ -158,25 +187,4 @@ class TextField:
     _editable = 1
     _selection = (0, 0)
 _list_attributes(TextField)
-
-class Window:
-    _text = 'Window'
-    _x = 30
-    _y = 30
-    _width = 400
-    _height = 300
-    _hmove = 0
-    _vmove = 0
-    _hstretch = 0
-    _vstretch = 0
-    _visible = 1
-    _enabled = 1
-    _title = 'Untitled'
-_list_attributes(Window)
-
-def shift_window():
-    Window._x += 30
-    Window._x %= 360
-    Window._y += 30
-    Window._y %= 360
-
+"""

@@ -22,7 +22,7 @@ class Application(AbstractApplication):
 
     def __init__(self):
         AbstractApplication.__init__(self)
-        self._root = Tk()
+        self._root = Tkinter.Tk()
         self._root.withdraw()
         # FIXME: Ugly...
         global _app

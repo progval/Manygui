@@ -1,7 +1,7 @@
 from Events import link, send
 
-# FIXME: Add mechanism for internal attributes (not in state[]). Use
-# _foo naming convention? :I
+# FIXME: Add mechanism for internal attributes (not in state[]). Uses
+# _foo naming convention for now...
 
 class Attrib:
     # TODO: Add new docstring (see below for old one)
@@ -15,7 +15,7 @@ class Attrib:
     def sync(self, *names): pass
 
     def __setattr__(self, name, value):
-        if name == 'state':
+        if name == 'state' or name[0] == '_':
             self.__dict__[name] = value
         else: self.set(**{name: value})
 

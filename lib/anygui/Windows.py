@@ -1,6 +1,6 @@
 from anygui import application, Defaults
 from anygui.Frames import Frame
-import anygui
+from anygui import backendModule
 
 class Window(Frame, Defaults.Window):
 
