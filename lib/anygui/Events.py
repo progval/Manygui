@@ -5,8 +5,8 @@
     Magnus Lie Hetland, 2001-11-16
 '''
 
-# TBD: Add callbacks to CallableReference and implement RefValueList, so
-# weeding won't be necessary in dispatch()
+# TBD (?): Add callbacks to CallableReference and implement
+# RefValueList, so weeding won't be necessary in dispatch()
 
 __all__ = '''
 
@@ -62,7 +62,7 @@ def lookup(event):
     source, type = locators(event)
     lists = []
     sources = [source]
-    if source is not Any: sources.append(Any)
+    if source() is not Any: sources.append(ref(Any, weak=0))
     types = [type]
     if type is not Any: types.append(Any)
     for s in sources:
@@ -103,8 +103,8 @@ def disconnectSource(source):
 def disconnectHandler(handler):
     'Disconnect a handler from the event framework.'
     h = ref(handler, weak=0)
-    for s in registry.iterkeys():
-        for t in registry[s].iterkeys():
+    for s in registry.keys():
+        for t in registry[s].keys():
             try: retistry[s][t].remove(h)
             except ValueError: pass
 
