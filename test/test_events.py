@@ -142,6 +142,18 @@ Relaying with sender wrapper:
 >>> send(src)
 Caught relayed_event
 
+enableEvent called by link:
+
+>>> class TestEventSource:
+...     def enableEvent(self, event):
+...         print 'enabled:', event
+...
+>>> tes = TestEventSource()
+>>> def handler(event): pass
+...
+>>> link(tes, 'some_event', handler)
+enabled: some_event
+
 """
 
 if __name__ == "__main__":

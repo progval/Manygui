@@ -56,6 +56,8 @@ def link(*args, **kwds):
         registry[s][event] = []
     if not h in registry[s][event]:
         registry[s][event].append(h)
+    prodder = getattr(source, 'enableEvent', None)
+    if callable(prodder): prodder(event)
 
 #def unlink(source, event, handler):
 def unlink(*args, **kwds):

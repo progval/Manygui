@@ -49,6 +49,18 @@ class Proxy(Attrib):
         should be implemented by subclasses, if needed.
         """
 
+    def enableEvent(self, event):
+        """
+        Called when the Proxy is the source in a call to link().
+
+        All event sources may optionally implement this method, and
+        are not required to produce the event in question until
+        enableEvent is called, since there will be no event handlers
+        around to handle them anyway. The Proxy implementation simply
+        calls the corresponding method in the backend Wrapper.
+        """
+        self.wrapper.enableEvent(event)
+
     def destroy(self):
         """
         Calls the destroy() method of the backend Wrapper.

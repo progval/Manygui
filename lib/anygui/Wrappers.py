@@ -16,6 +16,7 @@ The only methods that should be explicitly called by the Proxy are:
   update(state)
   getPrefs()
   prod()
+  activateEvent(event)
   destroy()
 
 """
@@ -195,6 +196,28 @@ class AbstractWrapper:
         do nothing.
         """
         pass
+
+    def enableEvent(self, event):
+        """
+        Called when the Proxy is the source in a call to link().
+
+        All event sources may optionally implement this method, and
+        are not required to produce the event in question until
+        enableEvent is called, since there will be no event handlers
+        around to handle them anyway.
+
+        After this method has been called once, the Wrapper must
+        generate the event. If the native widget is destroyed and
+        recreated, the Wrapper is responsible for removing old native
+        event handlers and registering new ones.
+
+        This method is mainly an optimization; it is perfectly
+        acceptable for a Wrapper to generate all its events before
+        enableEvent is called. The default implementation does
+        nothing.
+        """
+        # TODO: Add default implementation with some registry of
+        # activated events?
 
     def destroy(self):
         """
