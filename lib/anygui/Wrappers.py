@@ -1,5 +1,5 @@
 from anygui import application
-from anygui.Utils import topologicalSort, getSetter, setterName
+from anygui.Utils import topologicalSort, getSetter
 
 """
 The back-end wrapper presents a unified and simple interface for
@@ -22,7 +22,6 @@ The only methods that should be explicitly called by the Proxy are:
 
 # TODO:
 # - Add attribute dependencies, i.e. (text -> selection) etc.
-# - Fix use of dir() to get attributes/methods... ("Broken" until 2.2)
 
 class AbstractWrapper:
 
