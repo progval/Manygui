@@ -4,11 +4,17 @@ from anygui import Defaults
 
 class AbstractLabel(AbstractComponent, Defaults.Label):
 
+    _original_text = Defaults.Label._text
+
     def _get_text(self):
-        return self._text
+        return self._original_text
 
     def _set_text(self, text):
-        if self._text != text:
+        if self._original_text != text:
+            self._original_text = text
+            text = text.replace('\r\n', ' ')
+            text = text.replace('\n', ' ')
+            text = text.replace('\r', ' ')
             self._text = text
             self._ensure_text()
 

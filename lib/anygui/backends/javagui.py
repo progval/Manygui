@@ -148,13 +148,12 @@ class Label(ComponentMixin, AbstractLabel):
     _java_style = None
 
     def _ensure_text(self):
-        # FIXME: HTML may cause unwanted text wrapping
         if self._java_comp:
             text = self._text
-            text = cgi.escape(text)
-            text = text.replace('\n', '<br>')
-            text = text.replace('\r', '<br>')
-            text = '<html>' + text + '</html>'
+            #text = cgi.escape(text)
+            #text = text.replace('\n', '<br>')
+            #text = text.replace('\r', '<br>')
+            #text = '<html>' + text + '</html>'
             self._java_comp.text = text
             self.horizontalAlignment = swing.SwingConstants.LEFT # FIXME: Wrong place
             self.verticalAlignment = swing.SwingConstants.TOP # FIXME: Wrong place
