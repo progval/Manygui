@@ -393,9 +393,44 @@
       <codelisting>
 	<line>w = Window(title='Hello, world!', size=(200,100), visible=1)</line>
       </codelisting>
-      
-      <!-- Options class, and the Attrib.set() method -->
+    </section>
 
+    <section>
+      <title>The set Method and the Options Class</title>
+
+      <para>If you want to change some attributes of a widget, you can
+      either just set them directly, or (if you'd like to set several
+      at once), use the <code>set</code> method, just like the
+      constructor:</para>
+
+      <codelisting>
+	<line>w.set(title='Hello, again', size=(300,200))</line>
+      </codelisting>
+
+      <para>Supplying the same attributes with the same values to a
+      lot of widgets (if you are making several buttons with the same
+      size, for instance) can be a bit impractical (you'll learn more
+      about buttons in a little while):</para>
+
+      <codelisting>
+	<line>bt1 = Button(left=10, width=50, height=30, text='Button 1')</line>
+	<line>bt2 = Button(left=10, width=50, height=30, text='Button 2')</line>
+	<line>bt3 = Button(left=10, width=50, height=30, text='Button 3')</line>
+      </codelisting>
+
+      <para>To deal with this, the widget constructors (and the
+      <code>set</code> method) can take <code>Options</code> objects
+      as positional parameters:</para>
+
+      <codelisting>
+	<line>opt = Options(left=10, width=50, height=30)</line>
+	<line>bt1 = Button(opt, text='Button 1')</line>
+	<line>bt2 = Button(opt, text='Button 2')</line>
+	<line>bt3 = Button(opt, text='Button 3')</line>
+      </codelisting>
+
+      <para>As you can see, this saves quite a lot of typing. You can
+      use as many <code>Options</code> arguments as you like.</para>
     </section>
 
     <section>
