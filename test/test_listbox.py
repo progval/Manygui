@@ -4,7 +4,7 @@ class SelectionPrinter(ListBox):
 
     def __init__(self, lb):
         self._lb = lb
-        link(lb, 'action', self.print_selection)
+        link(lb, self.print_selection)
 
     def print_selection(self, **kw):
         print 'Item selected:', self._lb.selection, '(%s)' % self._lb.model[self._lb.selection]

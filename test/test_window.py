@@ -19,7 +19,7 @@ def new_window(**kw):
     win.open()
     
 btn = Button(text='Create new window', size=(200,25), x=10, y=10)
-link(btn, 'action', new_window)
+link(btn, new_window)
 win.add(btn)
 
 print application()._windows

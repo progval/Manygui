@@ -1,8 +1,8 @@
-from anygui.Mixins import Attrib, Action
+from anygui.Mixins import Attrib, DefaultEventMixin
 from anygui.Exceptions import UnimplementedMethod
 from anygui.LayoutManagers import LayoutData
 
-class AbstractComponent(Attrib):
+class AbstractComponent(Attrib, DefaultEventMixin):
     """AbstractComponent is an abstract base class representing a visual component of
     the graphical user interface. A Component owns a rectangular region of
     screen space defined by its x, y, width and height properties.
@@ -15,6 +15,7 @@ class AbstractComponent(Attrib):
     def __init__(self, *args, **kw):
         self.layout_data = LayoutData()
         Attrib.__init__(self, *args, **kw)
+        DefaultEventMixin.__init__(self)
 
     def destroy(self):
         self._set_container(None)

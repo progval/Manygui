@@ -8,6 +8,7 @@ space = 10
 class Button:
 
     _text = 'Button'
+    _default_event = 'click'
     _x = 0
     _y = 0
     _width = 80
@@ -22,6 +23,7 @@ class Button:
 class CheckBox:
 
     _text = 'CheckBox'
+    _default_event = 'click'
     _x = 0
     _y = 0
     _width = 100
@@ -64,6 +66,7 @@ class Label:
 class ListBox:
 
     _text = 'ListBox'
+    _default_event = 'select'
     _x = 0
     _y = 0
     _width = 100
@@ -78,6 +81,7 @@ class ListBox:
 class RadioButton:
     
     _text = 'RadioButton'
+    _default_event = 'click'
     _x = 0
     _y = 0
     _width = 100
@@ -88,6 +92,10 @@ class RadioButton:
     _vstretch = 0
     _visible = 1
     _enabled = 1
+
+class RadioGroup:
+
+    _default_event = 'select'
 
 class TextArea:
 
@@ -108,6 +116,7 @@ class TextArea:
 class TextField:
 
     _text = 'TextField'
+    _default_event = 'enterkey'
     _x = 0
     _y = 0
     _width = 100

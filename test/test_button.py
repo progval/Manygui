@@ -15,9 +15,9 @@ def say_hello(**kw):
 
 opt = Options(x = 30, width = 50, height = 30)
 btn = Button(opt, y = 30, text = "Hello")
-link(btn, 'action', say_hello)
+link(btn, say_hello)
 dis = Button(opt, y = 90, text = "Goodbye", enabled = 0)
-link(dis, 'action', say_hello)
+link(dis, say_hello)
 
 win.add(btn)
 win.add(dis)

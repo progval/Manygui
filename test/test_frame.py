@@ -27,5 +27,5 @@ for i in range(num):
                 print 'Frame %s shown' % j
     callbacks.append(callback)
 for i in range(num):
-    link(bns[i], 'action', callbacks[i])
+    link(bns[i], callbacks[i])
 app.run()

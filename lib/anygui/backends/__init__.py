@@ -1,5 +1,6 @@
 
-from anygui.Mixins import Attrib, Options
+from anygui.Mixins import Attrib
+from anygui.Utils import Options
 from anygui import application
 from anygui.Applications import AbstractApplication
 from anygui.Windows import AbstractWindow

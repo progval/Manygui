@@ -9,7 +9,7 @@ def report(**kw):
 win = Window(width = 160, height = 90)
 btn = RadioButton(x = 30, y = 30, width = 100, height = 30, 
 		  title = "Radio Button")
-link(btn, 'action', report)
+link(btn, report)
 win.add(btn)
 
 app.run()

@@ -1,6 +1,7 @@
 "Mixins: mix-in classes for the anygui package"
 
 from Exceptions import SetAttributeError, GetAttributeError
+from Events import link, send
 #import weakref
 weakref = None
 
@@ -43,11 +44,18 @@ class Attrib:
     def __init__(self, *args, **kwds):
         self.set(*args, **kwds)
 
-class Options:
-    def __init__(self, **kwds):
-        self.__dict__.update(kwds)
 
-class Action:
+class DefaultEventMixin:
+    def __init__(self):
+        if hasattr(self, '_default_event'):
+            link(self, self._default_event, self._default_event_handler)
+    def _default_event_handler(self, **kw):
+        kw = kw.copy()
+        del kw['event']
+        del kw['source']
+        send(self, 'default', **kw)
+
+class Action: # Obsolete
     """Action: mix-in class recording a user-specified action procedure
 
     Action may be any callable, or a sequence of one item (callable),
@@ -88,7 +96,7 @@ class Action:
         if self._action:
             return self._action(*self._action_args, **self._action_kwds)
 
-class Observable:
+class Observable: # Obsolete (?)
     """
     Implements the "observed" role in the Observer design pattern.
 

@@ -15,7 +15,7 @@ def show(**kw):
 
 b = Button(text='Show other window', position=(5, 5),
            size=(190, 90))
-link(b, 'action', show)
+link(b, show)
 
 w2.place(b)
 

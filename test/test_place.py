@@ -32,11 +32,11 @@ def main():
     cb1 = CheckBox(x = 10, y = 50,
                    width = 80, height = 20,
                    text = "Check Me!")
-    link(cb1, 'action', checked_it)
+    link(cb1, checked_it)
     cb2 = CheckBox(x = 10, y = 70,
                    width = 110, height = 20,
                    text = "Check Me Too!")
-    link(cb2, 'action', checked_it)
+    link(cb2, checked_it)
 
     rbs = []
     for i in xrange(1, 4):
@@ -46,12 +46,12 @@ def main():
         value = i))
 
     rg = RadioGroup(rbs)
-    link(rg, 'action', option_chosen)
+    link(rg, option_chosen)
 
     pb = Button(x = 10, y = 10,
                 width = 70, height = 30, 
                 text = "Push Me!")
-    link(pb, 'action', pushed_it)
+    link(pb, pushed_it)
 
     win.place(view1, position = (10, 10), border = 1)
     

@@ -13,3 +13,10 @@ def flatten(seq):
     for item in seq:
         result += flatten(item)
     return result
+
+
+class Bunch:
+    def __init__(self, **kwds):
+        self.__dict__.update(kwds)
+
+class Options(Bunch): pass

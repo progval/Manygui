@@ -19,17 +19,17 @@ def print_contents(**kw):
     print 'Enter was pressed. Field contents:', tf.model.value
 
 tf = TextField(width=150, height=25)
-link(tf, 'action', print_contents)
+link(tf, print_contents)
 tf.model.value = ''
 tf2 = TextField(width=150, height=25, editable=0)
 tf2.model.value = 'Edit me... :P'
 lbl = Label(width = 150, height=25, text = '')
 
 update_btn = Button(width=50, height=30, text='Update')
-link(update_btn, 'action', update_label)
+link(update_btn, update_label)
 
 reset_btn = Button(width=50, height=30, text='Reset')
-link(reset_btn, 'action', init_field)
+link(reset_btn, init_field)
 
 app = Application()
 
