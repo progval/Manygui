@@ -483,7 +483,7 @@ class TextArea(ComponentMixin, AbstractTextArea, DisabledTextBindings):
 ################################################################
 
 class Frame(ComponentMixin, AbstractFrame):
-    _tk_class = Tkinter.Frame
+    _tk_class = Tkinter.Frame        
 
 ################################################################
 

@@ -5,8 +5,8 @@ from Exceptions import SetAttributeError, GetAttributeError
 try:
     import weakref
 except ImportError:
-    # Evil hack to make Jython work. This is not a very
-    # good solution, but code should run at least.
+    from warnings import warn
+    warn('weakref module not available')
     class ref:
         def __init__(self,obj):
             self.obj = obj
