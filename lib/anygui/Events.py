@@ -5,10 +5,6 @@
     Magnus Lie Hetland, 2001-11-16
 '''
 
-# If weakref stuff is to be used, registry should use
-# WeakKeyDictionaries (which means the (src,type) tuple solution won't
-# work anymore)
-
 __all__ = '''
 
     connect
@@ -24,6 +20,7 @@ __all__ = '''
 
 categories = BOTH, SOURCE, TYPE, ANON = range(4)
 registry   = {}, {}, {}, {}
+sources = {}
 
 import time
 from Utils import WeakMethod, HashableWeakRef
@@ -48,6 +45,8 @@ def locators(event, weak=0):
 def connect(event, handler, weak=0):
     'Connect an event pattern to an event handler.'
     cat, key = locators(event, weak)
+    if not sources.has_key(key) and key[0]:
+        sources[key] = key[0]
     handler = WeakMethod(handler, weak)
     try:
         if not handler in registry[cat][key]:
@@ -61,6 +60,12 @@ def disconnect(event, handler):
     handler = WeakMethod(handler)
     if handler in registry[cat][key]:
         registry[cat][key].remove(handler)
+
+def set_time(event):
+    if not hasattr(event, 'time'):
+        try:
+            event.time = time.time()
+        except TypeError: pass
 
 def compatible(cat, filter):
     if cat == BOTH:
@@ -80,12 +85,19 @@ def dispatch(event):
     As a side-effect, dead handlers are removed from the candidate lists.'
     source_stack.append(id(getattr(event, 'source', None)))
     try:
-        if not hasattr(event, 'time'):
-            event.time = time.time()
+        set_time(event)
         event.freeze()
         cat1, key = locators(event)
         src, type = key
+        dead = 0
+        if sources.has_key(key):
+            real_src = sources[key]
+            dead = not real_src()
         for cat2 in categories:
+            if dead:
+                try: del registry[cat2][key]
+                except: pass
+                continue
             if not compatible(cat1, cat2): continue
             if cat2 is ANON: key = (None, None)
             handlers = registry[cat2].get(key, [])
@@ -160,8 +172,7 @@ class CallbackAdapter:
         '''
         if not hasattr(event, 'source'):
             event.source = self
-        if not hasattr(event, 'time'):
-            event.time = time.time()
+        set_time(event)
         event.freeze()
         callback = getattr(self, event.type, None)
         if callback:
