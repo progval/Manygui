@@ -1140,10 +1140,16 @@
       event type if you want to respond to any event type; otherwise
       you will only respond to the <code>default</code> type.</para>
 
+      <para>Event handlers that react to the same event will be called
+      in the order they were registered (with <code>link</code>),
+      subject to the following: (1) All handlers registered with a
+      specific source will be called before handlers with the value
+      <code>any</code> as source; (2) all handlers registered with a
+      specific event (including <code>default</code>) are called
+      before handlers with the value <code>any</code> as event.</para>
+
       <para>For more information on sending events, see
       <code>send</code>, below.</para>
-
-      <!-- Add stuff about order -->
 
       <para><apiname>send</apiname>(<var>source</var>,
       <var>event</var>=<code>'default'</code>, <var>loop</var>=0,
@@ -1182,6 +1188,9 @@
 	<line></line>
 	<line>send(btn) # Fake a button click -- will call click()</line>
       </codelisting>
+
+      <para>For information about the order in which event handlers
+      are called, see <code>link</code>, above.</para>
 
       <para><apiname>unlink</apiname>(<var>source</var>,
       [<var>event</var>,] <var>handler</var>)</para>

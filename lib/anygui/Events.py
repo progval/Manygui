@@ -10,9 +10,6 @@ TODO = '''
     - Fix optional arguments/use of kwdargs in place of positionals etc.
 '''
 
-# NOTE: Current semantics (with default events vs. globbing etc.) is
-# not necessarily consistent. I'm working on it...     [mlh20011126]
-
 __all__ = '''
 
     any
