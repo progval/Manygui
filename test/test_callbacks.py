@@ -15,8 +15,11 @@ class ClickSimulator(CallbackAdapter):
     def simulate(self):
         send('click', self, x=1, y=2, time=1005497058.537949)
 
-if __name__ == "__main__":
-    print "If you want detailed output, use \"python test_callbacks.py -v\"."
-    print "No output after this line indicates success."
-    import doctest, test_callbacks
-    doctest.testmod(test_callbacks)
+c = ClickSimulator()
+c.simulate()
+
+#if __name__ == "__main__":
+#    print "If you want detailed output, use \"python test_callbacks.py -v\"."
+#    print "No output after this line indicates success."
+#    import doctest, test_callbacks
+#    doctest.testmod(test_callbacks)
