@@ -35,15 +35,15 @@ The backends don't behave consistently wrt. setting or not setting
 focus when the selection of a TextField or TextArea is set
 programmatically.
 
+test/test.py crashes under systems where more than one application
+object is not permitted.  [beosgui and wxgui]
+
 RadioGroups don't work properly under BeOS.  BeOS will not allow
 multiple groups within the one view - hence, at this stage, all radio
 buttons are in the same group.
 
 Labels under BeOS display line breaks as an unprintable character: 
 this is because they are designed for single line use only.
-
-test/test_textarea.py : under BeOS, both text areas are placed in 
-the same position.  I don't know if this is a textarea or place bug.
 
 All List- and Text- Views always have scrollbars under BeOS.
 (Similar behaviour in other backends.)
