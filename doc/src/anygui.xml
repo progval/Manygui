@@ -881,18 +881,6 @@
       <name>Anygui</name> will continue searching through the other
       backends for a viable alternative.</para>
 
-
-      <!--
-      From Joe:
-
-You can now set ANYGUI_ALTERNATE_BORDER=1 in the environment
-to get +-| borders on strange terminal emulators. This is
-mentioned on the initial help screen as well.
-
-ANYGUI_SCREENSIZE
-ANYGUI_SKIP # Test script...
-      -->
-
       <!--
       Document default order.
       Documentation synch problem?
@@ -926,18 +914,45 @@ ANYGUI_SKIP # Test script...
       <codelisting>
 	<line>foo:~$ ANYGUI_DEBUG=1 python someprogram.py</line>
       </codelisting>
+
+      <para><code>ANYGUI_ALTERNATE_BORDER</code>: </para>
+
+      <para><code>ANYGUI_SCREENSIZE</code>: </para>
+
+      <!--
+      From Joe:
+
+      You can now set ANYGUI_ALTERNATE_BORDER=1 in the environment
+      to get +-| borders on strange terminal emulators. This is
+      mentioned on the initial help screen as well.
+
+      ANYGUI_SCREENSIZE
+      ANYGUI_SKIP # Test script...
+      -->
 	
     </section>
 
     <section>
       <title>Global Functions</title>
 
-      <!-- document backend() function -->
-
       <para><apiname>application</apiname>()</para>
 
       <para>Returns the current <code>Application</code>
       object.</para>
+
+      <para><apiname>backend</apiname>()</para>
+
+      <para>Returns the name (as used in <code>ANYGUI_WISHLIST</code>)
+      of the backend currently in use.</para>
+
+      <para>Example:</para>
+
+      <codelisting>
+	<line>if backend() == 'wx':</line>
+	<line>    some_wx_code()</line>
+	<line>else:</line>
+	<line>    some_generic_code()</line>
+      </codelisting>
 
       <para><apiname>link</apiname>(<var>source</var>,
       [<var>event</var>,] <var>handler</var>, <var>weak</var>=0,
@@ -1039,7 +1054,7 @@ ANYGUI_SKIP # Test script...
        
       <para><strong>Base Classes and Common Behaviour</strong></para>
 
-      <!-- document modify() -->
+      <!-- document set and modify -->
 
       <!-- Add info about update() and the assignee protocol, if
       adopted; models... -->
@@ -1173,7 +1188,7 @@ ANYGUI_SKIP # Test script...
       the <code>update</code> method of the <code>Attrib</code> object
       is called automatically.</para>
 
-      <!-- document the valu attribute -->
+      <!-- document the value attribute -->
 
       <para><strong>class Application</strong></para>
 
