@@ -2,37 +2,12 @@
 The Big Picture:
 ----------------
 
-Release 0.1: Basic functionality and main API
-
 Release 0.2: Refactoring, menus, full event set, graphics,
              native dialogs; more complete functionality
 
 Release 0.3: Less API change, focus on robustness
              and stability
 
-Remaining objectives for version 0.1:
--------------------------------------
-
-* Fix remaining bugs and make sure the tests work in all
-  backends
-
-* Make sure all backends convert attribute values so they
-  are acceptable to the backend widgets
-
-* All backends should now use modify() rather than
-  setting attributes directly. (ListBox.selection needs
-  some rewriting here)
-
-* Decide whether programmatic changes to widgets (e.g. setting
-  the selection of a ListBox) should generate the same events
-  as when these changes are caused by the user
-
-* Make passive attributes (like text selection) active
-  through basic event handling (Move to 0.2?)
-
-* Make send(foo) send out the default event type (e.g. 'click')
-  in addition to 'default', just as the symmetric case (e.g. send(btn,
-  'click') will send a 'default' event).
 
 Objectives for version 0.2:
 ---------------------------
@@ -114,6 +89,22 @@ Objectives for version 0.2:
   components.
 
 * Move main event loop to a separate GUI thread?
+
+
+Objectives for version 0.3:
+---------------------------
+
+* Implement a record/replay API for recording and simulating use of
+  the GUI (on a logical level, rather than using mouse coordinates
+  etc.)
+
+  This could include using a parallel event set, with names like
+  'simulate-click' (as a parallel to 'click') etc. Recording would
+  then not need a separate API but could use ordinary events;
+  simulation could simply send the 'simulate-foo' events which should
+  be picked up and acted upon by the backend (which in turn would send
+  out the appropriate 'foo' event).
+
 
 Longer term goals:
 ------------------
