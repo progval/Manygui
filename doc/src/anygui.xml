@@ -269,6 +269,22 @@ tall. 2-line-tall buttons still suck, though.
 
 Fixed focus indicator in textgui - it now always shows up.
 
+...
+
+- textgui now uses LINES/COLUMNS environment vars to determine
+screen size, and if that fails, uses ANYGUI_SCREENSIZE, which
+should be a string of the format "<columns>x<lines>", eg "80x24".
+
+- textfields and textareas now actually work in curses. Arrows
+move the cursor, you can enter text and backspace to erase.
+ESC to move to the next control in the focus order.
+Still need to add selection.  textgui is still not going
+to handle text controls very well.
+
+- scr_curses.py reorganized, and cursesgui.py now asserts
+if scr_curses can't be loaded properly. I don't know if that
+will help Andrew's probelm, but one can hope.
+
       -->
 
       <para>Of these, <name>Tkinter</name> is compiled in by default
@@ -752,6 +768,10 @@ Fixed focus indicator in textgui - it now always shows up.
       converted to an integer, it will. Otherwise, it will be treated
       as a string.) This will make <name>Anygui</name> print out the
       stack traces from each backend it tries to import.</para>
+
+      <!--
+      Document new star semantics
+      -->
 
       <para>Example:</para>
 
