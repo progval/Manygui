@@ -168,7 +168,6 @@ class Attrib:
         return self._set_or_mod(self.__class__.modattr, *args, **kwds)
 
     def modattr(self, name, value):
-        inhibit_update = None # FIXME: Is this correct?
         if name[0]!='_':
             try: modifier = getattr(self, '_modify_'+name)
             except AttributeError: pass
@@ -195,7 +194,7 @@ class Attrib:
         # it supplies a suitable method) and any watchers of 'self'
         try: old_value.modified()
         except: pass
-        if name[0]!='_' and not inhibit_update:
+        if name[0]!='_':
             self.update(modified=name)
 
     def __init__(self, *args, **kwds):
