@@ -9,9 +9,7 @@ class anygui:
 
     def __init__(self):
         self.__backend = None
-        # Is there a better way to do this? (Doesn't work in Jython 2.1a1)
-        import traceback
-        self.__dirname = os.path.dirname(traceback.extract_stack()[-1][0])
+        self.__dirname = __path__[0]
         self.__backends = BACKENDS
 
     def __try_to_get(self, modulename):
