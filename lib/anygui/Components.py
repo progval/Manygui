@@ -2,6 +2,12 @@ from anygui.Proxies import Proxy
 from anygui.Events import DefaultEventMixin
 from anygui.Exceptions import SyncError
 from anygui.LayoutManagers import LayoutData
+from anygui.Rules import RuleEngine
+
+rules = RuleEngine()
+rules.define('position = x, y')
+rules.define('size = width, height')
+rules.define('geometry = x, y, width, height')
 
 
 class Component(Proxy, DefaultEventMixin):
@@ -24,8 +30,8 @@ class Component(Proxy, DefaultEventMixin):
         The attributes handled and the relationships between them:
 
            # Pseudocode; the sequence types need not match:
-           position == (x, y)
-           size     == (width, height)
+           position == x, y
+           size     == width, height
            geometry == position + size
 
         If the equations above are satisfied, no action is taken. If
@@ -39,4 +45,5 @@ class Component(Proxy, DefaultEventMixin):
         may also include 'y', but that doesn't affect the sync. If
         these requirements are broken, a SyncError is raised.
         """
-        # TODO: Use Rules.RuleEngine
+        # FIXME: Should use modify() etc...
+        rules.sync(self.state, names)
