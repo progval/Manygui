@@ -5,6 +5,9 @@
     Magnus Lie Hetland, 2001-11-16
 '''
 
+# Dispatching is currently broken. I know what the problem is -- will fix
+# it soon.
+
 __all__ = '''
 
     connect
@@ -20,7 +23,7 @@ __all__ = '''
 
 categories = BOTH, SOURCE, TYPE, ANON = range(4)
 registry   = {}, {}, {}, {}
-sources = {}
+#sources = {}
 
 import time
 from Weakrefs import WeakMethod, HashableWeakRef
@@ -45,8 +48,8 @@ def locators(event, weak=0):
 def connect(event, handler, weak=0):
     'Connect an event pattern to an event handler.'
     cat, key = locators(event, weak)
-    if not sources.has_key(key) and key[0]:
-        sources[key] = key[0]
+    #if not sources.has_key(key) and key[0]:
+    #    sources[key] = key[0]
     handler = WeakMethod(handler, weak)
     try:
         if not handler in registry[cat][key]:
@@ -77,9 +80,24 @@ def compatible(cat, filter):
     elif cat == ANON:
         return filter == ANON
 
+def is_dead_source(source):
+    #real_src = sources[source]
+    #obj = real_src()
+    obj = src()
+    #return obj is None
+
+def delete_source(source):
+    #del sources[source]
+    for cat in categories:
+        for key in registry[cat].keys():
+            if key[0] == source:
+                del registry[cat][key]
+
 # Sources sending events:
 source_stack = []
 
+# FIXME: Should extract several functions here, to make more readable/robust.
+# FIXME: Fix deletion of dead sources
 def dispatch(event):
     'Call the appropriate event handlers with event as the argument. \
     As a side-effect, dead handlers are removed from the candidate lists.'
@@ -88,20 +106,11 @@ def dispatch(event):
         results = []
         set_time(event)
         event.freeze()
-        cat1, key = locators(event)
+        evt_cat, key = locators(event)
         src, type = key
-        dead = 0
-        if sources.has_key(key):
-            real_src = sources[key]
-            dead = not real_src()
-        for cat2 in categories:
-            if dead:
-                try: del registry[cat2][key]
-                except: pass
-                continue
-            if not compatible(cat1, cat2): continue
-            if cat2 is ANON: key = (None, None)
-            handlers = registry[cat2].get(key, [])
+        for cat in categories:
+            if not compatible(evt_cat, cat): continue
+            handlers = registry[cat].get(key, []) # FIXME: This doesn't retrieve all the lists that it should!
             live_handlers = []
             for weak_handler in handlers:
                 obj = weak_handler.get_obj()
@@ -112,7 +121,7 @@ def dispatch(event):
                     live_handlers.append(weak_handler)
                     result = handler(event)
                     if result is not None: results.append(result)
-            registry[cat2][key] = live_handlers
+            registry[cat][key] = live_handlers
         if results: return results
     finally:
         source_stack.pop()
