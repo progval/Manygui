@@ -1,3 +1,10 @@
+id() is broken in Jython and will probably not be fixed
+soon. Therefore, any use of id() in Anygui (such as in
+anygui.References) can not be guaranteed to be correct
+in Jython. This should preferrably be fixed in Jython,
+but failing that, by implementing some other id()
+wraparound in Anygui.
+
 The defaults for TextArea are overridden by the TextField
 defaults in mswgui.
 
