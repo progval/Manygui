@@ -7,7 +7,8 @@ Tentative release date: December 10th, 2001
   backends
 
 * Simplify the widget API by detaching models, using
-  signals
+  signals, update() and the Assignee protocol. (This
+  may also be useful for LayoutManager code.)
 
 * Adjust defaults, and improve window staggering
   (needs a mechanism to find the top window)

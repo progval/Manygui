@@ -10,6 +10,7 @@ __all__ = ['application', 'Application',
            'Window', 'Button', 'CheckBox', 'Label',
            'RadioButton', 'RadioGroup', 'ListBox', 'TextField', 'TextArea',
            'BooleanModel', 'ListModel', 'TextModel', 'Options',
+           'LayoutManager', 'Placer',
            'send', 'link', 'unlink', 'unlinkSource', 'unlinkHandler',
            'unlinkMethods', 'Frame', 'Placer',
            ] # FIXME: Add stuff from Colors and Fonts
