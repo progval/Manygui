@@ -148,7 +148,7 @@ class ButtonWrapper(ComponentWrapper):
     def clickHandler(self): 
         send(self.proxy, 'click')
 
-    def setUp(self):
+    def widgetSetUp(self):
         self.widget.configure(command=self.clickHandler)
 
     def widgetFactory(self, *args, **kwds):
@@ -430,7 +430,7 @@ class ToggleButtonMixin:
     def getOn(self):
         return self._var.get()
 
-    def setUp(self): # Should perhaps be in a ButtonMixin superclass?
+    def widgetSetUp(self): # Should perhaps be in a ButtonMixin superclass?
         self.widget.configure(command=self.clickHandler)
 
     def clickHandler(self, *args, **kws): # Should perhaps be in a ButtonMixin superclass?
@@ -550,18 +550,9 @@ class WindowWrapper(ComponentWrapper):
         self.proxy.rawModify(y=y)
         self.proxy.resized(dw, dh) # @@@ Implement this...
 
-    def setUp(self):
+    def widgetSetUp(self):
         self.widget.protocol('WM_DELETE_WINDOW', self.closeHandler)
         self.widget.bind('<Configure>', self.resizeHandler)
-
-    #def getGeometry(self):
-    #    geo = self.widget.geometry()
-    #    if not geo:
-    #        return 100, 100, 10, 10
-    #    geo = geo.split('+')
-    #    geo[0:1] = geo[0].split('x')
-    #    w, h, x, y = map(int, geo)
-    #    return x, y, w, h
 
     def getGeometry(self):
         g = self.widget.geometry()

@@ -408,10 +408,10 @@ class AbstractWrapper:
             except (AttributeError, AssertionError):
                 if widget is None:
                     self.widget = self.widgetFactory(*args, **kwds)
-                    self.setUp()        
+                    self.widgetSetUp()        
             else:
                 self.widget = self.widgetFactory(*args, **kwds)
-                self.setUp()
+                self.widgetSetUp()
 
     def destroy(self):
         """
@@ -427,7 +427,7 @@ class AbstractWrapper:
         resources. This method is used by the Proxy's destroy()
         method.
         """
-        self.tearDown()
+        self.widgetTearDown()
         self.internalDestroy()
         try: del self.widget # Restore DummyWidget
         except AttributeError: pass
@@ -450,7 +450,7 @@ class AbstractWrapper:
         """
         raise NotImplementedError
 
-    def setUp(self):
+    def widgetSetUp(self):
         """
         Sets up a new native widget. Called by create().
 
@@ -459,7 +459,7 @@ class AbstractWrapper:
         enableEvent, this may not be necessary.)
         """
 
-    def tearDown(self):
+    def widgetTearDown(self):
         """
         Clears up after a native widget. Called by destroy().
 
