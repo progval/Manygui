@@ -8,8 +8,7 @@ cases = {
     '"There\'s no peace at the gate"': "[('__setslice__', (5, 7, \"'\"), {})]"
 }
 
-class TestObserver(Observable):
-    
+class TestObserver:
     def model_changed(self, target=None, change=None):
         assert cases[repr(target)] == repr(change)
 
