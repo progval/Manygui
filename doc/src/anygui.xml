@@ -198,6 +198,15 @@
 	<line>Bethon     (beosgui)   <url>http://www.bebits.com/app/1564</url></line>
       </codelisting>
 
+      <!--
+      Matt's fixes to Bethon:
+      
+      http://www.chariot.net.au/~jaq/matt/BWindow.dx
+      http://www.chariot.net.au/~jaq/matt/BTextView.dx
+
+      Rebuild Bethon with these. (Copy to anygui website?)
+      -->
+
       <para>Of these, <name>Tkinter</name> is compiled in by default
       in the <name>MS Windows</name> distribution of
       <name>Python</name> (available from
