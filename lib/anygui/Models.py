@@ -10,41 +10,42 @@ class Assignee:
 
     def __init__(self):
         self.names = []
+        self.objects = []
 
-    def assigned(self, object, name):
-        sync = getattr(object, 'sync', None)
-        if sync is not None:
+    def installed(self, object, name):
+        push = getattr(object, 'push', None)
+        if push is not None:
             self.names.append(name)
-            link(self, sync)
-
+            self.objects.append(object)
+            
     def removed(self, object, name):
-        sync = getattr(object, 'sync', None)
-        if sync is not None:
-            unlink(self, sync)
+        push = getattr(object, 'push', None)
+        if push is not None:
+            self.objects.remove(object)
             self.names.remove(name)
 
-    def send(self, **kw):
-        send(self, names=self.names, **kw)
+    def send(self, **kwds):
+        for object in self.objects:
+            object.push(names=self.names)
+        send(self, **kwds)
 
 
-class Model(Attrib, Assignee):
-
-    def sync(self, event): # FIXME: Wrong signature
-        self.send(**event.dict)
+class Model(Assignee):
 
     def __init__(self, *arg, **kw):
         Assignee.__init__(self)
-        Attrib.__init__(self, **kw)
+        #Attrib.__init__(self, **kw)
 
 
 class BooleanModel(Model):
 
     _value = 0
 
-    def _set_value(self, value):
+    def setValue(self, value):
         self._value = value
+        self.send()
 
-    def _get_value(self):
+    def getValue(self):
         return self._value
 
     def __repr__(self): return repr(self._value)
@@ -56,68 +57,69 @@ class BooleanModel(Model):
 
 class ListModel(Model, UserList):
 
+
     def __init__(self, *arg, **kw):
         Model.__init__(self, **kw)
         UserList.__init__(self, *arg, **kw)
-
-    def _set_value(self, value):
+        
+    def setValue(self, value):
         self.data[:] = list(value)
 
-    def _get_value(self):
+    def getValue(self):
         return list(self)
 
     def __setitem__(self, i, item):
         UserList.__setitem__(self, i, item)
-        self.send(__setitem__=(i,item))
+        self.send()
 
     def __delitem__(self, i):
         UserList.__delitem__(self, i)
-        self.send(__delitem__=i)
+        self.send()
 
     def __setslice__(self, i, j, other):
         UserList.__setslice__(self, i, j, other)
-        self.send(__setslice__=(i,j,other))
+        self.send()
         
     def __delslice__(self, i, j):
         UserList.__delslice__(self, i, j)
-        self.send(__delslice__=(i,j))
+        self.send()
         
     def __iadd__(self, other):
         UserList.__iadd__(self, other)
-        self.send(__iadd__=other)
+        self.send()
         
     def __imul__(self, n):
         UserList.__imul__(self, n)
-        self.send(__imul__=n)
+        self.send()
         
     def append(self, item):
         UserList.append(self, item)
-        self.send(append=item)
+        self.send()
     
     def insert(self, i, item):
         UserList.insert(self, i, item)
-        self.send(insert=(i,item))
+        self.send()
         
     def pop(self, i=-1):
         result = UserList.pop(self, i)
-        self.send(pop=i)
+        self.send()
         return result
     
     def remove(self, item):
         UserList.remove(self, item)
-        self.send(remove=item)
+        self.send()
         
     def reverse(self):
         UserList.reverse(self)
-        self.send(reverse=1)
+        self.send()
         
     def sort(self, *args):
         UserList.sort(self, *args)
-        self.send(sort=1)
+        self.send()
         
     def extend(self, other):
         UserList.extend(self, other)
-        self.send(extend=other)
+        self.send()
 
 
 class TextModel(ListModel):
@@ -129,7 +131,7 @@ class TextModel(ListModel):
             arg = (list(arg[0]),) + arg[1:]
         ListModel.__init__(self, *arg, **kw)
 
-    def _get_value(self):
+    def getValue(self):
         return str(self)
 
     def __repr__(self): return repr(''.join(self.data))

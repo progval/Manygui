@@ -43,7 +43,7 @@ from anygui.RadioGroups      import RadioGroup
 from anygui.TextFields       import TextField
 from anygui.TextAreas        import TextArea
 from anygui.ListBoxes        import ListBox
-#from anygui.Models           import BooleanModel, ListModel, TextModel
+from anygui.Models           import BooleanModel, ListModel, TextModel
 from anygui.Events           import *
 from anygui.Frames           import Frame, GroupBox
 from anygui.LayoutManagers   import LayoutManager, Placer
@@ -67,6 +67,9 @@ __all__ = """
   ListBox
   RadioButton
   RadioGroup
+  BooleanModel
+  ListModel
+  TextModel
   any
   application
   backend

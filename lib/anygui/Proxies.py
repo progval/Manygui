@@ -1,10 +1,12 @@
 from Attribs import Attrib
+from Models  import Model
 
 class Proxy(Attrib):
 
     # TBD: Add docstring for class
 
     wrapper = None # so self.wrapper is always OK
+    installedModels = {}
 
     def __init__(self, *args, **kwds):
         Attrib.__init__(self, *args, **kwds)
@@ -59,6 +61,23 @@ class Proxy(Attrib):
         if not self.wrapper.widget: return
         state = self._partialState(*names)
         self.wrapper.pull(state)
+        
+        # ==== MODEL SUPPORT ==== #
+        # This is the logic that needs to go into ModelDelegate,
+        # but that might break encapsulation...
+        # -----------------------------------------------------
+        # After we have pulled the actual values from the widget,
+        # We need to update all installed models with them.
+        for prop in state:
+            try:
+                model = self.installedModels[prop]
+                # lazy update of model... should this be done??
+                # model.setValue(state[prop])
+                state[prop] = model
+            except:
+                pass
+        # == END MODEL SUPPORT == #
+        
         self.state.update(state)
 
     def push(self, *names, **kwds):
@@ -85,9 +104,27 @@ class Proxy(Attrib):
         if not self.wrapper: return
         # We may need to modify names, so...
         names = list(names)
+        
+        # ==== MODEL SUPPORT ==== #
+        # This is the logic that needs to go into ModelDelegate,
+        # but that might break encapsulation...
+        # -----------------------------------------------------
+        # After we have pulled the actual values from the widget,
+        # We need to update all installed models with them.
+        state = self._partialState(*names,**kwds)
+        for prop in state:
+            try:
+                model = self.installedModels[prop]
+                model.setValue(state[prop])
+                state[prop] = model
+            except:
+                pass
+        # == END MODEL SUPPORT == #
+        
         ## @@@ unused self.internalPush(names) # @@@ May no longer be needed
-        self.wrapper.push(self._partialState(*names,**kwds))
-
+        #self.wrapper.push(self._partialState(*names,**kwds))
+        self.wrapper.push(state)
+        
 ## @@@ unused
 ##    def internalPush(self, names): # @@@ May no longer be needed!
 ##        """
@@ -123,3 +160,12 @@ class Proxy(Attrib):
         assert self.wrapper,"?! absent wrapper in proxy"
         self.wrapper.destroy()
         # @@@ do we need del self.wrapper here ?
+
+    def installModel(self, obj, name, model):
+        self.installedModels[name] = model
+        model.installed(obj, name)
+
+    def removeModel(self, obj, name):
+        self.installedModels[name].removed(obj, name)
+        del self.installedModels[name]
+        

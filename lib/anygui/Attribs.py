@@ -1,5 +1,5 @@
 from Events import link, send
-from Utils import getGetter,getSetter,getterName
+from Utils import getGetter,getSetter,getterName,uncapitalizeAttribute
 
 # DONE: Add mechanism for internal attributes (not in state[]). Uses
 # _foo naming convention for now...::
@@ -49,6 +49,18 @@ class Attrib:
             method = getGetter(self,name)
             if method:
                 return method()
+        
+        # ===== FOR MODELS ===== #
+        if name.startswith('install') and name.endswith('Model'):
+            def metaInstall(model):
+                self.installModel(self, uncapitalizeAttribute(name[7:][:-5]), model)
+            return metaInstall
+        if name.startswith('remove') and name.endswith('Model'):
+            def metaRemove():
+                self.removeModel(self, uncapitalizeAttribute(name[6:][:-5]))
+            return metaRemove
+        # === END FOR MODELS === #
+        
         if not self.state.has_key(name):
             raise AttributeError, name
         try:
@@ -72,16 +84,16 @@ class Attrib:
     def rawSet(self, *args, **kwds):
         names = []
         for key, val in optsAndKwdsItems(args, kwds):
-            old_val = getattr(self, key, None)
-            try: old_val.removed(self, key)
-            except: pass
+            #old_val = getattr(self, key, None)
+            #try: old_val.removed(self, key)
+            #except: pass
             meth = getSetter(self,key)
             if meth:
                 meth(val)
             else:
                 self.state[key] = val
-                try: val.assigned(self, key)
-                except: pass
+                #try: val.assigned(self, key)
+                #except: pass
                 names.append(key)
         return names
 
