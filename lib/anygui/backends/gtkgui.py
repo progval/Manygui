@@ -1,156 +1,241 @@
+"""
+skelgui.py is an empty skeleton waiting for you to implement an
+Anygui back-end.
 
-from anygui.backends import *
-__all__ = anygui.__all__
+You should probably read IRFC14 (nondist/irfc/irfc-0014.txt
+in the CVS repository) before trying to implement an
+Anygui backend. Specifically, you should understand the
+terms "proxy", "wrapper", and "(native) widget" as
+they're used in Anygui. The classes implemented in
+a backend (and the classes in this file) are "wrappers"
+around "native widgets".
 
-################################################################
+To use this skeleton, simply copy it to a file in the
+anygui/lib/backends directory called <yourbackend>gui.py,
+and implement all of the methods and event handlers
+described below. Depending on your particular backend, there
+may be some opportunities to combine methods into mixin classes.
 
-from gtk import *
-import gtk
+The fastest way to resolve any questions or ambiguities
+about this file, is to look at one of the existing
+back-end implementations in the anygui/lib/anygui/backends
+directory. Failing that, post your question to
+the Anygui development list (devel@anygui.org).
 
-class ComponentMixin:
-    _gtk_comp = None
-    _gtk_id = None
-    _gtk_style = 0
-    _connected = 0
-    
-    def _is_created(self):
-        return self._gtk_comp is not None
+If you are implementing an Anygui backend, you should
+be subscribed to the development list. See
 
-    def _ensure_created(self):
-        if self._gtk_comp is None:
-            self._gtk_comp = self._gtk_class(*self._init_args)
-            self._ensure_visibility()
-            self._ensure_events()
-            self._ensure_geometry()
-            self._ensure_enabled_state()
-            if self._container is not None:
-                self._container._gtk_add(self)
-            return 1
-        return 0
+http://lists.sourceforge.net/lists/listinfo/anygui-devel
 
-    def _ensure_events(self):
-        pass
+for subscription instructions.
 
-    def _ensure_geometry(self):
-        if self._gtk_comp:
-            self._gtk_comp.set_uposition(int(self._x), int(self._y))
-            self._gtk_comp.set_usize(int(self._width), int(self._height))
+Comments and criticism to jknapka@earthlink.net (Joe Knapka).
+"""
+try:
+    # Import Anygui infrastructure. You shouldn't have to change these.
+    from anygui.backends import *
+    from anygui.Applications import AbstractApplication
+    from anygui.Wrappers import AbstractWrapper
+    from anygui.Events import *
+    from anygui import application
+    # End Anygui imports.
 
-    def _ensure_visibility(self):
-        if self._gtk_comp:
-            if self._visible:
-                self._gtk_comp.show()
-            else:
-                self._gtk_comp.hide()
+    # Import anything needed to access the backend API. This is
+    # your job!
+    from gtk import *
+    import gtk
+    # End backend API imports.
+except:
+    import traceback
+    traceback.print_exc()
 
-    def _ensure_enabled_state(self):
-        if self._gtk_comp:
-            self._gtk_comp.set_sensitive(int(self._enabled))
+__all__ = '''
 
-    def _ensure_destroyed(self):
-        if self._gtk_comp:
-            self._gtk_comp.destroy()
-            self._gtk_comp = None
-            self._connected = 0
+  Application
+  ButtonWrapper
+  WindowWrapper
+  LabelWrapper
+  TextFieldWrapper
+  TextAreaWrapper
+  ListBoxWrapper
+  RadioButtonWrapper
+  CheckBoxWrapper
+  MenuWrapper
+  MenuCommandWrapper
+  MenuCheckWrapper
+  MenuSeparatorWrapper
+  MenuBarWrapper
 
-    def _get_gtk_text(self):
-        return str(self._text)
+'''.split()
 
-    def _ensure_text(self):
-        pass
+class ComponentWrapper(AbstractWrapper):
+    """
+    The ComponentWrapper class should abstract away all behavior
+    that (nearly) all backend widgets perform similarly. Normally,
+    this will include geometry and visibility management, and in some
+    cases widget creation can be handled here as well (see wxgui.py
+    for example).
+    """
 
-################################################################
+    def __init__(self, *args, **kwds):
+        """
+        Common widget wrapper initialization code. The main thing that
+        we would normally do here is set any backend-specific
+        attribute constraints.
+        
+        Whenever the application code alters a widget proxy, the front end
+        will "push" any changed widget attributes into the backend by
+        calling the wrapper.set<Attribute>(self,new_value) method for any
+        attribute that changes. The setContraints() method allows the
+        backend to specify the order in which the set<Attribute>()
+        method calls are made, by specifying the order in which attribute
+        names are set. The constraints set here are just examples.
+        However, it is almost certainly a good idea to ensure that
+        'container' is set before any other attribute, so at minimum
+        you should call "self.setConstraints('container')" here.
+        """
+        AbstractWrapper.__init__(self, *args, **kwds)
 
-class Label(ComponentMixin, AbstractLabel):
-    _gtk_class = GtkLabel
+        # 'container' before everything, then geometry.
+        self.setConstraints('container','x','y','width','height')
 
-    def _ensure_created(self):
-        self._init_args = (str(self._text),)
-        return ComponentMixin._ensure_created(self)
+        # addConstraint(self,before,after) adds a constraint that attribute
+        # 'before' must be set before 'after', when both appear in the
+        # same push operation. An attempt to set mutually contradictory
+        # constraints will result in an exception.
+        self.addConstraint('geometry', 'visible')
 
-    def _ensure_text(self):
-        if self._gtk_comp:
-            self._gtk_comp.set_text(str(self._text))
+    def widgetFactory(self,*args,**kws):
+        """ Create and return the backend widget for this wrapper. For
+        example, mswgui.py uses the win32gui.CreateWindowEx() call
+        here to create a Windows native widget. The value returned
+        will be immediately assigned to self.widget by the Anygui
+        framework; henceforth you should refer to self.widget. """
+        raise NotImplementedError, 'should be implemented by subclasses'
 
-################################################################
+    def enterMainLoop(self): # ...
+        """ enterMainLoop() is called when the application event loop is
+        started for the first time. """
+        if not self.widget: return
+        self.widget.show()
 
-class Button(ComponentMixin, AbstractButton):
-    _gtk_class = GtkButton
+    def destroy(self):
+        """
+        destroy() is called when the application needs to destroy the
+        native widget. You can also call it within the wrapper code if
+        you need to destroy your native widget for some reason. You
+        should set self.widget to DummyWidget()
+        here, after destroying the native widget.
+        """
+        if self.widget:
+            self.widget.destroy()
+        self.widget = None
 
-    def _ensure_created(self):
-        self._init_args = (str(self._text),)
-        ret = ComponentMixin._ensure_created(self)
-        return ret
+    # From here on, all methods in this class are getters and setters.
+    # Setters must be implemented; they are called automatically in
+    # response to application-code manipulation of the associated
+    # proxy object, and perform the required magic on self.widget
+    # to implement the change.
+    #
+    # Getters need not be implemented unless the backend requires
+    # special handling, or if the attribute in question can be changed
+    # by user actions as well as by application code. Getters are
+    # called automatically during proxy attribute access, if they
+    # exist; otherwise the last value set in the proxy is returned.
+    # This file provides empty getter definitions for those attributes
+    # that will nearly always require special handling for get
+    # operations.
+    #
+    # The setters and getters here are a typical example of
+    # attribute handling that's common to all of a backend's
+    # widgets. For example, getGeometry() and setGeometry() work
+    # the same for any backend widget, thus they're included
+    # here in the common wrapper base class.
+    #
+    # Note that you must implement all the setter and getter
+    # methods in this file in order for your backend to work
+    # properly!
 
-    def _ensure_events(self):
-        if self._gtk_comp and not self._connected:
-            self._gtk_comp.connect("clicked", self._gtk_clicked)
-            self._connected = 1
+    def setContainer(self,container):
+        """
+        setContainer() is called whenever the proxy's container (the
+        Frame or top-level Window) in which the widget will appear is
+        set. It's called implicitly when a widget is added to a
+        container via the container.add(widget) method.
 
-    def _ensure_text(self):
-        if self._gtk_comp:
-            self._gtk_comp.children()[0].set_text(str(self._text))
+        In most backends, you'll call self.create() here in order to
+        actually create the backend widget. create() is a template
+        method that calls self.widgetFactory() to create the widget,
+        and then performs some bookkeeping for the wrapper.
 
-    def _gtk_clicked(self, *args):
-        send(self, 'click')
-
-class ToggleButtonMixin(ComponentMixin):
-    def _ensure_state(self):
-        if self._gtk_comp:
-            self._gtk_comp.set_active(int(self._on))
-
-    def _ensure_events(self):
-        if self._gtk_comp and not self._connected:
-            self._gtk_comp.connect("toggled", self._gtk_toggled)
-            self._connected = 1
-
-    def _gtk_toggled(self, *args):
-        val = self._gtk_comp.get_active()
-        if val == int(self._on):
+        When the widget is removed from its container, setContainer()
+        will be called with container==None; you must handle that case
+        correctly, whatever that means for your backend.
+        """
+        if container is None:
+            # Handle "removed from container" case.
+            self.destroy()
             return
-        self.modify(on=val)
-        #self.do_action()
-        send(self, 'click')
+        parent = container
+        self.create(parent)
+        self.proxy.push(blocked=['container'])
 
-    def _ensure_text(self):
-        if self._gtk_comp:
-            self._gtk_comp.children()[0].set_text(str(self._text))
+    def setGeometry(self,x,y,width,height):
+        """ Set the native widget's geometry. Note that we call
+        self.noWidget() here to see if the wrapper has a native widget
+        to manage. You should probably use this idiom at the start of
+        all setter and getter methods, unless you have a very good
+        reason not to. """
+        if not self.widget: return
+        self.widget.set_uposition(int(x), int(y))
+        self.widget.set_usize(int(width), int(height))
 
-class CheckBox(ToggleButtonMixin, AbstractCheckBox):
-    _gtk_class = GtkCheckButton
+    def getGeometry(self):
+        """ Get the native widget's geometry as an (x,y,w,h) tuple.
+        Since the geometry can be changed by the user dragging the
+        window frame, you must implement this method. """
+        if not self.widget: return
+        return self.widget.get_uposition(int(x), int(y)) + \
+               self.widget.get_usize(int(width), int(height))
 
-    def _ensure_created(self):
-        self._init_args = (str(self._text),)
-        return ComponentMixin._ensure_created(self)
-
-class RadioButton(ToggleButtonMixin, AbstractRadioButton):
-    _gtk_class = GtkRadioButton
-
-    def _ensure_created(self):
-        if self._group and len(self._group._items) > 1:
-            for item in self._group._items:
-                if item is not self:
-                    break
-            else:
-                raise InternalError(self, "Couldn't find non-self group item!")
-            self._init_args = (item._gtk_comp, str(self._text))
+    def setVisible(self,visible):
+        """ Set/get the native widget's visibility. """
+        if not self.widget: return
+        if visible:
+            self.widget.show()
         else:
-            self._init_args = (None, str(self._text))
-        return ComponentMixin._ensure_created(self)
+            self.widget.hide()
 
-    def _gtk_toggled(self, *args):
-        val = self._gtk_comp.get_active()
-        if val == int(self._on):
-            return
-        self.modify(on=val)
-        if int(self._on):
-            if self.group is not None:
-                self.group.modify(value=self.value)
-            send(self, 'click')
+    def setEnabled(self,enabled):
+        """ Set/get the native widget's enabled/disabled state. """
+        if not self.widget: return
+        self.widget.set_sensitive(int(enabled))
 
-################################################################
+    def setText(self,text):
+        """ Set/get the text associated with the widget. This might be
+        window title, frame caption, label text, entry field text,
+        or whatever.
+        """
+        if not self.widget: return
+        raise NotImplementedError, 'should be implemented by subclasses'
+
+class LabelWrapper(ComponentWrapper):
+    """
+    Wraps a backend "label" widget - static text.
+    You may need to implement setText() here.
+    """
+    def widgetFactory(self, *args, **kws):
+        print "In LabelWrapper.widgetFactory()"
+        return GtkLabel(*args, **kws)
+
+    def setText(self, text):
+        if not self.widget: return
+        self.widget.set_text(str(text))
 
 class ScrollableListBox(GtkScrolledWindow):
+    """
+    A scrollable list box.  Used by ListBoxWrapper.
+    """
     def __init__(self, *args, **kw):
         GtkScrolledWindow.__init__(self, *args, **kw)
         self._listbox = GtkCList()
@@ -158,224 +243,343 @@ class ScrollableListBox(GtkScrolledWindow):
         self.set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC)
         self.add_with_viewport(self._listbox)
 
-class ListBox(ComponentMixin, AbstractListBox):
-    _gtk_class = ScrollableListBox
+class ListBoxWrapper(ComponentWrapper):
+    """
+    Wraps a backend listbox.
 
-    def _ensure_created(self):
-        self._init_args = ()
-        return ComponentMixin._ensure_created(self)
+    At the moment, Anygui supports only single-select mode.
+    """
+    connected = 0
 
-    def _backend_selection(self):
-        if self._gtk_comp:
-            return int(self._gtk_comp._listbox.selection[0])
+    def widgetFactory(self, *args, **kws):
+        return ScrollableListBox()
 
-    def _ensure_items(self):
-        if self._gtk_comp:
-            self._gtk_comp._listbox.clear()
-            for item in self._items:
-                self._gtk_comp._listbox.append([str(item)])
+    def setItems(self,items):
+        """
+        Set the contents of the listbox widget. 'items' is a list of
+        strings, or of str()-able objects.
+        """
+        if not self.widget: return
+        self.widget._listbox.clear()
+        for item in items:
+            self.widget._listbox.append([str(item)])
 
-    def _ensure_events(self):
-        if self._gtk_comp and not self._connected:
-            self._gtk_comp._listbox.connect("select_row", self._row_selected)
-            self._connected = 1
+    def getItems(self):
+        """
+        Return ths listbox contents, in order, as a list of strings.
+        """
+        if not self.widget: return
+        return self.widget._listbox.rows
 
-    def _row_selected(self, *args):
-        #self.do_action()
-        send(self, 'select')
+    def setSelection(self,selection):
+        """
+        Set the selection. 'selection' is an integer indicating the
+        item to be selected.
+        """
+        if not self.widget: return
+        self.widget._listbox.select_row(int(selection), 0)
 
-    def _ensure_selection(self):
-        if self._gtk_comp:
-            self._gtk_comp._listbox.select_row(int(self._selection),0)
+    def getSelection(self):
+        """
+        Return the selected listbox item index as an integer.
+        """
+        if not self.widget: return
+        return int(self.widget._listbox.selection[0])
 
-################################################################
+    def widgetSetUp(self):
+        """
+        widgetSetUp() is called by the Anygui framework immediately after
+        the native widget has been created and assigned to self.widget.
+        The most common use of widgetSetUp() is to register any event
+        handlers necessary to deal with user actions.
 
-class TextField(ComponentMixin, AbstractTextField):
-    _gtk_class = GtkEntry
-    _ignore_changed = 0
+        The ListBox widget requires that an Anygui 'select' event be
+        fired whenever the user selects an item of the listbox.
+        self._select() sends the event, so here you should associate
+        the back-end's selection event with the self._select method.
+        """
+        if not self.connected:
+            self.widget._listbox.connect("select_row", self._select)
+            self.connected = 1
 
-    def _ensure_created(self):
-        self._init_args = ()
-        return ComponentMixin._ensure_created(self)
+    def _select(self,*args):
+        """
+        Send an Anygui 'select' event when the user clicks or otherwise
+        selects a listbox item. Note that the source of the event is
+        self.proxy, not self; that's because application code only
+        knows about proxies, not wrappers, so the source of the Anygui
+        event must be a proxy.
+        """
+        send(self.proxy,'select')
 
-    def _ensure_text(self):
-        if self._gtk_comp:
-            self._ignore_changed = 1
-            if str(self._text) != self._backend_text():
-                self._gtk_comp.set_text(str(self._text))
-            self._ignore_changed = 0
+#class CanvasWrapper(ComponentWrapper):
+# Fix me!
+#    _twclass = tw.Canvas
 
-    def _ensure_selection(self):
-        if self._gtk_comp:
-            start, end = self._selection
-            self._gtk_comp.select_region(start, end)
+class ButtonWrapper(ComponentWrapper):
+    """
+    Wraps a backend command-button widget - the kind you click
+    on to initiate an action, eg "OK", "Cancel", etc.
+    """
+    connected = 0
 
-    def _ensure_editable(self):
-        if self._gtk_comp:
-            self._gtk_comp.set_editable(int(self._editable))
+    def widgetFactory(self, *args, **kws):
+        return GtkButton(*args, **kws)
 
-    def _ensure_events(self):
-        if self._gtk_comp and not self._connected:
-            self._gtk_comp.connect("activate", self._entry_activated)
-            # XXX, currently updates on any change in the textfield.
-            # Perhaps too CPU intensive?
-            self._gtk_comp.connect("changed", self._entry_changed)
-            self._connected = 1
+    def widgetSetUp(self):
+        """
+        Register a backend event handler to call self.click when
+        the user clicks the button.
+        """
+        if not self.connected:
+            self.widget.connect("clicked", self._click)
+            self.connected = 1
 
-    def _backend_selection(self):
-        if self._gtk_comp:
-            start, end = int(self._gtk_comp.selection_start_pos), \
-                        int(self._gtk_comp.selection_end_pos)
-            if start > end:
-                return end, start
+    def setText(self, text):
+        self.widget.children()[0].set_text(str(text))
+
+    def _click(self,*args,**kws):
+        send(self.proxy,'click')
+
+
+class ToggleButtonMixin(ButtonWrapper):
+    """
+    Checkboxes and radio buttons often have common behavior that can
+    be abstracted away; on the other hand, sometimes they don't.
+    Consider this an example only.
+
+    They also should generate 'click' events, so we'll just inherit
+    ButtonWrapper here to get the event setup code. Your backend
+    may not permit this, however; do what needs to be done.
+    """
+
+    def getOn(self):
+        """ Return the button's state: 1 for checked, 0 for not. """
+        if not self.widget: return
+        return self.widget.get_active()
+
+    def setOn(self,on):
+        """ Set the button's state. """
+        if not self.widget: return
+        val = self.widget.get_active()
+        if val == int(on):
+            return
+        self.widget.set_active(int(on))
+
+class CheckBoxWrapper(ToggleButtonMixin):
+    """
+    Usually ToggleButtonMixin completely handles the CheckBox
+    behavior, but in case it doesn't, you may need to write some
+    code here.
+    """
+
+class RadioButtonWrapper(ToggleButtonMixin):
+    """
+    Radio buttons are a pain. Only one member of an RB "group" may be
+    active at a time. Anygui provides the RadioGroup front-end
+    class, which takes care of querying the state of radiobuttons
+    and setting their state in a mutually exclusive manner.
+    However, many backends also enforce this mutual exclusion,
+    which means that things can get complicated. The RadioGroup
+    class is implemented in as non-intrusive a way as possible,
+    but it can be a challenge to arrange for them to act in
+    the correct way, backend-wise. Look at the other backend
+    implementations for some clues.
+
+    In the case where a backend implements radiobuttons as a simple
+    visual variant of checkboxes with no mutual-exclusion behavior,
+    this class already does everything you need; just create the
+    proper backend widget in RadioButtonWrapper.widgetFactory(). You
+    can usually fake that kind of backend implementation by playing
+    tricks with the backend's mutual-exclusion mechanism. For example,
+    create a tiny frame to encapsulate the backend radiobutton, if
+    your backend enforces mutual exclusion on a per-frame basis.
+    """
+
+    def widgetFactory(self, *args, **kws):
+        if self.proxy.group and len(self.proxy.group._items) > 1:
+            for item in self.proxy.group._items:
+                if item is not self:
+                    break
             else:
-                return start, end
+                raise InternalError(self, "Couldn't find non-self group item!")
+            return GtkRadioButton(item.widget, *args, **kws)
+        else:
+            return GtkRadioButton(None, *args, **kws)
 
-    def _backend_text(self):
-        if self._gtk_comp:
-            return str(self._gtk_comp.get_text())
+    def _click(self,*args,**kws):
+        try:
+            # Ensure the other buttons in the group are updated
+            # properly. Note that if for some reason you need to
+            # implement getValue(), this code will no longer
+            # work due to the pull mechanism.
+            self.proxy.group.value = self.proxy.value
+        except AttributeError:
+            pass
+        send(self.proxy,'click')
 
-    def _entry_activated(self, *args):
-        #self.do_action()
-        send(self, 'enterkey')
+class TextControlMixin:
+    """
+    Single-line entry fields and multiline text controls usually
+    have a lot of common behavior that can be abstracted away. Do
+    that here.
+    """
 
-    def _entry_changed(self, *args):
-        if not self._ignore_changed:
-            self.modify(text=self._backend_text())
+    def setText(self,text):
+        """ Set/get the text associated with the widget. This might be
+        window title, frame caption, label text, entry field text,
+        or whatever.
+        """
+        if not self.widget: return
+        raise NotImplementedError, 'should be implemented by subclasses'
 
-class ScrollableTextArea(GtkScrolledWindow):
-    def __init__(self, *args, **kw):
-        GtkScrolledWindow.__init__(self, *args, **kw)
-        self._textarea = GtkText()
-        self._textarea.show()
-        self.set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC)
-        self.add(self._textarea) # _with_viewport(self._textarea)
+    def getText(self):
+        """
+        Fetch the widget's associated text. You *must* implement this
+        to get the text from the native widget; the default getText()
+        from ComponentWrapper (almost) certainly won't work.
+        """
+        if not self.widget: return
+        raise NotImplementedError, 'should be implemented by subclasses'
 
-class TextArea(ComponentMixin, AbstractTextArea):
-    _gtk_class = ScrollableTextArea
-    _connected = 0
-    _ignore_changed = 0
+    def setEditable(self,editable):
+        """
+        Set the editable state of the widget. If 'editable' is 0,
+        the widget should allow selection and copying of its text,
+        but should not accept user input.
+        """
+        if not self.widget: return
+        raise NotImplementedError, 'should be implemented by subclasses'
 
-    def _ensure_created(self):
-        self._init_args = ()
-        return ComponentMixin._ensure_created(self)
+    def getSelection(self):
+        """
+        Return the first and last+1 character indexes covered by the
+        selection, as a tuple; or (0,0) if there's no selection.
+        """
+        if not self.widget: return
+        raise NotImplementedError, 'should be implemented by subclasses'
 
-    def _ensure_text(self):
-        if self._gtk_comp:
-            if str(self._text) != self._backend_text():
-                self._ignore_changed = 1
-                p = self._gtk_comp._textarea.get_point()
-                self._gtk_comp._textarea.freeze()
-                self._gtk_comp._textarea.set_point(0)
-                self._gtk_comp._textarea.delete_text(0, -1)
-                self._gtk_comp._textarea.insert_defaults(str(self._text))
-                self._gtk_comp._textarea.set_point(p)
-                self._gtk_comp._textarea.thaw()
-                self._ignore_changed = 0
+    def setSelection(self,selection):
+        """
+        Select the indicated text. 'selection' is a tuple of two
+        integers indicating the first and last+1 indexes within
+        the widget text that should be covered by the selection.
+        """
+        if not self.widget: return
+        raise NotImplementedError, 'should be implemented by subclasses'
 
-    def _ensure_events(self):
-        if self._gtk_comp and not self._connected:
-            self._gtk_comp._textarea.connect("changed", self._text_changed)
-            self._connected = 1
+class TextFieldWrapper(TextControlMixin,ComponentWrapper):
+    """
+    Wraps a native single-line entry field.
+    """
 
-    def _ensure_editable(self):
-        if self._gtk_comp:
-            self._gtk_comp._textarea.set_editable(int(self._editable))
+    def widgetSetup(self):
+        """
+        Arrange for a press of the "Enter" key to call self._return.
+        """
+        raise NotImplementedError, 'should be implemented by subclasses'
 
-    def _ensure_selection(self):
-        if self._gtk_comp:
-            start, end = self._selection
-            self._gtk_comp._textarea.select_region(start, end)
+    def _return(self,*args,**kws):
+        send(self.proxy, 'enterkey')
 
-    def _backend_selection(self):
-        if self._gtk_comp:
-            start, end = int(self._gtk_comp._textarea.selection_start_pos), \
-                        int(self._gtk_comp._textarea.selection_end_pos)
-            if start > end:
-                return end, start
-            else:
-                return start, end
+class TextAreaWrapper(TextControlMixin,ComponentWrapper):
+    """
+    Wraps a native multiline text area. If TextControlMixin works
+    for your backend, you shouldn't need to change anything here.
+    """
 
-    def _backend_text(self):
-        if self._gtk_comp:
-            end = self._gtk_comp._textarea.get_length()
-            return str(self._gtk_comp._textarea.get_chars(0, end))
+# Incomplete: fix the remainder of this file!
 
-    def _text_changed(self, *args):
-        if not self._ignore_changed:
-            self.modify(text=self._backend_text())
+class ContainerMixin:
+    """
+    Frames - that is, widgets whose job is to visually group
+    other widgets - often have a lot of behavior in common
+    with top-level windows. Abstract that behavior here.
+    """
+    pass
 
-################################################################
+class FrameWrapper(ContainerMixin,ComponentWrapper):
 
-class Frame(ComponentMixin, AbstractFrame):
-    _gtk_class = GtkLayout
-    _visible = 0
-    _init_args = ()
+    def __init__(self,*args,**kws):
+        ComponentWrapper.__init__(self,*args,**kws)
 
-    def _gtk_add(self, comp):
-        self._gtk_comp.put(comp._gtk_comp, int(comp._x), int(comp._y))
+    def addToContainer(self,container):
+        """
+        Add the Frame to its back-end container (another
+        Frame or a Window).
+        """
+        #container.wrapper.widget.add(self.widget)
+        raise NotImplementedError, 'should be implemented by subclasses'
 
-################################################################
+class WindowWrapper(ContainerMixin,ComponentWrapper):
+    """
+    Wraps a top-level window frame.
+    """
+    connected = 0
 
-class Window(ComponentMixin, AbstractWindow):
-    _gtk_class = GtkWindow
-    _gtk_style = 0
+    def widgetFactory(self, *args, **kws):
+        print "In WindowWrapper.widgetFactory()"
+        return GtkWindow(WINDOW_TOPLEVEL)
 
-    def _ensure_created(self):
-        if self._gtk_comp is None:
-            self._gtk_comp = self._gtk_class(WINDOW_TOPLEVEL)
-            self._gtk_container = GtkLayout()
-            self._gtk_comp.add(self._gtk_container)
-            self._gtk_container.show()
-            return 1
-        return 0
+    def setTitle(self,title):
+        if not self.widget: return
+        self.widget.set_title(str(title))
 
-    def _ensure_events(self):
-        self._gtk_comp.connect('destroy', self._gtk_close_handler)
-        self._gtk_comp.connect('size_allocate', self._gtk_resize_handler)
+    def addToContainer(self,container):
+        """
+        Add self to the backend application, if required.
+        """
+        raise NotImplementedError, 'should be implemented by subclasses'
 
-    def _ensure_title(self):
-        if self._gtk_comp:
-            self._gtk_comp.set_title(str(self._title))
+    def widgetSetUp(self):
+        """
+        Arrange for self.resize() to be called whenever the user
+        interactively resizes the window.
+        """
+        self._gtk_container = GtkLayout()
+        self.widget.add(self._gtk_container)
+        self._gtk_container.show()
+        if not self.connected:
+            self.widget.connect('size_allocate', self.resize)
+            self.connected = 1
 
-    def _gtk_close_handler(self, *args):
-        global _app
-        self._gtk_comp.destroy()
-        self.destroy()
-        _app._window_deleted()
-    
-    def _gtk_resize_handler(self, *args):
-        w = self._gtk_comp.get_allocation()[2] #width
-        h = self._gtk_comp.get_allocation()[3] #height
-        dw = w - self._width
-        dh = h - self._height
-        #self.modify(width=w, height=h) #this is broken!
-        self._width = w
-        self._height = h
-        self.resized(dw, dh)
+    def resize(self,dw,dh):
+        """
+        Inform the proxy of a resize event. The proxy then takes care of
+        laying out the container contents. Don't change this method,
+        just call it from an event handler.
+        """
+        self.proxy.resized(dw, dh)
 
-    def _get_gtk_text(self):
-        return str(self._title)
+class MenuWrapper:
+    pass
 
-    def _gtk_add(self, comp):
-        self._gtk_container.put(comp._gtk_comp, int(comp._x), int(comp._y))
+class MenuCommandWrapper:
+    pass
 
-################################################################
+class MenuCheckWrapper:
+    pass
+
+class MenuSeparatorWrapper:
+    pass
+
+class MenuBarWrapper:
+    pass
 
 class Application(AbstractApplication):
-    def __init__(self):
-        AbstractApplication.__init__(self)
-        global _app
-        _app = self
+    """
+    Wraps a backend Application object (or implements one from
+    scratch if necessary).
 
-    def _window_deleted(self):
-        if not self._windows:
-            mainquit()
-    
-    def _mainloop(self):
+    wxgui's Application class inherits wxPython's Application class.
+    On the other hand, Tk has no Application class, so tkgui's
+    Application class simply calls Tk.mainloop() in its
+    Application.internalRun() method.
+    """
+
+    def internalRun(self):
+        """
+        Do whatever is necessary to start your backend's event-
+        handling loop.
+        """
         mainloop()
-
-################################################################
-# Local Variables:
-# compile-command: "pychecker -s gtkgui.py"
-# End:
