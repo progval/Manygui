@@ -127,7 +127,7 @@ def _dotted_import(name):
     return mod
 
 def _backend_passthrough():
-    global _backends, _backend
+    global _backends, _backend, _backend_name
     _backends = _backends.split()
     _backends = [b for b in _backends if not b in wishlist]
     if wishlist:
