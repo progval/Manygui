@@ -195,6 +195,37 @@ class IdentityStack:
             def __contains__(self,obj):
                 return id(obj) in self._stk
 
+def topologicalSort(items, constraints):
+    """ topological sort (stable) of list 'items' to respect pairwise
+        constraints coded as pairs (before, after) in sequence 'constraints'
+    """
+    # prepare mappings 'followers' [item -> set of items that must follow it]
+    # and 'nleaders' [item -> number of items that must precede it]
+    followers = {}
+    nleaders = {}
+    for before, after in constraints:
+        if before in items and after in items:
+            these_followers = followers.setdefault(before,{})
+            if not these_followers.has_key(after):
+                nleaders[after] = 1 + nleaders.get(after, 0)
+                these_followers[after] = before
+    # while there are items, pick one with no leaders, append it
+    # to result, update list 'items' and mapping 'nleaders'
+    result = []
+    while items:
+        # find first item left that has no 'leaders'
+        for item in items:
+            if nleaders.get(item,0)==0: break
+        else:
+            raise InternalError(items,"dependency loop")
+        # move the item from 'items' to 'result'
+        items.remove(item)
+        result.append(item)
+        # update the mapping 'nleaders'
+        for follower in followers.get(item,{}).keys():
+            nleaders[follower] -= 1
+    return result
+
 def _test():
     import doctest, Utils
     doctest.testmod(Utils)

@@ -1,5 +1,5 @@
 from anygui import application
-from anygui.Utils import getSetters
+from anygui.Utils import getSetters, topologicalSort
 
 """
 The back-end wrapper presents a unified and simple interface for
@@ -27,6 +27,8 @@ The only methods that should be explicitly called by the Proxy are:
 #   like the splitting itself.
 # - Check for the presence of 'And' in attributes (raise exception)
 # - Add dependencies/partial ordering of attributes
+# - Use inspect.getargspec instead of naming convention (in addition
+#   to "set<uppercase>" prefix) for the setter methods.
 
 class AbstractWrapper:
 
@@ -77,6 +79,7 @@ class AbstractWrapper:
         Any attributes that aren't covered by an appropriate setter
         method are ignored.
         """
+        # Use self.dependencies -- document it
         setters, unhandled = getSetters(self, state.keys())
         for setter, params in setters:
             kwds = {}
