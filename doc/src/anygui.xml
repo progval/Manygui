@@ -1478,6 +1478,8 @@
       <code>unlink</code>, so when the <code>Model</code> is modified,
       the <code>update</code> method of the <code>Attrib</code> object
       is called automatically.</para>
+      
+      <!-- document modified() -->
 
       <para>All models have a <code>value</code> attribute, which
       contains a "simple" version of its state (such as a number for
