@@ -120,7 +120,6 @@ class ComponentWrapper(Wrapper):
                 bounds = comp.bounds
                 container.remove(self.widget)
                 container.repaint(bounds)
-            if hasattr(self.widget, 'dispose'):
             try: comp.dispose()
             except AttributeError: pass
             self._container = None
