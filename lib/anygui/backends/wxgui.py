@@ -176,16 +176,15 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
 class TextField(ComponentMixin, AbstractTextField):
     _wx_class = wxTextCtrl
 
-    def _backend_text(self):
-        if self._wx_comp:
-            return self._wx_comp.GetValue()
-
     def _backend_selection(self):
         if self._wx_comp:
             return self._wx_comp.GetSelection()
             
     def _ensure_text(self):
         if self._wx_comp:
+            # XXX Recursive updates seem to be no problem here,
+            # wx does not seem to trigger the EVT_TEXT handler
+            # when a new text equal to the old one is set.
             self._wx_comp.SetValue(self._text)
 
     def _ensure_selection(self):
@@ -198,14 +197,18 @@ class TextField(ComponentMixin, AbstractTextField):
             self._wx_comp.SetEditable(self._editable)
 
     def _ensure_events(self):
-        if self._wx_comp:
-            EVT_TEXT_ENTER(self._wx_comp, self._wx_id, self._wx_enterkey)
+        EVT_TEXT_ENTER(self._wx_comp, self._wx_id, self._wx_enterkey)
+        EVT_TEXT(self._wx_comp, self._wx_id, self._wx_ontextchanged)
+
+    def _wx_ontextchanged(self, event):
+        self.model.value = self._wx_comp.GetValue()
 
     def _wx_enterkey(self, event):
         self.do_action()
 
     def _get_wx_text(self):
         # return the text required for creation
+        # XXX From here or from model?
         return self._text
 
 
@@ -215,16 +218,15 @@ class TextArea(ComponentMixin, AbstractTextArea):
     _wx_class = wxTextCtrl
     _wx_style = wxTE_MULTILINE | wxHSCROLL
 
-    def _backend_text(self):
-        if self._wx_comp:
-            return self._wx_comp.GetValue()
-
     def _backend_selection(self):
         if self._wx_comp:
             return self._wx_comp.GetSelection()
             
     def _ensure_text(self):
         if self._wx_comp:
+            # XXX Recursive updates seem to be no problem here,
+            # wx does not seem to trigger the EVT_TEXT handler
+            # when a new text equal to the old one is set.
             self._wx_comp.SetValue(self._text)
 
     def _ensure_selection(self):
@@ -236,8 +238,15 @@ class TextArea(ComponentMixin, AbstractTextArea):
         if self._wx_comp:
             self._wx_comp.SetEditable(self._editable)
 
+    def _ensure_events(self):
+        EVT_TEXT(self._wx_comp, self._wx_id, self._wx_ontextchanged)
+
+    def _wx_ontextchanged(self, event):
+        self.model.value = self._wx_comp.GetValue()
+
     def _get_wx_text(self):
         # return the text required for creation
+        # XXX From here or from model?
         return self._text
 
 ################################################################
