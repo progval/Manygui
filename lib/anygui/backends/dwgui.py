@@ -12,6 +12,10 @@ __all__ = '''
   FrameWrapper
   RadioButtonWrapper
   CheckBoxWrapper
+  ProgressBarWrapper
+  ImageWrapper
+  Resource
+  inlineResource
 '''.split()
 
 from anygui.Utils import log
@@ -89,7 +93,7 @@ PBM_SETPOS=WM_USER+2
 PBM_SETRANGE=WM_USER+1
 
 GetLastError = kernel32.GetLastError
-_verbose=0
+_verbose=1
 if _verbose:
     setLogFile('/tmp/dbg.txt')
 
@@ -202,7 +206,7 @@ class ComponentWrapper(AbstractWrapper):
         except AttributeError:
             pass
         except:
-            logTraceback(1)
+            logTraceback(None)
         return l,t,w,h
 
     def setX(self,x):
@@ -324,7 +328,7 @@ class ButtonWrapper(ComponentWrapper):
         # LOWORD(wParam): id of menu item, control, or accelerator
         if (wParam >> 16) == BN_CLICKED:
             #self.do_action()
-            send(self.proxy, 'click')
+            return send(self.proxy, 'click')
 
 ##################################################################
 class ListBoxWrapper(ComponentWrapper):
@@ -363,18 +367,10 @@ class ListBoxWrapper(ComponentWrapper):
         # LOWORD(wParam): id of menu item, control, or accelerator
         if wParam >> 16 == LBN_SELCHANGE:
             #self.do_action()
-            send(self.proxy, 'select')
+            return send(self.proxy, 'select')
 
 ##################################################################
-class ToggleButtonWrapper(ComponentWrapper):
-
-    def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
-        # lParam: handle of control (or NULL, if not from a control)
-        # HIWORD(wParam): notification code
-        # LOWORD(wParam): id of menu item, control, or accelerator
-        if (wParam >> 16) == BN_CLICKED:
-            #self.do_action()
-            send(self.proxy, 'click')
+class ToggleButtonWrapper(ButtonWrapper):
 
     def setOn(self,on):
         if not self.widget:
@@ -391,14 +387,6 @@ class ToggleButtonWrapper(ComponentWrapper):
         val = val & BST_CHECKED
         if val: return 1
         return 0
-
-    def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
-        # lParam: handle of control (or NULL, if not from a control)
-        # HIWORD(wParam): notification code
-        # LOWORD(wParam): id of menu item, control, or accelerator
-        if (wParam >> 16) != BN_CLICKED:
-            return
-        send(self.proxy, 'click')
 
 class CheckBoxWrapper(ToggleButtonWrapper):
     _wndclass = "BUTTON"
@@ -428,9 +416,8 @@ class RadioButtonWrapper(ToggleButtonWrapper):
         # lParam: handle of control (or NULL, if not from a control)
         # HIWORD(wParam): notification code
         # LOWORD(wParam): id of menu item, control, or accelerator
-        if (wParam >> 16) != BN_CLICKED:
-            return
-        send(self.proxy, 'click')
+        if (wParam >> 16) != BN_CLICKED: return -1
+        return send(self.proxy, 'click')
 
 ##################################################################
 
@@ -494,15 +481,8 @@ class TextFieldWrapper(ComponentWrapper):
         if self.widget:
             user32.SendMessage(self.widget, EM_SETREADONLY, not editable and 1 or 0, 0)
 
-##    def _ensure_events(self):
-##        if self.widget:
-##            EVT_TEXT_ENTER(self.widget, self._msw_id, self._msw_enterkey)
-
-##    def _msw_enterkey(self, event):
-##        self.do_action()
-
     def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
-        pass
+        return 0
 
 # FIXME: Inheriting TextField overrides TextArea defaults.
 #        This is a temporary fix. (mlh20011222)
@@ -516,21 +496,23 @@ class ContainerMixin:
         self.widget_map = {} # maps child window handles to instances
 
     def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
-        #log("ContainerMixin _WM_COMMAND called for %s"%self)
+        if _verbose: log("ContainerMixin _WM_COMMAND called for %s"%self)
         # lParam: handle of control (or NULL, if not from a control)
         # HIWORD(wParam): notification code
         # LOWORD(wParam): id of menu item, control, or accelerator
-        app = application()
         try:
+            app = application()
             child_window = self.widget_map[lParam]
         except KeyError:
-            #log("NO SUCH CHILD WINDOW %s"%lParam)
+            if _verbose: log("NO SUCH CHILD WINDOW %s"%lParam)
             # we receive (when running test_textfield.py)
             # EN_CHANGE (0x300) and EN_UPDATE (0x400) notifications
             # here even before the call to CreateWindow returns.
-            return
-        #log("Dispatching to child %s"%child_window)
-        child_window._WM_COMMAND(hwnd, msg, wParam, lParam)
+            return None
+        except:
+            logTraceback(None)
+        if _verbose: log("Dispatching to child %s"%child_window)
+        return child_window._WM_COMMAND(hwnd, msg, wParam, lParam)
 
 class FrameWrapper(ComponentWrapper,ContainerMixin):
     _win_style = WS_CHILD
@@ -558,7 +540,7 @@ class FrameWrapper(ComponentWrapper,ContainerMixin):
 
     def _WM_SIZE(self, hwnd, msg, wParam, lParam):
         # Proxy handles resizing.
-        pass
+        return 0
 
 
 class Resource:
@@ -575,7 +557,7 @@ class Resource:
                 self._handle = user32.LoadImage(0,windll.cstring(fn),
                     IMAGE_BITMAP,0,0,LR_DEFAULTSIZE|LR_LOADFROMFILE)
             except:
-                logTraceback(0)
+                logTraceback(None)
                 from anygui.backends.dwgui import _lastErrorMessage 
                 log(_lastErrorMessage())
 
@@ -606,7 +588,7 @@ class inlineResource(Resource):
 ##################################################################
 class ImageWrapper(ComponentWrapper):
     _win_style = WS_CHILD | WS_VISIBLE
-    _wndclass = "dw.anygui.PythonWindow"
+    _wndclass = "dw.anygui.Image"
 
     def _WM_PAINT(self, hwnd, msg, wParam, lParam):
         if not self.widget: return
@@ -638,10 +620,12 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
     _extraHeight = user32.GetSystemMetrics(SM_CYCAPTION) + 2*user32.GetSystemMetrics(SM_CYFRAME)
 
     def __init__(self,*args,**kws):
+        ContainerMixin.__init__(self)
         ComponentWrapper.__init__(self,*args,**kws)
         self.widget_map = {}
 
     def getGeometry(self):
+        if not self.widget: return 0,0,0,0
         r = t_rect()
         user32.GetWindowRect(self.widget,r)
         l,t,r,b = r.rect
@@ -681,14 +665,18 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
             user32.SetWindowTextA(self.widget, self._i_text)
 
     def getTitle(self):
+        if not self.widget: return
         return ComponentWrapper.getText(self)
 
     def widgetSetUp(self):
-        Application.widget_map[self.widget] = self
-        user32.SendMessage(self.widget,
-                             WM_SETFONT,
-                             self._hfont,
-                             0)
+        if _verbose: log('Windowwrapper widgetSetup',str(self),'application()',application(),'isRunning()',application().isRunning(),'widget',getattr(self,'widget',None))
+        application().widget_map[self.widget] = self
+        user32.SendMessage(self.widget, WM_SETFONT, self._hfont, 0)
+
+    def internalProd(self):
+        if _verbose: log('internalProd',str(self))
+        self.proxy.push(blocked=['container'])
+
     def _WM_SIZE(self, hwnd, msg, wParam, lParam):
         w, h = lParam & 0xFFFF, lParam >> 16
         if _verbose: log('WindowWrapper: _WM_SIZE _width,_height,w,h=',self._width,self._height,w,h,)
@@ -708,26 +696,62 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
         self._height = h
         if (dw,dh) == (0,0): return
         self.proxy.resized(dw,dh)
+        return 0
 
     def _WM_CLOSE(self, hwnd, msg, wParam, lParam):
         self.destroy()
         application().remove(self.proxy)
         return 1
 
+    def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
+        if _verbose: log('WindowWrapper: _WM_COMMAND',self,hwnd,msg,wParam,lParam)
+        ContainerMixin._WM_COMMAND(self, hwnd, msg, wParam, lParam)
+
 ################################################################
+def _dispatch_WM_DESTROY(window,hwnd,msg,wParam,lParam):
+    app = application()
+    app.remove(window)
+    app.internalRemove()
+    return 0
+
+def _dispatch_WM_CLOSE(window,hwnd,msg,wParam,lParam):
+    return window._WM_CLOSE(hwnd, msg, wParam, lParam)
+
+def _dispatch_WM_SIZE(window,hwnd,msg,wParam,lParam):
+    return window._WM_SIZE(hwnd, msg, wParam, lParam)
+
+def _dispatch_WM_COMMAND(window,hwnd,msg,wParam,lParam):
+    return window._WM_COMMAND(hwnd, msg, wParam, lParam)
+
+def _dispatch_WM_PAINT(window,hwnd,msg,wParam,lParam):
+    return window._WM_PAINT(hwnd, msg, wParam, lParam)
+
+def _dispatch_DEFAULT(window,hwnd,msg,wParam,lParam):
+    return user32.DefWindowProc(hwnd, msg, wParam, lParam)
+
 class Application(AbstractApplication):
     widget_map = {} # maps top level window handles to window instances
     _wndclass = None
+    _dispatch = {
+                WM_DESTROY: _dispatch_WM_DESTROY,
+                WM_CLOSE: _dispatch_WM_CLOSE,
+                WM_SIZE: _dispatch_WM_SIZE,
+                WM_COMMAND: _dispatch_WM_COMMAND,
+                WM_DESTROY: _dispatch_WM_PAINT,
+                }
 
     def __init__(self):
+        if _verbose: log('Application.__init__:start',self)
         AbstractApplication.__init__(self)
         if not self._wndclass: self._register_class()
         WindowWrapper._wndclass = self._wndclass
         FrameWrapper._wndclass = self._wndclass
         global _app
         _app = self
+        if _verbose: log('Application.__init__:end',self)
 
     def _register_class(self):
+        if _verbose: log('Application._register_class:start',self)
         class WNDCLASS(structob.struct_object):
             oracle = structob.Oracle (
                 'window class information',
@@ -758,6 +782,7 @@ class Application(AbstractApplication):
         user32.UnregisterClass(wc.lpzClassName,0)
         self.__class__._wndclass = user32.RegisterClass(wc)
         assert self.__class__._wndclass, "RegisterClass --> %d=%s ie\n%s" % (GetLastError(), hex(GetLastError()), _lastErrorMessage())
+        if _verbose: log('Application._register_class:end',self)
 
     def _wndproc(self, hwnd, msg, wParam, lParam):
         if _verbose: log("%s._wndproc called with %s,%s,%s,%s"%(self.__class__.__name__,hex(hwnd),hex(msg),hex(wParam),hex(lParam)))
@@ -766,28 +791,15 @@ class Application(AbstractApplication):
         except:
             if _verbose: log("\tNO WINDOW TO DISPATCH???")
             return user32.DefWindowProc(hwnd, msg, wParam, lParam)
-        # there should probably be a better way to dispatch messages
-        if msg == WM_DESTROY:
-            app = application()
-            app.remove(window)
-            app.internalRemove()
-        if msg == WM_CLOSE:
-            if _verbose: log("\t_WM_COMMAND to %s %s" % (window.__class__.__name__,window))
-            return window._WM_CLOSE(hwnd, msg, wParam, lParam)
-        if msg == WM_SIZE:
-            if _verbose: log("\t_WM_SIZE to %s %s" % (window.__class__.__name__,window))
-            return window._WM_SIZE(hwnd, msg, wParam, lParam)
-        if msg == WM_COMMAND:
-            if _verbose: log("\t_WM_COMMAND to %s %s" % (window.__class__.__name__,window))
-            return window._WM_COMMAND(hwnd, msg, wParam, lParam)
-        if msg == WM_PAINT:
-            if _verbose: log("\t_WM_PAINT to %s %s" % (window.__class__.__name__,window))
-            return window._WM_PAINT(hwnd, msg, wParam, lParam)
-        if _verbose: log("\tDefaultProc() %s %s" % (window.__class__.__name__,window))
-        return user32.DefWindowProc(hwnd, msg, wParam, lParam)
+        _dispatch = self._dispatch.get(msg,_dispatch_DEFAULT)
+        x = _dispatch(window,hwnd,msg,wParam,lParam)
+        if _verbose: log("\tdispatch %s to %s %s\n" % (_dispatch.__name__[9:],window.__class__.__name__,window),"\t ==>",x)
+        return x
+
 
     def internalRun(self):
-        class MSG (structob.struct_object):
+        if _verbose: log('internalRun:Begin',str(self))
+        class MSG(structob.struct_object):
             oracle = structob.Oracle (
                 'windows message',
                 'Nlllllll',
@@ -800,9 +812,15 @@ class Application(AbstractApplication):
                  'y')
                 )
         msg = MSG()
-        while self._windows and user32.GetMessage(msg, 0, 0, 0):
-            user32.TranslateMessage(msg)
-            user32.DispatchMessage(msg)
+        while user32.GetMessage(msg, 0, 0, 0):
+            try:
+                if _verbose: log('internalRun: loopstart',msg)
+                user32.TranslateMessage(msg)
+                user32.DispatchMessage(msg)
+                log('internalRun: loopend')
+            except:
+                logTraceback(None)
+        log('internalRun: finish')
 
     def internalRemove(self):
         if not self._windows:
