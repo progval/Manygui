@@ -146,10 +146,13 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
     _wx_class = wxRadioButton
 
     def _wx_clicked(self, evt):
-        # FIXME: Is called both on mouse press and mouse release...
+        # FIXME: Not correct yet
         if self.group is not None:
-            self.group.value = self.value
-        send(self, 'click')
+            if self.group._value != self._value:
+                self.group.value = self._value
+                send(self, 'click')
+        else:
+            send(self, 'click')
     
     def _ensure_created(self):
         # FIXME: Commented out 20011214mlh. Is this needed anymore?
