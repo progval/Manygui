@@ -1,10 +1,22 @@
-import os # FIXME: Environment stuff doesn't work in jython
-
 _backends = 'x java wx tk beos'
-wishlist = os.environ.get('ANYGUI_WISHLIST', _backends).split()
 
-# set to true to see tracebacks when searching for factories
-DEBUG = os.environ.get('ANYGUI_DEBUG', 0)
+# Try to get the environment variables ANYGUI_WISHLIST (used
+# before anygui.wishlist), and ANYGUI_DEBUG (to print out
+# stacktraces when importing backends):
+
+# FIXME: ANYGUI_WISHLIST cannot contain spaces in Jython...
+
+import os, sys
+
+if hasattr(sys, 'registry'):
+    # Jython:
+    wishlist = sys.registry.getProperty('ANYGUI_WISHLIST', _backends).split()
+    DEBUG = sys.registry.getProperty('ANYGUI_DEBUG', '0')
+else:
+    # CPython:
+    wishlist = os.environ.get('ANYGUI_WISHLIST', _backends).split()
+    DEBUG = os.environ.get('ANYGUI_DEBUG', '0')
+
 # Non-empty string may be zero (i.e. false):
 if DEBUG:
     try:
