@@ -206,15 +206,15 @@ class Canvas(ComponentMixin, AbstractCanvas):
         if closed:
             polygon.closePath()
 
-        if edgeColor is not Colors.transparent:
-            c = _convert_color(edgeColor)
-            g2.setPaint(c)
-            g2.draw(polygon)
-
         if fillColor is not Colors.transparent:
             c = _convert_color(fillColor)
             g2.setPaint(c)
             g2.fill(polygon)
+
+        if edgeColor is not Colors.transparent:
+            c = _convert_color(edgeColor)
+            g2.setPaint(c)
+            g2.draw(polygon)
 
 def _convert_color(c):
     # Hack to appease Jython polymorphism
