@@ -239,10 +239,17 @@ Date: 2003-02-16
    with a random sentence. Click it again, and a new sentence appears.
    Cool, huh?
 
-   (Note: Event handlers receive information about the event through
+   Note: Event handlers receive information about the event through
    Event objects. We ignore the specifics of these objects here. In
    version 0.1.1 and earlier, event handlers received information
-   through keyword arguments.)
+   through keyword arguments. So, if you're using Anygui 0.1.1, the
+   event handler should be:
+
+      def handler(**kwds):
+          txt.text = sentence()
+
+   If you use the definition without keyword arguments, you'll get a
+   TypeError, which complains about unexpected keyword arguments.
 
 9. Further Exploration
 
@@ -330,6 +337,7 @@ A. The Program
 
    win.height = txt.height + btn.height + 30
 
+   # Remember to use keyword arguments in Anygui 0.1.1
    def handler(event): txt.text = sentence()
    link(btn, 'click', handler)
 
