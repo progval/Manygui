@@ -36,7 +36,7 @@ class AbstractComponent(Attrib, DefaultEventMixin):
 
     def update(self, **ignore_kw):
         if self._inhibit_update: return
-        print 'compup(%r,%r)'%(self,ignore_kw)
+        #print 'compup(%r,%r)'%(self,ignore_kw)
         for ensure in self._all_ensures:
             v = getattr(self, ensure)
             v()
