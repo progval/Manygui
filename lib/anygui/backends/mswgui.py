@@ -1,6 +1,8 @@
 from anygui.backends import *
 __all__ = anygui.__all__
 
+from anygui.Utils import log
+
 ################################################################
 import win32gui, win32con
 
@@ -46,6 +48,8 @@ class ComponentMixin:
                 0, # hInstance
                 None)
             app._hwnd_map[self._hwnd] = self
+            if self._container:
+                self._container._hwnd_map[self._hwnd] = self
             win32gui.SendMessage(self._hwnd,
                                  win32con.WM_SETFONT,
                                  self._hfont,
@@ -80,8 +84,11 @@ class ComponentMixin:
                 win32gui.EnableWindow(self._hwnd, 0)
 
     def _ensure_destroyed(self):
+        if self._container:
+            del self._container._hwnd_map[self._hwnd]
         if self._hwnd:
             win32gui.DestroyWindow(self._hwnd)
+        self._hwnd = None
 
     def _ensure_text(self):
         pass
@@ -92,16 +99,16 @@ class Label(ComponentMixin, AbstractLabel):
     #_width = 100 # auto ?
     #_height = 32 # auto ?
     _wndclass = "STATIC"
-    _text = "mswLabel"
+    #_text = "mswLabel"
     _win_style = win32con.SS_LEFT | win32con.WS_CHILD
 
     def _ensure_text(self):
         if self._hwnd:
-            win32gui.SetWindowText(self._hwnd, self._text)
+            win32gui.SetWindowText(self._hwnd, str(self._text))
 
     def _get_msw_text(self):
         # return the text required for creation
-        return self._text
+        return str(self._text)
 
 ##################################################################
 
@@ -151,13 +158,14 @@ class ListBox(ComponentMixin, AbstractListBox):
 class Button(ComponentMixin, AbstractButton):
     _wndclass = "BUTTON"
     _win_style = win32con.BS_PUSHBUTTON | win32con.WS_CHILD
-    _text = "mswButton"
+    #_text = "mswButton"
 
     def _get_msw_text(self):
         # return the text required for creation
-        return self._text
+        return str(self._text)
 
     def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
+        #log("Button._WM_COMMAND called, looking for %s==%s"%(wParam>>16,win32con.BN_CLICKED))
         # lParam: handle of control (or NULL, if not from a control)
         # HIWORD(wParam): notification code
         # LOWORD(wParam): id of menu item, control, or accelerator
@@ -167,18 +175,18 @@ class Button(ComponentMixin, AbstractButton):
 
     def _ensure_text(self):
         if self._hwnd:
-            win32gui.SetWindowText(self._hwnd, self._text)
+            win32gui.SetWindowText(self._hwnd, str(self._text))
 
 
 class ToggleButtonMixin(ComponentMixin):
 
     def _get_msw_text(self):
         # return the text required for creation
-        return self._text
+        return str(self._text)
 
     def _ensure_text(self):
         if self._hwnd:
-            win32gui.SetWindowText(self._hwnd, self._text)
+            win32gui.SetWindowText(self._hwnd, str(self._text))
 
     def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
         # lParam: handle of control (or NULL, if not from a control)
@@ -214,13 +222,13 @@ class ToggleButtonMixin(ComponentMixin):
 
 class CheckBox(ToggleButtonMixin, AbstractCheckBox):
     _wndclass = "BUTTON"
-    _text = "mswCheckBox"
+    #_text = "mswCheckBox"
     _win_style = win32con.BS_AUTOCHECKBOX | win32con.WS_CHILD
 
 
 class RadioButton(ToggleButtonMixin, AbstractRadioButton):
     _wndclass = "BUTTON"
-    _text = "mswCheckBox"
+    #_text = "mswCheckBox"
     _win_style = win32con.BS_AUTORADIOBUTTON | win32con.WS_CHILD
     
     def _ensure_created(self):
@@ -228,6 +236,22 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
         if self._group and 0 == self._group._items.index(self):
             self._win_style |= win32con.WS_GROUP
         return ToggleButtonMixin._ensure_created(self)
+
+    def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
+        # lParam: handle of control (or NULL, if not from a control)
+        # HIWORD(wParam): notification code
+        # LOWORD(wParam): id of menu item, control, or accelerator
+        if (wParam >> 16) != win32con.BN_CLICKED:
+            return
+        #val = win32gui.SendMessage(self._hwnd, win32con.BM_GETSTATE, 0, 0)
+        #val = val & win32con.BST_CHECKED
+        #if val == self.on:
+        #    return
+        #self.modify(on=val)
+        #self.do_action()
+        if self.group is not None:
+            self.group.modify(value=self.value)
+        send(self, 'click')
 
 ##################################################################
 
@@ -237,7 +261,7 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
 
 class TextField(ComponentMixin, AbstractTextField):
     _wndclass = "EDIT"
-    _text = "mswTextField"
+    #_text = "mswTextField"
     _win_style = win32con.ES_NOHIDESEL | win32con.ES_AUTOHSCROLL | \
                  win32con.WS_CHILD | win32con.WS_BORDER
     _win_style_ex = win32con.WS_EX_CLIENTEDGE
@@ -248,12 +272,13 @@ class TextField(ComponentMixin, AbstractTextField):
     def _from_native(self, text):
         return text.replace('\r\n', '\n')
 
-    def _get_text(self):
+    def _backend_text(self):
         if self._hwnd:
             return self._from_native(win32gui.GetWindowText(self._hwnd))
 
-    def _set_text(self, text):
-        win32gui.SetWindowText(self._hwnd, self._to_native(text))
+    #def _set_text(self, text):
+    #    if self._hwnd:
+    #        win32gui.SetWindowText(self._hwnd, self._to_native(text))
 
     def _backend_selection(self):
         if self._hwnd:
@@ -271,9 +296,9 @@ class TextField(ComponentMixin, AbstractTextField):
     def _ensure_text(self):
         if self._hwnd:
             # avoid recursive updates
-            if self._text != self._get_text():
-                self._set_text(self._text)
-
+            if str(self._text) != self._backend_text():
+                win32gui.SetWindowText(self._hwnd, self._to_native(str(self._text)))
+        
     def _ensure_selection(self):
         if self._hwnd:
             start, end = self._selection
@@ -304,12 +329,12 @@ class TextField(ComponentMixin, AbstractTextField):
 
     def _get_msw_text(self):
         # return the text required for creation
-        return self._to_native(self._text)
+        return self._to_native(str(self._text))
 
     def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
         # HIWORD(wParam): notification code
         if (wParam >> 16) == win32con.EN_KILLFOCUS:
-            self.modify(text=self._get_text())
+            self.modify(text=self._backend_text())
 
 
 class TextArea(TextField, AbstractTextArea):
@@ -323,20 +348,26 @@ class ContainerMixin(ComponentMixin):
         self._hwnd_map = {} # maps child window handles to instances
     
     def _finish_creation(self):
+        #log("ContainerMixin._finish_creation %s"%self)
         for comp in self._contents:
+            #log("  Adding %s"%comp)
             self._hwnd_map[comp._hwnd] = comp
 
     def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
+        #log("ContainerMixin _WM_COMMAND called for %s"%self)
         # lParam: handle of control (or NULL, if not from a control)
         # HIWORD(wParam): notification code
         # LOWORD(wParam): id of menu item, control, or accelerator
+        app = application()
         try:
             child_window = self._hwnd_map[lParam]
         except KeyError:
+            #log("NO SUCH CHILD WINDOW %s"%lParam)
             # we receive (when running test_textfield.py)
             # EN_CHANGE (0x300) and EN_UPDATE (0x400) notifications
             # here even before the call to CreateWindow returns.
             return
+        #log("Dispatching to child %s"%child_window)
         child_window._WM_COMMAND(hwnd, msg, wParam, lParam)
 
     def _WM_SIZE(self, hwnd, msg, wParam, lParam):
@@ -402,7 +433,7 @@ class Window(ContainerMixin, AbstractWindow):
         AbstractWindow._finish_creation(self)
 
     def _get_msw_text(self):
-        return self._title
+        return str(self._title)
 
     def _ensure_title(self):
         if self._hwnd:
@@ -424,6 +455,8 @@ class Application(AbstractApplication):
             self._register_class()
         Window._wndclass = self._wndclass
         Frame._wndclass = self._wndclass
+        global _app
+        _app = self
 
     def _register_class(self):
         # register a window class for toplevel windows.
@@ -436,9 +469,11 @@ class Application(AbstractApplication):
         self.__class__._wndclass = win32gui.RegisterClass(wndclass)
 
     def _wndproc(self, hwnd, msg, wParam, lParam):
+        #log("_wndproc called with %s,%s,%s,%s"%(hwnd,msg,wParam,lParam))
         try:
             window = self._hwnd_map[hwnd]
         except:
+            #log("NO WINDOW TO DISPATCH???")
             return win32gui.DefWindowProc(hwnd, msg, wParam, lParam)
         # there should probably be a better way to dispatch messages
         if msg == win32con.WM_DESTROY:
@@ -451,6 +486,7 @@ class Application(AbstractApplication):
         if msg == win32con.WM_SIZE:
             return window._WM_SIZE(hwnd, msg, wParam, lParam)
         if msg == win32con.WM_COMMAND:
+            #log("Dispatching command to %s"%window)
             return window._WM_COMMAND(hwnd, msg, wParam, lParam)
         return win32gui.DefWindowProc(hwnd, msg, wParam, lParam)
         
