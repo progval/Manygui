@@ -1,9 +1,9 @@
 from unittest import TestCase, main
-from anygui.Rules import AggregateRuleEngine
+from anygui.Rules import RuleEngine
 
 class RectangleTestCase(TestCase):
     def setUp(self):
-        self.eng = AggregateRuleEngine()
+        self.eng = RuleEngine()
         self.eng.define('position = x, y')
         self.eng.define('size = width, height')
         self.eng.define('geometry = x, y, width, height')
