@@ -98,6 +98,7 @@ class ComponentWrapper(Wrapper):
         if not self.widget: return
         if not self.visible: return
         self.widget.place(width=width)
+        self.widget.update_idletasks()
 
     def setHeight(self, height):
         if not self.widget: return
@@ -118,6 +119,25 @@ class ComponentWrapper(Wrapper):
         if not self.widget: return
         if not self.visible: return
         self.widget.place(x=x, y=y, width=width, height=height)
+
+# If added test_shake fails
+# because the various self.widget.place take effect only
+# once again in the event loop or upon update(_idletasks).
+#
+# Should we add a call to update_idletasks to all setXxx methods ???
+# probably not. Getting and setting will give a consistent picture
+# because proxies will cache the value passed to place
+# and not defining getXxx will cause the use of those cached values.
+# Window wrappers need getXxx methods querying the widget because of externally triggered
+# resizing, so the set methods need update_idletasks to get consistency.
+# See WindowWrapper. 
+# 
+#    def getGeometry(self):
+#        x = self.widget.winfo_x()
+#        y = self.widget.winfo_y()
+#        w = self.widget.winfo_width()
+#        h = self.widget.winfo_height()
+#        return x,y,w,h
 
     def setVisible(self, visible):
         if not self.widget: return
@@ -644,20 +664,18 @@ class WindowWrapper(ComponentWrapper):
     def setPosition(self, x, y):
         if not self.widget: return
         ox, oy, w, h = self.getGeometry()
-        geometry = "%dx%d+%d+%d" % (w, h, x, y)
-        self.widget.geometry(geometry)
+        self.setGeometry(x, y, w, h)
 
     def setSize(self, width, height):
         if not self.widget: return
         x, y, ow, oh = self.getGeometry()
-        geometry = "%dx%d+%d+%d" % (width, height, x, y)
-        self.widget.geometry(geometry)        
+        self.setGeometry(x, y, width, height)
     
     def setGeometry(self, x, y, width, height):
         if not self.widget: return
         geometry = "%dx%d+%d+%d" % (width, height, x, y)
         self.widget.geometry(geometry)
-        self.widget.update()
+        self.widget.update_idletasks()
     
     def setTitle(self, title):
         if not self.widget: return
