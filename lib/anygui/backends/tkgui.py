@@ -154,7 +154,7 @@ class ListBox(ComponentMixin, AbstractListBox):
         if self._tk_comp:
             self._tk_comp.delete(0, END)
             for item in self._items:
-                self._tk_comp.insert(END, item)
+                self._tk_comp.insert(END, str(item))
 
     def _ensure_selection(self):
         if self._tk_comp:

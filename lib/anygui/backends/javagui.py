@@ -210,7 +210,7 @@ class ListBox(ComponentMixin, AbstractListBox):
         if self._java_comp:
             items = java.util.Vector()
             for item in self._items:
-                items.addElement(item)
+                items.addElement(str(item))
             self._java_comp.setListData(items)
 
     def _ensure_selection(self):

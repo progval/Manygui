@@ -102,7 +102,7 @@ class ListBox(ComponentMixin, AbstractListBox):
         if self._wx_comp:
             for index in range(self._wx_comp.Number()):
                 self._wx_comp.Delete(0)
-            self._wx_comp.InsertItems(list(self._items), 0)
+            self._wx_comp.InsertItems(map(str, list(self._items)), 0)
 
     def _ensure_selection(self):
         if self._wx_comp:
