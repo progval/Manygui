@@ -14,4 +14,5 @@ from anygui.ListBoxes import AbstractListBox
 from anygui.Models import BooleanModel, ListModel, TextModel
 from anygui.Events import *
 from anygui.Frames import AbstractFrame
+from anygui.LayoutManagers import Placer
 import anygui
