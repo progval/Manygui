@@ -1,7 +1,3 @@
-In tkinter, setting editable=0 for TextArea or TextField
-does not protect against pasting text with the second
-mouse button (on platforms where that is possible).
-
 The defaults for TextArea are overridden by the TextField
 defaults in mswgui.
 
