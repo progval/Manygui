@@ -6,8 +6,8 @@ class RadioButton(Component, Defaults.RadioButton):
 
     def __init__(self,value=1,*args,**kws):
         Component.__init__(self,*args,**kws)
-        self.value = int(value)
-        self.on = 0
+        self.value = int(value) # @@@ This should be done through the default mechanism
+        self.on = 0 # @@@ This should be done through the default mechanism
 
     def wrapperFactory(self):
         return backendModule().RadioButtonWrapper(self)

@@ -408,7 +408,7 @@ class ToggleButtonMixin:
             self.widget.deselect()
 
     def getOn(self):
-        return self._var.get() == int(self.widget.cget('value'))
+        return self._var.get()
 
     def setUp(self): # Should perhaps be in a ButtonMixin superclass?
         self.widget.configure(command=self.clickHandler)
@@ -427,6 +427,9 @@ class RadioButtonWrapper(ToggleButtonMixin, ComponentWrapper):
     def widgetFactory(self, *args, **kws):
         kws.update(self.initArgs())
         return Tkinter.Radiobutton(*args, **kws)
+
+    def getOn(self):
+        return self._var.get() == int(self.widget.cget('value'))
 
     def setGroup(self, group):
         if group is None:

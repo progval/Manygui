@@ -1,4 +1,5 @@
-"""Defaults for the anygui package.
+"""
+Defaults for the anygui package.
 
 Each class in module Defaults provides default attributes for the
 widget of the same name, plus an attribute named explicit_attributes
@@ -17,7 +18,7 @@ space = 10
 #    klass.explicit_attributes = klass.__dict__.keys()
 
 class Button:
-    _default_event = 'click'
+    _defaultEvent = 'click'
     state = {
         'text': 'Button',
         'x': 0,
@@ -79,9 +80,9 @@ class Label:
         }
 
 class TextField:
+    _defaultEvent = 'enterkey'
     state = {
         'text' : '',
-        'default_event' : 'enterkey',
         'x' : 0,
         'y' : 0,
         'width' : 100,
@@ -122,9 +123,9 @@ class Canvas:
         }
 
 class CheckBox:
+    _defaultEvent = 'click'
     state = {
         'text' : 'CheckBox',
-        'default_event' : 'click',
         'x' : 0,
         'y' : 0,
         'width' : 100,
@@ -138,9 +139,9 @@ class CheckBox:
         }
 
 class ListBox:
+    _defaultEvent = 'select'
     state = {
         'text' : 'ListBox',
-        'default_event' : 'select',
         'x' : 0,
         'y' : 0,
         'width' : 100,
@@ -156,9 +157,9 @@ class ListBox:
         }
     
 class RadioButton:
+    _defaultEvent = 'click'
     state = {
         'text' : 'RadioButton',
-        'default_event' : 'click',
         'x' : 0,
         'y' : 0,
         'width' : 100,
@@ -172,10 +173,10 @@ class RadioButton:
         }
 
 class RadioGroup:
+    _defaultEvent = 'select'
     state = {
         'items' : None,
         'value' : None,
-        'default_event' : 'select',
         }
 
 class TextArea:

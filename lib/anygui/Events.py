@@ -139,11 +139,11 @@ caller = Caller
 class DefaultEventMixin:
 
     def __init__(self):
-        if hasattr(self, '_default_event'):
-            link(self, self._default_event, self._default_event_handler,
+        if hasattr(self, '_defaultEvent'):
+            link(self, self._defaultEvent, self._defaultEventHandler,
                  weak=1, loop=1)
 
-    def _default_event_handler(self, event):
+    def _defaultEventHandler(self, event):
         args = event.dict.copy()
         del args['source']
         del args['event']
