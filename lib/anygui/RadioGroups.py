@@ -16,12 +16,12 @@ class RadioGroup(Attrib, CallbackAdapter):
         return self._value
 
     def _set_value(self, value):
-        if self._value != value:
+        if 1 or self._value != value:
             self._value = value
             for item in self._items:
                 item._update_state()
             #self.do_action()
-            #send('action', self)
+            #send('action', self) # Needed?
 
     def add(self, buttons):
         for btn in buttons:

@@ -261,11 +261,11 @@ class ToggleButtonMixin(ComponentMixin):
 
     def _ensure_state(self):
         if self._java_comp is not None:
-            self._java_comp.selected = self._on
+            self._java_comp.selected = self.on
     
     def _java_clicked(self, evt):
         val = self._java_comp.selected
-        if val == self._on:
+        if val == self.on:
             return
         self.model.value = val
         #self.do_action()

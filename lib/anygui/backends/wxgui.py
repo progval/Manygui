@@ -136,11 +136,11 @@ class ToggleButtonMixin(ComponentMixin):
 
     def _ensure_state(self):
         if self._wx_comp is not None:
-            self._wx_comp.SetValue(self._on)
+            self._wx_comp.SetValue(self.on)
     
     def _wx_clicked(self, evt):
         val = self._wx_comp.GetValue()
-        if val == self._on:
+        if val == self.on:
             return
         self.model.value = val
         #self.do_action()

@@ -207,7 +207,7 @@ class ToggleButtonMixin(ComponentMixin):
 
     def _ensure_state(self):
         if self._tk_comp is not None:
-            self._var.set(self._on)
+            self._var.set(self.on)
 
     def _ensure_created(self):
         ComponentMixin._ensure_created(self)
@@ -217,19 +217,15 @@ class ToggleButtonMixin(ComponentMixin):
 
     
     def _tk_clicked(self):
-        val = self._var.get()
-        if val == self._on:
-            return
-        self.model.value = val
-        #self.do_action()
+        self.group.value = self.value
         send('action', self)
-
-class CheckBox(ToggleButtonMixin, AbstractCheckBox):
-    _tk_class = Checkbutton
-    _text = "tkCheckbuton"
 
     def _ensure_events(self):
         self._tk_comp.config(command=self._tk_clicked)
+
+class CheckBox(ToggleButtonMixin, AbstractCheckBox):
+    _tk_class = Checkbutton
+    _text = "tkCheckbutton"
 
 class RadioButton(ToggleButtonMixin, AbstractRadioButton):
     _tk_class = Radiobutton
@@ -239,9 +235,6 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
         result = ToggleButtonMixin._ensure_created(self)
         self._tk_comp.config(value=1) # FIXME: Shaky...
         return result
-
-    def _ensure_events(self):
-        self._tk_comp.config(command=self._tk_clicked)
 
 ################################################################
 

@@ -305,7 +305,7 @@ class ToggleButtonMixin(ComponentMixin):
        
     def _beos_clicked(self):
         val = self._get_on()
-        if val == self._on:
+        if val == self.on:
             return
         self.model.value = val
         # self.do_action()

@@ -107,11 +107,11 @@ class Button(ComponentMixin, AbstractButton):
 class ToggleButtonMixin(ComponentMixin):
     def _ensure_state(self):
         if self._gtk_comp:
-            self._gtk_comp.set_active(self._on)
+            self._gtk_comp.set_active(self.on)
 
     def _gtk_toggled(self, *args):
         val = self._gtk_comp.get_active()
-        if val == self._on:
+        if val == self.on:
             return
         self.model.value = val
         #self.do_action()
@@ -155,10 +155,10 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
 
     def _gtk_toggled(self, *args):
         val = self._gtk_comp.get_active()
-        if val == self._on:
+        if val == self.on:
             return
-        self._on = val
-        if self._on:
+        self.on = val
+        if self.on:
             # XXX: Hack!
             #self.do_action()
             send('action', self)

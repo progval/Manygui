@@ -182,7 +182,7 @@ class ToggleButtonMixin(ComponentMixin):
     def _ensure_state(self):
         if not self._hwnd:
             return
-        if self._on:
+        if self.on:
             val = win32con.BST_CHECKED
         else:
             val = win32con.BST_UNCHECKED
@@ -196,7 +196,7 @@ class ToggleButtonMixin(ComponentMixin):
             return
         val = win32gui.SendMessage(self._hwnd, win32con.BM_GETSTATE, 0, 0)
         val = val & win32con.BST_CHECKED
-        if val == self._on:
+        if val == self.on:
             return
         self.model.value = val
         #self.do_action()
