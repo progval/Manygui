@@ -1,0 +1,33 @@
+Importing tkgui in jython gives a non-intuitive error message. It
+(tkgui) should simply be ignored.
+
+Defaults don't work properly.
+
+Window positioning doesn't work properly in javagui and tkgui.
+
+Setting editable=0 makes it impossible to select/copy text in tkgui.
+This should be fixed.
+
+Setting the selection of a wxgui TextField or TextArea doesn't work.
+
+Programs running javagui don't always quit, because of some unstable
+thread code (which may wait for the wrong thread).
+
+Selecting items in a ListBox with the arrow keys in javagui doesn't
+cause the callback to be activated. (Using the JListModel in a more
+conventional way would help, but would cause the callback to be called
+when the selection is set programmatically, which is not the desired
+behaviour.)
+
+It is impossible to select items with the arrow keys in tkgui
+ListBoxes.
+
+wxgui windows flicker excessively when resized.
+
+All the text of a tkgui TextField or TextArea is selected when one
+tabs into it. This is not consistent with wxgui and javagui, where the
+selection is preserved.
+
+The backends don't behave consistently wrt. setting or not setting
+focus when the selection of a TextField or TextArea is set
+programmatically.

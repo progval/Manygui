@@ -1,0 +1,27 @@
+Developers:
+-----------
+
+Magnus Lie Hetland          admin, core, javagui, tkgui, wxgui
+Thomas Heller               core, wxgui, mswgui*
+Alex Martelli               dhtmlgui*
+Greg Ewing                  xgui*
+Matthew Schinckel           beosgui*
+Kalle Svensson              gtkgui*
+Joe Knapka                  tkgui
+Just van Rossum             macgui*
+
+(* backend not yet implemented)
+
+Other Contributors:
+-------------------
+
+Kevin Altis
+Stephane Conversy
+Laura Creighton
+Robin Dunn
+Warren Kirk
+Patrick K. O'Brien
+Samuele Pedroni
+Dmitry Samosseiko
+Amardeep Singh
+Niki Spahiev

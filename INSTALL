@@ -1,0 +1,11 @@
+To install anygui, simply run the included install script with the
+"install" command:
+
+   python setup.py install
+
+For information on the various options available, use:
+
+   python setup.py --help
+
+If you'd rather do the installation manually, simply move or copy the
+directory lib/anygui to a location found in your PYTHON_PATH.

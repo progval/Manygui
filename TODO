@@ -1,0 +1,24 @@
+
+Goals for next release:
+-----------------------
+
+* Add a dialog class
+
+* Add support for native dialogs (e.g. file dialogs)
+
+* Add basic support for defaults
+
+* Add support for the border property
+
+Longer term goals:
+------------------
+
+* Add full menu system
+
+* Add support for the document/view model
+
+* Add full event system
+
+* Add advanced support for default, including default
+  "shrink-wrapping" of windows and frames that aren't
+  given an explicit size
