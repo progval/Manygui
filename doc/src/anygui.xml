@@ -781,6 +781,8 @@ You can now set ANYGUI_ALTERNATE_BORDER=1 in the environment
 to get +-| borders on strange terminal emulators. This is
 mentioned on the initial help screen as well.
 
+ANYGUI_SCREENSIZE
+
       -->
 
       <para>Example:</para>
