@@ -107,7 +107,7 @@ class Attrib:
 
 
     Attrib also supplies a default refresh method, which calls all the
-    relevant methods named _ensure_* if flag _inhibit_update is false.
+    relevant methods named _ensure_* if flag _inhibit_refresh is false.
     In this release, all _ensure_* are called; eventually, some kind
     of mechanism will use the hints to be more selective/optimizing.
     Attrib's responsibilities include calling certain _ensure_* methods
