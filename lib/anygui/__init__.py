@@ -1,4 +1,4 @@
-_backends = 'x java wx tk beos'
+_backends = 'msw x java wx tk beos'
 
 # Try to get the environment variables ANYGUI_WISHLIST (used
 # before anygui.wishlist), and ANYGUI_DEBUG (to print out
