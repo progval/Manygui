@@ -1,3 +1,46 @@
+"""Test status:
+
+Missing: test_menu
+
+test_aboutdlg OK
+test_backend  OK
+test_canvas   NA
+test_button   OK
+test_checkbox OK
+test_combobox OK (Not native though)
+test_component NA
+test_curses OK
+test_defaults OK
+test_events OK
+test_frame  OK
+test_interface NA (Others don't pass either)
+test_invisible OK
+test_label OK
+test_layout OK
+test_menu
+test_modv1 OK
+test_modv2 OK
+test_modv3 OK
+test_openfiledlg OK   (Some bugs on exit)
+test_place OK
+test_radiobutton NA   (Can't implement, doesn't work like a toggle button)
+test_radiogroup  OK
+test_references  OK
+test_remove   (Works only the first time)
+test_rules  NA
+test_shake  OK 
+test_tags   NA
+test_textarea OK
+test_textfield OK
+test_window    OK
+
+demo/ttt.py OK
+demo/ttt2.py NA (Fails on Tk & wx)
+demo/ifs.py  NA (Fails on Tk & wx. Canvas missing)
+demo/chmodgui.py OK
+
+"""
+
 try:
     # Import Anygui infrastructure. You shouldn't have to change these.
     from anygui.backends import *
@@ -9,7 +52,10 @@ try:
 
     # Import anything needed to access the backend API. This is
     # your job!
-    from gtk import *
+    import pygtk
+    
+    pygtk.require('2.0')
+    
     import gtk
     # End backend API imports.
 except:
@@ -56,6 +102,7 @@ class ComponentWrapper(AbstractWrapper):
     def enterMainLoop(self): # ...
         if not self.widget: return
         self.widget.show()
+        self.proxy.push()
 
     def destroy(self):
         if self.widget:
@@ -65,23 +112,40 @@ class ComponentWrapper(AbstractWrapper):
     # getters and setters
     def setContainer(self,container):
         if container is None:
-            self.destroy()
+            try:
+                self.destroy()
+            except:
+                pass
             return
-        parent = container.wrapper.widget
-        if parent is None:
-            self.create(parent)
+        parent = container.wrapper
+        if parent is not None:
+            self.create()
+            cont = parent._getContainer()
+            self.widget.unparent()
+            if hasattr(cont, 'put'):
+                cont.put(self.widget, 0, 0)
+            elif hasattr(cont, 'add'):
+                cont.add(self.widget)
             self.proxy.push(blocked=['container'])
-            self.setupChildWidgets()
+
+    def create(self):
+        if not self.widget:
+            self.widget = self.widgetFactory()
+            self.widget.visible = self.proxy.state['visible']
+            self.widgetSetUp()
 
     def setGeometry(self,x,y,width,height):
         if not self.widget: return
+        if self.widget.parent and hasattr(self.widget.parent, 'move'):
+            self.widget.parent.move(self.widget,
+                                    int(x), int(y))
         self.widget.set_uposition(int(x), int(y))
-        self.widget.set_usize(int(width), int(height))
 
-    def getGeometry(self):
-        if not self.widget: return
-        return self.widget.get_uposition(int(x), int(y)) + \
-               self.widget.get_usize(int(width), int(height))
+        width = max(int(width),   1)
+        height = max(int(height), 1)
+        
+        self.widget.set_size_request(int(width), int(height))
+        return        
 
     def setVisible(self,visible):
         if not self.widget: return
@@ -96,27 +160,42 @@ class ComponentWrapper(AbstractWrapper):
 
     def setText(self,text):
         if not self.widget: return
-        raise NotImplementedError, 'should be implemented by subclasses'
+#        raise NotImplementedError, 'should be implemented by subclasses'
 
 class LabelWrapper(ComponentWrapper):
 
     def widgetFactory(self, *args, **kws):
-        print "In LabelWrapper.widgetFactory()"
-        return GtkLabel(*args, **kws)
+        try:
+            label = args[0] or ''
+        except:
+            label = ''
+            
+        return gtk.Label(label, *args, **kws)
 
     def setText(self, text):
         if not self.widget: return
         self.widget.set_text(str(text))
 
-class ScrollableListBox(GtkScrolledWindow):
+class _ComboBoxWrapper(ComponentWrapper):
+    def widgetFactory(self, *args, **kws):
+        return gtk.Combo()
+    def getSelection(self):
+        if not self.widget: return
+        return int(self.widget.list.selection[0])
+    def setSelection(self, selection):
+        if not self.widget: return
+        self.widget.list.select_row(int(selection), 0)
+
+
+class ScrollableListBox(gtk.ScrolledWindow):
     """
     A scrollable list box.  Used by ListBoxWrapper.
     """
     def __init__(self, *args, **kw):
-        GtkScrolledWindow.__init__(self, *args, **kw)
-        self._listbox = GtkCList()
+        gtk.ScrolledWindow.__init__(self, *args, **kw)
+        self._listbox = gtk.CList()
         self._listbox.show()
-        self.set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC)
+        self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.add_with_viewport(self._listbox)
 
 class ListBoxWrapper(ComponentWrapper):
@@ -133,6 +212,7 @@ class ListBoxWrapper(ComponentWrapper):
         """
         if not self.widget: return
         self.widget._listbox.clear()
+        self._items = items[:]
         for item in items:
             self.widget._listbox.append([str(item)])
 
@@ -141,7 +221,10 @@ class ListBoxWrapper(ComponentWrapper):
         Return ths listbox contents, in order, as a list of strings.
         """
         if not self.widget: return
-        return list(self.widget._listbox.rows)
+        items = []
+        for i in range(self.widget._listbox.rows):
+            items.append(self.widget._listbox.get_text(i, 0))        
+        return items
 
     def setSelection(self,selection):
         """
@@ -156,7 +239,11 @@ class ListBoxWrapper(ComponentWrapper):
         Return the selected listbox item index as an integer.
         """
         if not self.widget: return
-        return int(self.widget._listbox.selection[0])
+        listbox = self.widget._listbox
+        if listbox.selection:
+            return listbox.selection[0]
+        else:
+            return -1
 
     def widgetSetUp(self):
         """ Connect ListBox events """
@@ -179,7 +266,7 @@ class ButtonWrapper(ComponentWrapper):
     connected = 0
 
     def widgetFactory(self, *args, **kws):
-        return GtkButton(*args, **kws)
+        return gtk.Button(*args, **kws)
 
     def widgetSetUp(self):
         """
@@ -187,31 +274,55 @@ class ButtonWrapper(ComponentWrapper):
         the user clicks the button.
         """
         if not self.connected:
-            self.widget.connect("clicked", self._click)
+            self.widget.connect("clicked", self.clickHandler)
             self.connected = 1
 
     def setText(self, text):
         if not self.widget: return
-        self.widget.children()[0].set_text(str(text))
+        
+        if self.widget.get_children():
+            self.widget.get_children()[0].set_text(str(text))
+        else:
+            label = gtk.Label(str(text))
+            label.show()
+            self.widget.add(label)
 
-    def _click(self,*args,**kws):
+    def clickHandler(self,*args,**kws):
         send(self.proxy,'click')
 
-
 class ToggleButtonMixin(ButtonWrapper):
+    def widgetFactory(self, *args, **kws):
+        return gtk.ToggleButton(*args, **kws)
 
     def getOn(self):
         """ Return the button's state: 1 for checked, 0 for not. """
         if not self.widget: return
         return self.widget.get_active()
 
+    def widgetSetUp(self):
+        ButtonWrapper.widgetSetUp(self)
+        self._toggling = 0
+        self.widget.connect('toggled', self.toggleHandler)
+        
     def setOn(self,on):
         """ Set the button's state. """
         if not self.widget: return
         val = self.widget.get_active()
         if val == int(on):
             return
+        
+        self._toggling = 1        
         self.widget.set_active(int(on))
+        self._toggling = 0
+
+    def toggleHandler(self, data):
+        if not self._toggling:
+            send(self.proxy, 'click')
+    
+    def clickHandler(self, data):        
+        if not self._toggling:
+            send(self.proxy, 'click')
+            
 
 class CheckBoxWrapper(ToggleButtonMixin):
     """
@@ -219,6 +330,9 @@ class CheckBoxWrapper(ToggleButtonMixin):
     behavior, but in case it doesn't, you may need to write some
     code here.
     """
+    def widgetFactory(self, *args, **kws):
+        return gtk.CheckButton(*args, **kws)
+    
 
 class RadioButtonWrapper(ToggleButtonMixin):
     """
@@ -245,45 +359,26 @@ class RadioButtonWrapper(ToggleButtonMixin):
 
     def widgetFactory(self, *args, **kws):
         if self.proxy.group and len(self.proxy.group._items) > 1:
+            item = None
             for item in self.proxy.group._items:
                 if item is not self:
-                    break
+                   break
             else:
                 raise InternalError(self, "Couldn't find non-self group item!")
-            return GtkRadioButton(item.widget, *args, **kws)
+            return gtk.RadioButton(item.wrapper.widget, *args, **kws)
         else:
-            return GtkRadioButton(None, *args, **kws)
+            return gtk.RadioButton(None, *args, **kws)
 
-    def _click(self,*args,**kws):
-        try:
-            # Ensure the other buttons in the group are updated
-            # properly. Note that if for some reason you need to
-            # implement getValue(), this code will no longer
-            # work due to the pull mechanism.
-            self.proxy.group.value = self.proxy.value
-        except AttributeError:
-            pass
-        send(self.proxy,'click')
-
-class TextControlMixin:
-
-    def setText(self,text):
-        """ Set/get the text associated with the widget. This might be
-        window title, frame caption, label text, entry field text,
-        or whatever.
-        """
-        if not self.widget: return
-        raise NotImplementedError, 'should be implemented by subclasses'
-
-    def getText(self):
-        """
-        Fetch the widget's associated text. You *must* implement this
-        to get the text from the native widget; the default getText()
-        from ComponentWrapper (almost) certainly won't work.
-        """
-        if not self.widget: return
-        raise NotImplementedError, 'should be implemented by subclasses'
-
+    def setGroup(self,group):
+        if group is None:
+            return
+        if self.proxy not in group._items:
+            group._items.append(self.proxy)
+            
+class TextFieldWrapper(ComponentWrapper):
+    """
+    Wraps a native single-line entry field.
+    """
     def setEditable(self,editable):
         """
         Set the editable state of the widget. If 'editable' is 0,
@@ -291,7 +386,7 @@ class TextControlMixin:
         but should not accept user input.
         """
         if not self.widget: return
-        raise NotImplementedError, 'should be implemented by subclasses'
+        self.widget.set_editable(editable)
 
     def getSelection(self):
         """
@@ -299,7 +394,12 @@ class TextControlMixin:
         selection, as a tuple; or (0,0) if there's no selection.
         """
         if not self.widget: return
-        raise NotImplementedError, 'should be implemented by subclasses'
+        bounds = self.widget.get_selection_bounds()
+        if bounds:
+            return bounds
+        else:
+            position = self.widget.get_position()
+            return (position, position)
 
     def setSelection(self,selection):
         """
@@ -308,27 +408,93 @@ class TextControlMixin:
         the widget text that should be covered by the selection.
         """
         if not self.widget: return
-        raise NotImplementedError, 'should be implemented by subclasses'
+        self.widget.select_region(selection[0], selection[1])
 
-class TextFieldWrapper(TextControlMixin,ComponentWrapper):
-    """
-    Wraps a native single-line entry field.
-    """
+    def setText(self,text):
+        """ Set/get the text associated with the widget. This might be
+        window title, frame caption, label text, entry field text,
+        or whatever.
+        """
+        if not self.widget: return
+        self.widget.delete_text(0, -1)
+        self.widget.insert_text(str(text))
 
-    def widgetSetup(self):
+    def getText(self):
+        """
+        Fetch the widget's associated text. You *must* implement this
+        to get the text from the native widget; the default getText()
+        from ComponentWrapper (almost) certainly won't work.
+        """
+        if not self.widget: return
+        return self.widget.get_chars(0, -1)
+    
+    def widgetFactory(self, *args, **kws):
+        return gtk.Entry(*args, **kws)
+    
+    def widgetSetUp(self):
         """
         Arrange for a press of the "Enter" key to call self._return.
         """
-        raise NotImplementedError, 'should be implemented by subclasses'
+        pass
 
     def _return(self,*args,**kws):
         send(self.proxy, 'enterkey')
 
-class TextAreaWrapper(TextControlMixin,ComponentWrapper):
+class ScrollableTextView(gtk.ScrolledWindow):
+    """
+    A scrollable text view.  Used by TextAreaWrapper.
+    """
+    def __init__(self, *args, **kw):
+        gtk.ScrolledWindow.__init__(self, *args, **kw)        
+        self._textview = gtk.TextView()
+        self._textview.show()
+        self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        self.add(self._textview)
+
+class TextAreaWrapper(ComponentWrapper):
     """
     Wraps a native multiline text area. If TextControlMixin works
     for your backend, you shouldn't need to change anything here.
     """
+    def widgetFactory(self, *args, **kws):
+        frame = gtk.Frame()
+        scrollable = ScrollableTextView(*args, **kws)
+        scrollable.show()
+        frame.add(scrollable)
+        frame._textview = scrollable._textview
+        return frame
+
+    def widgetSetUp(self):
+        if self.widget:
+            self.widget._textview.set_wrap_mode(gtk.WRAP_WORD)
+    
+    def getText(self):
+        if not self.widget: return
+        buffer = self.widget._textview.get_buffer()
+        return buffer.get_text(buffer.get_start_iter(),
+                               buffer.get_end_iter(),
+                               False)
+
+    def setText(self, text):
+        if not self.widget: return
+        self.widget._textview.get_buffer().set_text(str(text))
+
+    def setSelection(self, selection):
+        if not self.widget: return
+        start, end = selection
+        buffer = self.widget._textview.get_buffer()
+        buffer.move_mark_by_name('selection_bound',
+                                 buffer.get_iter_at_offset(start))
+        buffer.move_mark_by_name('insert',
+                                 buffer.get_iter_at_offset(end))
+
+    def getSelection(self):
+        return self.widget._textview.get_selection_bounds()
+
+    def setEditable(self, editable):
+        if not self.widget: return
+        self.widget._textview.set_editable(editable)        
+
 
 # Incomplete: fix the remainder of this file!
 
@@ -345,6 +511,21 @@ class FrameWrapper(ContainerMixin,ComponentWrapper):
     def __init__(self,*args,**kws):
         ComponentWrapper.__init__(self,*args,**kws)
 
+    def widgetFactory(self):
+        return gtk.Frame()
+    
+    def _getContainer(self):
+        if not hasattr(self, '_gtk_container'):
+            self.create()
+
+        return self._gtk_container
+
+    def widgetSetUp(self):
+        if not hasattr(self, '_gtk_container'):
+            self._gtk_container = gtk.Layout()
+            self.widget.add(self._gtk_container)
+            self._gtk_container.show()
+
     def addToContainer(self,container):
         """
         Add the Frame to its back-end container (another
@@ -353,6 +534,23 @@ class FrameWrapper(ContainerMixin,ComponentWrapper):
         #container.wrapper.widget.add(self.widget)
         raise NotImplementedError, 'should be implemented by subclasses'
 
+    def setContainer(self, *args, **kws):
+        """
+        OK, this probably needs to be pulled into a mixin heritable by
+        various backends.
+        
+        Ensure all contents are properly created. This looks like it could
+        be handled at the Proxy level, but it probably *shouldn't* be -
+        it's handling a Tk-specific requirement about the order in which
+        widgets must be created. (I did it the Proxy way too. This way
+        is definitely "the simplest thing that could possibly work.") - jak
+        """
+        ComponentWrapper.setContainer(self, *args, **kws)
+#        for component in self.proxy.contents:
+#            component.container = self.proxy
+    
+    
+
 class WindowWrapper(ContainerMixin,ComponentWrapper):
     """
     Wraps a top-level window frame.
@@ -360,13 +558,17 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
     connected = 0
 
     def widgetFactory(self, *args, **kws):
-        print "In WindowWrapper.widgetFactory()"
-        return GtkWindow(WINDOW_TOPLEVEL)
+        return gtk.Window(gtk.WINDOW_TOPLEVEL)
 
     def setTitle(self,title):
         if not self.widget: return
         self.widget.set_title(str(title))
 
+    def _getContainer(self):
+        if not hasattr(self, '_gtk_container'):
+            self.widgetSetUp()
+        return self._gtk_container
+    
     def addToContainer(self,container):
         """
         Add self to the backend application, if required.
@@ -378,20 +580,52 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
         Arrange for self.resize() to be called whenever the user
         interactively resizes the window.
         """
-        self._gtk_container = GtkLayout()
-        self.widget.add(self._gtk_container)
-        self._gtk_container.show()
+        if not self.widget:
+            self.create()
+
+        if not hasattr(self, '_gtk_container'):
+            self._gtk_container = gtk.Layout()
+            self.widget.add(self._gtk_container)
+            self._gtk_container.show()
         if not self.connected:
-            self.widget.connect('size_allocate', self.resize)
+            self.widget.connect('size_allocate', self.resizeHandler)
+            self.widget.connect('destroy', self.close)
             self.connected = 1
 
-    def resize(self,dw,dh):
-        """
-        Inform the proxy of a resize event. The proxy then takes care of
-        laying out the container contents. Don't change this method,
-        just call it from an event handler.
-        """
+    def close(self, event):
+        self.widget.destroy()
+        self.destroy()
+        application().remove(self.proxy)
+
+    def resizeHandler(self, *args):
+        w = self.widget.get_allocation().width
+        h = self.widget.get_allocation().height
+        dw = w - self.proxy.state['width']
+        dh = h - self.proxy.state['height']
+
+        if (dw,dh) == (0,0):
+            return        
+
+        #ensure proxy state is updated
+        self.proxy.state['height'] = h
+        self.proxy.state['width']  = w
+        
         self.proxy.resized(dw, dh)
+        
+    def setContainer(self,container):
+        if not application().isRunning(): return
+        if container is None: return
+        if self.widget is None:
+            self.create()
+        self.proxy.push(blocked=['container'])
+        # Ensure contents are properly created.
+        for comp in self.proxy.contents:
+            comp.container = self.proxy
+
+    def setGeometry(self, x, y, width, height):
+        if not self.widget: return
+        self.widget.set_uposition(x, y)
+        self.widget.set_default_size(width, height)
 
 class MenuWrapper:
     pass
@@ -408,6 +642,7 @@ class MenuSeparatorWrapper:
 class MenuBarWrapper:
     pass
 
+
 class Application(AbstractApplication):
     """
     Wraps a backend Application object (or implements one from
@@ -418,10 +653,19 @@ class Application(AbstractApplication):
     Application class simply calls Tk.mainloop() in its
     Application.internalRun() method.
     """
-
+    def __init__(self, **kwds):
+        AbstractApplication.__init__(self, **kwds)
+        self._isRunning = True
+        
+    def isRunning(self): return self._isRunning
+    def internalRemove(self):        
+        if not self._windows:
+            gtk.main_quit()
+            
     def internalRun(self):
         """
         Do whatever is necessary to start your backend's event-
         handling loop.
         """
-        mainloop()
+        gtk.main()
+
