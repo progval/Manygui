@@ -342,7 +342,10 @@ class TextField(ComponentMixin, AbstractTextField):
             self.modify(text=self._backend_text())
 
 
-class TextArea(TextField, AbstractTextArea):
+# FIXME: Inheriting TextField overrides TextArea defaults.
+#        This is a temporary fix. (mlh20011222)
+import anygui.Defaults # Deleted at the end of the module [xyzzy42]
+class TextArea(anygui.Defaults.TextArea, TextField, AbstractTextArea):
     _win_style = TextField._win_style | win32con.ES_MULTILINE | \
                  win32con.ES_AUTOVSCROLL | win32con.ES_WANTRETURN
 
@@ -500,6 +503,9 @@ class Application(AbstractApplication):
 
 ################################################################
 
+# FIXME: Part of temporary fix earlier in file. (Search for xyzzy42)
+del anygui.Defaults # Imported earlier
+
 if __name__ == '__main__':
     from anygui import *
 
@@ -508,3 +514,6 @@ if __name__ == '__main__':
                  width = 300, height = 200)
     win.show()
     application().run()
+
+
+
