@@ -7,11 +7,6 @@ from anygui.Exceptions import Error
 # Screen-management package.
 _scr = None
 
-class CursesGUIException(Error):
-
-    def __init__(self,**kws):
-        self.__dict__.update(kws)
-
 _refresh_all_flag = 0
 def _refresh_all():
     global _refresh_all_flag
@@ -102,11 +97,11 @@ class ComponentMixin:
     _tiny_LLCORNER = ord('<')
     _tiny_LRCORNER = ord('>')
 
-    # Border characters:
     def __init__(self,*args,**kws):
-        #_scr.dbg("Creating %s"%self)
+        ##_scr.dbg("Creating %s"%self)
         self._curses_created = 0
         self._cpos = 1,1 # Cursor position when in focus.
+        # Border characters:
         self._LVLINE = _scr.SCR_LVLINE
         self._RVLINE = _scr.SCR_RVLINE
         self._UHLINE = _scr.SCR_UHLINE
@@ -117,11 +112,16 @@ class ComponentMixin:
         self._LRCORNER = _scr.SCR_LRCORNER
         self._attr = _scr.ATTR_NORMAL
 
+    def _is_visible(self):
+        if self._visible: return self._container._is_visible()
+
     def _set_focus(self,val):
+        self._ensure_enabled_state()
         global _focus_control
         if val:
             _focus_control = self
-            if self._gets_focus and self._visible and self._curses_created \
+            _scr.dbg("_set_focus:",self._gets_focus,self._is_visible(),self._curses_created,_in_focus_purview(self),self)
+            if self._gets_focus and self._is_visible() and self._curses_created \
                and _in_focus_purview(self):
                 return
             else:
@@ -149,6 +149,10 @@ class ComponentMixin:
         w,h = self._scale_xy(self.width,self.height)
         return h
 
+    def _screen_width(self):
+        w,h = self._scale_xy(self.width,self.height)
+        return w
+
     def _effective_texty(self):
         return min(self._texty,self._screen_height()-1)
 
@@ -156,7 +160,7 @@ class ComponentMixin:
         if not self._curses_created: return 0,0
         #if self._needs_container and not self._container: return 0,0
         x,y = self._scale_xy(self.x,self.y)
-        #_scr.dbg("_gsc: %s,%s: %s"%(x,y,self._text))
+        ##_scr.dbg("_gsc: %s,%s: %s"%(x,y,self._text))
         if not self._container:
             return x,y
         cx,cy = self._container._get_screen_coords()
@@ -178,7 +182,7 @@ class ComponentMixin:
         ih = iy2-iy
         if iw<0: iw=0
         if ih<0: ih=0
-        #_scr.dbg("_container_intersect (%s,%s) %s,%s,%s,%s: %s"%(x,y,ix,iy,iw,ih,self))
+        ##_scr.dbg("_container_intersect (%s,%s) %s,%s,%s,%s: %s"%(x,y,ix,iy,iw,ih,self))
         return ix,iy,iw,ih
 
     def _addstr(self,x,y,str,attr=0):
@@ -197,28 +201,29 @@ class ComponentMixin:
         if not self._visible or not self._curses_created:
             return 0,0,0,0
         x,y = self._get_screen_coords()
-        #_scr.dbg("%s,%s: %s"%(x,y,self))
+        ##_scr.dbg("%s,%s: %s"%(x,y,self))
         w,h = self._scale_xy(self.width,self.height)
         x,y,w,h = self._container_intersect(x,y,w,h)
         return x,y,w,h
 
     def _redraw(self):
-        #_scr.dbg("Redrawing (%d) %s"%(self.refresh,self))
+        ##_scr.dbg("Redrawing (%d) %s"%(self.refresh,self))
         if not self._curses_created: return
-        #_scr.dbg("Visible: %s"%self)
+        ##_scr.dbg("Visible: %s"%self)
+        x,y = self._get_screen_coords()
         if self._visible:
             self._erase()
             self._draw_border()
             self._draw_contents()
             ety = self._effective_texty()
-            _scr.dbg("ety ",ety,self,self._height*self._vert_scale)
+            #_scr.dbg("ety ",ety,self,self._height*self._vert_scale)
             if self._use_text:
                 self._addstr(self._textx,ety,self._text)
 
     def _erase(self):
         if not self._curses_created: return
         x,y,w,h = self._get_bounding_rect()
-        #_scr.dbg("Erasing %s"%self)
+        ##_scr.dbg("Erasing %s"%self)
         _scr.erase(x,y,w,h)
 
     def _draw_border(self):
@@ -226,10 +231,10 @@ class ComponentMixin:
         if not self._border: return
         x,y = self._get_screen_coords()
         w,h = self._scale_xy(self.width,self.height)
-        #_scr.dbg("Screen coords %s for %s"%((x,y,w,h),self))
+        ##_scr.dbg("Screen coords %s for %s"%((x,y,w,h),self))
         x,y,w,h = self._container_intersect(x,y,w,h)
         if w == 0 or h == 0: return
-        #_scr.dbg("Container intersect %s for %s"%((x,y,w,h),self))
+        ##_scr.dbg("Container intersect %s for %s"%((x,y,w,h),self))
 
         llcorner = self._LLCORNER
         lrcorner = self._LRCORNER
@@ -256,12 +261,12 @@ class ComponentMixin:
     def _ensure_focus(self):
         if not self._curses_created: return
         x,y = self._get_screen_coords()
-        #_scr.dbg("Ensuring focus %s,%s on %s"%(x,y,self))
+        ##_scr.dbg("Ensuring focus %s,%s on %s"%(x,y,self))
         if _focus_control is self:
-            #_scr.dbg("Ensuring focus on ",self)
-            #_scr.dbg("   HAS FOCUS!")
+            ##_scr.dbg("Ensuring focus on ",self)
+            ##_scr.dbg("   HAS FOCUS!")
             ety = self._effective_texty()
-            _scr.dbg("focus ety ",ety,self,self._height*self._vert_scale)
+            #_scr.dbg("focus ety ",ety,self,self._height*self._vert_scale)
             _scr.move_cursor(x+self._textx,y+ety)
 
     def _handle_event(self,ev):
@@ -281,7 +286,7 @@ class ComponentMixin:
         return self._curses_created
 
     def _ensure_created(self):
-        #_scr.dbg("_ensure_created(): %s"%self)
+        ##_scr.dbg("_ensure_created(): %s"%self)
         if self._curses_created:
             return 0
         if self._needs_container and not self._container:
@@ -291,7 +296,7 @@ class ComponentMixin:
         return 1
 
     def _ensure_geometry(self):
-        #_scr.dbg("Ensuring geometry",self.geometry,self)
+        ##_scr.dbg("Ensuring geometry",self.geometry,self)
         _refresh_all()
         self._redraw()
 
@@ -306,10 +311,9 @@ class ComponentMixin:
                 _app._change_focus()
         else:
             self._gets_focus = self.__class__._gets_focus
-        self._redraw()
 
     def _ensure_destroyed(self):
-        #_scr.dbg("Ensuring destroyed: %s"%self)
+        ##_scr.dbg("Ensuring destroyed: %s"%self)
         self.focus_capture = 0
         _remove_from_focus_list(self)
         self._erase()
@@ -329,6 +333,12 @@ class ContainerMixin(ComponentMixin):
     def __init__(self,*args,**kws):
         ComponentMixin.__init__(self,*args,**kws)
 
+    def _is_visible(self):
+        if self._container:
+            return ComponentMixin._is_visible(self)
+        if self._visible: return 1
+        return 0
+
     def _redraw(self):
         if not self._curses_created: return
         ComponentMixin._redraw(self)
@@ -336,17 +346,17 @@ class ContainerMixin(ComponentMixin):
             comp._redraw()
 
     def _ensure_destroyed(self):
-        #_scr.dbg("Ensuring destroyed ",self)
+        ##_scr.dbg("Ensuring destroyed ",self)
         self.focus_capture = 0
         _remove_from_focus_list(self)
         for comp in self._contents:
             comp._ensure_destroyed()
-        #_scr.dbg("Focus on ",_focus_control,"after dtoy",self)
+        ##_scr.dbg("Focus on ",_focus_control,"after dtoy",self)
         self._erase()
         self._curses_created = 0
 
     def _ensure_focus(self):
-        #_scr.dbg("Ensuring focus in %s"%self)
+        ##_scr.dbg("Ensuring focus in %s"%self)
         ComponentMixin._ensure_focus(self)
         for win in self._contents:
             win._ensure_focus()
@@ -366,7 +376,7 @@ class ContainerMixin(ComponentMixin):
             self._contents.remove(comp)
             comp._set_container(None)
 
-            #_scr.dbg("Refreshing %s"%self)
+            ##_scr.dbg("Refreshing %s"%self)
             self._redraw()
         except ValueError:
             pass
@@ -524,25 +534,132 @@ class TextMixin(ComponentMixin):
 
     def __init__(self,*args,**kws):
         ComponentMixin.__init__(self,*args,**kws)
+        self._tpos=0
+        self._cur_pos=(1,1)
+        self._cur_line = 0
+        self._cur_col = 0
+
+    def _ensure_focus(self):
+        if not self._curses_created: return
+        x,y = self._get_screen_coords()
+        ##_scr.dbg("Ensuring focus %s,%s on %s"%(x,y,self))
+        if _focus_control is self:
+            ##_scr.dbg("Ensuring focus on ",self)
+            ##_scr.dbg("   HAS FOCUS!")
+            ety = self._effective_texty()
+            #_scr.dbg("focus ety ",ety,self,self._height*self._vert_scale)
+            tx,ty = self._cur_pos
+            _scr.move_cursor(x+tx,y+ty)
 
     def _event_handler(self,ev):
-        if ev < 256 and chr(ev) in string.printable:
-            self._text += chr(ev)
-            self._redraw()
+        if ev == 27:
+            _app._change_focus()
+            return 1
+        if ev == 258:
+            self._move_line(1)
+            return 1
+        if ev == 259:
+            self._move_line(-1)
             return 1
         if ev == 127:
-            self._text = self._text[:-1]
+            if self._tpos < 1: return 1
+            self._text = self._text[:self._tpos-1] + self._text[self._tpos:]
+            self._tpos -= 1
             self._redraw()
+            return 1
+        if ev == 260:
+            self._tpos -= 1
+            if self._tpos<0: self._tpos=0
+            self._redraw()
+            _scr.dbg("^H",self._tpos,self)
+            return 1
+        if ev == 261:
+            self._tpos += 1
+            if self._tpos>len(self._text): self._tpos=len(self._text)
+            self._redraw()
+            _scr.dbg("^L",self._tpos,self)
+            return 1
+        if ev < 256 and chr(ev) in string.printable:
+            self._text = self._text[:self._tpos] + chr(ev) + self._text[self._tpos:]
+            self._tpos += 1
+            self._redraw() # FIXME: only really need to redraw current line.
             return 1
         return 0
 
+    def _move_line(self,n):
+        lines = self._text.split('\n')
+        nlines = len(lines)
+        self._cur_line += n
+        cur_line_not_0 = 1
+        if self._cur_line <= 0:
+            self._cur_line = 0
+            cur_line_not_0 = 0
+        if self._cur_line >= nlines:
+            self._cur_line = nlines-1
+        lline = len(lines[self._cur_line])
+        if lline<self._cur_col:
+            self._cur_col = lline
+        trunc_lines = lines[:self._cur_line]
+        self._tpos = len(string.join(trunc_lines,'\n'))+self._cur_col+cur_line_not_0
+        self._redraw()
+
     def _draw_contents(self):
+        if self._screen_height()<2: return
+        
         t = self._text
         x=1;y=1
         lines = self._text.split('\n')
-        for li in lines:
-            self._addstr(x,y,li)
+        line,col = self._find_cursor_pos(lines)
+        self._cur_line_len = len(lines[line])
+
+        startline,startcol = self._find_relative_cpos(line,col,len(lines),len(lines[line]))
+        sh = self._screen_height()
+
+        for li in range(0,min(sh,len(lines)-startline)):
+            _scr.dbg("start,line:",startline,li,self)
+            line = lines[startline+li]
+            self._addstr(x,y,line[startcol:])
             y+=1
+
+    def _find_relative_cpos(self,line,col,nlines,nchars):
+        # Take the line,col position of the cursor in self._text
+        # and convert it, based on window size, into the window-
+        # relative cursor position, which is stored in self._cpos.
+        # Then return the line and column of the character that
+        # should appear at the top-left corner.
+        lh = self._screen_height()-2
+        startline = 0
+        if lh<nlines:
+            startline = line - lh
+            if startline<0: startline = 0
+            
+        lw = self._screen_width()-2
+        startcol = 0
+        if lw<nchars:
+            startcol = col - lw
+            if startcol<0: startcol = 0
+
+        self._cur_pos = (col-startcol+1, line-startline+1)
+        _scr.dbg("cur_pos:",self._cur_pos,self)
+
+        return startline,startcol
+
+    def _find_cursor_pos(self,lines):
+        tp = self._tpos
+        ll = 0
+        tt = 0
+        tl = len(lines)
+        lastlen = 0
+        line = 0
+        while tt<=tp and ll<tl:
+            lastlen = len(lines[ll])+1
+            line = ll
+            tt += lastlen
+            ll += 1
+        col=lastlen-(tt-tp)
+        self._cur_line = line
+        self._cur_col = col
+        return line,col
 
     def _ensure_editable(self):
         pass
@@ -592,7 +709,7 @@ class Window(ContainerMixin, AbstractWindow):
         ContainerMixin.__init__(self,*args,**kws)
         AbstractWindow.__init__(self,*args,**kws)
         self._text = ""
-        #_scr.dbg("%s:%s"%(self._title,self.geometry))
+        ##_scr.dbg("%s:%s"%(self._title,self.geometry))
 
     def _ensure_destroyed(self):
         ContainerMixin._ensure_destroyed(self)
@@ -613,13 +730,10 @@ class Window(ContainerMixin, AbstractWindow):
 
     def _present_winmenu(self):
         x,y = self._x,self._y
-        w,h = int(round(12.0/self._horiz_scale)),int(round(8.0/self._vert_scale))
+        w,h = int(round(12.1/self._horiz_scale)),int(round(4.1/self._vert_scale))
         self._omenu = MenuWindow(title="?Window")
         self._omenu._event_handler = self._winmenu_event_handler
         self._omenu.geometry=(x,y,w,h)
-        sx,sy,sw,sh = self._omenu._get_bounding_rect()
-        #_scr.dbg("omenu geo",(x,y,w,h))
-        #_scr.dbg("omenu scr geo",(sx,sy,sw,sh))
         x,y = int(round(1.1/self._horiz_scale)),int(round(1.1/self._vert_scale))
         w,h = int(round(10.1/self._horiz_scale)),int(round(1.1/self._vert_scale))
         self._clbtn = MenuButton(geometry=(x,y,w,h),text="Close")
@@ -689,7 +803,7 @@ class Window(ContainerMixin, AbstractWindow):
         self.resized(dw,dh)
 
     def _close(self,*args,**kws):
-        #_scr.dbg("CLOSING %s"%self)
+        ##_scr.dbg("CLOSING %s"%self)
         self._omenu.destroy()
         self.destroy()
 
@@ -718,11 +832,12 @@ class Application(AbstractApplication):
         AbstractApplication.__init__(self)
         self._quit = 0
         _scr.scr_init()
+        _set_scale(_scr._xsize,_scr._ysize)
         global _app
         _app = self
 
     def _window_deleted(self):
-        #_scr.dbg("WINDOW DELETED")
+        ##_scr.dbg("WINDOW DELETED")
         if not self._windows:
             self._quit = 1
         else:
@@ -760,7 +875,7 @@ class Application(AbstractApplication):
             self._redraw_all()
 
     def _app_event_handler(self,ch):
-        _scr.dbg("APP_EVENT_HANDLER",ch)
+        #_scr.dbg("APP_EVENT_HANDLER",ch)
         if ch == 17: # ^Q
             return 0
         if ch == 6 or ch == 258:  # ^F,down
@@ -798,12 +913,12 @@ class Application(AbstractApplication):
             for win in self._windows:
                 win._redraw()
             _refresh_all_flag = 0
-        #_scr.dbg("redraw_all: %s"%self._windows)
+        ##_scr.dbg("redraw_all: %s"%self._windows)
         self._ensure_focus()
         _scr.refresh()
 
     def _change_focus(self,dir=1):
-        _scr.dbg("**** CHANGING FOCUS",dir)
+        #_scr.dbg("**** CHANGING FOCUS",dir)
         global _focus_dir
         _focus_dir = dir
         
@@ -811,13 +926,15 @@ class Application(AbstractApplication):
         if not _focus_control:
             for win in _all_components:
                 win.focus = 1
-                if _focus_control: return
-            _scr.dbg("NOFOCUS: FOCUS NOW ON",_focus_control,"\n")
+                if _focus_control:
+                    self._raise_focus_window()
+                    return
+            #_scr.dbg("NOFOCUS: FOCUS NOW ON",_focus_control,"\n")
             return
         
         # Move focus to the next control that can accept it.
         aclen = len(_all_components)
-        _scr.dbg("aclen:",aclen)
+        #_scr.dbg("aclen:",aclen)
         tried = 0
 
         fc = _focus_control
@@ -831,7 +948,8 @@ class Application(AbstractApplication):
             if ii<0: ii = aclen-1
             _all_components[ii].focus = 1
 
-        _scr.dbg("FOCUS NOW ON",_focus_control,"\n")
+        #_scr.dbg("FOCUS NOW ON",_focus_control,"\n")
+        self._raise_focus_window()
 
     #def _window_lost_focus(self,win):
     #    try:
@@ -849,6 +967,12 @@ class Application(AbstractApplication):
     def _ensure_focus(self):
         for win in self._windows:
             win._ensure_focus()
+
+    def _raise_focus_window(self):
+        if not _focus_control: return
+        for win in self._windows:
+            if _contains(win,_focus_control):
+                self._move_to_top(win)
 
     def _move_to_top(self,win):
         self._windows.remove(win)

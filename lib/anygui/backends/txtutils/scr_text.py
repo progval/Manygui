@@ -1,5 +1,7 @@
 # Curses magic simulated on dumb console.
 
+import os
+
 _debug_messages = 0
 if _debug_messages:
     _f = open("txt.txt","w")
@@ -32,12 +34,25 @@ ATTR_UNDERLINE = 0
 # Screen buffer.
 _xsize=80
 _ysize=23
+try:
+    _xsize,_ysize=map(int,os.environ['ANYGUI_SCREENSIZE'].split('x'))
+    _ysize -= 1 # Leave room for the prompt line.
+except KeyError:
+    try:
+        _xsize=int(os.environ['COLUMNS'])
+        _ysize=int(os.environ['LINES'])
+        _ysize -= 1 # Leave room for the prompt line.
+    except KeyError:
+        pass
+print 'x,y=',_xsize,_ysize
 _line = [' ']*_xsize
 _scrbuf = []
 for ii in range(0,_ysize):
     _scrbuf.append(_line[:])
 
 def addstr(x,y,ch,n=0,attr=0):
+    if _inbuf!="":
+        return
     dbg('addstr %s,%s,%s,%s'%(x,y,ch,n))
     global _scrbuf
     if n == 0: n = len(ch)
@@ -47,6 +62,8 @@ def addstr(x,y,ch,n=0,attr=0):
     dbg("SCRBUF: %s"%_scrbuf)
 
 def erase(x,y,w,h):
+    if _inbuf!="":
+        return
     dbg('erase %s,%s,%s,%s'%(x,y,w,h))
     global _scrbuf, _under_curs
     x = max(0,x)
@@ -62,6 +79,8 @@ def erase(x,y,w,h):
         _under_curs = ' '
 
 def addch(y,x,ch):
+    if _inbuf!="":
+        return
     dbg('addch %s,%s,%s'%(x,y,ch))
     if x<0 or y<0 or x>=_xsize or y>=_ysize:
         return
@@ -70,12 +89,15 @@ def addch(y,x,ch):
     if x==_cursx and y==_cursy: _under_curs = chr(ch)
 
 def refresh():
-    print join(reduce(op.add,_scrbuf),'')
+    if _inbuf=="":
+        print join(reduce(op.add,_scrbuf),'')
 
 def erase_all():
+    if _inbuf!="":
+        return
     global _scrbuf
     _scrbuf = []
-    for ii in range(0,23):
+    for ii in range(0,_ysize):
         _scrbuf.append(_line[:])
 
 def scr_quit():
