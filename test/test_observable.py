@@ -80,5 +80,7 @@ class View:
 
 # Do the doctest thing.
 if __name__ == "__main__":
+    print "If you want detailed output, use \"python test_observable.py -v\"."
+    print "No output after this line indicates everything is working."
     import doctest, test_observable
     doctest.testmod(test_observable)
