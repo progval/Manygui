@@ -183,6 +183,11 @@ class TextField(ComponentMixin, AbstractTextField):
     def _backend_selection(self):
         if self._wx_comp:
             return self._wx_comp.GetSelection()
+
+
+    def _backend_text(self):
+        if self._wx_comp:
+            return  self._wx_comp.GetValue()
             
     def _ensure_text(self):
         if self._wx_comp:
@@ -234,6 +239,10 @@ class TextArea(ComponentMixin, AbstractTextArea):
                 start -= text[:start].count('\n')
                 end -= text[:end].count('\n')
             return start, end
+
+    def _backend_text(self):
+        if self._wx_comp:
+            return  self._wx_comp.GetValue()
             
     def _ensure_text(self):
         if self._wx_comp:

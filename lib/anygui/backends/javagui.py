@@ -381,9 +381,9 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
 class TextField(ComponentMixin, AbstractTextField):
     _java_class = swing.JTextField
 
-    #def _backend_text(self):
-    #    if self._java_comp:
-    #        return self._java_comp.text
+    def _backend_text(self):
+        if self._java_comp:
+            return self._java_comp.text
 
     def _backend_selection(self):
         if self._java_comp:

@@ -1,3 +1,6 @@
+In test_textfield the update button resets the text
+field in wxgui.
+
 There seems to be some infinite recursion associated with
 the text components in javagui.
 
