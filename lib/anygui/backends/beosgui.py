@@ -250,6 +250,12 @@ class ListBox(ComponentMixin, AbstractListBox):
             self._ensure_events()
             return result
     
+    def _ensure_geometry(self):
+        self._beos_bounds = (float(self._x),
+                float(self._y),
+                float(self._width+ self._x-15),
+                float(self._height+self._y))
+        
     def _ensure_created2(self):
         "Without Scroll Bars."
         self._beos_class = BListView.BListView
@@ -502,6 +508,12 @@ class TextArea(ComponentMixin, AbstractTextArea):
         if self._beos_comp:
             start, end = self._selection
             self._beos_sub.Select(start, end)
+
+    def _ensure_geometry(self):
+        self._beos_bounds = (float(self._x),
+                float(self._y),
+                float(self._width+ self._x-15),
+                float(self._height+self._y))
     
     def _backend_selection(self):
         if self._beos_comp:
