@@ -1,6 +1,6 @@
 Title: Anygui Tutorial
 Author: Magnus Lie Hetland
-Date: 2002-01-04
+Date: 2003-02-16
 
 1. Introduction
 
@@ -54,13 +54,14 @@ Date: 2002-01-04
 
       from anygui import *
       
-      win = Window()
       app = Application()
+      win = Window()
       app.add(win)
 
    There; we've created a Window object, an Application object, and
    added the Window to the Application (otherwise it wouldn't show up
-   anywhere).
+   anywhere). You should create your Application object before your
+   other Anygui components (including Windows).
 
    This won't do anything by itself; we need to tell the Application
    to start running, which will "freeze" the script and start up a
@@ -217,7 +218,7 @@ Date: 2002-01-04
    containing the action to be performed (called the "event handler")
    and link it to the button:
 
-      def handler(**kw):
+      def handler(event):
           txt.text = sentence()
 
       link(btn, 'click', handler)
@@ -239,9 +240,9 @@ Date: 2002-01-04
    Cool, huh?
 
    (Note: Event handlers receive information about the event through
-   keyword arguments, such as event type, the time when the event
-   occurred etc. We simply ignore all that here, using the **kw syntax
-   to allow any keywords.)
+   Event objects. We ignore the specifics of these objects here. In
+   version 0.1.1 and earlier, event handlers received information
+   through keyword arguments.)
 
 9. Further Exploration
 
@@ -317,6 +318,8 @@ A. The Program
                 choice(nouns)]
        return ' '.join(words)
 
+   app = Application()
+
    win = Window()
 
    btn = Button(text='Click Me')
@@ -327,10 +330,9 @@ A. The Program
 
    win.height = txt.height + btn.height + 30
 
-   def handler(**kw): txt.text = sentence()
+   def handler(event): txt.text = sentence()
    link(btn, 'click', handler)
 
-   app = Application()
    app.add(win)
    app.run()
 
