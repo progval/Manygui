@@ -4,7 +4,9 @@ import sys
 __all__ = '''
 
   Application
+  ButtonWrapper
   LabelWrapper
+  TextFieldWrapper
   ListBoxWrapper
   WindowWrapper
 
@@ -71,6 +73,21 @@ class Wrapper(AbstractWrapper):
         #assert isDummy(self.proxy.state['container'].wrapper.widget)
         self.proxy.push() 
 
+    def create(self, *args, **kwds):
+        
+        #FIXME: This does no harm in Jython, since the GUI will run
+        #before app.run() anyway. However, this does mean that javagui
+        #will behave differently from other back-ends, i.e. the
+        #widgets will appear earlier than expected. Also, the reason
+        #why this overriding was needed was that
+        #AbstractWrapper.create wasn't called after the main loop was
+        #entered. That should be fixed, and this method should then
+        #probably be removed. [mlh@20020831]
+
+        if self.noWidget():
+            self.widget = self.widgetFactory(*args, **kwds)
+            self.widgetSetUp()
+
     # internalDestroy?
 
 ################################################################
@@ -136,7 +153,7 @@ class ComponentWrapper(Wrapper):
                 container = self._container
             except AttributeError: pass
             else:
-                bounds = comp.bounds
+                bounds = self.widget.bounds
                 container.remove(self.widget)
                 container.repaint(bounds)
             try: self.widget.dispose()
@@ -156,7 +173,22 @@ class ComponentWrapper(Wrapper):
             return self.widget.text
         else:
             return "" # @@@ What would be the best behaviour here? Should there be an exception?
-          
+
+################################################################
+
+class ButtonWrapper(ComponentWrapper):
+
+    def clickHandler(self, event):
+        send(self.proxy, 'click')
+
+    def widgetSetUp(self):
+        insets = awt.Insets(0, 0, 0, 0)
+        self.widget.margin = insets
+        self.widget.actionPerformed = self.clickHandler
+
+    def widgetFactory(self, *args, **kwds):
+        return swing.JButton()
+
 ################################################################
 
 class LabelWrapper(ComponentWrapper):
@@ -167,6 +199,35 @@ class LabelWrapper(ComponentWrapper):
         widget.verticalAlignment = swing.SwingConstants.TOP    # @@@ Should be settable from Proxy
         return widget
 
+################################################################
+
+class TextFieldWrapper(ComponentWrapper):
+
+    def widgetFactory(self, *args, **kwds):
+        return swing.JTextField()
+
+    def widgetSetUp(self):
+        self.widget.actionPerformed = self.enterHandler
+
+    def enterHandler(self, event):
+        send(self, 'enterkey')
+
+    def getSelection(self):
+        return self.widget.selectionStart, \
+               self.widget.selectionEnd
+
+    def setSelection(self, selection):
+        self.widget.selectionStart = selection[0]
+        self.widget.selectionStart = selection[1]
+
+    def setEditable(self, editable):
+        self.widget.editable = editable
+
+    def setText(self, text):
+        self.widget.text = text
+
+    def getText(self):
+        return self.widget.text
 
 ################################################################
 
@@ -209,6 +270,7 @@ class ListBoxWrapper(ComponentWrapper):
         self.widget.setSelectedIndex(selection)
         
     def getSelection(self):
+        # FIXME: This should be handled differently
         if isDummy(self.widget): return 0
         return self.widget.getSelectedIndex()
 
@@ -231,7 +293,8 @@ class ListBoxWrapper(ComponentWrapper):
         self.widget.setMouseReleased(self.clickHandler)
 
     def clickHandler(self, event):
-        send(self, 'select')
+        send(self.proxy, 'select')
+        send(self.proxy, 'click')
 
 ################################################################
 
