@@ -5,21 +5,33 @@ from weakref import ref
 # Support for using bound methods with weak references.
 # See http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/81253
 
+# Note: To allow the weakref behaviour to be switched on and off,
+# these support an additional "weak" keyword argument. If it is
+# set to 0, hard references will be used.
+
 class WeakCallable:
-    def __init__(self, obj, func):
-        try:
-            self.obj = ref(obj)
-        except TypeError:
-            self.obj = None
+    def __init__(self, obj, func, weak=1):
+        self.weak = weak
+        if weak:
+            try:
+                self.obj = ref(obj)
+            except TypeError:
+                self.obj = None
+        else:
+            self.obj = obj
         self.meth = func
     def __call__(self, *args, **kwds):
         if self.obj is not None:
-            return self.meth(self.obj(), *args, **kwds)
+            if self.weak:
+                return self.meth(self.obj(), *args, **kwds)
+            else:
+                return self.meth(self.obj, *args, **kwds)
         else:
             return self.meth(*args, **kwds)
 
 class WeakMethod:
-    def __init__(self, func):
+    def __init__(self, func, weak=1):
+        self.weak = weak
         try:
             obj, func = func
         except TypeError:
@@ -27,43 +39,78 @@ class WeakMethod:
         if obj and hasattr(func, 'im_self'):
             assert obj is func.im_self
         try:
-            self.obj = ref(func.im_self)
+            if weak:
+                self.obj = ref(func.im_self)
+            else:
+                self.obj = func.im_self
             self.meth = func.im_func
         except AttributeError:
-            self.obj = ref(obj)
+            if weak:
+                self.obj = ref(obj)
+            else:
+                self.obj = obj
             self.meth = func
     def get_obj(self):
         if self.obj is None: return None
-        return self.obj()
+        if self.weak:
+            return self.obj()
+        else:
+            return self.obj
     def __eq__(self, other):
-        if self.obj == other.obj:
+        if self.weak:
+            self_obj = self.obj()
+        else:
+            self_obj = self.obj
+        if other.weak:
+            other_obj = other.obj()
+        else:
+            other_obj = other.obj
+        if self_obj == other_obj:
             if self.meth == other.meth:
                 return 1
         return 0
     def __call__(self):
         if self.dead(): return None
         obj = self.obj
-        if obj is not None: obj = obj()
+        if obj is not None and self.weak: obj = obj()
         return WeakCallable(obj, self.meth)
     def dead(self):
-        return self.obj is not None and self.obj() is None
+        return self.obj is not None and \
+               self.weak and self.obj() is None
 
 class HashableWeakRef:
-    def __init__(self, obj):
+    def __init__(self, obj, weak=1):
+        self.weak = weak
         if obj is None:
             self.ref = None
-        else:
+        elif weak:
             self.ref = ref(obj)
+        else:
+            self.ref = obj
     def __call__(self):
         if self.ref is None:
             return None
-        return self.ref()
-    def __cmp__(self,other):
-        if id(self.ref)<id(other.ref): return 1
-        if id(self.ref)>id(other.ref): return -1
+        elif self.weak:
+            return self.ref()
+        else:
+            return self.ref
+    def __eq__(self, other):
+        if self.weak:
+            self_ref = self.ref()
+        else:
+            self_ref = self.ref
+        if other.weak:
+            other_ref = other.ref()
+        else:
+            other_ref = other.ref
+        if self_ref == other_ref:
+                return 1
         return 0
     def __hash__(self):
-        return id(self.ref)
+        if self.weak:
+            return id(self.ref())
+        else:
+            return id(self.ref)
 
 # To be phased out with the place() method
 def flatten(seq):
