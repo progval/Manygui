@@ -1,5 +1,5 @@
 from anygui import application
-from anygui.Utils import getSetters, topologicalSort
+from anygui.Utils import topologicalSort, getSetter, setterName
 
 """
 The back-end wrapper presents a unified and simple interface for
@@ -66,7 +66,7 @@ class AbstractWrapper:
         The resulting mapping is used by getSetters() during setter
         dispatch in update().        
         """
-        self.aggregates[signature] = setter
+        self.aggregates[signature] = name
 
     def getSetters(self, attrs):
         """
@@ -86,10 +86,12 @@ class AbstractWrapper:
         """
         result = []
         candidates = self.aggregates.items()
+        attrs = attrs[:]
         def moreSpecific(aggr1, aggr2):
             return cmp(len(aggr1[0]), len(aggr2[0]))
         # Get the aggregates:
         candidates.sort(moreSpecific)
+        candidates.reverse()
         for candidate in candidates:
             for attr in candidate[0]:
                 if not attr in attrs: break
@@ -97,13 +99,13 @@ class AbstractWrapper:
                 setter = getSetter(self, candidate[1])
                 if not setter is None:
                     for attr in candidate[0]: attrs.remove(attr)
-                    result.append((setter, attr[0]))
+                    result.append((setter, candidate[0]))
         # Get the plain setters:
         unhandled = []
         for attr in attrs:
             setter = getSetter(self, attr)
             if setter is not None:
-                result.append(setter, (attr,))
+                result.append((setter, (attr,)))
             else:
                 unhandled.append(attr)
 
@@ -136,7 +138,7 @@ class AbstractWrapper:
         method are ignored.
         """
         # Use self.dependencies -- document it
-        setters, unhandled = getSetters(self, state.keys())
+        setters, unhandled = self.getSetters(state.keys())
         for setter, params in setters:
             kwds = {}
             for key in params:
@@ -164,9 +166,13 @@ class AbstractWrapper:
         has been entered, since many backend Wrappers will then be
         able to instantiate their native widgets.
         """
-        if application().isRunning() and not self.inMainLoop:
-            self.inMainLoop = 1
-            self.enterMainLoop()
+
+        # mlh20020321: Temporarily commented out while working without
+        # any viable backends:
+        import warnings; warnings.warn('Unfixed code in AbstractWrapper.prod()')
+        #if application().isRunning() and not self.inMainLoop:
+        #    self.inMainLoop = 1
+        #    self.enterMainLoop()
         self.internalProd()
 
     def enterMainLoop(self):
