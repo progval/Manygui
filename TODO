@@ -17,6 +17,10 @@ Tentative release date: December 10th, 2001
 
 * Resolve the single-line/multi-line Label issue
 
+* Add support for __delattr__ (in the form of _del_foobar)
+  in Mixins.Attrib, and make sure it's used where applicable
+  in the various modules.
+
 Objectives for version 0.2:
 ---------------------------
 Tentative release date: February 28th, 2002
