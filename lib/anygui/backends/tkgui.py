@@ -165,8 +165,7 @@ class ListBox(ComponentMixin, AbstractListBox):
     def _ensure_events(self):
         if self._tk_comp:
             self._tk_comp.bind('<ButtonRelease-1>', self._tk_clicked)
-            self._tk_comp.bind('<KeyRelease-Up>',self._tk_clicked)
-            self._tk_comp.bind('<KeyRelease-Down>',self._tk_clicked)
+            self._tk_comp.bind('<KeyRelease-space>',self._tk_clicked)
 
     def _tk_clicked(self, event):
         self.do_action()
