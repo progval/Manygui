@@ -204,8 +204,8 @@
 	<line>Java Swing (javagui)   <url>http://www.jython.org</url></line>
 	<line>PyGTK      (gtkgui)    <url>http://www.daa.com.au/~james/pygtk</url></line>
 	<line>Bethon     (beosgui)   <url>http://www.bebits.com/app/1564</url></line>
-	<!-- PyQt -- qtgui -->
-	<!-- curses -- cursesgui -->
+	<!-- PyQt - qtgui -->
+	<!-- curses - cursesgui -->
       </codelisting>
 
       <!--
@@ -1024,6 +1024,14 @@
 
       <para><apiname>add</apiname>(<var>comp</var>, [<var>opts</var>,] **<var>kwds</var>)</para>
       
+      <para>Adds one or more components. The parameter
+      <code>comp</code> may be either a single component, or a
+      sequence of components. In the latter case, all the components
+      will be added.</para>
+
+      <para>The <code>opts</code> parameter containes an
+      <code>Options</code> object (see below)</para>
+
       <para>[layout, layout managers, layout property]</para>
 
       <para><strong>class Label</strong></para>
