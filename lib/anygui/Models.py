@@ -133,6 +133,19 @@ class TextModel(ListModel):
     def __str__(self): return ''.join(self.data)
 
 
+# when 2.2 is the standard, just multiply inherit from Model
+# and the appropriate builtin type and have appropriate _set_value
+# and _get_value accessors depending on the type -- all of the
+# boilerplate specialmethods as in the following class NumberModel
+# won't be needed then.  For example:
+#     class IntModel(int, ModelThatInheritsFromObject):
+#         _value = 0
+#         def _set_value(self, value):
+#             self._value = value
+#         def _get_value(self):
+#             return self._value
+# Note the setter/getter can be avoided for immutable builtins.
+
 class NumberModel(Model):
 
     _value = 0

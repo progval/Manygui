@@ -11,13 +11,12 @@ _no_auto_ensures = '_ensure_created _ensure_destroyed'.split()
 # get all names of methods starting with _ensure_ for a class & its bases,
 # except those listed in _no_auto_ensures
 def _get_all_ensures(klass, theset):
-    for x in dir(klass):
-        if x.startswith('_ensure_'):
-            if x in _no_auto_ensures: continue
-            v = getattr(klass,x)
-            if callable(v):
-                theset[x]=1
-    for b in klass.__bases__: _get_all_ensures(b, theset)
+    for name in dir(klass):
+        if name.startswith('_ensure_'):
+            if name in _no_auto_ensures: continue
+            value = getattr(klass,name)
+            if callable(value): theset[name]=1
+    for base in klass.__bases__: _get_all_ensures(base, theset)
 
 
 class Attrib:
