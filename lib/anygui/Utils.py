@@ -5,8 +5,10 @@ from Exceptions import InternalError
 
 # To be phased out with the place() method
 def flatten(seq):
-    '''Flatten a sequence. If seq is not a sequence, return [seq].
-    If seq is empty, return [].'''
+    """
+    Flatten a sequence. If seq is not a sequence, return [seq].  If
+    seq is empty, return [].
+    """
     try:
         if len(seq) > 0:
             seq[0]
