@@ -51,7 +51,8 @@ def connect(event, handler, weak=0):
     cat, key = locators(event)
     handler = WeakMethod(handler, weak)
     try:
-        registry[cat][key].append(handler)
+        if not handler in registry[cat][key]:
+            registry[cat][key].append(handler)
     except KeyError:
         registry[cat][key] = [handler]
 
