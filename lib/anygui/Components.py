@@ -2,8 +2,9 @@ from anygui.Proxies import Proxy
 from anygui.Events import DefaultEventMixin
 from anygui.Exceptions import SyncError
 from anygui.LayoutManagers import LayoutData
-#from anygui.Rules import RuleEngine
+from anygui.Rules import RectEngine
 
+rules = RectEngine()
 #rules = RuleEngine()
 #rules.define('position = x, y')
 #rules.define('size = width, height')
@@ -18,11 +19,11 @@ class Component(Proxy, DefaultEventMixin):
     height properties.  It may be contained within another Component.
     """
 
-    _aggregates = {
-        'position': ('x', 'y'),
-        'size': ('width', 'height'),
-        'geometry': ('x', 'y', 'width', 'height')
-        }
+    #_aggregates = {
+    #    'position': ('x', 'y'),
+    #    'size': ('width', 'height'),
+    #    'geometry': ('x', 'y', 'width', 'height')
+    #    }
     
     def __init__(self, *args, **kw):
         DefaultEventMixin.__init__(self)
@@ -51,12 +52,10 @@ class Component(Proxy, DefaultEventMixin):
         may also include 'y', but that doesn't affect the sync. If
         these requirements are broken, a SyncError is raised.
         """
-        # FIXME: Should use modify() etc...
-        #rules.sync(self.state, names)
+        rules.sync(self, names)
 
     def blockedNames(self):
         """
         Blocks all aggregates from being passed to the backend.
         """
-        #return ['position', 'size', 'geometry']
-        return []
+        return ['position', 'size', 'geometry']

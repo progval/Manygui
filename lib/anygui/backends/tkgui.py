@@ -135,12 +135,16 @@ class WindowWrapper(ComponentWrapper):
 
     # Creation/event setup should be placed more consistently...
     def internalProd(self):
+        try: self.proxy.container # Should check for None, but not properly implemented yet...
+        except AttributeError: return
         if application().isRunning():
-            try: assert self.widget.isDummy()
+            try:
+                assert self.widget.isDummy()
             except (AttributeError, AssertionError): pass
             else:
                 self.widget = self.widgetFactory()
                 self.widget.protocol('WM_DELETE_WINDOW', self.closeHandler)
+                self.proxy.sync()
 
     def closeHandler(self):
         self.destroy()
@@ -166,7 +170,7 @@ class WindowWrapper(ComponentWrapper):
         self.widget.title(title)
 
     def setContainer(self, container):
-        pass
+        self.prod()
 
     def setVisible(self, visible):
         if visible: self.widget.deiconify()

@@ -6,8 +6,8 @@ class Proxy(Attrib):
 
     def __init__(self, *args, **kwds):
         Attrib.__init__(self, *args, **kwds)
-        self.rawSet(wrapper=self.wrapperFactory())
-        self.sync() # @@@ Hm...
+        self.rawSet(wrapper=self.wrapperFactory()) # wrapper in state?
+        self.sync() # Hm... Move to wrapper.internalProd?
 
     def wrapperFactory(self):
         """
@@ -44,11 +44,12 @@ class Proxy(Attrib):
             the backend either.
           
         """
+        self.internalSync(names)
+
         # FIXME: Acceptable?
         try: self.wrapper
         except AttributeError: return
 
-        self.internalSync(names)
         state = {}
         try: blocked = kwds['blocked']
         except KeyError: blocked = []

@@ -1,5 +1,121 @@
 
-# Currently not working (and bloating terribly :P)
+class IllegalState(Exception): pass
+
+class RuleEngine:
+
+    def call(self, name, check=0):
+        try:
+            method = getattr(self, 'sync'+name.capitalize())
+            method(check)
+        except (AttributeError, TypeError): pass
+
+    def sync(self, obj, defs):
+        self.obj = obj
+        self.state = obj.state
+        self.defs = defs
+        self.complete()
+        for name in defs:
+            self.call(name)
+        for name in self.atoms:
+            self.call(name, check=1)
+
+    def wholeSync(self, name, *parts):
+        state = self.state
+        this = state[name]
+        for attr, index in parts:
+            other = state[attr]
+            if this != other[index]:
+                if attr in self.defs: raise IllegalState, 'overdetermined sync'
+                other = list(other)
+                other[index] = this
+                other = tuple(other)
+                self.obj.rawModify(**{attr:other})
+
+    def wholeCheck(self, name, *parts):
+        state = self.state
+        this = state[name]
+        for attr, index in parts:
+            other = state[attr]
+            if this != other[index]: raise IllegalState, 'underdetermined sync'
+
+    def partSync(self, name, *parts):
+        state = self.state
+        this = state[name]
+        modified = []
+        for attr, index in parts:
+            other = state[attr]
+            if this[index] != other:
+                if attr in self.defs: raise IllegalState, 'overdetermined sync'
+                self.obj.rawModify(**{attr:this[index]})
+                modified.append(attr)
+        return modified
+
+class RectEngine(RuleEngine):
+
+    atoms = 'x', 'y', 'width', 'height'
+
+    def complete(self):
+        # x, y, width, and height are assumed to exist
+        state = self.state
+        if not state.has_key('position'):
+            state['position'] = state['x'], state['y']
+        if not state.has_key('size'):
+            state['size'] = state['width'], state['height']
+        if not state.has_key('geometry'):
+            state['geometry'] = state['x'], state['y'], \
+                                state['width'], state['height']
+
+    def syncX(self, check=0):
+        if check: method = self.wholeCheck
+        else: method = self.wholeSync
+        method('x', ('position', 0), ('geometry', 0))
+
+    def syncY(self, check=0):
+        if check: method = self.wholeCheck
+        else: method = self.wholeSync
+        method('y', ('position', 1), ('geometry', 1))
+
+    def syncWidth(self, check=0):
+        if check: method = self.wholeCheck
+        else: method = self.wholeSync
+        method('width', ('size', 0), ('geometry', 2))
+
+    def syncHeight(self, check=0):
+        if check: method = self.wholeCheck
+        else: method = self.wholeSync
+        method('height', ('size', 1), ('geometry', 3))
+
+    def syncPosition(self, dummy=0):
+        modified = self.partSync('position', ('x', 0), ('y', 1))
+        for name in modified: self.call(name)
+
+    def syncSize(self, dummy=0):
+        modified = self.partSync('size', ('width', 0), ('height', 1))
+        for name in modified: self.call(name)
+
+    def syncGeometry(self, dummy=0):
+        modified = self.partSync('geometry', ('x', 0), ('y', 1),
+                                 ('width', 2), ('height', 3))
+        for name in modified: self.call(name)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
 
 '''
 class IllegalState(Exception): pass

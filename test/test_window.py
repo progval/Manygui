@@ -14,7 +14,7 @@ def new_window(event):
     win = Window(title='Yay, another window!', x=100, y=100)
 
     # Test for flashing (should not be visible):
-    for i in range(5):
+    for i in xrange(100):
         win.visible = not win.visible
     win.visible = 1
 
