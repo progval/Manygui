@@ -37,6 +37,7 @@ class AbstractFrame(AbstractComponent):
     def place(self, items,
               left = None, right = None,
               top = None, bottom = None,
+              position = None, # Shortcut for (left, top)
               hmove = 0, vmove = 0,
               hstretch = 0, vstretch = 0,
 ##              hscroll = 0, vscroll = 0,
@@ -66,6 +67,9 @@ class AbstractFrame(AbstractComponent):
         except KeyError:
             raise ArgumentError(self, 'place', 'direction', direction)
         # Unpack the side arguments
+        if position != None:
+            assert left == None and top == None, "position shouldn't be overspecified"
+            left, top = position
         left_obj, left_off = side(left, 'left')
         right_obj, right_off = side(right, 'right')
         top_obj, top_off = side(top, 'top')

@@ -49,7 +49,7 @@ def main():
 		  width = 70, height = 30, 
 		  text = "Push Me!", action = pushed_it)
 
-  win.place([view1], left = 10, top = 10, border = 1)
+  win.place(view1, position = (10, 10), border = 1)
 
   win.place([cb1, cb2], left = 10, top = (view1, 20))
 
