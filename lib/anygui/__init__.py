@@ -10,9 +10,7 @@ __all__ = ['application', 'Application',
            'Window', 'Button', 'CheckBox', 'Label',
            'RadioButton', 'RadioGroup', 'ListBox', 'TextField', 'TextArea',
            'BooleanModel', 'ListModel', 'TextModel', 'Options',
-           'send', 'connect', 'disconnect',
-           #'Frame'
-           ]
+           'send', 'connect', 'disconnect', 'Frame']
 
 if hasattr(sys, 'registry'):
     # Jython:

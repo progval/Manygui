@@ -267,6 +267,11 @@ class TextArea(ComponentMixin, AbstractTextArea):
 
 ################################################################
 
+class Frame(ComponentMixin, AbstractFrame):
+    _wx_class = wxPanel
+
+################################################################
+
 class Window(ComponentMixin, AbstractWindow):
     _wx_class = wxFrame
     _wx_style = wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE
