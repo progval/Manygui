@@ -1,6 +1,15 @@
 from anygui.backends import *
 import sys
 
+########################################
+# TODO:
+#
+# (1) Fix the menu implementation. It leaks wx resources, and
+# doesn't seem to work on Windows for some reason (apparently
+# related to event handling).
+#
+########################################
+
 #__all__ = anygui.__all__
 
 __all__ = '''
