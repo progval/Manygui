@@ -566,5 +566,4 @@ class CallbackAdapter:
         if hasattr(self, message):
             meth = getattr(self, message)
             if callable(meth):
-                print kwds
                 _handler_adapter(self, meth)(**kwds)
