@@ -8,7 +8,7 @@ warnings.filterwarnings('ignore')
 from anygui.Components import Component
 
 class DummyWrapper:
-    def update(self, *args, **kwds): pass
+    def push(self, *args, **kwds): pass
 
 class TestComponent(Component):
     # Defaults...
