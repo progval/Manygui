@@ -1,49 +1,52 @@
-In wxgui, RadioButtons need to have a group when they are
-created - otherwise they won't work properly. Thus they cannot
-be moved from RadioGroup to RadioGroup.
+In wxgui, RadioButtons need to have a group when they are created -
+otherwise they won't work properly. Thus they cannot be moved from
+RadioGroup to RadioGroup.
 
 In wxgui, the text cursor doesn't seem to want to leave non-editable
-text areas and text fields... It keeps moving around to the
-correct position (but in the wrong field) if one (after having
-selected portions of an uneditable field) selects parts of an
-editable field. The bug sometimes goes the other way too (not
-leaving the editable field). It may not have anything to do with
-the "editability" at all... (See test_textfield and test_textarea.)
+text areas and text fields... It keeps moving around to the correct
+position (but in the wrong field) if one (after having selected
+portions of an uneditable field) selects parts of an editable field.
+The bug sometimes goes the other way too (not leaving the editable
+field). It may not have anything to do with the "editability" at
+all... (See test_textfield and test_textarea.)
 
 javagui layout is extremely slow. Also, some components may not be
 visible before the window is resized (the TextArea in test_defaults,
-for instance). This has not always been so, and is probably caused by a
-bug. (This may in part be because windows are shown before their contents
-has been placed properly. That can be fixed by rearranging the order in
-which the _ensure_* methods are called, by calling _ensure_visible last,
-for instance.)
+for instance). This has not always been so, and is probably caused by
+a bug. (This may in part be because windows are shown before their
+contents has been placed properly. That can be fixed by rearranging
+the order in which the _ensure_* methods are called, by calling
+_ensure_visible last, for instance.)
 
-test_defaults doesn't place the text field correctly in tkinter
-in MacPython. It works with tkinter in Windows, though.
+test_defaults doesn't place the text field correctly in tkinter in
+MacPython. It works with tkinter in Windows, though.
 
-Windows created after app.run() seem to have only default
-geometry (i.e. size == (0, 0)) in tkgui/MacPython.
+Windows created after app.run() seem to have only default geometry
+(i.e. size == (0, 0)) in tkgui/MacPython.
 
 test_references.py and test_events don't work in Jython 2.1b1.
 (References and Events should still work, though...)
 
 When moving the mouse out of a text area in tkgui, the selection is
-lost. [jknapka: this is not actually true. However, on Windows
-(not Unix), the visual indication of the selection is erased.
-The selection is still present, however.]
+lost. [jknapka: this is not actually true. However, on Windows (not
+Unix), the visual indication of the selection is erased.  The
+selection is still present, however.]
 
-id() is broken in Jython and will probably not be fixed soon.
-This will probably not affect the correctness of the hashing
-of references (in anygui.References), but care should be
-taken not to store things with id(obj) as key.
+id() is broken in Jython and will probably not be fixed soon.  This
+will probably not affect the correctness of the hashing of references
+(in anygui.References), but care should be taken not to store things
+with id(obj) as key.
 
 Compiling Anygui apps to jar files seems problematic in Jython, giving
 the error "anygui clashes with package of same name".
 
 Label alignment (both vertical and horizontal) varies across backends.
 
-Setting tf.text moves selection to the end of
-textfields/textareas in javagui.
+Setting tf.text moves selection to the end of textfields/textareas in
+javagui.
+
+In test_textarea, the update button doesn't capture the selection
+properly in javagui.
 
 Tabbing between fields and/or other controls doesn't work in mswgui.
 

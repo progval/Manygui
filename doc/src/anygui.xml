@@ -243,10 +243,10 @@
       <code>ANYGUI_FORCE_CURSES</code>; see the API Reference
       below.)</para>
 
-      <para><strong>Note:</strong> The <name>BeOS</name> backen is not
-      included in the current release (&longversion;), but is
-      scheduled for inclusion in the final release
-      (&shortversion;).</para>
+      <para><strong>Note:</strong> The <name>BeOS</name> and
+      <name>GTK</name> backends are not included in the current
+      release (&longversion;), but are scheduled for inclusion in the
+      final release (&shortversion;).</para>
 
       <!--
       Matt's fixes to Bethon:
