@@ -5,7 +5,12 @@ __all__ = anygui.__all__
 ################################################################
 
 from Tkinter import * # A bit risky
-import re, Tkinter
+import re, Tkinter, os
+
+# Figure out proper setting for Tk's "exportselection" option.
+EXPORTSELECTION='true'
+if os.name in ['nt','os2']:
+    EXPORTSELECTION = 'false'
 
 class ComponentMixin:
     # mixin class, implementing the backend methods
@@ -43,6 +48,13 @@ class ComponentMixin:
             else:
                 frame.title(self._get_tk_text())
             self._tk_comp = frame
+
+            # Handle exportselection.
+            try:
+                self._tk_comp.configure(exportselection=EXPORTSELECTION)
+            except:
+                pass            
+
             return 1
         return 0
 
@@ -139,6 +151,9 @@ class ScrollableListBox(Tkinter.Frame):
 
     def bind(self, event, callback):
         self._listbox.bind(event, callback)
+
+    def configure(self,*args,**kw):
+        self._listbox.configure(*args,**kw)
 
 class ListBox(ComponentMixin, AbstractListBox):
     _tk_class = ScrollableListBox
@@ -382,6 +397,8 @@ class ScrollableTextArea(Tkinter.Frame):
 
     def tag_names(self): return self._textarea.tag_names()
 
+    def configure(self,*args,**kw):
+        self._textarea.configure(*args,**kw)
 
 class TextArea(ComponentMixin, AbstractTextArea, DisabledTextBindings):
     _tk_class = ScrollableTextArea # Tkinter.Text
