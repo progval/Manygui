@@ -182,6 +182,11 @@ Date: 2002-01-04
    stretched horizontally (hstretch) to keep these margins. (There is
    also a vstretch argument for vertical stretching.)
 
+   (Note: When both left and right are set, there is no need to set
+   the width of the component, since that will be set by the layout
+   manager. The same goes for setting height if you have already
+   supplied top and bottom.)
+
    The button is placed like this:
 
       win.add(btn, top=(txt,10), right=10, hmove=1)
