@@ -276,7 +276,7 @@ class ComponentMixin:
         if self.visible: return self.parent.is_visible()
 
     def set_visible(self,vis):
-        _scr.dbg("set_visible",vis,self)
+        #_scr.dbg("set_visible",vis,self)
         self.visible = vis
 
     def focus_gained(self):
@@ -385,9 +385,9 @@ class ComponentMixin:
         return x,y,w,h
 
     def redraw(self):
-        _scr.dbg("Redrawing %s"%(self))
+        #_scr.dbg("Redrawing %s"%(self))
         if not self._created:
-            _scr.dbg("\tnot created")
+            #_scr.dbg("\tnot created")
             return
         ##_scr.dbg("Visible: %s"%self)
         #x,y = self.get_screen_coords()
@@ -400,13 +400,13 @@ class ComponentMixin:
             if self._use_text:
                 self.addstr(self._textx,ety,str(self.text))
         else:
-            _scr.dbg("\tnot visible")
+            #_scr.dbg("\tnot visible")
             pass
 
     def erase(self):
         if not self._created: return
         x,y,w,h = self.get_bounding_rect()
-        _scr.dbg("Erasing %s"%self)
+        #_scr.dbg("Erasing %s"%self)
         _scr.erase(x,y,w,h)
 
     def draw_border(self):
@@ -478,12 +478,12 @@ class ComponentMixin:
         return self._created
 
     def create(self):
-        _scr.dbg("Creating: %s"%self)
+        #_scr.dbg("Creating: %s"%self)
         if self._created:
-            _scr.dbg("\talready created")
+            #_scr.dbg("\talready created")
             return 0
         if self._needs_parent and not self.parent:
-            _scr.dbg("\tNo parent")
+            #_scr.dbg("\tNo parent")
             return 0
         self._created = 1
         add_to_focus_list(self)
@@ -502,7 +502,7 @@ class ComponentMixin:
             self._gets_focus = self.__class__._gets_focus
 
     def destroy(self):
-        _scr.dbg("Destroying: %s"%self)
+        #_scr.dbg("Destroying: %s"%self)
         self.set_focus_capture(0)
         remove_from_focus_list(self)
         self.erase()
@@ -535,9 +535,9 @@ class ParentMixin(ComponentMixin):
         return 0
 
     def redraw(self):
-        _scr.dbg("Parent redraw",self,self._contents)
+        #_scr.dbg("Parent redraw",self,self._contents)
         if not self._created:
-            _scr.dbg("\tnot created")
+            #_scr.dbg("\tnot created")
             return
         ComponentMixin.redraw(self)
         for comp in self._contents:
@@ -864,6 +864,7 @@ class ToggleButtonMixin(ComponentMixin):
     def curs_clicked(self,ev):
         """Click on button."""
         self.on = not self.on
+        _scr.dbg(self,"clicked, now",self.on)
         self.redraw()
         if self.command:
             self.command(self,self.value)
@@ -871,8 +872,13 @@ class ToggleButtonMixin(ComponentMixin):
     _event_map = { ord(' '):curs_clicked }
 
     def set_state(self,on):
+        _scr.dbg(self,"set_state",on)
         self.on = on
         #self.redraw()
+
+    def get_state(self):
+        _scr.dbg(self,"get_state",self.on)
+        return self.on
 
     def draw_contents(self):
         ind = self._off_ind
@@ -906,20 +912,20 @@ class RadioButton(ToggleButtonMixin):
 
     def __init__(self,group=None,*args,**kws):
         ToggleButtonMixin.__init__(self,*args,**kws)
+    
+    #def set_container(self,cont):
+    #    ComponentMixin.set_container(self,cont)
+    #    if cont:
+    #        cont.set_value(self.value)
 
-    def set_container(self,cont):
-        ComponentMixin.set_container(self,cont)
-        if cont:
-            cont.set_value(self.value)
+    #def curs_clicked(self,ev):
+    #    """Click on button."""
+    #    if self.parent is not None:
+    #        self.parent.set_value(self.value)
+    #    if self.command:
+    #        self.command(self,self.value)
 
-    def curs_clicked(self,ev):
-        """Click on button."""
-        if self.parent is not None:
-            self.parent.set_value(self.value)
-        if self.command:
-            self.command(self,self.value)
-
-    _event_map = { ord(' '):curs_clicked }
+    #_event_map = { ord(' '):curs_clicked }
 
 class DisabledTextBindings: pass
 
@@ -1230,7 +1236,7 @@ class TextArea(TextMixin):
     def __init__(self,*args,**kws):
         TextMixin.__init__(self,*args,**kws)
 
-class Frame(ParentMixin,RadioGroup):
+class Frame(ParentMixin):
 
     _gets_focus = 0
     texty = 0
@@ -1239,7 +1245,7 @@ class Frame(ParentMixin,RadioGroup):
     def __init__(self,*args,**kws):
         ParentMixin.__init__(self,*args,**kws)
 
-class Window(ParentMixin,RadioGroup):
+class Window(ParentMixin):
     """To move or resize a window, use Esc-W to open
 the window menu, then type h,j,k, or l to move, and
 H,J,K, or L to resize."""
@@ -1478,7 +1484,7 @@ class HelpWindow(Window):
                   ord('Q'):dismiss,}
 
 # If false, present an initial help window.
-_inithelp = 0
+_inithelp = 1
 
 # Character escape sequences, and the events we transform them
 # into.
@@ -1656,7 +1662,7 @@ class Application:
         #_scr.dbg("Checking for events...")
         ch = _scr.get_char()
         ch = self.translate_escape(ch)
-        _scr.dbg("GOT:",ch)
+        #_scr.dbg("GOT:",ch)
         handled = 0
         if _focus_control is not None:
             handled = _focus_control.handle_event(ch)

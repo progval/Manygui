@@ -1,13 +1,35 @@
 """
 skelgui.py is an empty skeleton waiting for you to implement an
-Anygui back-end. Simply implement all of the methods documented
-below. Depending on your particular backend, there may be
-some opportunities to combine methods into mixin classes.
+Anygui back-end.
+
+You should probably read IRFC14 (nondist/irfc/irfc-0014.txt
+in the CVS repository) before trying to implement an
+Anygui backend. Specifically, you should understand the
+terms "proxy", "wrapper", and "(native) widget" as
+they're used in Anygui. The classes implemented in
+a backend (and the classes in this file) are "wrappers"
+around "native widgets".
 
 To use this skeleton, simply copy it to a file in the
 anygui/lib/backends directory called <yourbackend>gui.py,
 and implement all of the methods and event handlers
-described below.
+described below. Depending on your particular backend, there
+may be some opportunities to combine methods into mixin classes.
+
+The fastest way to resolve any questions or ambiguities
+about this file, is to look at one of the existing
+back-end implementations in the anygui/lib/anygui/backends
+directory. Failing that, post your question to
+the Anygui development list (devel@anygui.org).
+
+If you are implementing an Anygui backend, you should
+be subscribed to the development list. See
+
+http://lists.sourceforge.net/lists/listinfo/anygui-devel
+
+for subscription instructions.
+
+Comments and criticism to jknapka@earthlink.net (Joe Knapka).
 """
 
 # Import Anygui infrastructure. You shouldn't have to change these.
@@ -28,25 +50,28 @@ from anygui import application
 class ComponentWrapper(AbstractWrapper):
     """
     The ComponentWrapper class should abstract away all behavior
-    that all backend widgets perform similarly. Normally, this
-    will include geometry and visibility management, and in some
-    cases widget creation can be handled here as well (see
-    mswgui.py for example).
+    that (nearly) all backend widgets perform similarly. Normally,
+    this will include geometry and visibility management, and in some
+    cases widget creation can be handled here as well (see wxgui.py
+    for example).
     """
 
     def __init__(self, *args, **kwds):
         """
         Common widget wrapper initialization code. The main thing that
-        we would normall do here is set any backend-specific
+        we would normally do here is set any backend-specific
         attribute constraints.
         
-        Whenever the application code alters a widget, the front end
+        Whenever the application code alters a widget proxy, the front end
         will "push" any changed widget attributes into the backend by
-        calling the set<Attribute>(self,new_value) method for any
-        attributes that changes. The setContraints() method allows the
+        calling the wrapper.set<Attribute>(self,new_value) method for any
+        attribute that changes. The setContraints() method allows the
         backend to specify the order in which the set<Attribute>()
         method calls are made, by specifying the order in which attribute
         names are set. The constraints set here are just examples.
+        However, it is almost certainly a good idea to ensure that
+        'container' is set before any other attribute, so at minimum
+        you should call "self.setConstraints('container')" here.
         """
         AbstractWrapper.__init__(self, *args, **kwds)
 
@@ -92,17 +117,21 @@ class ComponentWrapper(AbstractWrapper):
     # Getters need not be implemented unless the backend requires
     # special handling, or if the attribute in question can be changed
     # by user actions as well as by application code. Getters are
-    # called automatically by proxy attribute access, if they
+    # called automatically during proxy attribute access, if they
     # exist; otherwise the last value set in the proxy is returned.
-    # Note that if you elect not to implement a getter, *you*
-    # *must* *remove* *the* *empty* *getter* *def* from this
-    # class.
+    # This file provides empty getter definitions for those attributes
+    # that will nearly always require special handling for get
+    # operations.
     #
-    # The setters and getters here are a typlical example of
+    # The setters and getters here are a typical example of
     # attribute handling that's common to all of a backend's
     # widgets. For example, getGeometry() and setGeometry() work
     # the same for any backend widget, thus they're included
     # here in the common wrapper base class.
+    #
+    # Note that you must implement all the setter and getter
+    # methods in this file in order for your backend to work
+    # properly!
 
     def setContainer(self,container):
         """
@@ -116,13 +145,13 @@ class ComponentWrapper(AbstractWrapper):
         method that calls self.widgetFactory() to create the widget,
         and then performs some bookkeeping for the wrapper.
 
-        When the widget is removed from it's container, setContainer()
+        When the widget is removed from its container, setContainer()
         will be called with container==None; you must handle that case
         correctly, whatever that means for your backend.
         """
         if not self.noWidget():
             # If the container has changed, and there's already a native
-            widget, it may be necessary to take special action here.
+            # widget, it may be necessary to take special action here.
             pass
         if container is None:
             # Handle "removed from container" case.
@@ -139,15 +168,16 @@ class ComponentWrapper(AbstractWrapper):
         raise NotImplementedError, 'should be implemented by subclasses'
 
     def setGeometry(self,x,y,width,height):
-        """ Set/get the native widget's geometry. Note that we call
+        """ Set the native widget's geometry. Note that we call
         self.noWidget() here to see if the wrapper has a native widget
         to manage. You should probably use this idiom at the start of
         all setter and getter methods, unless you have a very good
         reason not to. """
         if self.noWidget(): return
         raise NotImplementedError, 'should be implemented by subclasses'
+
     def getGeometry(self):
-        """ Set/get the native widget's geometry as an (x,y,w,h) tuple.
+        """ Get the native widget's geometry as an (x,y,w,h) tuple.
         Since the geometry can be changed by the user dragging the
         window frame, you must implement this method. """
         if self.noWidget(): return
@@ -157,17 +187,11 @@ class ComponentWrapper(AbstractWrapper):
         """ Set/get the native widget's visibility. """
         if self.noWidget(): return
         raise NotImplementedError, 'should be implemented by subclasses'
-    def getVisible(self):
-        if self.noWidget(): return
-        raise NotImplementedError, 'should be implemented by subclasses'
 
     def setEnabled(self,enabled):
         """ Set/get the native widget's enabled/disabled state. """
         if self.noWidget(): return
         raise NotImplementedError, 'should be implemented by subclasses'    def setEnabled(self,enabled):
-    def getEnabled(self):
-        if self.noWidget(): return
-        raise NotImplementedError, 'should be implemented by subclasses'
 
     def setText(self,text):
         """ Set/get the text associated with the widget. This might be
@@ -176,14 +200,6 @@ class ComponentWrapper(AbstractWrapper):
         """
         if self.noWidget(): return
         raise NotImplementedError, 'should be implemented by subclasses'
-    def getText(self):
-        """
-        Fetch the widget's associated text. You normally don't need to
-        implement this except for TextField and TextArea controls.
-        """
-        if self.noWidget(): return
-        raise NotImplementedError, 'should be implemented by subclasses'
-
 
 class LabelWrapper(ComponentWrapper):
     """
@@ -290,6 +306,7 @@ class ToggleButtonMixin(ButtonWrapper):
         raise NotImplementedError, 'should be implemented by subclasses'
 
     def setOn(self,on):
+        """ Set the button's state. """
         if self.noWidget(): return
         raise NotImplementedError, 'should be implemented by subclasses'
 
@@ -313,17 +330,26 @@ class RadioButtonWrapper(ToggleButtonMixin):
     the correct way, backend-wise. Look at the other backend
     implementations for some clues.
 
-    In the case where a backend implements radiobuttons as
-    a simple visual variant of checkboxes with no mutual-exclusion
-    behavior, the ToggleButtonMixin class already does everything
-    you need; just create the proper backend widget in
-    RadioButtonWrapper.widgetFactory(). You can usually fake
-    that kind of backend implementation by playing tricks
-    with the backend's mutual-exclusion mechanism. For example,
-    create a tiny frame to encapsulate the backend radiobutton,
-    if your backend enforces mutual exclusion on a
-    per-frame basis.
+    In the case where a backend implements radiobuttons as a simple
+    visual variant of checkboxes with no mutual-exclusion behavior,
+    this class already does everything you need; just create the
+    proper backend widget in RadioButtonWrapper.widgetFactory(). You
+    can usually fake that kind of backend implementation by playing
+    tricks with the backend's mutual-exclusion mechanism. For example,
+    create a tiny frame to encapsulate the backend radiobutton, if
+    your backend enforces mutual exclusion on a per-frame basis.
     """
+
+    def _click(self,*args,**kws):
+        try:
+            # Ensure the other buttons in the group are updated
+            # properly. Note that if for some reason you need to
+            # implement getValue(), this code will no longer
+            # work due to the pull mechanism.
+            self.proxy.group.value = self.proxy.value
+        except AttributeError:
+            pass
+        send(self.proxy,'click')
 
 class TextControlMixin:
     """
@@ -398,56 +424,102 @@ class TextAreaWrapper(TextControlMixin,ComponentWrapper):
 # Incomplete: fix the remainder of this file!
 
 class ContainerMixin:
-
-    def resize(self,dw,dh):
-        self.proxy.resized(dw, dh)
+    """
+    Frames - that is, widgets whose job is to visually group
+    other widgets - often have a lot of behavior in common
+    with top-level windows. Abstract that behavior here.
+    """
 
     def setContainer(self,container):
+        """
+        Most backends create native widgets when the front-end
+        widget is added to a container. That means that containers
+        must recursively ensure that their contents are created
+        when they are added to a higher-level container. For
+        example, a Frame being added to a Window must ensure
+        that all of its contents are created and updated to
+        match the front-end state. The easiest way to handle
+        that is to simply call all of the contents'
+        setContainer() methods.
+        """
         if not self.noWidget():
             self.destroy()
         if container is None:
             self.widget.parent = None
             return
-        #if container.wrapper.noWidget(): return
+
+        # Ensure this container's widget is created.
         self.create()
+
+        # Add self to the back-end container in the proper way.  This
+        # operation will be different for frames and top-level
+        # windows, so we call a method to handle it.
         self.addToContainer(container)
-        self.widget.create()
+
+        # Ensure geometry, etc are up to date.
         self.proxy.push(blocked=['container'])
+
+        # Ensure all contents are created.
         for comp in self.proxy.contents:
             comp.container = self.proxy
 
 class FrameWrapper(ContainerMixin,ComponentWrapper):
-    _twclass = tw.Frame
 
     def __init__(self,*args,**kws):
         ComponentWrapper.__init__(self,*args,**kws)
 
     def addToContainer(self,container):
-        container.wrapper.widget.add(self.widget)
+        """
+        Add the Frame to its back-end container (another
+        Frame or a Window).
+        """
+        #container.wrapper.widget.add(self.widget)
+        raise NotImplementedError, 'should be implemented by subclasses'
 
 class WindowWrapper(ContainerMixin,ComponentWrapper):
-    """To move or resize a window, use Esc-W to open
-the window menu, then type h,j,k, or l to move, and
-H,J,K, or L to resize."""
-
-    _twclass = tw.Window
-
-    def __init__(self,*args,**kws):
-        ComponentWrapper.__init__(self,*args,**kws)
+    """
+    Wraps a top-level window frame.
+    """
 
     def setTitle(self,title):
         if self.noWidget(): return
         self.widget.set_title(title)
 
     def addToContainer(self,container):
-        application().txtapp.add(self.widget)
-        self.widget.resize_command = self.resize
+        """
+        Add self to the backend application, if required.
+        """
+        raise NotImplementedError, 'should be implemented by subclasses'
+
+    def widgetSetUp(self):
+        """
+        Arrange for self.resize() to be called whenever the user
+        interactively resizes the window.
+        """
+        raise NotImplementedError, 'should be implemented by subclasses'
+
+    def resize(self,dw,dh):
+        """
+        Inform the proxy of a resize event. The proxy then takes care of
+        laying out the container contents. Don't change this method,
+        just call it from an event handler.
+        """
+        self.proxy.resized(dw, dh)
 
 class Application(AbstractApplication):
+    """
+    Wraps a backend Application object (or implements one from
+    scratch if necessary).
 
-    def __init__(self):
-        AbstractApplication.__init__(self)
-        self.txtapp = tw.Application()
+    wxgui's Application class inherits wxPython's Application class.
+    On the other hand, Tk has no Application class, so tkgui's
+    Application class simply calls Tk.mainloop() in its
+    Application.internalRun() method.
+    """
 
     def internalRun(self):
-        self.txtapp.run()
+        """
+        Do whatever is necessary to start your backend's event-
+        handling loop.
+        """
+        raise NotImplementedError, 'should be implemented by subclasses'

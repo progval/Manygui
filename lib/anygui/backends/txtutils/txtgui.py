@@ -11,8 +11,10 @@ from anygui.Applications import AbstractApplication
 from anygui.Wrappers import AbstractWrapper, DummyWidget, isDummy
 from anygui.Events import *
 from anygui.Exceptions import Error
-from anygui.Utils import log
+from anygui.Utils import log,setLogFile
 from anygui import application
+
+setLogFile("txtgui.log")
 
 def setScreenPackage(pkg):
     if pkg == "curses":
@@ -84,7 +86,7 @@ class ComponentWrapper(AbstractWrapper):
         self.proxy.push() # FIXME: Why is this needed when push is called in internalProd (by prod)?
 
     def setContainer(self,container):
-        log("Set container",self,container)
+        #log("Set container",self,container)
         if not self.noWidget():
             self.destroy()
         if container is None:
@@ -142,7 +144,8 @@ class ToggleButtonMixin(ButtonMixin):
 
     def getOn(self):
         if self.noWidget(): return
-        return self.widget.on
+        log(self,"getOn",self.widget.get_state())
+        return self.widget.get_state()
 
     def setOn(self,on):
         if self.noWidget(): return
@@ -151,8 +154,21 @@ class ToggleButtonMixin(ButtonMixin):
 class CheckBoxWrapper(ToggleButtonMixin,ComponentWrapper):
     _twclass = tw.CheckBox
 
-class RadioButtonWrapper(ToggleButtonMixin,ComponentWrapper,ButtonMixin):
+class RadioButtonWrapper(ToggleButtonMixin,ComponentWrapper):
     _twclass = tw.RadioButton
+
+    def setGroup(self,group):
+        if group == None:
+            return
+        if self.proxy not in group._items:
+            group._items.append(self.proxy)
+
+    def _twClick(self,btn=None,*args,**kws):
+        try:
+            self.proxy.group.value = self.proxy.value
+        except AttributeError:
+            pass
+        ToggleButtonMixin._twClick(self,btn,*args,**kws)
 
 class TextControlMixin:
 
