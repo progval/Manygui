@@ -558,6 +558,7 @@ class ListBox(ComponentMixin, AbstractListBox):
         if self._selection >= len(self._items):
             self._selection = 0
         self._redraw()
+        return 1
 
     def _select_up(self,ev):
         """Move listbox selection up."""
@@ -565,6 +566,7 @@ class ListBox(ComponentMixin, AbstractListBox):
         if self._selection < 0:
             self._selection = len(self._items)-1
         self._redraw()
+        return 1
 
     def _do_click(self,ev):
         """Click on selected item."""
@@ -628,7 +630,8 @@ class ToggleButtonMixin(ComponentMixin):
     _event_map = { ord(' '):_curs_clicked }
 
     def _ensure_state(self):
-        self._redraw()
+        pass
+        #self._redraw()
 
     def _draw_contents(self):
         ind = self._off_ind
@@ -656,10 +659,12 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
         AbstractRadioButton.__init__(self,*args,**kws)
 
     def _curs_clicked(self,ev):
+        """Click on button."""
         if self.group is not None:
             self.group.value = self.value
-        self._redraw()
         send(self, 'click')
+
+    _event_map = { ord(' '):_curs_clicked }
 
 class DisabledTextBindings: pass
 
@@ -857,8 +862,8 @@ class TextField(TextMixin, AbstractTextField):
 
     _event_map = {}
     _event_map.update(TextMixin._event_map)
-    del _event_map[258] # No line control in TextFields.
-    del _event_map[259]
+    del _event_map[UP_ARROW] # No line control in TextFields.
+    del _event_map[DOWN_ARROW]
     _event_map[ord('\n')] = TextMixin._change_focus
 
 class TextArea(TextMixin, AbstractTextArea):
@@ -901,7 +906,9 @@ class Window(ContainerMixin, AbstractWindow):
         ContainerMixin._redraw(self)
         self._addstr(2,0,self._title)
 
-    def _ensure_title(self): self._redraw()
+    def _ensure_title(self):
+        #self._redraw()
+        pass
 
     def _present_winmenu(self,ev):
         """Open window menu"""
@@ -1034,10 +1041,11 @@ class HelpWindow(Window):
 
     def _populate_lb(self,lb):
         """Add docstrings for _prev_ctrl event handlers to lb."""
-        items = ["The current control is a "+self._prev_ctrl.__class__.__name__+";",
-                 "it responds to the following key bindings:",""]
-
-        items += self._prev_ctrl._get_event_help()
+        items = []
+        if self._prev_ctrl:
+            items += ["The current control is a "+self._prev_ctrl.__class__.__name__+";",
+                     "it responds to the following key bindings:",""]
+            items += self._prev_ctrl._get_event_help()
         items += ["",
                   "---------------------------------------------------------------------",
                   "This is txtgui, the text/curses binding for Anygui.",
@@ -1076,7 +1084,8 @@ class HelpWindow(Window):
         self.destroy()
         if self._prev_focus_capture:
             self._prev_focus_capture.focus_capture = 1
-        self._prev_ctrl.focus = 1
+        if self._prev_ctrl:
+            self._prev_ctrl.focus = 1
 
     #def _event_handler(self,ev):
     #    if ev == ord('q'): self._dismiss(ev)
@@ -1156,15 +1165,15 @@ class Application(AbstractApplication):
             _scr.scr_quit()
 
     def _mainloop(self):
-        # Establish the initial focus.
-        self._change_focus()
-
         # Present the initial help screen, without which the
         # UI remains forever mysterious.
         global _inithelp
         if not _inithelp:
             HelpWindow()
             _inithelp = 1
+
+        # Establish the initial focus.
+        self._change_focus()
 
         # Redraw the screen.
         _refresh_all()
