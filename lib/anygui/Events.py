@@ -5,6 +5,8 @@
     Magnus Lie Hetland, 2001-11-16
 '''
 
+# Dispatch-loop blocking not yet implemented
+
 __all__ = '''
 
     connect
