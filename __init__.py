@@ -36,7 +36,7 @@ class anygui:
         candidates = wishlist + candidates
 
         for name in candidates:
-            backend = self.__try_to_get('%sgui' % name)
+            backend = self.__dict__['__try_to_get']('%sgui' % name)
             if backend: break
         else:
             raise Exception, 'not able to import any GUI backends'
