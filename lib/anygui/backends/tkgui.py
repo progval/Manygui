@@ -57,7 +57,7 @@ class ComponentMixin:
 
     def _ensure_visibility(self):
         if self._tk_comp:
-            # FIXME: Hack... (And won't work with windows?)
+            # FIXME: Hack...
             if self._visible:
                 self._ensure_geometry()
             else:
@@ -357,11 +357,12 @@ class Window(ComponentMixin, AbstractWindow):
         #    self._tk_comp.SetAutoLayout(1)
         return result
 
-    def _ensure_visible(self):
-        if self._visible:
-            self._tk_comp.deiconify()
-        else:
-            self._tk_comp.withdraw()
+    def _ensure_visibility(self):
+        if self._tk_comp:
+            if self._visible:
+                self._tk_comp.deiconify()
+            else:
+                self._tk_comp.withdraw()
 
     def _ensure_geometry(self):
         geometry = "%dx%d%+d%+d" % (self._width, self._height,
