@@ -10,6 +10,7 @@ __all__ = '''
   TextFieldWrapper
   TextAreaWrapper
   ListBoxWrapper
+  FrameWrapper
   RadioButtonWrapper
   CheckBoxWrapper
 
@@ -21,7 +22,6 @@ from anygui.Wrappers import AbstractWrapper, DummyWidget, isDummy
 from anygui.Events import *
 from anygui import application
 
-ListBoxWrapper = 4
 RadioButtonWrapper = 5
 CheckBoxWrapper = 6
 
@@ -80,8 +80,7 @@ class ComponentWrapper(AbstractWrapper):
         return widget
 
     def widgetSetUp(self):
-        if self.proxy.container:
-            self.proxy.container.wrapper.widget_map[self.widget] = self
+        self.proxy.container.wrapper.widget_map[self.widget] = self
         win32gui.SendMessage(self.widget,
                              win32con.WM_SETFONT,
                              self._hfont,
@@ -153,8 +152,12 @@ class ComponentWrapper(AbstractWrapper):
             except:
                 pass
         if not self.noWidget():
-            win32gui.DestroyWindow(self.widget)
-            del self.widget
+            try:
+                win32gui.DestroyWindow(self.widget)
+            except:
+                pass
+            self.widget = DummyWidget()
+                
 
     def setText(self,text):
         if self.noWidget(): return
@@ -249,7 +252,7 @@ class ListBoxWrapper(ComponentWrapper):
 
 ##################################################################
 
-'''
+'''JKJKJK
 class ToggleButtonMixin(ComponentMixin):
 
     def _get_msw_text(self):
@@ -332,6 +335,10 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
 ### text classes should probably also be done in the other.
 '''
 
+##################################################################
+
+# END COMMENT - search for JKJKJK
+
 class TextFieldWrapper(ComponentWrapper):
     _wndclass = "EDIT"
     #_text = "mswTextField"
@@ -408,20 +415,11 @@ class TextAreaWrapper(TextFieldWrapper):
     _win_style = TextFieldWrapper._win_style | win32con.ES_MULTILINE | \
                  win32con.ES_AUTOVSCROLL | win32con.ES_WANTRETURN
 
-##################################################################
 
-'''
-
-class ContainerMixin(ComponentMixin):
-    def __init__(self):
+class ContainerMixin:
+    def __init__(self,*args,**kws):
         self.widget_map = {} # maps child window handles to instances
     
-    def _finish_creation(self):
-        #log("ContainerMixin._finish_creation %s"%self)
-        for comp in self._contents:
-            #log("  Adding %s"%comp)
-            self.widget_map[comp.widget] = comp
-
     def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
         #log("ContainerMixin _WM_COMMAND called for %s"%self)
         # lParam: handle of control (or NULL, if not from a control)
@@ -441,32 +439,37 @@ class ContainerMixin(ComponentMixin):
 
     def _WM_SIZE(self, hwnd, msg, wParam, lParam):
         w, h = lParam & 0xFFFF, lParam >> 16
-        dw = w - self._width
-        dh = h - self._height
-        self.modify(width=w)
-        self.modify(height=h)
-        self.resized(dw, dh)
+        dw = w - self.proxy.width
+        dh = h - self.proxy.height
+        self.proxy.rawModify(width=w)
+        self.proxy.rawModify(height=h)
+        self.proxy.resized(dw,dh) # @@@ Implement this...
 
 
-class Frame(ContainerMixin, AbstractFrame):
+class FrameWrapper(ComponentWrapper,ContainerMixin):
     _win_style = win32con.WS_CHILD
     _win_style_ex = 0
 
-    def __init__(self, *args, **kw):
+    def __init__(self,*args,**kws):
         ContainerMixin.__init__(self)
-        AbstractFrame.__init__(self, *args, **kw)
+        ComponentWrapper.__init__(self,*args,**kws)
 
-    def _get_msw_text(self):
-        return ""
+    def setContainer(self, *args, **kws):
+        """
+        OK, this probably needs to be pulled into a mixin heritable by
+        various backends.
+        
+        Ensure all contents are properly created. This looks like it could
+        be handled at the Proxy level, but it probably *shouldn't* be -
+        it's handling a Tk-specific requirement about the order in which
+        widgets must be created. (I did it the Proxy way too. This way
+        is definitely "the simplest thing that could possibly work.") - jak
+        """
+        ComponentWrapper.setContainer(self, *args, **kws)
+        for component in self.proxy.contents:
+            component.container = self.proxy
 
-    def _finish_creation(self):
-        ContainerMixin._finish_creation(self)
-        AbstractFrame._finish_creation(self)
-'''
-# END COMMENT - search for JKJKJK
-
-
-class WindowWrapper(ComponentWrapper):
+class WindowWrapper(ContainerMixin,ComponentWrapper):
 
     _win_style = win32con.WS_OVERLAPPEDWINDOW | win32con.WS_CLIPCHILDREN
     _win_style_ex = 0
@@ -497,13 +500,12 @@ class WindowWrapper(ComponentWrapper):
         if container is None: return
         if self.noWidget():
             self.create()
+        win32gui.ShowWindow(self.widget, win32con.SW_HIDE)
+        win32gui.UpdateWindow(self.widget)
         self.proxy.push(blocked=['container'])
         # Ensure contents are properly created.
         for comp in self.proxy.contents:
             comp.container = self.proxy
-        win32gui.ShowWindow(self.widget, win32con.SW_HIDE)
-        win32gui.UpdateWindow(self.widget)
-
 
     def setTitle(self,title):
         if self.noWidget(): return
@@ -523,34 +525,7 @@ class WindowWrapper(ComponentWrapper):
         application().remove(self.proxy)
         return 1
 
-    def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
-        #log("ContainerMixin _WM_COMMAND called for %s"%self)
-        # lParam: handle of control (or NULL, if not from a control)
-        # HIWORD(wParam): notification code
-        # LOWORD(wParam): id of menu item, control, or accelerator
-        app = application()
-        try:
-            child_window = self.widget_map[lParam]
-        except KeyError:
-            #log("NO SUCH CHILD WINDOW %s"%lParam)
-            # we receive (when running test_textfield.py)
-            # EN_CHANGE (0x300) and EN_UPDATE (0x400) notifications
-            # here even before the call to CreateWindow returns.
-            return
-        #log("Dispatching to child %s"%child_window)
-        child_window._WM_COMMAND(hwnd, msg, wParam, lParam)
-
-    def _WM_SIZE(self, hwnd, msg, wParam, lParam):
-        w, h = lParam & 0xFFFF, lParam >> 16
-        #dw = w - self._width
-        #dh = h - self._height
-        #self.setWidth(width=w)
-        #self.setHeight(height=h)
-        #self.resized(dw, dh)
-
 ################################################################
-
-class Frame: pass
 
 class Application(AbstractApplication):
     widget_map = {} # maps top level window handles to window instances
@@ -561,7 +536,7 @@ class Application(AbstractApplication):
         if not self._wndclass:
             self._register_class()
         WindowWrapper._wndclass = self._wndclass
-        Frame._wndclass = self._wndclass
+        FrameWrapper._wndclass = self._wndclass
         global _app
         _app = self
 
