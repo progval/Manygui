@@ -146,11 +146,10 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
     _wx_class = wxRadioButton
 
     def _wx_clicked(self, evt):
-        # FIXME: Not correct yet
-        # print self._wx_comp.GetInt()
-        if self.group is not None: # ... and self._wx_comp.GetInt()?
-            self.group.modify(value=self.value)
-        send(self, 'click')
+        if evt.GetInt():
+            if self.group is not None:
+                self.group.modify(value=self.value)
+            send(self, 'click')
     
     def _ensure_created(self):
         # FIXME: What about moving buttons between groups? Would that
