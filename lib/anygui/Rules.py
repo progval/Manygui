@@ -3,150 +3,129 @@ class IllegalState(Exception): pass
 class CannotCalculate(Exception): pass
 class ValueUnchanged(Exception): pass
 
-def addSubKey(dict, key, subkey):
-    dict.setdefault(key, {})[subkey] = 1
+class EquivalencePartition:
 
-def equiv(a, b):
-    try:
-        if len(a) != len(b): return 0
-        for x, y in zip(a, b):
-            if x != y: return 0
-        return 1
-    except TypeError:
-        return a == b
+    def __init__(self):
+        self.classes = {}
+
+    def equate(self, a, b):
+        class_a = self.classes.get(a, {a:1})
+        class_b = self.classes.get(b, {b:1})
+        class_a.update(class_b)
+        for key in class_a.keys():
+            self.classes[key] = class_a
+
+    def getClass(self, key):
+        return self.classes[key]        
+
+    def getClasses(self):
+        done = {}
+        result = []
+        for c in self.classes.values():
+            keys = c.keys()
+            keys.sort()
+            keys = tuple(keys)
+            if not done.has_key(keys):
+                done[keys] = 1
+                result.append(c)
+        return result
+
+    def equal(self, a, b):
+        return self.classes[a] == self.classes[b]
 
 class RuleEngine:
     
     def __init__(self):
-        self.parts = {}
-        self.whole = {}
-        self.rules = {}
-
-    def getChildren(self, name):
-        return self.parts.get(name, {})
-
-    def getOrderedChildren(self, name):
-        return self.rules.get(name, [])
-
-    def getParents(self, name):
-        return self.whole.get(name, {})
-
-    def getSpouses(self, name):
-        result = {}
-        for child in self.getChildren(name).keys():
-            result.update(self.getParents(child))
-        try: del result[name]
-        except: pass
-        return result
+        self.equiv = EquivalencePartition()
+        self.sizes = {}
 
     def define(self, rule):
         whole, parts = rule.split('=')
         whole = whole.strip()
-        rule = []
+        pos = 0
         for part in parts.split(','):
             part = part.strip()
-            rule.append(part)
-            addSubKey(self.whole, part, whole)
-            addSubKey(self.parts, whole, part)
-        self.rules[whole] = rule
+            self.sizes[part] = None
+            a = (whole, pos)
+            b = (part, None)
+            self.equiv.equate(a, b)
+            pos += 1
+        self.sizes[whole] = pos
 
-    def check(self, state, names, undef):
+    def explode(self, names):
+        result = []
         for name in names:
-            try: self.newValue(name, state, undef)
-            except ValueUnchanged: pass
-            except CannotCalculate: pass # Hm...
-            else: raise IllegalState('inconsistent attribute values')
+            if self.sizes[name] is None:
+                result.append((name, None))
+            else:
+                for i in xrange(self.sizes[name]):
+                    result.append((name, i))
+        return result
 
-    def checkAll(self, state):
-        names = self.parts.copy()
-        names.update(self.whole)
-        names = names.keys()
-        self.check(state, names, {})
-    
+    def getValue(self, state, key):
+        name, index = key
+        if index is None: return state[name]
+        else: return state[name][index]
+
+    def setValue(self, state, key, value):
+        name, index = key
+        if index is None: state[name] = value
+        else:
+            state[name] = list(state[name])
+            state[name][index] = value
+
+    def getUndefs(self, state, defs):
+        undefs = {}
+        for key in defs:
+            value = self.getValue(state, key)
+            c = self.equiv.getClass(key)
+            for other in c.keys():
+                if self.getValue(state, other) != value:
+                    undefs[other] = 1
+        for key in defs:
+            if undefs.has_key(key): raise IllegalState
+        return undefs
+
+    def check(self, state, defs): # Ahem... I'll clean this code up in a while ;) [mlh]
+        defs = defs[:]
+        for c in self.equiv.getClasses():
+            for key in defs:
+                if c.has_key(key):
+                    defs.remove(key)
+                    break
+            else:
+                if c:
+                    k, v = c.popitem()
+                    value = self.getValue(state, k)
+                    while 1:
+                        try: k, v = c.popitem()
+                        except KeyError: break
+                        if value != self.getValue(state, k):
+                            raise IllegalState
+
     def sync(self, state, defs):
-        """
-        Sync a state dictionary according to the defined rules.
-
-        This method works as follows:
-
-          1. For each defined name, add all dependents to the set of
-             undefined names.
-
-          2. If any of the defined names are also in the set of
-             undefined names, remove them from the set of undefined
-             names and schedule them for checking.
-
-          3. For each name scheduled for checking, check that it will
-             not receive a new value from the newValue method.
-
-          4. ... [FIXME]
-          
-        """
-        # Probably not quite correct yet
-        undef = {}
-        for name in defs:
-            undef.update(self.getChildren(name))
-            undef.update(self.getParents(name))
-            undef.update(self.getSpouses(name))
-        check_names = []
-        for name in undef.keys():
-            if name in defs:
-                del undef[name]
-                check_names.append(name)
-        if check_names: # Hm...
-            self.check(state, check_names, undef) # Hm...
-        elif not undef: # Hm...
-            self.checkAll(state) # Hm...
+        defs = self.explode(defs)
+        undefs = self.getUndefs(state, defs)
+        self.check(state, defs)
         stable = 0
-        while undef and not stable:
+        while undefs and not stable:
             stable = 1
-            for name in undef.keys():
-                try:
-                    newValue = self.newValue(name, state, undef)
-                except (ValueUnchanged, CannotCalculate): pass
+            for key in undefs.keys():
+                try: newValue = self.newValue(key, state, undefs)
+                except (CannotCalculate, ValueUnchanged): pass
                 else:
-                    state[name] = newValue
-                    del undef[name]
+                    self.setValue(state, key, newValue)
+                    del undefs[key]
                     stable = 0
-        return undef.keys()
-
-    def newValue(self, name, state, undef):
-        """
-        Calculates a new value for a given name.
-
-        This method may do one of three things:
-
-        1. Return a new value
-
-        If a rule is found that defines the given name and that
-        doesn't have any undefined dependencies, the new value is
-        calculated. If it is different from the previous value, it is
-        returned.
-
-        2. Raise ValueUnchanged
-
-        If a value is calculated as per alternative 1 but it is
-        equivalent (as defined by the equiv function) to the current
-        value, ValueUnchanged is raised.
-
-        3. Raise CannotCalculate
-
-        If no rule is found that defines the given name and that
-        doesn't have any undefined dependencies, CannotCalculate is
-        raised.
-        """
-        for parent in self.getParents(name).keys():
-            if not undef.has_key(parent):
-                pos = self.rules[parent].index(name)
-                value = state[parent][pos]
+        return undefs.keys()
+        
+    def newValue(self, key, state, undefs):
+        oldValue = self.getValue(state, key)
+        for other in self.equiv.getClass(key).keys():
+            if not undefs.has_key(other):
+                newValue = self.getValue(state, other)
                 break
         else:
-            value = []
-            for child in self.getOrderedChildren(name):
-                if undef.has_key(child):
-                    raise CannotCalculate
-                else:
-                    value.append(state[child])
-            value = tuple(value)
-        if equiv(state[name], value): raise ValueUnchanged
-        return value
+            raise CannotCalculate
+        if oldValue == newValue: raise ValueUnchanged
+        return newValue
