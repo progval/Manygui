@@ -10,7 +10,7 @@ if hasattr(sys,'ps1'):
     try:
         os.environ['ANYGUI_FORCE_CURSES']
     except KeyError:
-        raise Error(None,"This appears to be an interactive session; curses disabled.")
+        raise ImportError,"This appears to be an interactive session; curses disabled."
 
 import atexit
 
