@@ -39,31 +39,5 @@ class Component(Proxy, DefaultEventMixin):
         may also include 'y', but that doesn't affect the sync. If
         these requirements are broken, a SyncError is raised.
         """
-        # FIXME: Not yet correct (or pretty... ;)
-        # FIXME: geometry doesn't really work...
-        
-        equations = [
-            ('position', ('x', 'y')),
-            ('size',     ('width', 'height')),
-            #('geometry', ('x', 'y', 'width', 'height'))
-            # ... or geometry == position + size... Hm.
-            ]
-
-        # FIXME: Use tuples for new values?
-
-        for left, right in equations:
-            leftVal = getattr(self, left)
-            newLeft = list(leftVal)
-            for i in range(len(right)):
-                rightVal = getattr(self, right[i])
-                if leftVal[i] != rightVal:
-                    if not (left in names or right[i] in names):
-                        raise SyncError('Underspecified (%s vs %s)' % (left, right[i]))
-                    if left in names and right[i] in names:
-                        raise SyncError('Overspecified (%s vs %s)' % (left, right[i]))
-                    if right[i] in names:
-                        newLeft[i] = rightVal
-                    else: # left in names
-                        self.rawModify(**{right[i]: leftVal[i]})
-            if list(leftVal) != newLeft:
-                self.rawModify(**{left: newLeft})
+        # Use Rules.RuleEngine
+        raise NotImplementedError
