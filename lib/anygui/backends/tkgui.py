@@ -112,7 +112,11 @@ class ListBox(ComponentMixin, AbstractListBox):
 
     def _backend_selection(self):
         if self._tk_comp:
-            return self._tk_comp.curselection()[0] # FIXME: Multiple/single selection; May contain strings :P
+            selection = self._tk_comp.curselection()[0]
+            try:
+                selection = int(selection)
+            except ValueError: pass
+            return selection
 
     def _ensure_items(self):
         if self._tk_comp:
