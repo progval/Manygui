@@ -16,7 +16,7 @@ class RadioGroup(Attrib, Defaults.RadioGroup, DefaultEventMixin):
         for btn in self._items:
             if btn.on:
                 return int(btn.value)
-        return -1
+        return None
 
     def setValue(self, value):
         for btn in self._items:
