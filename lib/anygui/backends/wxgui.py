@@ -122,7 +122,7 @@ class ToggleButtonMixin(ComponentMixin):
 
     def _ensure_state(self):
         if self._wx_comp is not None:
-            self._wx_comp.SetValue(int(self.on))
+            self._wx_comp.SetValue(int(self._on))
 
     def _get_wx_text(self):
         # return the text required for creation
@@ -151,9 +151,10 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
         send(self, 'click')
     
     def _ensure_created(self):
+        # FIXME: Commented out 20011214mlh. Is this needed anymore?
         # The first radiobutton in a group must have the wxRB_GROUP style
-        if self._group and 0 == self._group._items.index(self):
-            self._wx_style |= wxRB_GROUP
+        #if self._group and 0 == self._group._items.index(self):
+        #    self._wx_style |= wxRB_GROUP
         return ToggleButtonMixin._ensure_created(self)
 
     def _ensure_events(self):
