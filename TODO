@@ -20,6 +20,9 @@ Tentative release date: December 10th, 2001
 
 * Resolve the single-line/multi-line Label issue
 
+* Make it possible to create widgets while the program is
+  running (by improving use of ensure_created etc.)
+
 Objectives for version 0.2:
 ---------------------------
 Tentative release date: February 30th, 2002
