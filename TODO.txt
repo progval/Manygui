@@ -8,6 +8,32 @@ Release 0.2: Refactoring, menus, full event set, graphics,
 Release 0.3: Less API change, focus on robustness
              and stability
 
+Short-term Objectives/FIXMEs [mlh]
+----------------------------------
+
+* Clear up default argument issue
+
+* Use a fixed set of attributes (or something similar)?
+  Remove blocked names?
+
+* Rewrite AbstractApplication; clear up prodding issue
+
+* Clear up _foo issue
+
+* Document tentative API for all components
+
+* Clean up exception use (Exceptions module -- perhaps not needed)
+
+* Clear up the issue of encapsulation wrt. attributes like container,
+  contents/items, menubar, etc.
+
+* Review layout manager mechanism
+
+* Fix Models wrt. the new architecture
+
+* Implement other front-end components in new architecture (delegate)
+
+* Get more work done on a list of events
 
 Objectives for version 0.2a1:
 -----------------------------
@@ -81,6 +107,8 @@ Objectives for version 0.2a3:
 * Fix the setup() mechanism.
 
 * Implement "full" event list
+
+* Make event system thread-safe
 
 New Components:
 
