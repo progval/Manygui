@@ -14,12 +14,12 @@ Goals for next release:
 
 * Add documentation (including major docstrings)
 
+* Add support for the document/view model
+
 Longer term goals:
 ------------------
 
 * Add full menu system
-
-* Add support for the document/view model
 
 * Add full event system
 
