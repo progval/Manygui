@@ -21,7 +21,7 @@ class Proxy(Attrib):
         """
         raise NotImplementedError, 'should be implemented by subclasses'
 
-    def _partialState(self,*names,**kwds):
+    def _partialState(self, *names, **kwds):
         """
         Create a copy of the Proxy's state dict with only the
         keys in *names.
@@ -37,7 +37,7 @@ class Proxy(Attrib):
             except KeyError: pass
         return state
 
-    def pull(self,*names,**kws):
+    def pull(self, *names, **kws):
         """
         Pulls state from the Wrapper to its Proxy.
 
@@ -75,7 +75,7 @@ class Proxy(Attrib):
         at a minimum be supplied. Before Proxy/Wrapper
         synchronisation, the internalPush method is called.
 
-        There are two exceptions to the above:
+        There is one exception to the above:
 
           - If the keyword argument 'blocked' is used, it must contain
             a sequence of names. These names will not be supplied to

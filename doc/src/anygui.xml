@@ -16,6 +16,7 @@
            - Describe new send() behaviour - no longer uses **kwds, but event object;
              (Add this description to the tutorial as well).
            - Document sender() and caller()
+	   - Document the new push/pull mechanism
 
      Remember to keep backend-list up to date
 -->

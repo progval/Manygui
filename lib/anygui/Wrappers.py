@@ -163,7 +163,7 @@ class AbstractWrapper:
         topologicalSort(names, result, self.constraints)
         return result, unhandled
     
-    def update(self, state):
+    def update(self, state): # @@@ Should be push()!
         """
         Updates native widget based on given name/value pairs.
         
