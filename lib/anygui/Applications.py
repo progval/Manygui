@@ -3,7 +3,7 @@ from Attribs import Attrib
 from Utils import flatten
 import anygui
 
-# FIXME: Update to work with Wrapper and Proxy Should maintain a list
+# FIXME: Update to work with Wrapper and. Proxy Should maintain a list
 # of proxies, to be able to prod them when entering the main event
 # loop.
 

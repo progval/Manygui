@@ -3,10 +3,16 @@ import re
 name_pat = re.compile('[a-zA-Z_][a-zA-Z_0-9]*')
 
 class RuleEngine:
+    """
+    A simple rule engine which can maintain relationships between a
+    set of key/value pairs in a dictionary.
+    """
+    
     def __init__(self):
         self.rules = {}
         self.deps = {}
         self.is_dep = {}
+        
     def addRule(self, rule):
         assert '"' not in rule and "'" not in rule
         name, expr = rule.split('=', 1)
@@ -16,6 +22,7 @@ class RuleEngine:
         for dep in deps: self.is_dep[dep] = 1
         self.deps[name] = deps
         self.rules[name] = compile(expr, '', 'eval')
+        
     def adjust(self, vals, defs):
         undef = self.deps.copy()
         dirty = 0
@@ -39,6 +46,7 @@ class RuleEngine:
                     del undef[name]
                     more = 1
         return undef.keys()
+    
     def fire(self, name, scope):
         scope[name] = eval(self.rules[name], scope)
 
@@ -52,7 +60,9 @@ if __name__ == '__main__':
     eng.addRule('height = size[1]')
     eng.addRule('geometry = position + size')
     # How to add reverse here without overriding existent rule?
-    # Have multiple rules?
+    # Must have multiple rules for each name... :I
+    #eng.addRule('position = geometry[0], geometry[1]')
+    #eng.addRule('size = geometry[2], geometry[3]')
 
     # TODO: Add "rule checks" -- if a rule is satisfied, dependencies
     # are irrelevant.
