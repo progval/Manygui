@@ -243,17 +243,12 @@
 
 
     <section>
-      <title>Using Anygui in Standalone Executables</title>
+      <title>Importing the Backends Directly</title>
 
-      <para>You may use <name>Anygui</name> in standalone executables
-      built with tools like <code>py2exe</code>
-      (<url>http://starship.python.net/crew/theller/py2exe/</url>) or
-      the McMillan installer
-      (<url>http://www.mcmillan-inc.com/install1.html</url>), but then
-      you have to specify which backend you want to use, and "hardwire
-      it" into your program, by importing it directly. So, for
-      instance, if you wanted to use the <name>wxPython</name>
-      backend, <code>wxgui</code>, you'd replace
+      <para>If you wish to import a backend directly (and "hardwire
+      it" into your program), you may do so. For instance, if you
+      wanted to use the <name>wxPython</name> backend,
+      <code>wxgui</code>, you'd replace
       </para>
 
       <codelisting>
@@ -266,8 +261,13 @@
 	<line>from anygui.backends.wxgui import *</line>
       </codelisting>
 
-      <para>The same applies when using <code>jythonc</code> with the
-      <code>--deep</code> option or equivalent.</para>
+      <para>This way you may use <name>Anygui</name> in standalone
+      executables built with tools like <code>py2exe</code>
+      (<url>http://starship.python.net/crew/theller/py2exe/</url>) or
+      the McMillan installer
+      (<url>http://www.mcmillan-inc.com/install1.html</url>), or with
+      <code>jythonc</code> with the <code>--deep</code> option or
+      equivalent.</para>
 
     </section>
 
