@@ -1,6 +1,7 @@
 """txtgui.py is the curses/text binding for Anygui <http://www.anygui.org>.
 """
 import sys
+import os
 
 from anygui.backends import *
 from anygui.Exceptions import Error
@@ -600,6 +601,7 @@ class ListBox(ComponentMixin, AbstractListBox):
                    ord(' '):_do_click }
 
 from bmpascii import *
+from anygui.Colors import black,white
 class Canvas(ComponentMixin, AbstractCanvas):
     #_text = "Canvas not supported in text mode."
     _gets_focus = 0
@@ -608,6 +610,7 @@ class Canvas(ComponentMixin, AbstractCanvas):
     def __init__(self,*args,**kws):
         ComponentMixin.__init__(self,*args,**kws)
         AbstractCanvas.__init__(self,*args,**kws)
+        self._must_render = 1
         w,h = self._screen_width(),self._screen_height()
         self._bmpw = w*4
         self._bmph = h*6
@@ -617,26 +620,36 @@ class Canvas(ComponentMixin, AbstractCanvas):
             self._bitmap.append(line[:])
         self._scalew = float(self._bmpw)/float(self._width)
         self._scaleh = float(self._bmph)/float(self._height)
-        log("w,h = ",self._width,self._height)
-        log("bmpw,bmph = ",self._bmpw,self._bmph)
-        log("scalew,scaleh = ",self._scalew,self._scaleh)
+        #log("w,h = ",self._width,self._height)
+        #log("bmpw,bmph = ",self._bmpw,self._bmph)
+        #log("scalew,scaleh = ",self._scalew,self._scaleh)
 
-    def _draw_line(self,point1,point2):
+    def _draw_line(self,point1,point2,color=None):
+        if color is None:
+            color = self.defaultLineColor
+        if color != white:
+            color = 1
+        else:
+            color = 0
         x1,y1 = point1
         x2,y2 = point2
-        log("_draw_line",x1,y1,"->",x2,y2)
+        #log("_draw_line",x1,y1,"->",x2,y2)
         if x1 == x2:
             if y1>y2: y2,y1 = y1,y2
             for y in range(y1,y2+1):
                 ey = int(y*self._scaleh)
                 ex = int(x1*self._scalew)
-                log("Setting x,y --> ez,ey",x1,y,ex,ey)
-                self._bitmap[ey][ex] = 1
+                #log("Setting x,y --> ez,ey",x1,y,ex,ey)
+                try:
+                    self._bitmap[ey][ex] = color
+                except:
+                    pass
             return
-        if x1<0 or x1>=self._width or x2<0 or x2>=self._width:
+        if x1<0 or x1>self._width or x2<0 or x2>self._width:
             return
-        if y1<0 or y1>=self._height or y2<0 or y2>=self._height:
+        if y1<0 or y1>self._height or y2<0 or y2>self._height:
             return
+
         if x1>x2:
             #x1,y1,x2,y2 = x2,y2,x1,y1
             x1,x2 = x2,x1
@@ -653,16 +666,63 @@ class Canvas(ComponentMixin, AbstractCanvas):
             y = m*x+b
             ey = int(y*self._scaleh)
             ex = int(x*self._scalew)
-            log("Setting x,y --> ez,ey",x,y,ex,ey)
-            self._bitmap[ey][ex] = 1
+            #log("Setting x,y --> ez,ey",x,y,ex,ey)
+            try:
+                self._bitmap[ey][ex] = color
+            except:
+                pass
+            #self._bitmap[ey][ex] = not self._bitmap[ey][ex]
     
+    def drawLine(self, x1, y1, x2, y2, color=None, width=None):
+        "Draw a straight line between x1,y1 and x2,y2."
+        self._draw_line((x1,y1),(x2,y2),color)
+
     def drawPolygon(self, pointlist,
                     edgeColor=None, edgeWidth=None, fillColor=None, closed=0):
+        #log("FILLING, fillColor is",fillColor)
+        self._fillColor = fillColor
         for ip in range(len(pointlist)-1):
-            self._draw_line(pointlist[ip],pointlist[ip+1])
+            self._draw_line(pointlist[ip],pointlist[ip+1],edgeColor)
         if closed:
-            self._draw_line(pointlist[-1],pointlist[0])
+            #log("CLOSED POLY",pointlist)
+            self._draw_line(pointlist[-1],pointlist[0],edgeColor)
+            self._fillPoly(pointlist)
         self._must_render = 1
+
+    def _fillPoly(self,ps):
+        if self._fillColor is None:
+            return
+        if self._fillColor != white:
+            color = 1
+        else:
+            color = 0
+        #log("FILLING, fillColor is",self._fillColor)
+        x1 = 9999
+        y1 = 9999
+        x2 = 0
+        y2 = 0
+        for p in ps:
+            if p[0]<x1:
+                x1 = p[0]
+            if p[0]>x2:
+                x2 = p[0]
+            if p[1]<y1:
+                y1=p[1]
+            if p[1]>y2:
+                y2=p[1]
+        #log("FILLING in rect",x1,y1,"x",x2,y2)
+        for x in range(x1+1,x2-1):
+            for y in range(y1+1,y2-1):
+                if self._pnpoly(ps,x,y):
+                    #log(x,y,"is in poly",ps)
+                    ey = int(y*self._scaleh)
+                    ex = int(x*self._scalew)
+                    #log("Clearing x,y --> ez,ey",x,y,ex,ey)
+                    try:
+                        self._bitmap[ey][ex] = color
+                    except:
+                        pass
+                    #self._bitmap[ey][ex] = not self._bitmap[ey][ex]
 
     def _render(self):
         if not self._must_render: return
@@ -677,6 +737,17 @@ class Canvas(ComponentMixin, AbstractCanvas):
             self._addstr(0,y,line)
             y += 1
         
+    def _pnpoly(self,ps, x, y):
+        i=0
+        j=0
+        c=0
+        npol = len(ps)
+        for i,j in zip(range(0,npol),range(-1,npol-1)):
+            if ((((ps[i][1]<=y) and (y<ps[j][1])) or
+                 ((ps[j][1]<=y) and (y<ps[i][1]))) and
+                (x < (ps[j][0] - ps[i][0]) * (y - ps[i][1]) / (ps[j][1] - ps[i][1]) + ps[i][0])):
+                c = not c
+        return c
 
 class Button(ComponentMixin, AbstractButton):
 
@@ -1367,12 +1438,12 @@ class Application(AbstractApplication):
             # In the event of an error, restore the terminal
             # to a sane state.
             _scr.scr_quit()
-
+            
     def _mainloop(self):
         # Present the initial help screen, without which the
         # UI remains forever mysterious.
         global _inithelp
-        if not _inithelp:
+        if not _inithelp and not os.environ['ANYGUI_CURSES_NOHELP']:
             HelpWindow()
             _inithelp = 1
 
