@@ -33,8 +33,6 @@ got to do with slow updates of layout?)
 Windows created after app.run() seem to have only default
 geometry (i.e. size == (0, 0)) in tkgui/MacPython.
 
-In test_textfield the update button resets the text field in wxgui.
-
 There seems to be some infinite recursion associated with the text
 components in javagui.
 
@@ -43,9 +41,6 @@ test_textchange below a certain value...
 
 test_textarea doesn't work properly. (Swap from Label to TextArea
 needs ironing out...)
-
-test_textchange fails in some backends (e.g. wx) because _ensure_text
-isn't supported on the relevant widgets
 
 test_references.py and test_events don't work in Jython 2.1b1.
 (References and Events should still work, though...)
