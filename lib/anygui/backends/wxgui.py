@@ -40,9 +40,14 @@ class ComponentWrapper(AbstractWrapper):
     _wx_style = 0
     _needsCreationText = 1
     
+    def __init__(self,*args,**kws):
+        AbstractWrapper.__init__(self,*args,**kws)
+        self.setConstraints('container','x','y','width','height',
+                            'text','selection','geometry','visible')
+
     def widgetFactory(self,*args,**kws):
         if hasattr(self.proxy.container,'wrapper'):
-            parent = self.proxy.container.wrapper._wx_frame
+            parent = self.proxy.container.wrapper._getContainer()
         else:
             parent = None
         if self._wx_id is None:
@@ -145,92 +150,94 @@ class LabelWrapper(ComponentWrapper):
     _wx_style = wxALIGN_LEFT
 
 ################################################################
-'''COMMENT JKJKJK
 
-class ListBox(ComponentMixin, AbstractListBox):
+class ButtonWrapper(ComponentWrapper):
+    _wx_class = wxButton
+
+    def widgetSetUp(self):
+        EVT_BUTTON(self.widget, self._wx_id, self._wx_clicked)
+
+    def _wx_clicked(self, evt):
+        send(self.proxy, 'click')
+
+################################################################
+
+class ListBoxWrapper(ComponentWrapper):
     _wx_class = wxListBox
     _wx_style = wxLB_SINGLE # FIXME: Not used... But default?
+    _needsCreationText=0
 
-    def _backend_selection(self):
+    def getSelection(self):
         if not self.noWidget():
             return self.widget.GetSelection()
 
-    def _ensure_items(self):
+    def setItems(self,items):
         if not self.noWidget():
             for index in range(self.widget.Number()):
                 self.widget.Delete(0)
-            self.widget.InsertItems(map(str, list(self._items)), 0)
+            self.widget.InsertItems(map(str, list(items)), 0)
 
-    def _ensure_selection(self):
+    def setSelection(self,selection):
         if not self.noWidget():
             if self.widget.Number() > 0:
-                self.widget.SetSelection(int(self._selection)) # Does not cause an event
+                self.widget.SetSelection(int(selection)) # Does not cause an event
 
-    def _ensure_events(self):
+    def widgetSetUp(self):
         if not self.noWidget():
             EVT_LISTBOX(self.widget, self._wx_id, self._wx_clicked)
 
     def _wx_clicked(self, event):
-        send(self, 'select')
+        send(self.proxy, 'select')
 
 ################################################################
 
-class Button(ComponentMixin, AbstractButton):
-    _wx_class = wxButton
+class ToggleButtonWrapper(ComponentWrapper):
 
-    def _ensure_events(self):
-        EVT_BUTTON(self.widget, self._wx_id, self._wx_clicked)
+    def setOn(self,on):
+        if not self.noWidget():
+            self.widget.SetValue(int(on))
 
-    def _wx_clicked(self, evt):
-        send(self, 'click')
+    def getOn(self):
+        if not self.noWidget():
+            return self.widget.GetValue()
 
-    def _get_wx_text(self):
-        return str(self._text)
-
-
-class ToggleButtonMixin(ComponentMixin):
-
-    def _ensure_state(self):
-        if self.widget is not None:
-            self.widget.SetValue(int(self._on))
-
-    def _get_wx_text(self):
-        # return the text required for creation
-        return str(self._text)
-
-
-class CheckBox(ToggleButtonMixin, AbstractCheckBox):
+class CheckBoxWrapper(ToggleButtonWrapper):
     _wx_class = wxCheckBox
 
-    def _wx_clicked(self, evt):
-        val = self.widget.GetValue()
-        if val == self._on:
-            return
-        self.modify(on=val)
-        send(self, 'click')
-
-    def _ensure_events(self):
+    def widgetSetUp(self):
         EVT_CHECKBOX(self.widget, self._wx_id, self._wx_clicked)
 
-class RadioButton(ToggleButtonMixin, AbstractRadioButton):
+    def _wx_clicked(self, evt):
+        send(self.proxy, 'click')
+
+
+class RadioButtonWrapper(ToggleButtonWrapper):
     _wx_class = wxRadioButton
 
     def _wx_clicked(self, evt):
-        if evt.GetInt():
-            if self.group is not None:
-                self.group.modify(value=self.value)
-            send(self, 'click')
+        if self.getOn():
+            send(self.proxy, 'click')
     
-    def _ensure_created(self):
+    def widgetFactory(self,*args,**kws):
         # FIXME: What about moving buttons between groups? Would that
         # require destruction and recreation? [mlh20011214]
         # The first radiobutton in a group must have the wxRB_GROUP style
-        if self._group and 0 == self._group._items.index(self):
+        if self.proxy.group and self.proxy.group._items.index(self.proxy) == 0:
             self._wx_style |= wxRB_GROUP
-        return ToggleButtonMixin._ensure_created(self)
+        return ToggleButtonWrapper.widgetFactory(self,*args,**kws)
 
-    def _ensure_events(self):
+    # COMMON WITH MSW
+    def setGroup(self,group):
+        if group is None:
+            return
+        if self.proxy not in group._items:
+            group._items.append(self.proxy)
+    # END COMMON WITH MSW
+
+    def widgetSetUp(self):
         EVT_RADIOBUTTON(self.widget, self._wx_id, self._wx_clicked)
+
+################################################################
 
 ################################################################
 
@@ -238,113 +245,98 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
 # fixed (e.g. with a common superclass), fixes in one of these
 # text classes should probably also be done in the other.
 
-class TextField(ComponentMixin, AbstractTextField):
-    _wx_class = wxTextCtrl
+class TextControlMixin:
 
-    def _backend_selection(self):
+    def getText(self):
         if not self.noWidget():
-            return self.widget.GetSelection()
-
-
-    def _backend_text(self):
-        if not self.noWidget():
-            return  self.widget.GetValue()
+            if sys.platform[:3] == 'win':
+                return self.widget.GetValue().replace('\r','')
+            else:
+                return self.widget.GetValue()
             
-    def _ensure_text(self):
+    def setText(self,text):
         if not self.noWidget():
             # XXX Recursive updates seem to be no problem here,
             # wx does not seem to trigger the EVT_TEXT handler
             # when a new text equal to the old one is set.
-            self.widget.SetValue(str(self._text))
+            self.widget.SetValue(str(text))
 
-    def _ensure_selection(self):
+    def setEditable(self,editable):
         if not self.noWidget():
-            start, end = self._selection
+            self.widget.SetEditable(int(editable))
+
+class TextFieldWrapper(TextControlMixin,ComponentWrapper):
+    _wx_class = wxTextCtrl
+
+    def getSelection(self):
+        if not self.noWidget():
+            return self.widget.GetSelection()
+
+    def setSelection(self,selection):
+        if not self.noWidget():
+            start, end = selection
             self.widget.SetSelection(int(start), int(end))
 
-    def _ensure_editable(self):
-        if not self.noWidget():
-            self.widget.SetEditable(int(self._editable))
-
-    def _ensure_events(self):
+    def widgetSetUp(self):
         EVT_TEXT_ENTER(self.widget, self._wx_id, self._wx_enterkey)
-        EVT_KILL_FOCUS(self.widget, self._wx_killfocus)
-
-    def _wx_killfocus(self, event):
-        self.modify(text=self.widget.GetValue())
 
     def _wx_enterkey(self, event):
-        send(self, 'enterkey')
+        send(self.proxy, 'enterkey')
 
-    def _get_wx_text(self):
-        # return the text required for creation
-        # XXX From here or from model?
-        return str(self._text)
-
-
-# FIXME: 'Copy-Paste' inheritance... TA and TF could have a common wx
-# superclass. The only differences are the _wx_style and event handling.
-class TextArea(ComponentMixin, AbstractTextArea):
+class TextAreaWrapper(TextControlMixin,ComponentWrapper,TextControlMixin):
     _wx_class = wxTextCtrl
     _wx_style = wxTE_MULTILINE | wxHSCROLL
 
-    def _backend_selection(self):
+    def getSelection(self):
         if not self.noWidget():
             start, end = self.widget.GetSelection()
             if sys.platform[:3] == 'win':
                 # under windows, the native widget contains
                 # CRLF line separators
                 # XXX Is this a wxPython bug?
-                text = self.text
-                start -= text[:start].count('\n')
-                end -= text[:end].count('\n')
+                # (Probably not, one wants to be able to cut&paste
+                # normally under windows. It would be nice if
+                # the selection was returned in a saner manner,
+                # however.)
+
+                # I -think- this is right, now. We need to find the
+                # number of newlines spanned by the selection in
+                # the non-Windowfied text in order to do this
+                # properly. If anyone notices a problem with
+                # wx TextArea selections, please fix it :-) - jak
+                
+                span = end-start
+                text = self.widget.GetValue()
+                unxText = text.replace('\r','')
+                startCt = text[:start].count('\n')
+                unxStart = start-startCt
+                spanBreaks = unxText[unxStart:(unxStart+span)].count('\n')
+                endCt = startCt+spanBreaks
+                start -= startCt
+                end -= endCt
             return start, end
 
-    def _backend_text(self):
+    def setSelection(self,selection):
         if not self.noWidget():
-            return  self.widget.GetValue()
-            
-    def _ensure_text(self):
-        if not self.noWidget():
-            # XXX Recursive updates seem to be no problem here,
-            # wx does not seem to trigger the EVT_TEXT handler
-            # when a new text equal to the old one is set.
-            self.widget.SetValue(str(self._text))
-
-    def _ensure_selection(self):
-        if not self.noWidget():
-            start, end = self._selection
+            start, end = selection
             if sys.platform[:3] == 'win':
                 # under windows, the natice widget contains
                 # CRLF line separators
                 # XXX Is this a wxPython bug?
-                text = self.text
+                text = self.getText()
                 start += text[:start].count('\n')
                 end += text[:end].count('\n')
             self.widget.SetSelection(int(start), int(end))
 
-    def _ensure_editable(self):
-        if not self.noWidget():
-            self.widget.SetEditable(int(self._editable))
-
-    def _ensure_events(self):
-        EVT_KILL_FOCUS(self.widget, self._wx_killfocus)
-
-    def _wx_killfocus(self, event):
-        self.modify(text=self.widget.GetValue())
-
-    def _get_wx_text(self):
-        # return the text required for creation
-        # XXX From here or from model?
-        return str(self._text)
-
 ################################################################
 
-class Frame(ComponentMixin, AbstractFrame):
+class FrameWrapper(ComponentWrapper):
     _wx_class = wxPanel
+    _needsCreationText = 0
+
+    def _getContainer(self): return self.widget
 
 ################################################################
-END COMMENT JKJKJK '''
 
 class WindowWrapper(ComponentWrapper):
     _wx_class = wxFrame
@@ -391,6 +383,8 @@ class WindowWrapper(ComponentWrapper):
         for comp in self.proxy.contents:
             comp.container = self.proxy
 
+    def _getContainer(self): return self._wx_frame
+
     # wxPython event handlers receive an event as parameter
     def _wx_close_handler(self, evt):
         self.destroy()
@@ -401,7 +395,9 @@ class WindowWrapper(ComponentWrapper):
         self._wx_frame.SetSize((w, h))
         dw = w - ow
         dh = h - oh
-        self.proxy.resized(dw, dh)
+        #self.proxy.resized(dw, dh)
+        print "Resizing..."
+        self.proxy.resized(0,0)
 
 ################################################################
 
@@ -414,7 +410,6 @@ class Application(AbstractApplication, wxApp):
         return 1
 
     def internalRun(self):
-        print "Entering wx mainloop"
         self.MainLoop()
 
 ################################################################

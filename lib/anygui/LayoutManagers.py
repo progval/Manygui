@@ -675,6 +675,7 @@ class Placer(LayoutManager):
         elif ld._vstretch:
             dh = cdh
         if dx != 0 or dy != 0 or dw != 0 or dh != 0:
+            #print "Placer:",(comp.x, comp.y, comp.width, comp.height),dx,dy,dw,dh
             comp.geometry = (comp.x + dx, comp.y + dy,
                              comp.width + dw, comp.height + dh)
 

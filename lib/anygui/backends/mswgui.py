@@ -44,6 +44,8 @@ class ComponentWrapper(AbstractWrapper):
     _hfont = win32gui.GetStockObject(win32con.ANSI_VAR_FONT)
 
     def __init__(self,*args,**kws):
+        self._width = 0
+        self._height = 0
         AbstractWrapper.__init__(self,*args,**kws)
         self.setConstraints('container','x','y','width','height',
                             'text','selection','geometry','visible')
@@ -81,6 +83,23 @@ class ComponentWrapper(AbstractWrapper):
         l,t,r,b = win32gui.GetWindowRect(self.widget)
         w = r-l
         h = b-t
+
+        # Gag me with a cat.
+        # Child window positions are reported relative to the
+        # *toplevel* window, not relative to the parent.
+        # Refactor this. - jak
+        if not isinstance(self.container,WindowWrapper):
+            done = 0
+            try:
+                if isinstance(self.proxy.container.wrapper,FrameWrapper):
+                    px,py,pw,ph = self.proxy.container.geometry
+                    l-=px
+                    t-=py
+                else:
+                    done=1
+            except AttributeError:
+                done = 1
+
         return l,t,w,h
 
     def setX(self,x):
@@ -413,20 +432,15 @@ class ContainerMixin:
         #log("Dispatching to child %s"%child_window)
         child_window._WM_COMMAND(hwnd, msg, wParam, lParam)
 
-    def _WM_SIZE(self, hwnd, msg, wParam, lParam):
-        w, h = lParam & 0xFFFF, lParam >> 16
-        dw = w - self.proxy.width
-        dh = h - self.proxy.height
-        self.proxy.resized(dw,dh) # @@@ Implement this...
-
-
 class FrameWrapper(ComponentWrapper,ContainerMixin):
     _win_style = win32con.WS_CHILD
     _win_style_ex = 0
+    _wndclass = None
 
     def __init__(self,*args,**kws):
         ContainerMixin.__init__(self)
         ComponentWrapper.__init__(self,*args,**kws)
+
 
     def setContainer(self, *args, **kws):
         """
@@ -442,6 +456,10 @@ class FrameWrapper(ComponentWrapper,ContainerMixin):
         ComponentWrapper.setContainer(self, *args, **kws)
         for component in self.proxy.contents:
             component.container = self.proxy
+
+    def _WM_SIZE(self, hwnd, msg, wParam, lParam):
+        # Proxy handles resizing.
+        pass
 
 class WindowWrapper(ContainerMixin,ComponentWrapper):
 
@@ -465,9 +483,6 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
                               + win32api.GetSystemMetrics(win32con.SM_CYCAPTION) \
                               + 2*win32api.GetSystemMetrics(win32con.SM_CYFRAME),
                               win32con.SWP_NOACTIVATE | win32con.SWP_NOZORDER)
-
-    #def _ensure_events(self):
-    #    pass
 
     def setContainer(self,container):
         if not application().isRunning(): return
@@ -494,6 +509,24 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
                              win32con.WM_SETFONT,
                              self._hfont,
                              0)
+    def _WM_SIZE(self, hwnd, msg, wParam, lParam):
+        w, h = lParam & 0xFFFF, lParam >> 16
+        if self._width==0 and self._height==0:
+            # This will be the case when the widget is first
+            # created. We need to ensure the contents get
+            # reasonable geometries before we start sliding
+            # them around, so ignore the initial resize.
+            dw=0
+            dh=0
+        else:
+            dw = w - self._width
+            dh = h - self._height
+        
+        self._width = w
+        self._height = h
+        if (dw,dh) == (0,0): return
+        self.proxy.resized(dw,dh)
+
     def _WM_CLOSE(self, hwnd, msg, wParam, lParam):
         self.destroy()
         application().remove(self.proxy)

@@ -533,16 +533,19 @@ class WindowWrapper(ComponentWrapper):
         # No, we've already got new geometry, no need to
         # set it. - jak
         x, y, w, h = self.getGeometry()
-        dw = w - self.proxy.width # @@@ With lazy semantics, these will be fetched from the widget!
-        dh = h - self.proxy.height # @@@
+        dw = w - self.proxy.state['width'] # @@@ With lazy semantics, these will be fetched from the widget!
+        dh = h - self.proxy.state['height'] # @@@ (and therefore will tell us nothing!)
 
         # Weird: why doesn't self.proxy.geometry give us the same values???
-        oldGeo = self.proxy.x,self.proxy.y,self.proxy.width,self.proxy.height
-        if (x, y, w, h) == oldGeo:
-            # Do nothing unless we've actually changed size or position.
+        if (dw,dh) == (0,0):
+            # Do nothing unless we've actually changed size.
             # (Configure events happen for all kinds of wacky reasons,
             # most of which are already dealt with by Proxy code.) - jak
             return
+
+        # Ensure proxy state is updated, else we recurse forever.
+        self.proxy.height
+        self.proxy.width
 
         #@@@ These should be handled by pull()
         #self.proxy.rawModify(width=w)

@@ -52,11 +52,20 @@ class Frame(Component, Defaults.Frame):
 
     def resized(self, dw, dh):
         """ Ensure all contents are layed out properly. """
+        oldSizes = {}
+        for item in self.contents:
+            try:
+                oldSizes[item] = item.width,item.height
+            except:
+                pass
         try:
             self.layout.resized(dw,dh)
             for item in self.contents:
+                ow,oh = oldSizes[item]
+                idw = item.width-ow
+                idh = item.height-oh
                 try:
-                    item.resized(dw,dh)
+                    item.resized(idw,idh)
                 except:
                     pass
         except:
