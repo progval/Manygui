@@ -1,6 +1,7 @@
 #from Mixins import Action
 from Exceptions import UnimplementedMethod
 from Mixins import Attrib
+from Util import flatten
 import anygui
 
 class AbstractApplication(Attrib):
@@ -15,10 +16,11 @@ class AbstractApplication(Attrib):
         anygui._application = self
 
     def _get_contents(self):
-        return self._windows
+        return tuple(self._windows)
 
     def add(self, win):
-        self._windows.append(win)
+        for w in flatten(win):
+            self._windows.append(w)
         if self._running:
             win.ensure_created()
             
