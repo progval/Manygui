@@ -443,7 +443,7 @@ class Application(AbstractApplication):
         # there should probably be a better way to dispatch messages
         if msg == win32con.WM_DESTROY:
             app = application()
-            app._remove_window(window)
+            app.remove(window)
             if not app._windows:
                 win32gui.PostQuitMessage(0)
         if msg == win32con.WM_CLOSE:

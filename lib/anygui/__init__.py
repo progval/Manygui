@@ -32,6 +32,7 @@ if DEBUG:
         pass
 
 _application = None
+_backend     = None
 
 def _dotted_import(name):
     # version of __import__ which handles dotted names
@@ -44,7 +45,7 @@ def _dotted_import(name):
     return mod
 
 def _backend_passthrough():
-    global _backends
+    global _backends, _backend
     _backends = _backends.split()
     _backends = [b for b in _backends if not b in wishlist]
     _backends = wishlist + _backends
@@ -59,16 +60,23 @@ def _backend_passthrough():
                 traceback.print_exc()
             continue
         else:
+            _backend = name
             return
     raise RuntimeError, "no usable backend found"
 
 def application():
-    """Return the global application object"""
-    global _application
+    'Return the global application object'
+    #global _application
     if not _application:
         #_application = factory()._map['Application']()
         raise RuntimeError, 'no application exists'
     return _application
+
+def backend():
+    'Return the name of the current backend'
+    if not _backend:
+        raise RuntimeError, 'no backend exists'
+    return _backend
 
 # Pass the backend namespace through:
 _backend_passthrough()
