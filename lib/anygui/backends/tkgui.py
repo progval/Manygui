@@ -567,7 +567,7 @@ class CheckBoxWrapper(ToggleButtonMixin, ComponentWrapper):
 class FrameWrapper(ComponentWrapper):
 
     def widgetFactory(self, *args, **kws):
-        kws['relief'] = 'sunken'
+        #kws['relief'] = 'sunken'
         kws['borderwidth'] = 2
         widget=Tkinter.Frame(*args, **kws)
         return widget
