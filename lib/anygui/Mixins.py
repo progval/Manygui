@@ -1,4 +1,4 @@
-"Mixins: mix-in classes for the anyguy package"
+"Mixins: mix-in classes for the anygui package"
 
 from Exceptions import SetAttributeError, GetAttributeError
 import weakref
@@ -74,11 +74,27 @@ class Action:
 
 class Observable:
     """
-    Models can use this to get registration+notification abilities.
+    Implements the "observed" role in the Observer design pattern.
+    Views call add_view(<view_object>,<callback_name>) to add themselves
+    to the observer list for the model. Models may call self.notify_views()
+    with arbitrary arguments to notify all existing views via their
+    callback method, or via their "notify" method if no callback name
+    is supplied in the add_view() call. All arguments passed to
+    notify_views() are passed on intact to the views' callback.
+    In addition, a "target=modelself" keyword argument is passed.
+
+    Models may also record "hints" using the add_hint() method. A hint
+    is a (method_name,*args,**kwargs) tuple describing a method call
+    on the model object since the last time the model notified its
+    views of a state change. A model that uses the hint facility may call
+    self.notify_views_with_hints() to deliver all accumulated hint
+    data to all views, again using the views' named callback method
+    or "notify()" by default; the accumulated hints are then discarded.
     """
 
     def __init__(self):
         self.views = []
+        self.hints = []
 
     def add_view(self,view,callback=None):
         """
@@ -101,7 +117,9 @@ class Observable:
 
     def notify_views(self,*args,**kw):
         """
-        Notify all registered, non-GC'd views of a model change.
+        Notify all registered, non-GC'd views of a model change. Any arguments
+        and keywords passed to notify_views are passed along intact to the
+        views' callback methods.
         """
 
         # Get rid of views that've been GC'd.
@@ -116,7 +134,25 @@ class Observable:
                     # we try using a bound method we end up back in circular-reference
                     # land.
                     meth = getattr(view,vv[1])
-                    meth(self,*args,**kw)
+                    meth(target=self,*args,**kw)
                 else:
                     # No custom callback, so just try to notify().
                     view.notify(self,*args,**kw)
+
+    def add_hint(self,meth,*args,**kw):
+        """
+        Record a hint for later delivery to views. A hint is a model method name,
+        a list of positional arguments, and a dictionary of keyword arguments.
+        Or any other data the model would like to send :-)
+        """
+        self.hints.append((meth,args,kw))
+
+    def notify_views_with_hints(self):
+        """
+        Notify all registered, non-GC'd views of a model change using
+        the recorded hint list, then discard the hints.
+        
+        FIX ME! There are almost certain to be threading issues here.
+        """
+        self.notify_views(change=self.hints)
+        self.hints = []
