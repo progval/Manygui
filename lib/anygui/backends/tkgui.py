@@ -203,6 +203,10 @@ class Button(ComponentMixin, AbstractButton):
         #self.do_action()
         send('action', self)
 
+    def _ensure_text(self):
+        if self._tk_comp:
+            self._tk_comp.configure(text = self._text)
+
 class ToggleButtonMixin(ComponentMixin):
 
     def _ensure_state(self):
