@@ -1,4 +1,6 @@
 
+raise "Don't use this module!"
+
 class IllegalState(Exception): pass
 
 class RuleEngine:

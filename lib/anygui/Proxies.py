@@ -49,7 +49,7 @@ class Proxy(Attrib):
         # We may need to modify names, so...
         names = list(names)
 
-        self.internalSync(names)
+        self.internalSync(names) # @@@ May no longer be needed
 
         # FIXME: Acceptable?
         try: self.wrapper
@@ -58,12 +58,12 @@ class Proxy(Attrib):
         state = {}
         try: blocked = kwds['blocked']
         except KeyError: blocked = []
-        blocked.extend(self.blockedNames())
+        #blocked.extend(self.blockedNames()) # No longer needed
         if not names: state.update(self.state)
         else:
-            for name in names:
-	        if name in blocked:
-                    self.expandAliasedName(names,name)
+            #for name in names:
+	    #    if name in blocked:
+            #        self.expandAliasedName(names,name)
             for name in names: state[name] = self.state[name]
         for name in blocked:
             try: del state[name]
@@ -77,16 +77,16 @@ class Proxy(Attrib):
         """
         pass
 
-    def blockedNames(self):
-        """
-        Returns a sequence of names that should not be passed to the backend Wrapper.
+    #def blockedNames(self):
+    #    """
+    #    Returns a sequence of names that should not be passed to the backend Wrapper.
+    #
+    #    Should be overridden by subclasses which need to block
+    #    names. The default is an empty list.
+    #    """
+    #    return []
 
-        Should be overridden by subclasses which need to block
-        names. The default is an empty list.
-        """
-        return []
-
-    def internalSync(self, names):
+    def internalSync(self, names): # @@@ May no longer be needed!
         """
         Used for internal synchronisation in the Proxy.
 

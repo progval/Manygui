@@ -24,6 +24,9 @@ class Rectangle:
     """
     
     # FIXME: Should perhaps use modify instead of set?
+    
+    # FIXME: What about naming? Should we use centerX etc? hCenter?
+    # hcenter?  What about hmove etc?
 
     def setBottom(self, bottom):
         self.set(y=bottom-self.height)
@@ -118,10 +121,6 @@ class Rectangle:
     def getMidtop(self):
         return self.getCenterx(), self.y
 
-    setPosition = setTopleft
-
-    getPosition = getTopleft
-
     def setRight(self, right):
         x = right
         x -= self.width
@@ -135,7 +134,7 @@ class Rectangle:
         self.set(width=w, height=h)
 
     def getSize(self):
-        returh self.width, self.height
+        return self.width, self.height
 
     def setTop(self, top):
         self.set(y=top)
@@ -149,6 +148,10 @@ class Rectangle:
 
     def getTopleft(self):
         return self.x, self.y
+
+    setPosition = setTopleft
+
+    getPosition = getTopleft
 
     def setTopright(self, topright):
         x, y = topright

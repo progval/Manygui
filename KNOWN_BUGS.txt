@@ -1,3 +1,20 @@
+
+0.2 transitional problems:
+--------------------------
+
+tkgui:
+
+[mlh@20020713] It is not currently possible to create Windows before
+instantiating Application. It should be.
+
+[mlh@20020713] It seems that the tkgui event loop doesn't die with the
+last window. When run at the interactive prompt, calling app.add(win)
+after the application has quit simply starts it up again, with the new
+window. Quite odd. In these situations, the Tk main window appears
+too...
+
+----------------------------------------------------------------------
+
 The from anygui.backends.foogui import * solution doesn't really work
 as described in the docs...
 
