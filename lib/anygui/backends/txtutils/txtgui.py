@@ -4,14 +4,42 @@ import sys
 from anygui.backends import *
 from anygui.Exceptions import Error
 
+# Some useful event codes.
+DOWN_ARROW=258
+UP_ARROW=259
+LEFT_ARROW=260
+RIGHT_ARROW=261
+ESCAPE=27
+BACKSPACE=127
+LEFT_BRACKET=91
+WINMENU_EVENT=990
+FOCUS_FORWARD_EVENT=991
+FOCUS_BACKWARD_EVENT=992
+REFRESH_EVENT=997
+QUIT_EVENT=998
+HELP_EVENT=999
+COMMAND_EVENT=1000
+SCROLL_LEFT=951
+SCROLL_RIGHT=952
+SCROLL_UP=953
+SCROLL_DOWN=954
+
 # Map of character codes to names.
 _charnames = {ord(' '):'space',
-              258:'down arrow',
-              259:'up arrow',
-              260:'left arrow',
-              261:'right arrow',
-              27:'ESC',
-              127:'backspace',
+              DOWN_ARROW:'down arrow',
+              UP_ARROW:'up arrow',
+              LEFT_ARROW:'left arrow',
+              RIGHT_ARROW:'right arrow',
+              ESCAPE:'ESC',
+              BACKSPACE:'backspace',
+              HELP_EVENT:'ESC-?',
+              COMMAND_EVENT:'ESC-ESC',
+              QUIT_EVENT:'ESC-q-u-i-t',
+              SCROLL_LEFT:'ESC-leftarrow',
+              SCROLL_RIGHT:'ESC-rightarrow',
+              SCROLL_UP:'ESC-uparrow',
+              SCROLL_DOWN:'ESC-downarrow',
+              WINMENU_EVENT:'ESC-w',
               1:'^A',
               2:'^B',
               3:'^C',
@@ -282,7 +310,7 @@ class ComponentMixin:
         ##_scr.dbg("Redrawing (%d) %s"%(self.refresh,self))
         if not self._curses_created: return
         ##_scr.dbg("Visible: %s"%self)
-        x,y = self._get_screen_coords()
+        #x,y = self._get_screen_coords()
         if self._visible:
             self._erase()
             self._draw_border()
@@ -381,10 +409,13 @@ class ComponentMixin:
     def _ensure_geometry(self):
         ##_scr.dbg("Ensuring geometry",self.geometry,self)
         _refresh_all()
-        self._redraw()
+        #self._redraw()
 
     def _ensure_visibility(self):
         self._redraw()
+
+    #def _ensure_visible(self):
+    #    self._redraw()
 
     def _ensure_enabled_state(self):
         #_scr.dbg("ENSURING ENABLED",self)
@@ -413,7 +444,7 @@ class ComponentMixin:
 
     def _ensure_text(self):
         self._ensure_editable()
-        self._redraw()
+        #self._redraw()
 
 class ContainerMixin(ComponentMixin):
     """ Special handling for containers. These are mostly the
@@ -539,8 +570,8 @@ class ListBox(ComponentMixin, AbstractListBox):
         """Click on selected item."""
         send(self,'select')
 
-    _event_map = { ord('j'):_select_down,
-                   ord('k'):_select_up,
+    _event_map = { DOWN_ARROW:_select_down,
+                   UP_ARROW:_select_up,
                    ord(' '):_do_click }
 
 class Canvas(ComponentMixin, AbstractCanvas):
@@ -703,21 +734,25 @@ class TextMixin(ComponentMixin):
     def _change_focus(self,ev):
         """Focus on the next control."""
         _app._change_focus()
+        return 1
 
     def _down_line(self,ev):
-        """Move cursor up one line."""
+        """Move cursor down one line."""
         self._move_line(1)
+        return 1
         
     def _up_line(self,ev):
-        """Move cursor down one line."""
+        """Move cursor up one line."""
         self._move_line(-1)
+        return 1
 
-    _event_map = {127:_backspace,
-                  258:_down_line,
-                  259:_up_line,
-                  27:_change_focus,
-                  260:_back,
-                  261:_fwd,
+    _event_map = {BACKSPACE:_backspace,
+                  8:_backspace, #^H
+                  DOWN_ARROW:_down_line,
+                  UP_ARROW:_up_line,
+                  #27:_change_focus,
+                  LEFT_ARROW:_back,
+                  RIGHT_ARROW:_fwd,
                   15:ComponentMixin._ignore_event
                   }
     _event_range_map = {(8,255):_insert}
@@ -820,7 +855,8 @@ class TextField(TextMixin, AbstractTextField):
         TextMixin.__init__(self,*args,**kws)
         AbstractTextField.__init__(self,*args,**kws)
 
-    _event_map = TextMixin._event_map
+    _event_map = {}
+    _event_map.update(TextMixin._event_map)
     del _event_map[258] # No line control in TextFields.
     del _event_map[259]
     _event_map[ord('\n')] = TextMixin._change_focus
@@ -874,22 +910,23 @@ class Window(ContainerMixin, AbstractWindow):
         self._omenu = WinMenuWindow(title="?Window")
         self._omenu._pwin = self
         self._omenu.geometry=(x,y,w,h)
+        self._omenu._gets_focus=0
+
         x,y = int(round(1.1/self._horiz_scale)),int(round(1.1/self._vert_scale))
         w,h = int(round(10.1/self._horiz_scale)),int(round(1.1/self._vert_scale))
-        self._clbtn = MenuButton(geometry=(x,y,w,h),text="Close")
-        self._omenu.add(self._clbtn)
-        self._omenu._gets_focus=0
-        link(self._clbtn,self._close)
-
-        x,y = int(round(1.1/self._horiz_scale)),int(round(2.1/self._vert_scale))
         self._canbtn = MenuButton(geometry=(x,y,w,h),text="Cancel")
         self._omenu.add(self._canbtn)
         link(self._canbtn,self._cancel_close)
 
+        x,y = int(round(1.1/self._horiz_scale)),int(round(2.1/self._vert_scale))
+        self._clbtn = MenuButton(geometry=(x,y,w,h),text="Close")
+        self._omenu.add(self._clbtn)
+        link(self._clbtn,self._close)
+
         _app.add(self._omenu)
         self._omenu.focus_capture = 1
         
-    _event_map = {15:_present_winmenu}
+    _event_map = {WINMENU_EVENT:_present_winmenu}
 
     def _curs_resized(self,dw,dh):
         self.resized(dw,dh)
@@ -984,7 +1021,7 @@ class HelpWindow(Window):
         Window.__init__(self,*args,**kws)
         self._prev_ctrl = _focus_control
         self._prev_focus_capture = _focus_capture_control
-        self._title = "INFORMATION (press 'q' to dismiss)"
+        self._title = "INFORMATION (press 'Q' to dismiss)"
         self._x = 0
         self._y = 0
         self._width = 600
@@ -997,17 +1034,40 @@ class HelpWindow(Window):
 
     def _populate_lb(self,lb):
         """Add docstrings for _prev_ctrl event handlers to lb."""
-        items = ["This is txtgui, the text/curses binding for Anygui.",
-                 "You can get this help screen at any time by typing ^G.",
-                 "",
-                 "^F and ^B move between controls.",
-                 "Under curses, up and down arrow move between controls,",
-                 "except in text controls, where they move between lines.",
-                 "z and Z can be used to zoom the presentation in and out.",
-                 "",
-                 "The current control is a "+self._prev_ctrl.__class__.__name__+";",
-                 "it supports the following key bindings:",""]
+        items = ["The current control is a "+self._prev_ctrl.__class__.__name__+";",
+                 "it responds to the following key bindings:",""]
+
         items += self._prev_ctrl._get_event_help()
+        items += ["",
+                  "---------------------------------------------------------------------",
+                  "This is txtgui, the text/curses binding for Anygui.",
+                  "",
+                  
+                  "You can get this context-sensitive help screen at",
+                  "any time by typing ESC-?. You can exit the",
+                  "application by typing ESC, followed by the word",
+                  "'quit' in lower-case, or by closing all the",
+                  "application's windows.",
+                  
+                  "",
+                  
+                  "The main difference between the curses binding and",
+                  "the text binding is that if the text binding is",
+                  "used, you must press the <Return> key in order for",
+                  "the application to respond to input. You may type",
+                  "ESC-<Return> if you need to send a return character",
+                  "to the application.",
+                  
+                  "",
+                  
+                  "ESC-f and ESC-b move forward and backward, respectively,",
+                  "among the application's controls. Up and down arrow",
+                  "move between controls, except in text controls,",
+                  "where they move between lines. Z and z can be used",
+                  "to zoom the presentation in and out. ESC-arrows",
+                  "may be used to scroll the entire screen.",
+                  
+                  "",]
         lb.items = items
 
     def _dismiss(self,ev):
@@ -1021,10 +1081,44 @@ class HelpWindow(Window):
     #def _event_handler(self,ev):
     #    if ev == ord('q'): self._dismiss(ev)
 
-    _event_map = {ord('q'):_dismiss}
+    _event_map = {ord('q'):_dismiss,
+                  ord('Q'):_dismiss,}
 
 # If false, present an initial help window.
 _inithelp = 0
+
+# Character escape sequences, and the events we transform them
+# into.
+_escape_sequence_map = {
+    (LEFT_BRACKET,):None,
+    (LEFT_BRACKET,65):UP_ARROW,
+    (LEFT_BRACKET,66):DOWN_ARROW,
+    (LEFT_BRACKET,67):RIGHT_ARROW,
+    (LEFT_BRACKET,68):LEFT_ARROW,
+
+    (LEFT_ARROW,):SCROLL_LEFT,
+    (RIGHT_ARROW,):SCROLL_RIGHT,
+    (UP_ARROW,):SCROLL_UP,
+    (DOWN_ARROW,):SCROLL_DOWN,
+
+    (ord('?'),):HELP_EVENT,
+
+    (ord('q'),):None,
+    (ord('q'),ord('u')):None,
+    (ord('q'),ord('u'),ord('i')):None,
+    (ord('q'),ord('u'),ord('i'),ord('t')):QUIT_EVENT,
+
+    (ord('r'),):REFRESH_EVENT,
+
+    (ord('w'),):WINMENU_EVENT,
+
+    (ord('f'),):FOCUS_FORWARD_EVENT,
+    (ord('b'),):FOCUS_BACKWARD_EVENT,
+
+    # Convert ESC-Return into Return, for textgui's benefit.
+    (ord('\n'),):ord('\n'),
+
+    }
 
 class Application(AbstractApplication):
     def __init__(self):
@@ -1082,34 +1176,71 @@ class Application(AbstractApplication):
 
     def _app_event_handler(self,ch):
         #_scr.dbg("APP_EVENT_HANDLER",ch)
-        if ch == 7: # ^G
+        if ch == HELP_EVENT: # ESC-?
             HelpWindow()
-        if ch == 17: # ^Q
+        if ch == QUIT_EVENT: # ESC-quit
             wins = self._windows[:]
             for win in wins:
                 win.destroy()
             return 0
-        if ch == 6 or ch == 258:  # ^F,down
+        if ch == FOCUS_FORWARD_EVENT or ch == DOWN_ARROW:  # ^F,down
             self._change_focus(1)
-        if ch == 2 or ch == 259:  # ^B,up
+        if ch == FOCUS_BACKWARD_EVENT or ch == UP_ARROW:  # ^B,up
             self._change_focus(-1)
-        if ch == 12:
+        if ch == REFRESH_EVENT:
+            _refresh_all()
+        if ch == SCROLL_LEFT:
+            ox,oy = _scr.get_origin()
+            ox-=10
+            _scr.set_origin(ox,oy)
+            _refresh_all()
+        if ch == SCROLL_RIGHT:
+            ox,oy = _scr.get_origin()
+            ox+=10
+            _scr.set_origin(ox,oy)
+            _refresh_all()
+        if ch == SCROLL_UP:
+            ox,oy = _scr.get_origin()
+            oy-=10
+            _scr.set_origin(ox,oy)
+            _refresh_all()
+        if ch == SCROLL_DOWN:
+            ox,oy = _scr.get_origin()
+            oy+=10
+            _scr.set_origin(ox,oy)
             _refresh_all()
 
         if ch == ord('z'):
-            ComponentMixin._horiz_scale *= 2.0
-            ComponentMixin._vert_scale *= 2.0
-            _refresh_all()
-        
-        if ch == ord('Z'):
             ComponentMixin._horiz_scale /= 2.0
             ComponentMixin._vert_scale /= 2.0
             _refresh_all()
         
+        if ch == ord('Z'):
+            ComponentMixin._horiz_scale *= 2.0
+            ComponentMixin._vert_scale *= 2.0
+            _refresh_all()
+        
         return 1
+
+    def _translate_escape(self,ch):
+        if ch != ESCAPE:
+            return ch
+        done=0
+        chtuple=()
+        while not done:
+            ch = self._translate_escape(_scr.get_char())
+            try:
+                chtuple = chtuple + (ch,)
+                result = _escape_sequence_map[chtuple]
+                if type(result) == type(0):
+                    return result
+            except:
+                # Invalid escape sequence.
+                return ch
 
     def _check_for_events(self):
         ch = _scr.get_char()
+        ch = self._translate_escape(ch)
         handled = 0
         if _focus_control is not None:
             handled = _focus_control._handle_event(ch)

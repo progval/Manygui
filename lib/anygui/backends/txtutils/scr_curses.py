@@ -7,6 +7,9 @@ if _debug_messages:
 
 _cur_scr = None
 
+_ox=0
+_oy=0
+
 class Screen:
     ATTR_NORMAL = curses.A_NORMAL
     ATTR_UNDERLINE = curses.A_UNDERLINE
@@ -27,6 +30,8 @@ class Screen:
     
     def erase(self,x,y,w,h):
         #dbg("Erasing %s,%s,%s,%s"%(x,y,w,h))
+        x-=_ox
+        y-=_oy
         x = max(0,x)
         ex = min(self._xsize,x+w)
         y = max(y,0)
@@ -42,6 +47,8 @@ class Screen:
         _cur_scr.addstr(ey-1,x,line)
     
     def addch(self,y,x,ch,attr=ATTR_NORMAL):
+        x-=_ox
+        y-=_oy
         if x<0 or y<0 or x>=self._xsize or y>=self._ysize:
             return
         if x==self._xsize-1 and y==self._ysize-1:
@@ -81,7 +88,7 @@ class Screen:
         curses.noecho()
         curses.cbreak()
         curses.raw()
-        _cur_scr.keypad(1)
+        #_cur_scr.keypad(1)
         self._ysize, self._xsize = _cur_scr.getmaxyx()
         self.dbg("xsize",self._xsize,"; ysize",self._ysize)
     
@@ -95,6 +102,8 @@ class Screen:
         self.SCR_LRCORNER = curses.ACS_LRCORNER
     
     def move_cursor(self,x,y):
+        x-=_ox
+        y-=_oy
         #self.dbg("Moving cursor",x,y)
         if x<0 or y<0 or x>=self._xsize or y >= self._ysize:
             return
@@ -106,3 +115,10 @@ class Screen:
     def get_char(self):
         return _cur_scr.getch()
 
+
+    def get_origin(self,): return _ox,_oy
+
+    def set_origin(self,ox,oy):
+        global _ox, _oy
+        _ox = ox
+        _oy = oy

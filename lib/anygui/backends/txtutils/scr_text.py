@@ -34,6 +34,10 @@ ATTR_UNDERLINE = 0
 # Screen buffer.
 _xsize=80
 _ysize=23
+
+_ox=0
+_oy=0
+
 try:
     _xsize,_ysize=map(int,os.environ['ANYGUI_SCREENSIZE'].split('x'))
     _ysize -= 1 # Leave room for the prompt line.
@@ -53,18 +57,20 @@ for ii in range(0,_ysize):
 def addstr(x,y,ch,n=0,attr=0):
     if _inbuf!="":
         return
-    dbg('addstr %s,%s,%s,%s'%(x,y,ch,n))
+    #dbg('addstr %s,%s,%s,%s'%(x,y,ch,n))
     global _scrbuf
     if n == 0: n = len(ch)
     n = min(n,len(ch))
     for xx in range(0,n):
         addch(y,x+xx,ord(ch[xx]))
-    dbg("SCRBUF: %s"%_scrbuf)
+    #dbg("SCRBUF: %s"%_scrbuf)
 
 def erase(x,y,w,h):
     if _inbuf!="":
         return
-    dbg('erase %s,%s,%s,%s'%(x,y,w,h))
+    x -= _ox
+    y -= _oy
+    #dbg('erase %s,%s,%s,%s'%(x,y,w,h))
     global _scrbuf, _under_curs
     x = max(0,x)
     ex = min(_xsize,x+w)
@@ -81,7 +87,9 @@ def erase(x,y,w,h):
 def addch(y,x,ch):
     if _inbuf!="":
         return
-    dbg('addch %s,%s,%s'%(x,y,ch))
+    x -= _ox
+    y -= _oy
+    #dbg('addch %s,%s,%s'%(x,y,ch))
     if x<0 or y<0 or x>=_xsize or y>=_ysize:
         return
     global _scrbuf, _under_curs
@@ -110,6 +118,8 @@ _cursx = 0
 _cursy = 0
 _under_curs = ' '
 def move_cursor(x,y):
+    x -= _ox
+    y -= _oy
     if x<0 or y<0 or x>=_xsize or y >= _ysize:
         return
     global _under_curs, _cursx, _cursy
@@ -124,6 +134,16 @@ def get_char():
     global _inbuf
     if len(_inbuf) == 0:
         _inbuf = raw_input()
-    c = _inbuf[0]
-    _inbuf = _inbuf[1:]
+    try:
+        c = _inbuf[0]
+        _inbuf = _inbuf[1:]
+    except:
+        return ord('\n')
     return ord(c)
+
+def get_origin(): return _ox,_oy
+
+def set_origin(ox,oy):
+    global _ox, _oy
+    _ox = ox
+    _oy = oy
