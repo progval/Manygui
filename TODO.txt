@@ -34,7 +34,14 @@ Objectives for version 0.2a0:
 -----------------------------
 
 * Implement the functionality of release 0.1.1 with the new (0.2)
-  architecture. Model functionality is not required for this release.
+  architecture.
+
+* Make sure push() and pull() work with in-place modification (and
+  therby Models etc.) Let Wrapper.pull() simply return the correct
+  dictionary for use in Proxy.rawModify()...?
+
+* Clarify the requirements placed on Wrapper setters/getters (checks
+  for "widget is None" etc.)
 
 Objectives for version 0.2a1:
 -----------------------------
