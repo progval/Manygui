@@ -8,6 +8,8 @@ from UserString import UserString
 
 class Assignee:
 
+    _locked = 0
+
     def __init__(self):
         self.names = []
         self.objects = []
@@ -24,9 +26,16 @@ class Assignee:
             self.objects.remove(object)
             self.names.remove(name)
 
+    def lockPush(self):
+        self._locked = 1
+
+    def unlockPush(self):
+        self._locked = 0
+
     def send(self, **kwds):
-        for object in self.objects:
-            object.push(names=self.names)
+        if self._locked == 0:
+            for object in self.objects:
+                object.push(names=self.names)
         send(self, **kwds)
 
 
@@ -64,6 +73,7 @@ class ListModel(Model, UserList):
         
     def setValue(self, value):
         self.data[:] = list(value)
+        self.send()
 
     def getValue(self):
         return list(self)

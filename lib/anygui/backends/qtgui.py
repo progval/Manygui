@@ -287,11 +287,11 @@ class ToggleButtonWrapperBase(ButtonWrapperBase):
 
     def setOn(self, on):
         if self.widget:
-            self.widget.setChecked(on)
+            self.widget.setChecked(bool(on))
 
     def getOn(self):
         if self.widget:
-            return self.widget.isChecked()
+            return bool(self.widget.isChecked())
 
 #--------------------------------------------------------------#
 

@@ -6,7 +6,7 @@ class Proxy(Attrib):
     # TBD: Add docstring for class
 
     wrapper = None # so self.wrapper is always OK
-    installedModels = {}
+    _installedModels = {}
 
     def __init__(self, *args, **kwds):
         Attrib.__init__(self, *args, **kwds)
@@ -63,16 +63,16 @@ class Proxy(Attrib):
         self.wrapper.pull(state)
         
         # ==== MODEL SUPPORT ==== #
-        # This is the logic that needs to go into ModelDelegate,
-        # but that might break encapsulation...
-        # -----------------------------------------------------
         # After we have pulled the actual values from the widget,
         # We need to update all installed models with them.
         for prop in state:
             try:
-                model = self.installedModels[prop]
-                # lazy update of model... should this be done??
-                # model.setValue(state[prop])
+                model = self._installedModels[prop]
+                # locked update of model, this keeps model
+                # from calling proxy.push
+                model.lockPush()
+                model.setValue(state[prop])
+                model.unlockPush()
                 state[prop] = model
             except:
                 pass
@@ -106,16 +106,16 @@ class Proxy(Attrib):
         names = list(names)
         
         # ==== MODEL SUPPORT ==== #
-        # This is the logic that needs to go into ModelDelegate,
-        # but that might break encapsulation...
-        # -----------------------------------------------------
-        # After we have pulled the actual values from the widget,
-        # We need to update all installed models with them.
         state = self._partialState(*names,**kwds)
         for prop in state:
             try:
-                model = self.installedModels[prop]
-                model.setValue(state[prop])
+                model = self._installedModels[prop]
+                # if state[prop] is not the model, this means that rawSet
+                # has changed the value, thus we need to sync model
+                if state[prop] is not model:
+                    model.lockPush()
+                    model.setValue(state[prop])
+                    model.unlockPush()
                 state[prop] = model
             except:
                 pass
@@ -162,10 +162,18 @@ class Proxy(Attrib):
         # @@@ do we need del self.wrapper here ?
 
     def installModel(self, obj, name, model):
-        self.installedModels[name] = model
+        if self._installedModels.has_key(name):
+            self.removeModel(obj, name)
+        self._installedModels[name] = model
+        # need to call rawSet to avoid use of default when
+        # wrapper doesn't exist and user manipulates the model
+        self.rawSet(**{name:model})
         model.installed(obj, name)
 
     def removeModel(self, obj, name):
-        self.installedModels[name].removed(obj, name)
-        del self.installedModels[name]
+        try:
+            self._installedModels[name].removed(obj, name)
+            del self._installedModels[name]
+        except:
+            pass
         
