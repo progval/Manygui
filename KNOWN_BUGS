@@ -82,3 +82,7 @@ this is because they are designed for single line use only.
 
 All List- and Text- Views always have scrollbars under BeOS.
 (Similar behaviour in other backends.)
+
+beosgui.py does not implement _ensure_destroyed(). This will
+prevent objects from being removed from a container, and/or
+moved between containers.
