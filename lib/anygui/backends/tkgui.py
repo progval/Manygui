@@ -269,6 +269,7 @@ class DisabledTextBindings:
         self._tk_comp.bind("<Key-Down>",self._arrowbinding)
         self._tk_comp.bind("<Key-Left>",self._arrowbinding)
         self._tk_comp.bind("<Key-Right>",self._arrowbinding)
+        self._tk_comp.bind("<ButtonRelease>",self._insertbinding)
 
         # Easy place to put this - not _editable-related, but common
         # to text widgets.
@@ -374,7 +375,7 @@ class ScrollableTextArea(Tkinter.Frame):
     # Replacemenent for Tkinter.Text
 
     def __init__(self, *args, **kw):
-        Frame.__init__(self, *args, **kw)
+        Tkinter.Frame.__init__(self, *args, **kw)
         
         self._yscrollbar = Tkinter.Scrollbar(self)
         self._yscrollbar.pack(side=RIGHT, fill=Y)
