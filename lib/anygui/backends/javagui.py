@@ -175,8 +175,8 @@ class Canvas(ComponentMixin, AbstractCanvas):
 
     def clear(self):
         img = awt.image.BufferedImage(self._width,
-                                                  self._height,
-                                                  self._img_type)
+                                      self._height,
+                                      self._img_type)
         g2 = img.createGraphics()
         w, h = img.width, img.height
         rect = awt.geom.Rectangle2D.Double(0, 0, w, h)
@@ -197,8 +197,8 @@ class Canvas(ComponentMixin, AbstractCanvas):
         g2 = self._offscreen.createGraphics()
         
         g2.setStroke(awt.BasicStroke(edgeWidth))
-        c = edgeColor
-        g2.setPaint(awt.Color(c.red, c.green, c.blue))
+        c = _convert_color(edgeColor)
+        g2.setPaint(c)
         
         polygon = awt.geom.GeneralPath(self._path_type, int(len(pointlist)/2))
         polygon.moveTo(*pointlist[0])
@@ -209,9 +209,14 @@ class Canvas(ComponentMixin, AbstractCanvas):
         g2.draw(polygon)
 
         if fillColor is not None: # FIXME: Correct behaviour? Check Sping specs
-            c = fillColor
-            g2.setPaint(awt.Color(c.red, c.green, c.blue))
+            c = _convert_color(fillColor)
+            g2.setPaint(c)
             g2.fill(polygon)
+
+def _convert_color(c):
+    # Hack to appease Jython polymorphism
+    c = int(c.red*255) << 16 | int(c.green*255) << 8 | int(c.blue*255)
+    return awt.Color(c)
           
 ################################################################
 

@@ -189,6 +189,7 @@ class AbstractCanvas(AbstractComponent, Defaults.Canvas):
 
 # Utility functions
 
+# FIXME: Seems to be incorrect...
 def arcPoints(self, x1,y1, x2,y2, startAng=0, extent=360):
     "Return a list of points approximating the given arc."		
     # Note: this implementation is simple and not particularly efficient.
