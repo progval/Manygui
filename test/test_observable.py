@@ -1,3 +1,43 @@
+"""
+Doctest cases:
+
+>>> m = Model()
+>>> v1 = View(m)
+>>> v2 = View(m)
+>>> v3 = View(m,"customNotify")
+>>> v1.model_changed()
+View 1: value is 1
+>>> v2.model_changed()
+View 2: value is 1
+>>> v3.model_changed()
+View 3: value is 1
+>>> m.setVal(3)
+View 1: value is 3
+Hints: []
+View 2: value is 3
+Hints: []
+View 3 (custom callback): value is 3
+Hints: []
+>>> del v2
+>>> m.setVal(42)
+View 1: value is 42
+Hints: []
+View 3 (custom callback): value is 42
+Hints: []
+>>> m.setVal2(101)
+>>> m.setVal3(50,2)
+>>> m.notify_views()
+View 1: value is 100
+Hints: [('setVal2', (101,), {}), ('setVal3', (50, 2), {})]
+View 3 (custom callback): value is 100
+Hints: [('setVal2', (101,), {}), ('setVal3', (50, 2), {})]
+>>> m.notify_views()
+View 1: value is 100
+Hints: []
+View 3 (custom callback): value is 100
+Hints: []
+"""
+
 from anygui.Mixins import Observable
 
 class Model(Observable):
@@ -28,33 +68,17 @@ class View:
         self.n = View.N
         View.N += 1
 
-    def notify(self,target=None,change=None):
+    def model_changed(self,target=None,change=None):
         print "View %d: value is %d"%(self.n,self.model.val)
         if change is not None:
-            print "\tHints: %s"%str(change)
+            print "Hints: %s"%str(change)
 
     def customNotify(self,target=None,change=None):
         print "View %d (custom callback): value is %d"%(self.n,self.model.val)
         if change is not None:
-            print "\tHints: %s"%str(change)
+            print "Hints: %s"%str(change)
 
-m = Model()
-
-v1 = View(m)
-v2 = View(m)
-v3 = View(m,"customNotify")
-
-v1.notify()
-v2.notify()
-v3.notify()
-
-m.setVal(3)
-
-del v2
-
-m.setVal(42)
-
-m.setVal2(101)
-m.setVal3(50,2)
-m.notify_views()
-m.notify_views()
+# Do the doctest thing.
+if __name__ == "__main__":
+    import doctest, test_observable
+    doctest.testmod(test_observable)

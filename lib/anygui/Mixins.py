@@ -5,6 +5,8 @@ from Exceptions import SetAttributeError, GetAttributeError
 try:
     import weakref
 except ImportError:
+    # Evil hack to make Jython work. This is not a very
+    # good solution, but code should run at least.
     class ref:
         def __init__(self,obj):
             self.obj = obj
@@ -85,21 +87,22 @@ class Action:
 class Observable:
     """
     Implements the "observed" role in the Observer design pattern.
+
     Views call add_view(<view_object>,<callback_name>) to add themselves
-    to the observer list for the model. Models may call self.notify_views()
+    to the observer list for the model. Models may call self.raw_notify_views()
     with arbitrary arguments to notify all existing views via their
-    callback method, or via their "notify" method if no callback name
+    callback method, or via their "model_changed" method if no callback name
     is supplied in the add_view() call. All arguments passed to
-    notify_views() are passed on intact to the views' callback.
+    raw_notify_views() are passed on intact to the views' callback.
     In addition, a "target=modelself" keyword argument is passed.
 
     Models may also record "hints" using the add_hint() method. A hint
     is a (method_name,*args,**kwargs) tuple describing a method call
     on the model object since the last time the model notified its
     views of a state change. A model that uses the hint facility may call
-    self.notify_views_with_hints() to deliver all accumulated hint
+    self.notify_views() to deliver all accumulated hint
     data to all views, again using the views' named callback method
-    or "notify()" by default; the accumulated hints are then discarded.
+    or "model_changed()" by default; the accumulated hints are then discarded.
     """
 
     def __init__(self):
@@ -147,7 +150,7 @@ class Observable:
                     meth(target=self,*args,**kw)
                 else:
                     # No custom callback, so just try to notify().
-                    view.notify(self,*args,**kw)
+                    view.model_changed(self,*args,**kw)
 
     def add_hint(self,meth,*args,**kw):
         """
