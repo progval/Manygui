@@ -1159,6 +1159,8 @@
       default). To make it appear, you'll have to call the following
       method:</para>
 
+      <!-- Remove this: -->
+
       <para><apiname>open</apiname>()</para>
 
       <para>Opens a <code>Window</code> after it has been created. If
@@ -1188,11 +1190,6 @@
       you might want to hide some of them while showing others. Using
       a separate method for opening the windows allows you to do
       so.</para>
-
-      <para><strong>Note</strong>: This behaviour may change in future
-      releases.</para>
-
-      <!-- hide/show -->
 
     </section>
 
