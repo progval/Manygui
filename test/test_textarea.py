@@ -47,10 +47,10 @@ app = Application()
 
 win = Window(title='TextArea test', width=400, height=670)
 
-win.place([ta, ta2, lbl], left=25, right=25, top=40, hstretch=1,
+win.add([ta, ta2, lbl], left=25, right=25, top=40, hstretch=1,
           direction='down', space=20)
 
-win.place([reset_btn, update_btn], right=25, bottom=25, vmove=1, hmove=1,
+win.add([reset_btn, update_btn], right=25, bottom=25, vmove=1, hmove=1,
           direction='left', space=25)
 
 init_field()

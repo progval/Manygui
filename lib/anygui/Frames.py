@@ -40,9 +40,6 @@ class AbstractFrame(AbstractComponent, Defaults.Frame):
         if self._layout:
             self._layout.add(*items,**kws)
 
-    def place(self,*items,**kws):
-        self.add(*items,**kws)
-
     def remove(self, component):
         "If the given component is among the contents of this Frame, removes it."
         if component in self._contents:

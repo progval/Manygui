@@ -53,15 +53,15 @@ def main():
                 text = "Push Me!")
     link(pb, pushed_it)
 
-    win.place(view1, position = (10, 10), border = 1)
+    win.add(view1, position = (10, 10), border = 1)
     
-    win.place(cb1, cb2, left = 10, top = (view1, 20))
+    win.add(cb1, cb2, left = 10, top = (view1, 20))
 
-    win.place(rbs, left = (view1, 20), top = 10, direction = 'down')
+    win.add(rbs, left = (view1, 20), top = 10, direction = 'down')
 
-    win.place(pb, right = 20, bottom = 10, hmove = 1, vmove = 1)
+    win.add(pb, right = 20, bottom = 10, hmove = 1, vmove = 1)
 
-    win.place([view2], 
+    win.add([view2], 
               left = (rbs[0], 20), top = 10, 
               right = 20, bottom = (pb, 10),
               hstretch = 1, vstretch = 1)#, border = 1, hscroll = 1, vscroll = 1)
@@ -70,8 +70,8 @@ def main():
     #entry = TextField(width = 200, height = 28, text="Hi")
     entry = TextField(width = 200, height = 28)
     entry.model.value = "Hi"
-    win.place(label, left = 10, top = (cb1, 20))
-    win.place(entry, left = 10, top = (label, 10), border = 1)
+    win.add(label, left = 10, top = (cb1, 20))
+    win.add(entry, left = 10, top = (label, 10), border = 1)
 
     app.run()
 

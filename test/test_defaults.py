@@ -11,7 +11,7 @@ txa = TextArea()
 txf = TextField()
 
 win = Window(size=(120,380))
-win.place(btn, cbx, lbl, lst, rdb, txa, txf,
+win.add(btn, cbx, lbl, lst, rdb, txa, txf,
           direction='down',
           left=10, top=10)
 
