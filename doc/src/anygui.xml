@@ -13,7 +13,7 @@
 
   <author>Magnus Lie Hetland</author>
 
-  <date>October 23, 2001</date>
+  <date>October 28, 2001</date>
 
   <section>
     <title>Introduction</title>
@@ -263,8 +263,8 @@
       </codelisting>
 
       <para>The preferred way to use modules like this is usually to
-      avoid cluttering your namespace, by using simply <code>import
-      anygui</code>. However, if you are going to create a lot of
+      avoid cluttering your namespace, by using simply
+      <code>import anygui</code>. However, if you are going to create a lot of
       widgets, the <code>anygui</code> prefix may be
       cumbersome. Therefore, I suggest renaming it to
       <code>gui</code>, either with a simple assignment...</para>
