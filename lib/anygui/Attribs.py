@@ -1,3 +1,4 @@
+from __future__ import nested_scopes # Support for 2.1
 from Events import link, send
 from Utils import getGetter,getSetter,getterName,uncapitalizeAttribute
 
