@@ -247,7 +247,7 @@ class TextArea(ComponentMixin, AbstractTextArea):
 
 class Window(ComponentMixin, AbstractWindow):
     _wx_class = wxFrame
-    _wx_style = wxDEFAULT_FRAME_STYLE
+    _wx_style = wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE
 
     def _ensure_created(self):
         result = ComponentMixin._ensure_created(self)
