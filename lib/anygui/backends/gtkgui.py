@@ -272,6 +272,11 @@ class TextArea(ComponentMixin, AbstractTextArea):
                 self._gtk_comp._textarea.thaw()
                 self._ignore_changed = 0
 
+    def _ensure_events(self):
+        if self._gtk_comp and not self._connected:
+            self._gtk_comp._textarea.connect("changed", self._text_changed)
+            self._connected = 1
+
     def _ensure_editable(self):
         if self._gtk_comp:
             self._gtk_comp._textarea.set_editable(int(self._editable))
@@ -280,13 +285,6 @@ class TextArea(ComponentMixin, AbstractTextArea):
         if self._gtk_comp:
             start, end = self._selection
             self._gtk_comp._textarea.select_region(start, end)
-
-    def _ensure_events(self):
-        if self._gtk_comp and not self._connected:
-            # XXX, currently updates on any change in the textfield.
-            # Perhaps too CPU intensive?
-            self._gtk_comp._textarea.connect("changed", self._text_changed)
-            self._connected = 1
 
     def _backend_selection(self):
         if self._gtk_comp:
