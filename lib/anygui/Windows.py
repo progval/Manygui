@@ -14,7 +14,7 @@ class AbstractWindow(AbstractFrame, Defaults.Window):
         self._x = Defaults.Window._x
         self._y = Defaults.Window._y
         Defaults.shift_window()
-        
+    
     def destroy(self):
         self._ensure_destroyed()
         try:
