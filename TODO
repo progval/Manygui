@@ -18,6 +18,7 @@ Tentative release date: December 10th, 2001
 * Separate layout mechanism from the Frame class (including
   the place() method), using signals
 
+* Resolve the single-line/multi-line Label issue
 
 Objectives for version 0.2:
 ---------------------------
