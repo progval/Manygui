@@ -576,12 +576,19 @@ class Window(ComponentMixin, AbstractWindow):
     def _ensure_style(self):
         if self._beos_comp:
             self._beos_comp.SetType(self._beos_styles[self._style])
+    
+    def _beos_close_handler(self):
+        #print "Destroy!"
+        self.destroy()
+        if self._beos_comp:
+            self._beos_comp = None
             
     def QuitRequested(self):
         """
         This BeOS hook function is called whenever a quit type action is requested.
         Currently sends a Quit message to the app if it is the last window.
         """
+        self._beos_close_handler()
         if BApplication.be_app.CountWindows() == 1:
             BApplication.be_app.PostMessage(B_QUIT_REQUESTED)
         return 1
