@@ -33,9 +33,10 @@ class AbstractFrame(AbstractComponent):
     def _get_contents(self):
         return self._contents
         
-    def add(self, component):
-        """Adds the given component to the contents of this Frame."""
-        component._set_container(self)
+    def add(self, *components):
+        """Adds the given components to the contents of this Frame."""
+        for component in components:
+            component._set_container(self)
 
     def remove(self, component):
         "If the given component is among the contents of this Frame, removes it."
