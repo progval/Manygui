@@ -8,17 +8,6 @@ class AbstractComponent(Attrib, Action):
     It may be contained within another Component, in which case it is clipped
     to the boundaries of its container.
     """
-    _x = 0
-    _y = 0
-    _width = 100
-    _height = 100
-    _hmove = 0
-    _vmove = 0
-    _hstretch = 0
-    _vstretch = 0
-
-    _visible = 1
-    _enabled = 1
     
     _container = None
 

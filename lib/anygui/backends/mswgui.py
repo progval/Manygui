@@ -13,10 +13,10 @@ import win32gui, win32con
 
 class ComponentMixin:
     # mixin class, implementing the backend methods
-    _height = -1 # -1 means default size in wxPython
-    _width = -1
-    _x = -1
-    _y = -1
+    #_height = -1 # -1 means default size in wxPython
+    #_width = -1
+    #_x = -1
+    #_y = -1
 
     _hwnd = None
     _win_style_ex = 0

@@ -10,10 +10,10 @@ import gtk
 class ComponentMixin:
     # mixin class, implementing the backend methods
     # FIXME: Defaults...
-    _height = -1
-    _width = -1
-    _x = -1
-    _y = -1
+    #_height = -1
+    #_width = -1
+    #_x = -1
+    #_y = -1
 
     _gtk_comp = None
     _gtk_id = None

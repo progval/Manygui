@@ -2,7 +2,7 @@ from anygui.Exceptions import UnimplementedMethod
 from anygui.Components import AbstractComponent
 
 class AbstractGenericButton(AbstractComponent):
-    _text = "GenericButton"
+    #_text = "GenericButton"
     def _get_text(self):
         return self._text
 

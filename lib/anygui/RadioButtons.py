@@ -1,10 +1,10 @@
 from anygui.Exceptions import UnimplementedMethod
 from anygui.Mixins import Attrib
 from anygui.ToggleButtons import AbstractToggleButton
+from anygui import Defaults
 
-class AbstractRadioButton(AbstractToggleButton):
+class AbstractRadioButton(AbstractToggleButton, Defaults.RadioButton):
 
-    _text = "RadioButton"
     _group = None
     _value = None
 

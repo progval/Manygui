@@ -1,9 +1,9 @@
 from anygui import application
 from anygui.Frames import AbstractFrame
 from anygui.Exceptions import UnimplementedMethod
+from anygui import Defaults
 
-class AbstractWindow(AbstractFrame):
-    _title = "Untitled"
+class AbstractWindow(AbstractFrame, Defaults.Window):
 
     def __init__(self, *args, **kw):
         self.visible = 0

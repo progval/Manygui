@@ -13,10 +13,10 @@ swing.UIManager.setLookAndFeel(swing.UIManager.getSystemLookAndFeelClassName())
 
 class ComponentMixin:
     # mixin class, implementing the backend methods
-    _height = -1 # FIXME: Default handling needed
-    _width = -1
-    _x = -1
-    _y = -1
+    #_height = -1 # FIXME: Default handling needed
+    #_width = -1
+    #_x = -1
+    #_y = -1
 
     _java_comp = None
     _java_id = None

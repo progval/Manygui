@@ -8,10 +8,10 @@ from wxPython.wx import *
 
 class ComponentMixin:
     # mixin class, implementing the backend methods
-    _height = -1 # -1 means default size in wxPython
-    _width = -1
-    _x = -1
-    _y = -1
+    #_height = -1 # -1 means default size in wxPython
+    #_width = -1
+    #_x = -1
+    #_y = -1
 
     _wx_comp = None
     _wx_id = None

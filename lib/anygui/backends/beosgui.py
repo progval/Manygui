@@ -100,10 +100,10 @@ work in Python.  Stolen blatantly from Donn."""
 
 class ComponentMixin(WrapThis):
     "Base class for all components."
-    _height = -1 # default sizes & positions
-    _width = -1
-    _x = 0 # Note funny default for window positions.
-    _y = 0 # (Works on inside of window, not outside).
+    #_height = -1 # default sizes & positions
+    #_width = -1
+    #_x = 0 # Note funny default for window positions.
+    #_y = 0 # (Works on inside of window, not outside).
     
     _action = None
     

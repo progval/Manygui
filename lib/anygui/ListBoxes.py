@@ -2,6 +2,7 @@ from anygui.Components import AbstractComponent
 from anygui.Exceptions import UnimplementedMethod
 from anygui.Models import ListModel
 from UserList import UserList
+from anygui import Defaults
 
 class AnyguiList(UserList):
 
@@ -11,7 +12,7 @@ class AnyguiList(UserList):
     def _set_value(self,items):
         self.data = items
 
-class AbstractListBox(AbstractComponent):
+class AbstractListBox(AbstractComponent, Defaults.ListBox):
 
     _items = () # FIXME: Remove?
     _model = None

@@ -5,14 +5,14 @@ class Button:
     _text = 'Button'
     _x = 0
     _y = 0
-    _width = 100
-    _height = 100
+    _width = 50
+    _height = 25
     _hmove = 0
     _vmove = 0
     _hstretch = 0
     _vstretch = 0
     _visible = 1
-    _enabled = 0
+    _enabled = 1
 
 class CheckBox:
 
@@ -20,13 +20,13 @@ class CheckBox:
     _x = 0
     _y = 0
     _width = 100
-    _height = 100
+    _height = 15
     _hmove = 0
     _vmove = 0
     _hstretch = 0
     _vstretch = 0
     _visible = 1
-    _enabled = 0
+    _enabled = 1
 
 class Label:
 
@@ -34,13 +34,13 @@ class Label:
     _x = 0
     _y = 0
     _width = 100
-    _height = 100
+    _height = 50
     _hmove = 0
     _vmove = 0
     _hstretch = 0
     _vstretch = 0
     _visible = 1
-    _enabled = 0
+    _enabled = 1
 
 class ListBox:
 
@@ -54,7 +54,7 @@ class ListBox:
     _hstretch = 0
     _vstretch = 0
     _visible = 1
-    _enabled = 0
+    _enabled = 1
 
 class RadioButton:
     
@@ -62,13 +62,13 @@ class RadioButton:
     _x = 0
     _y = 0
     _width = 100
-    _height = 100
+    _height = 15
     _hmove = 0
     _vmove = 0
     _hstretch = 0
     _vstretch = 0
     _visible = 1
-    _enabled = 0
+    _enabled = 1
 
 class TextArea:
 
@@ -82,7 +82,7 @@ class TextArea:
     _hstretch = 0
     _vstretch = 0
     _visible = 1
-    _enabled = 0
+    _enabled = 1
     _editable = 1
     _selection = (0, 0)
 
@@ -92,13 +92,13 @@ class TextField:
     _x = 0
     _y = 0
     _width = 100
-    _height = 100
+    _height = 25
     _hmove = 0
     _vmove = 0
     _hstretch = 0
     _vstretch = 0
     _visible = 1
-    _enabled = 0
+    _enabled = 1
     _editable = 1
     _selection = (0, 0)
 
@@ -107,12 +107,12 @@ class Window:
     _text = 'Window'
     _x = 0
     _y = 0
-    _width = 100
-    _height = 100
+    _width = 400
+    _height = 300
     _hmove = 0
     _vmove = 0
     _hstretch = 0
     _vstretch = 0
     _visible = 1
-    _enabled = 0
+    _enabled = 1
     _title = 'Untitled'

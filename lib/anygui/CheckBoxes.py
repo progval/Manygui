@@ -1,4 +1,5 @@
 from anygui.ToggleButtons import AbstractToggleButton
+from anygui import Defaults
 
-class AbstractCheckBox(AbstractToggleButton):
-    _text = "CheckBox"
+class AbstractCheckBox(AbstractToggleButton, Defaults.CheckBox):
+    pass
