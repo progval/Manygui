@@ -10,6 +10,8 @@ Goals for next release:
 
 * Add support for the border property
 
+* Add a structured testing framework
+
 Longer term goals:
 ------------------
 
