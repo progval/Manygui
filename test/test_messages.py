@@ -1,41 +1,41 @@
 """
-Test the Signals.py signal/handler logic.
+Test the Messages.py message/handler logic.
 
 Begin doctest cases:
 
 >>> from anygui.Messages import *
->>> from test_signals import *
+>>> from test_messages import *
 >>> s1 = Sender('s1')
 >>> s2 = Sender('s2')
 >>> r1 = Receiver('r1')
 >>> r2 = Receiver('r2')
 >>> r2.listenTo(s2)
 >>> def allSigs(message):
-...   print "Signal %s sent"%message
+...   print "Message %s sent"%message
 ...
 >>> connect(allSigs,None,None)
 >>> s1.sayHello("joe")
 Saying hello to joe
-Signal HELLO sent
+Message HELLO sent
 >>> s2.sayHello("ani")
 Saying hello to ani
 r2: s2 said hello to ani
-Signal HELLO sent
+Message HELLO sent
 >>> s1.changeName("carl")
 Sender s1 changing name to carl
 r1: carl changed its name from s1 to carl
 r2: carl changed its name from s1 to carl
-Signal NAMECHANGE sent
+Message NAMECHANGE sent
 >>> del r1
 r1 DYING!!!
 >>> s2.changeName("phil")
 Sender s2 changing name to phil
 r2: phil changed its name from s2 to phil
-Signal NAMECHANGE sent
+Message NAMECHANGE sent
 >>> disconnect((r2,adapterFunc),None,"NAMECHANGE")
 >>> s1.changeName("bob")
 Sender carl changing name to bob
-Signal NAMECHANGE sent
+Message NAMECHANGE sent
 >>> disconnect(allSigs)
 >>> s1.changeName("fred")
 Sender bob changing name to fred
@@ -44,9 +44,9 @@ r2 DYING!!!
 >>> m = MessageAdapter(Model(),["set_state","affinity"])
 >>> connect(allSigs)
 >>> m.set_state(9)
-Signal set_state sent
+Message set_state sent
 >>> m.affinity=42
-Signal affinity sent
+Message affinity sent
 >>> m.foo="bar"
 >>> 
 """
@@ -99,7 +99,7 @@ class Model:
 
 # Do the doctest thing.
 if __name__ == "__main__":
-    print "If you want detailed output, use \"python test_signals.py -v\"."
+    print "If you want detailed output, use \"python test_messages.py -v\"."
     print "No output after this line indicates success."
-    import doctest, test_signals
-    doctest.testmod(test_signals)
+    import doctest, test_messages
+    doctest.testmod(test_messages)
