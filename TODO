@@ -8,8 +8,6 @@ Goals for version 0.1:
 
 * Add Frame class with utility factories e.g. col/row (?)
 
-* Add support for the border property (?)
-
 * Make new Windows invisible until event loop is entered
   or re-entered (after a callback)?
 
@@ -23,6 +21,8 @@ Goals for version 0.2:
 * Add menus
 
 * Add event system
+
+* Add support for borders
 
 Longer term goals:
 ------------------
