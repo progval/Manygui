@@ -1,13 +1,14 @@
 from __future__ import nested_scopes
 
-from anygui import Window, Label, Button, TextArea, ListBox, Frame, TextField
-from anygui import application, link
+from anygui import Window, Label, Button, TextArea, ListBox, Frame, TextField, ComboBox
+from anygui import application, link, send
 from anygui.Models import ListModel
 from anygui.LayoutManagers import SimpleGridManager
 
 from UserList import UserList
 import re
 import sys, glob, os
+import traceback
 
 PATH_SEPAR=''
 ROOT_PATH=''
@@ -48,142 +49,11 @@ SORT_RULES={ALPHABETICAL: cmp, DIRS_FIRST: sort_dirs_first,\
 
 # == END SORT_RULES == #
 
-class DirListModel(ListModel):
-
-    def __init__(self, *arg, **kw):
-        try:
-            self.sortRule = kw['sort_rule']
-        except:
-            self.sortRule = DIRS_FIRST
-        assert kw.has_key('filter'), \
-               '!! cannot create a DirListModel without a filter.'
-        ListModel.__init__(self, **kw)
-
-    def setValue(self, value):
-        value.sort(SORT_RULES[self.sortRule])
-        self.data = value
-        self.send()
-
-class DirListNode:
-
-    def __init__(self, dir_list):
-        self.dirList = dir_list
-        self.prev = None
-        self.next = None
-
-    def __repr__(self):
-        return str(self)
-
-    def __str__(self):
-        return str(self.dirList)
-
-class TripanedDoublyLinkedList:
-
-    def __init__(self, dirs):
-        assert isintance(dirs, list) and len(dirs)>=1, \
-               '!! must construct with at least one dir.'
-        tripane = self.tripane = [None,None,None]
-        self.head = tripane[0] = DirListNode(dirs[0])
-        try:
-            node = tripane[1] = DirListNode(dirs[1])
-            self.appendNode(node)
-        except:
-            return
-        try:
-            node = tripane[2] = DirListNode(dirs[2])
-            self.appendNode(node)
-        except:
-            return
-
-    def __str__(self):
-        nlist = []
-        node = self.head
-        while node:
-            if node in self.tripane:
-                nlist.append([node])
-            else:
-                nlist.append(node)
-            node = node.next
-        return str(nlist)
-
-    def prepend(self, dir):
-        node = DirListNode(dir)
-        self.prependNode(node)
-
-    def prependNode(self, node):            
-        head = self.head
-        head.prev = node
-        node.next = head
-        self.head = node
-        if not hasattr(self, 'tail'):
-            self.tail = head
-
-    def append(self, dir):
-        node = DirListNode(dir)
-        self.appendNode(node)
-
-    def appendNode(self, node):
-        if hasattr(self, 'tail'):
-            tail = self.tail
-            tail.next = node
-            node.prev = tail
-            self.tail = node
-            if self.tripane[2] is None:
-                self.tripane[2] = node
-        else:
-            self.tripane[1] = self.tail = node
-            self.head.next = node
-            node.prev = self.head
-
-    def pop(self):
-        assert hasattr(self, 'tail'), '!! cannot pop last node.'
-        if self.tail.prev == self.head:
-            tail = self.tail
-            del self.tail 
-            tail.prev = None
-            self.head.next = None
-            if tail in self.tripane:
-                self.tripane[self.tripane.index(tail)] = None
-            return tail
-        tail = self.tail
-        self.tail = tail.prev
-        self.tail.next = None
-        tail.prev = None
-        if tail in self.tripane:
-            self.tripane[self.tripane.index(tail)] = None
-        return tail
-
-    def count(self):
-        node = self.head
-        count = 0
-        while node:
-            count += 1
-            node = node.next
-        return count
-
-    def shiftPaneBack(self, nbr):
-        for i in range(nbr):
-            try:
-                self.tripane[0] = self.tripane[0].prev
-                self.tripane[1] = self.tripane[1].prev
-                self.tripane[2] = self.tripane[2].prev
-            except:
-                break
-
-    def shiftPaneFwd(self, nbr):
-        for i in range(nbr):
-            try:
-                self.tripane[0] = self.tripane[0].next
-                self.tripane[1] = self.tripane[1].next
-                self.tripane[2] = self.tripane[2].next
-            except:
-                break
-
 class DirManager:
 
     def __init__(self, dir, filter, sort_rule=DIRS_FIRST):
-        print '>> dir    -> ', dir
-        print '>> filter -> ', filter
+        #print '>> dir    -> ', dir
+        #print '>> filter -> ', filter
         assert os.path.isdir(dir), '!! DirManager: ' + dir + ' is not a directory.'
         if not dir.endswith(PATH_SEPAR):
             dir += PATH_SEPAR
@@ -229,30 +99,30 @@ class DirManager:
         return objCache
 
     def _genDirCaches(self):
-        print '>> self.currDir -> ', self.currDir
+        #print '>> self.currDir -> ', self.currDir
         self.currDirCache = self.globDir(self.currDir)
         # now generate cache for self.dir/..
         if not self.currDirIsRoot():
             self.oneDirUp = self.dirUp(self.currDir)
-            print '>> self.oneDirUp -> ', self.oneDirUp
+            #print '>> self.oneDirUp -> ', self.oneDirUp
             self.oneDirUpCache = self.globDir(self.oneDirUp)
             # and the same for self.dir/../..
             if not self.isRootDir(self.oneDirUp):
                 self.twoUpDir = self.dirUp(self.oneDirUp)
-                print '>> self.twoDirUp -> ', self.twoDirUp
+                #print '>> self.twoDirUp -> ', self.twoDirUp
                 self.twoDirUpCache = self.globDir(self.twoDirUp)
 
 class OpenFileDialog(Window):
 
-    def __init__(self, dir, filter, sort_rule=DIRS_FIRST):
+    def __init__(self, dir, filters, sort_rule=DIRS_FIRST):
         Window.__init__(self, title='Open File - ' + \
                         application().name + '-' + application().version, \
                         geometry=(250, 200, 420, 350))
         self._updating = 0
-        dirMngr = self.dirMngr = DirManager(dir, filter, sort_rule)
+        self.dirMngr = DirManager(dir, filters[0], sort_rule)
         self._priorSelections = []
         #self.createTripaneDirList()
-        self.initWidgets()
+        self.initWidgets(filters)
 
     #def createTripaneDirList(self):
     #    dirMngr = self.dirMngr
@@ -262,7 +132,7 @@ class OpenFileDialog(Window):
     #        if not dirMngr.isRootDir(dirMngr.oneDirUp):
     #            self.dirList.prepend(dirMngr.twoDirUpCache)
 
-    def initWidgets(self):
+    def initWidgets(self, filters):
 
         dirMngr = self.dirMngr
 
@@ -285,6 +155,7 @@ class OpenFileDialog(Window):
         lbxDirOne = self.lbxDirOne = ListBox()
         #lbxDirOne.items = self.dirList.tripane[0]
         lbxDirOne.items = self.dirMngr.currDirCache
+        lbxDirOne.selection = 0
         frmDirs.add(lbxDirOne)
         link(lbxDirOne, self.lbxSelect)
 
@@ -315,14 +186,15 @@ class OpenFileDialog(Window):
                  hstretch=1, vmove=1)
         link(txtLocation, self.changeDirs)
 
-        txtFilter = self.txtFilter = TextField(text=dirMngr.filter)
-        self.add(txtFilter, left=(lblFilter, 5), right=100, top=(txtLocation, 10), \
+        cbxFilter = self.cbxFilter = ComboBox(items=filters)
+        #txtFilter = self.txtFilter = TextField(text=dirMngr.filter)
+        self.add(cbxFilter, left=(lblFilter, 5), right=100, top=(txtLocation, 10), \
                  hstretch=1, vmove=1)
-        link(txtFilter, self.applyFilter)
+        link(cbxFilter, self.applyFilter)
 
     def open(self, event):
-        print ">> Got event: ", event
-        print ">> event dict: ", event.__dict__
+        send(self, 'open', file=self.txtLocation.text)
+        self.destroy()
 
     def close(self, event):
         self.destroy()
@@ -341,12 +213,12 @@ class OpenFileDialog(Window):
         self._updating = 0
 
     def handleLbxDirOneEvent(self):
-        print '>> handling lbxDirOne event'
+        #print '>> handling lbxDirOne event'
         dirMngr = self.dirMngr
         s = self._state()
         obj = dirMngr.currDir + s.dirOne
         if os.path.isdir(obj):
-            dirMngr.filter = self.txtFilter.text
+            dirMngr.filter = self.cbxFilter.text
             result = dirMngr.globDir(obj)
             try:
                 s.lbxTwo.items = result
@@ -362,12 +234,12 @@ class OpenFileDialog(Window):
         self.txtLocation.text = obj
 
     def handleLbxDirTwoEvent(self):
-        print '>> handling lbxDirTwo event'
+        #print '>> handling lbxDirTwo event'
         dirMngr = self.dirMngr
         s = self._state()
         obj = dirMngr.currDir + s.dirOne + s.dirTwo
         if os.path.isdir(obj):
-            dirMngr.filter = self.txtFilter.text
+            dirMngr.filter = self.cbxFilter.text
             result = dirMngr.globDir(obj)
             s.lbxThree.items = result
         else:
@@ -375,7 +247,7 @@ class OpenFileDialog(Window):
         self.txtLocation.text = obj
 
     def handleLbxDirThreeEvent(self):
-        print '>> handling lbxDirThree event'
+        #print '>> handling lbxDirThree event'
         dirMngr  = self.dirMngr
         s = self._state()
         obj = dirMngr.currDir + s.dirOne + s.dirTwo + s.dirThree
@@ -385,7 +257,7 @@ class OpenFileDialog(Window):
             dirMngr.update()
             s.lbxOne.items = dirMngr.currDirCache
             s.lbxOne.selection = s.selTwo
-            dirMngr.filter = self.txtFilter.text
+            dirMngr.filter = self.cbxFilter.text
             s.lbxTwo.items = dirMngr.globDir(dirMngr.currDir + s.dirTwo)
             s.lbxTwo.selection = s.selThree
             s.lbxThree.items = dirMngr.globDir(obj)
@@ -394,8 +266,8 @@ class OpenFileDialog(Window):
         self.txtLocation.text = obj
 
     def goDirFwd(self, event):
-        print ">> Got event: ", event
-        print ">> event dict: ", event.__dict__
+        #print ">> Got event: ", event
+        #print ">> event dict: ", event.__dict__
         self._updating = 1
         self.handleLbxDirThreeEvent()
         if self._priorSelections:
@@ -404,13 +276,13 @@ class OpenFileDialog(Window):
             del priSels[0]
         if not self._priorSelections:
             self.btnDirFwd.enabled = 0
-            
+
         self._updating = 0
 
 
     def goDirBack(self, event):
-        print ">> Got event: ", event
-        print ">> event dict: ", event.__dict__
+        #print ">> Got event: ", event
+        #print ">> event dict: ", event.__dict__
 
         self._updating = 1
 
@@ -447,8 +319,8 @@ class OpenFileDialog(Window):
         print ">> event dict: ", event.__dict__
 
     def applyFilter(self, event):
-        print ">> Got event: ", event
-        print ">> event dict: ", event.__dict__
+        #print ">> Got event: ", event
+        #print ">> event dict: ", event.__dict__
         self._update = 1
 
         dirMngr = self.dirMngr
@@ -456,7 +328,7 @@ class OpenFileDialog(Window):
 
         try:
             s.dirThree
-            print '>> filtering lbxThree'
+            #print '>> filtering lbxThree'
             self.handleLbxDirTwoEvent()
             return
         except (AttributeError):
@@ -464,14 +336,14 @@ class OpenFileDialog(Window):
 
         try:
             s.dirTwo
-            print '>> filtering lbxTwo'
+            #print '>> filtering lbxTwo'
             self.handleLbxDirOneEvent()
             return
         except (AttributeError):
             pass
 
-        print '>> filtering lbxOne'
-        dirMngr.filter = self.txtFilter.text
+        #print '>> filtering lbxOne'
+        dirMngr.filter = self.cbxFilter.text
         dirMngr.update()
 
         s.lbxOne.items = dirMngr.currDirCache
@@ -479,9 +351,10 @@ class OpenFileDialog(Window):
             selection = s.lbxOne.selection = dirMngr.currDirCache.index(s.dirOne)
             self.txtLocation.text = dirMngr.currDir + dirMngr.currDirCache[selection]
         except (AttributeError, ValueError):
+            traceback.print_exc()
             self.txtLocation.text = dirMngr.currDir
 
-        self.btnDirFwd.enabled = 0            
+        self.btnDirFwd.enabled = 0
 
         self._update = 0
 

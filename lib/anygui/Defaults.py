@@ -160,11 +160,11 @@ class ListBox:
 class ComboBox:
     _defaultEvent = 'select'
     state = {
-        'text' : 'ComboBox',
+        'text' : '',
         'x' : 0,
         'y' : 0,
         'width'  : 100,
-        'height' : 15,
+        'height' : 22,
         'hmove'  : 0,
         'vmove'  : 0,
         'hstretch' : 0,
@@ -174,8 +174,6 @@ class ComboBox:
         'items' : (),
         'selection' : 0,
         'lbxHeight' : 100,
-        'cbxHeight' : 22,
-        'btnWidth'  : 18,
         }
 
 class RadioButton:

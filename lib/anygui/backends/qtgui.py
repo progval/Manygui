@@ -11,7 +11,7 @@ try:
     from anygui import application
     from anygui.Menus import Menu, MenuCommand, MenuCheck, MenuSeparator
 
-    # qtgui specific imports        
+    # qtgui specific imports
     import sys
     from weakref import ref as wr
     from qt import *
@@ -165,7 +165,7 @@ class ComponentWrapper(Wrapper):
             except:
                 # Widget has no text.
                 return ""
-            
+
     def setupChildWidgets(self):
         pass
 
@@ -177,7 +177,7 @@ class EventFilter(QObject):
     for Qt based widgets. This is really only a
     temp fix for some slight problems with PyQt.
     """
-    
+
     _comp = None
     _events = {}
 
@@ -271,9 +271,6 @@ class ButtonWrapperBase(ComponentWrapper):
 
 class ButtonWrapper(ButtonWrapperBase):
 
-    def __init__(self, *args, **kws):
-        ButtonWrapperBase.__init__(self, *args, **kws)
-
     def widgetFactory(self, *args, **kwds):
         return QPushButton(*args, **kwds)
 
@@ -281,9 +278,6 @@ class ButtonWrapper(ButtonWrapperBase):
 # Base class for Toggle widgets
 
 class ToggleButtonWrapperBase(ButtonWrapperBase):
-
-    def __init__(self, *args, **kws):
-        ButtonWrapperBase.__init__(self, *args, **kws)
 
     def setOn(self, on):
         if self.widget:
@@ -298,9 +292,6 @@ class ToggleButtonWrapperBase(ButtonWrapperBase):
 
 class CheckBoxWrapper(ToggleButtonWrapperBase):
 
-    def __init__(self, *args, **kws):
-        ToggleButtonWrapperBase.__init__(self, *args, **kws)
-
     def widgetFactory(self, *args, **kwds):
         return QCheckBox(*args, **kwds)
 
@@ -309,9 +300,6 @@ class CheckBoxWrapper(ToggleButtonWrapperBase):
 
 class RadioButtonWrapper(ToggleButtonWrapperBase):
     groupMap = {}
-
-    def __init__(self, *args, **kws):
-        ComponentWrapper.__init__(self, *args, **kws)
 
     def widgetFactory(self, *args, **kwds):
         return QRadioButton(*args, **kwds)
@@ -342,9 +330,6 @@ class RadioButtonWrapper(ToggleButtonWrapperBase):
 class TextWrapperBase(ComponentWrapper):
     connected = 0
 
-    def __init__(self, *args, **kws):
-        ComponentWrapper.__init__(self, *args, **kws)
-
     def widgetSetUp(self):
         if not self.connected:
             events = {QEvent.KeyRelease: self.keyReleaseHandler.im_func,
@@ -365,7 +350,7 @@ class TextWrapperBase(ComponentWrapper):
         if DEBUG: print 'in keyReleaseHandler of: ', self.widget
         self.proxy.pull('text')
         if int(event.key()) == 0x1004: #Qt Return Key Code
-            if DEBUG: print 'enter key was pressed in ', self 
+            if DEBUG: print 'enter key was pressed in ', self
             send(self.proxy, 'enterkey')
         return 1
 
@@ -395,9 +380,6 @@ class TextWrapperBase(ComponentWrapper):
 
 class TextFieldWrapper(TextWrapperBase):
 
-    def __init__(self, *args, **kws):
-        TextWrapperBase.__init__(self, *args, **kws)
-
     def widgetFactory(self, *args, **kwds):
         return QLineEdit(*args, **kwds)
 
@@ -406,7 +388,7 @@ class TextFieldWrapper(TextWrapperBase):
             if DEBUG: print 'in setSelection of: ', self.widget
             start, end = selection
             self.widget.setSelection(start, end-start)
-        
+
     def getSelection(self):
         if self.widget:
             if DEBUG: print 'in getSelection of: ', self.widget
@@ -420,9 +402,6 @@ class TextFieldWrapper(TextWrapperBase):
 # TextArea
 
 class TextAreaWrapper(TextWrapperBase):
-
-    def __init__(self, *args, **kws):
-        TextWrapperBase.__init__(self, *args, **kws)
 
     def widgetFactory(self, *args, **kwds):
         return QTextEdit(*args, **kwds)
@@ -493,9 +472,6 @@ class TextAreaWrapper(TextWrapperBase):
 
 class FrameWrapper(ComponentWrapper):
 
-    def __init__(self, *args, **kws):
-        ComponentWrapper.__init__(self, *args, **kws)
-
     def widgetFactory(self, *args, **kws):
         widget = QFrame(*args, **kws)
         widget.setFrameStyle(QFrame.Plain)
@@ -514,16 +490,19 @@ class WindowWrapper(ComponentWrapper):
     destroyingSelf = 0
     mainWindow = None
 
-    def __init__(self, proxy):
-        ComponentWrapper.__init__(self, proxy)
-
     def setText(self, text):
         if self.widget:
             self.mainWindow.setCaption(QString(str(text)))
 
+    def getText(self):
+        return str(self.widget.title())
+
     def setTitle(self, title):
         if self.widget:
             self.mainWindow.setCaption(QString(str(title)))
+
+    def getTitle(self):
+        return str(self.widget.title())
 
     def widgetSetUp(self):
         if not self.connected:
@@ -536,9 +515,6 @@ class WindowWrapper(ComponentWrapper):
                                                    self.closeHandler.im_func})
             self.mainWindow.installEventFilter(self.mainWinEventFilter)
             self.connected = 1
-
-    def getTitle(self):
-        return str(self.widget.title())
 
     def resizeHandler(self, event):
         if DEBUG: print 'in resizeHandler of: ', self.widget
@@ -634,9 +610,6 @@ class WindowWrapper(ComponentWrapper):
 
 class GroupBoxWrapper(ComponentWrapper):
 
-    def __init__(self, *args, **kws):
-        ComponentWrapper.__init__(self, *args, **kws)
-
     def widgetFactory(self, *args, **kws):
         widget = QButtonGroup(*args, **kws)
         # widget.setFrameStyle(QFrame.Plain)
@@ -662,7 +635,7 @@ class MenuItemMixin:
 
     def setEnabled(self,enabled):
         if self.proxy.container is not None \
-		   and self.proxy.container.wrapper.widget is not None:
+           and self.proxy.container.wrapper.widget is not None:
             self.proxy.container.wrapper.rebuild()
 
     def setContainer(self,container):
@@ -728,7 +701,7 @@ class MenuWrapper(MenuItemMixin, ComponentWrapper):
         self to parent.
         """
         if self.proxy.container is not None and \
-		   self.proxy.container.wrapper.widget is not None:
+           self.proxy.container.wrapper.widget is not None:
             parent = self.proxy.container.wrapper.widget
             if DEBUG: print "\nREBUILDING: ", self,self.proxy.contents
             if self.widget is not None:
@@ -738,7 +711,7 @@ class MenuWrapper(MenuItemMixin, ComponentWrapper):
                     self.create(parent)
                 else:
                     self.create(None)
-            
+
             for item in self.proxy.contents:
                 item.wrapper.createIfNeeded()
                 item.wrapper.insertInto(self.widget)
@@ -747,7 +720,7 @@ class MenuWrapper(MenuItemMixin, ComponentWrapper):
 
     def enterMainLoop(self): # ...
         self.proxy.push() # FIXME: Why is this needed when push
-		                  # is called in internalProd (by prod)?
+                          # is called in internalProd (by prod)?
 
     def insertInto(self, widget):
         self.rebuild()
@@ -759,7 +732,7 @@ class MenuBarWrapper(MenuWrapper):
         widget = parent.menuBar()
         widget.clear()
         return widget
-    
+
 
 class MenuCommandWrapper(MenuItemMixin, AbstractWrapper):
 
@@ -788,11 +761,11 @@ class MenuCheckWrapper(MenuCommandWrapper):
 
     def clickHandler(self,*args,**kws):
         self.setOn(not self.getOn())
-        MenuCommandWrapper.clickHandler(self,*args,**kws) 
+        MenuCommandWrapper.clickHandler(self,*args,**kws)
 
 
 class MenuSeparatorWrapper(MenuItemMixin, AbstractWrapper):
-    
+
     def insertInto(self, widget):
         widget.insertSeparator()
 

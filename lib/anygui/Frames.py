@@ -1,4 +1,4 @@
-import sys
+import traceback
 from anygui.Components import Component
 from types import TupleType, InstanceType, IntType, ListType
 from anygui.Exceptions import ArgumentError, UnimplementedMethod
@@ -16,7 +16,7 @@ class Frame(Component, Defaults.Frame):
 
     def wrapperFactory(self):
         return backendModule().FrameWrapper(self)
-        
+
     def add(self,items,options=None,**kws):
         """
         Add the given items to this container, passing the items and
@@ -72,7 +72,8 @@ class Frame(Component, Defaults.Frame):
                 except:
                     pass
         except:
-            print "Layout error, please contact Anygui team:",sys.exc_info()
+            print "Layout error, please contact Anygui team:"
+            traceback.print_exc()
             pass
 
     def setLayout(self,lo):

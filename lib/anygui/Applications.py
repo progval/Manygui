@@ -7,9 +7,9 @@ import anygui
 class AbstractApplication(Attrib):
 
     _running = 0
-    _name = "Anygui App"
-    _version = "0"
-    
+    _name = 'Anygui App'
+    _version = '0'
+
     def __init__(self, **kwds):
         Attrib.__init__(self)
         self.parseKwds(**kwds)
@@ -39,7 +39,7 @@ class AbstractApplication(Attrib):
     def add(self, win):
         for w in flatten(win):
             self._windows.append(w)
-            w.container = self            
+            w.container = self
             w.wrapper.prod()
 
     def remove(self, win):
@@ -47,7 +47,7 @@ class AbstractApplication(Attrib):
             self._windows.remove(win)
             self.internalRemove()
         except: pass
-	# FIXME: Temporary(?) fix to cover problem in mswgui _wndproc
+    # FIXME: Temporary(?) fix to cover problem in mswgui _wndproc
         # FIXME: Destroy the window?
 
     def internalRemove(self):
@@ -93,4 +93,4 @@ class AbstractApplication(Attrib):
         except ValueError: pass
 
     def quit(self):
-        raise UnimplementedMethod, (self, "quit")
+        raise UnimplementedMethod, (self, 'quit')

@@ -57,45 +57,40 @@ class ComboBoxWrapper(Wrapper):
 
     def _createWidgets(self):
         state = self.proxy.state
-        lx = state['x']
-        ly = state['y']
-        lwidth = state['width']
-        lheight = state['height']
-        self._btnWidth = state['btnWidth']
+        x = state['x']
+        y = state['y']
+        width = state['width']
+        height = state['height']
         self._lbxHeight = state['lbxHeight']
-        self._cbxHeight = state['cbxHeight']
-        litems = list(self.proxy.items)
+        items = list(self.proxy.items)
+        self._textFld  = anygui.TextField(geometry = ( x,
+                                                       y,
+                                                       width - height,
+                                                       height ))
         self._popupBtn = anygui.Button(text = 'v',
-                                       geometry = ( lx + lwidth - self._btnWidth,
-                                                    ly,
-                                                    self._btnWidth,
-                                                    self._cbxHeight ))
-        self._textFld  = anygui.TextField(geometry = ( lx,
-                                                       ly,
-                                                       lwidth - self._btnWidth,
-                                                       self._cbxHeight ))
+                                       geometry = ( x + width - height,
+                                                    y,
+                                                    height,
+                                                    height ))
         self._itemLbx = anygui.ListBox(visible = 0,
-                                       items = litems,
-                                       geometry = ( lx,
-                                                    ly + lheight,
-                                                    lwidth,
+                                       items = items,
+                                       geometry = ( x,
+                                                    y + height,
+                                                    width,
                                                     self._lbxHeight ))
 
 
     def _setupBtn(self):
         self._popupBtn.container = self.proxy.container
-        self.proxy.container.contents.append(self._popupBtn)
 
     def _setupTxtFld(self):
         self._textFld.container = self.proxy.container
-        self.proxy.container.contents.append(self._textFld)
 
     def _setupLbx(self):
         self._itemLbx.container = self.proxy.container
-        self.proxy.container.contents.append(self._itemLbx)
 
     def widgetFactory(self, *args, **kws):
-        print '>> in widgetFactory...'
+        #print '>> in widgetFactory...'
         self._createWidgets()
         self._comps = 1
         class Class: pass
@@ -104,16 +99,14 @@ class ComboBoxWrapper(Wrapper):
 
     def widgetSetUp(self):
         if self._comps and not self._connected:
-            print '>> in widgetSetUp'
-            #self._popupBtn._ensure_events()
+            #print '>> in widgetSetUp'
             link(self._popupBtn, self._handlePopup)
-            #self._itemLbx._ensure_events()
             link(self._itemLbx, self._handleSelection)
             self._connected = 1
 
     def setupChildWidgets(self):
         if self._comps:
-            print '>> in setupChildWidgets'
+            #print '>> in setupChildWidgets'
             self._setupTxtFld()
             self._setupBtn()
             self._setupLbx()
@@ -128,36 +121,14 @@ class ComboBoxWrapper(Wrapper):
             self.proxy.push(blocked=['container'])
             self.setupChildWidgets()
 
-    def getSelection(self):
-        if self._comps:
-            return self._itemLbx.selection
-
-    def setSelection(self, selection):
-        if self._comps:
-            self._loop = 1
-            self._itemLbx.selection = selection
-            self._textFld.text = self._itemLbx.items[selection]
-            self._loop = 0
-
-    def getItems(self):
-        if self._comps:
-            return self._itemLbx.items
-
-    def setItems(self, items):
-        if self._comps:
-            print '>> in setItems(items) -> ', items
-            self._loop = 1
-            self._itemLbx.items = items
-            self._loop = 0
-
     def _handlePopup(self, event):
-        print '>> handling Popup...'
+        #print '>> handling Popup...'
         self._loop = 1
         self._itemLbx.visible = self._popupOpen = not self._popupOpen
         self._loop = 0
 
     def _handleSelection(self, event):
-        print '>> handling Selection...'
+        #print '>> handling Selection...'
         if not self._loop:
             self._loop = 1
             self._textFld.text = self._itemLbx.items[self._itemLbx.selection]
@@ -201,24 +172,66 @@ class ComboBoxWrapper(Wrapper):
         if self._comps:
             x, y, dummy, height = self._textFld.geometry
             d, d1, width, d2   = self._itemLbx.geometry
-            return (x, y, height, width)
+            return (x, y, width, height)
 
     def setGeometry(self, x, y, width, height):
         if self._comps:
             self._loop = 1
             self._textFld.geometry  = (x,
                                        y,
-                                       width - self._btnWidth,
-                                       self._cbxHeight)
-            self._popupBtn.geometry = (x + width - self._btnWidth,
+                                       width - height,
+                                       height)
+            self._popupBtn.geometry = (x + width - height,
                                        y,
-                                       self._btnWidth,
-                                       self._cbxHeight)
+                                       height,
+                                       height)
             self._itemLbx.geometry =  (x,
-                                       y + self._cbxHeight,
+                                       y + height,
                                        width,
                                        self._lbxHeight)
             self._loop = 0
+
+    def getSelection(self):
+        if self._comps:
+            return self._itemLbx.selection
+
+    def setSelection(self, selection):
+        if self._comps:
+            self._loop = 1
+            self._itemLbx.selection = selection
+            self._textFld.text = self._itemLbx.items[selection]
+            self._loop = 0
+
+    def getItems(self):
+        if self._comps:
+            return self._itemLbx.items
+
+    def setItems(self, items):
+        if self._comps:
+            #print '>> in setItems(items) -> ', items
+            self._loop = 1
+            self._itemLbx.items = items
+            self._loop = 0
+
+    def getText(self):
+        items = list(self._itemLbx.items)
+        text = self._textFld.text
+        if text in items:
+            return text
+        else:
+            return items[self._itemLbx.selection]
+
+    def getLbxHeight(self):
+        return self._lbxHeight
+
+    def setLbxHeight(self, lbxHeight):
+        if self._comps:
+            self._lbxHeight = lbxHeight
+            x, y, width, height = self.proxy.geometry
+            self._itemLbx.geometry = ( x,
+                                       y + height,
+                                       width,
+                                       lbxHeight)
 
     def getVisible(self):
         return self._visible
@@ -226,17 +239,23 @@ class ComboBoxWrapper(Wrapper):
     def setVisibile(self, visible):
         if self._comps:
             self._visible = visible
+            if self._popupOpen:
+                self._itemLbx.visible = visible
+                self._popupOpen = visible
             self._textFld.visible = visible
             self._popupBtn.visible = visible
 
+    def getEnabled(self):
+        return self._enabled
+
     def setEnabled(self, enabled):
         if self._comps:
+            if self._popupOpen:
+                self._itemLbx.visible = 0
+                self._popupOpen = 0
             self._enabled = enabled
             self._textFld.enabled  = enabled
             self._popupBtn.enabled = enabled
-
-    def getEnabled(self):
-        return self._enabled
 
     def internalDestroy(self):
         if self._comps:
