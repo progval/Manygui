@@ -1,4 +1,4 @@
-"Default values for the anygui package."
+"Defaults for the anygui package."
 
 class Button:
 
