@@ -899,7 +899,7 @@
 	<line>os.environ['ANYGUI_SOMEVAR'] = 'some value'</line>
       </codelisting>
 
-      <para>This will probably not work in <name>Jython</name>, though.</para>
+      <para>This will probably not work well in <name>Jython</name>, though.</para>
       
       <para>The environment variables used by <name>Anygui</name>
       are:</para>
