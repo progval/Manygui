@@ -1,7 +1,8 @@
 ListModel._set_value doesn't work properly; fails during
 notification.
 
-Only javagui, mswgui, wxgui and gtkgui supports TextModel yet.
+Only beosgui, javagui, mswgui, wxgui and gtkgui supports
+TextModel yet.
 
 Setting tf.model.value moves selection to the end of
 textfields/textareas in javagui.

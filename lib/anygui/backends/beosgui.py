@@ -56,7 +56,7 @@ import BOutlineListView
 import BPath, BPopUpMenu
 import BRadioButton
 import BScrollBar, BScrollView, BSeparatorItem, BSlider, BStatusBar, BStringItem, BStringView
-import BTab, BTabView, BTextControl, BTextView
+import BTab, BTabView, BTextControl, BTextView             # BTextView.dx updated!!!
 import BView, BVolume
 import BWindow                                             # Version with Minimize()
 
@@ -92,7 +92,7 @@ work in Python.  Stolen blatantly from Donn."""
         self._beos_comp.bind(self)
 
     def sub_wrap(self, this):
-        "For classes with scrollbox surrounding them."
+        # For widgets with scrollbox surrounding them.
         self._beos_sub = this
         self._beos_sub.bind(self)
 
@@ -113,13 +113,13 @@ class ComponentMixin(WrapThis):
     _beos_style = None
     _beos_msg = None
     _beos_clicked = None
+    _lost_focus = None
     _beos_mode = B_FOLLOW_LEFT + B_FOLLOW_TOP
     _beos_flags = B_WILL_DRAW + B_NAVIGABLE
 
     _init_args = None
     	
     def _ensure_created(self):
-        #app = Application() # BeOS terminates processes that have no valid BApplication
         if self._beos_comp is None:
             self._beos_id = str(self._beos_id)
             self._ensure_visibility()
@@ -157,16 +157,6 @@ class ComponentMixin(WrapThis):
                 float(self._y),
                 float(self._width+ self._x),
                 float(self._height+self._y))
-        if self._beos_comp:
-            #self._beos_comp.ResizeToPreferred()
-            '''
-            # Should be something a bit like...
-            width, height = self._beos_comp.GetPreferredSize()
-            if width>self._width:
-                self._beos_comp.ResizeToPreferred()
-            elif height > self._height:
-                self._beos_comp.ResizeToPreferred()
-            '''
 
     def _ensure_visibility(self):
         pass
@@ -274,13 +264,6 @@ class ListBox(ComponentMixin, AbstractListBox):
         self._ensure_items()
         self._ensure_events()
         return result
-
-    #def _backend_items(self):
-    #    if self._beos_comp:
-    #        items = []
-    #        for index in range(self._beos_sub.CountItems()):
-    #            items.append(self._beos_sub.ItemAt(index).Text())
-    #        return items
     
     def _backend_selection(self):
         if self._beos_comp:
@@ -356,7 +339,7 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
 
 
 class RadioGroup(RadioGroup):
-    _beos_class = BView.BView #Not yet used :)
+    _beos_class = BView.BView 
     """ FIXME: forces all buttons into the one group.
                Selecting a button from another group
                has the same effect as choosing the button 
@@ -455,14 +438,7 @@ class TextField(ComponentMixin, AbstractTextField):
     def _backend_text(self):
         if self._beos_comp:
             self.model.value = self._beos_comp.Text()
-    
-    def MakeFocus(self, focus):
-        print "Here 1"
-        if not focus:
-            print "Here"
-            self.model.value = self._beos_comp.Text()
-        _beos_class.MakeFocus(self, focus)
-    
+        
     def _backend_selection(self):
         if self._beos_comp:
             return self._beos_comp.TextView().GetSelection()
@@ -483,6 +459,10 @@ class TextField(ComponentMixin, AbstractTextField):
     def _ensure_enabled_state(self):
         if self._beos_comp:
             self._beos_comp.SetEnabled(self._enabled)
+    
+    def _lost_focus(self):
+        self.model.value = self._beos_comp.Text()
+
 
 
 class TextArea(ComponentMixin, AbstractTextArea):
@@ -493,6 +473,7 @@ class TextArea(ComponentMixin, AbstractTextArea):
     _beos_border = B_FANCY_BORDER
     
     def _ensure_created(self):
+        self._focus = 0
         self._beos_id = str(self._beos_id)
         if self._beos_sub is None:
             self.sub_wrap(self._beos_sub_class(self._beos_bounds,
@@ -534,16 +515,12 @@ class TextArea(ComponentMixin, AbstractTextArea):
     def _lost_focus(self):
         self.model.value = self._beos_sub.Text()
     
-    """def MakeFocus(self, focus):
-        print self._beos_sub.IsFocus(), focus
+    def MakeFocus(self, focus=1):
+        """Doesn't seem to Draw properly: clicking in another window then
+        back makes it work."""
+        self._beos_sub.MakeFocus(focus)
         if not focus:
-            print "Here"
-            self.model.value = self._beos_comp.Text()
-        else:
-            print "There"
-            #self._beos_sub.Draw(self._beos_comp.Bounds())
-            #self._beos_sub.Flush()
-            #self._beos_sub.MakeFocus(focus)"""
+            self._lost_focus()        
 
 #################################################################
 
@@ -626,7 +603,9 @@ class Window(ComponentMixin, AbstractWindow):
                 if item._beos_id == id:
                     if item._beos_clicked:    # Bit of a hack?
                         item._beos_clicked()
-                    item._action()
+                    if item._lost_focus:
+                        item._lost_focus()
+                    item._action()                
 
     def _ensure_title(self):
         if self._beos_comp:
@@ -642,6 +621,7 @@ class Window(ComponentMixin, AbstractWindow):
         AbstractWindow.add(self, object)
     
     # Had to overload these methods, but they still call the parent.
+    # Shouldn't this bit be in the Abstract class?
     
     def show(self):
         AbstractWindow.show(self)
