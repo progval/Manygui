@@ -1,8 +1,10 @@
-from anygui import Application, Window, Menu, Label, link
+from anygui import Application, Window, Menu, Label, link, TextField
+from anygui.LayoutManagers import SimpleGridManager
 
 app = Application()
 
 win = Window(geometry=(50,50,100,100))
+win.layout = SimpleGridManager(1,2)
 
 # A menubar for the window.
 mbar = Menu()
@@ -55,6 +57,13 @@ for txt in ["Slight","Moderate","Unbearable"]:
     link(silliness[-1],handleSillySelect)
 skitMenu.add(subMenu)
 
+skitMenu.addSeparator()
+addCmd = skitMenu.addCommand(text="Add Skit")
+def addSkit(*args,**kws):
+    cmd = skitMenu.addCommand(text=entry.text)
+    link(cmd,chooseSkit)
+link(addCmd,addSkit)
+
 # And a menu for help...
 helpMenu = Menu(text="Help")
 helpMenu.addCommand(text="About Anygui")
@@ -62,6 +71,8 @@ mbar.add(helpMenu)
 
 lbl = Label(text="No skit selected")
 win.add(lbl)
+entry = TextField(text="Enter new skit",selection=(0,15))
+win.add(entry)
 
 def chooseSkit(ev):
     # Handle a skit choice. A menu event should have a
