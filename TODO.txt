@@ -11,18 +11,21 @@ Release 0.3: Less API change, focus on robustness
 
 Objectives for version 0.2a1:
 -----------------------------
-(Est. early March)
-
-* Finish the design of the new architecture.
 
 * Implement the new architecture.
 
+* Wrap the event repository in class which implements "link counting"
+  for a two-way version of enableEvent.
+
+* Fix default events so that their event type is the real type
+  (e.g. 'click'), not 'default'.
+
 * Create a Container mixin for add() and remove(), and either a
-  contents or items attribute. (With items it could be used with
+  contents or items attribute? (With items it could be used with
   ListBox too, giving the possibility of adding and removing items...)
 
 * Change Assignee to SmartValue, which also has support for Container
-  objects.
+  objects (?)
 
 * Change add() signature?
 
@@ -37,7 +40,6 @@ New Components:
 
 Objectives for version 0.2a2:
 -----------------------------
-(Est. late March)
 
 * Integrate an "event path" notion into the event framework,
   facilitating the use of callbacks in containers to react to events
@@ -63,7 +65,6 @@ New Components
 
 Objectives for version 0.2a3:
 -----------------------------
-(Est. early April)
 
 * Adjust defaults, and improve window staggering
   (needs a mechanism to find the top window)
