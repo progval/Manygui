@@ -27,15 +27,23 @@ from anygui.Utils import log, setLogFile, logTraceback
 ################################################################
 from ctypes import CDLL, _DLLS, _DynFunction, CFunction, c_string, Structure, WinError, byref
 
-class WinDLLA(CDLL):
+_apiMode = 'A'
+def _to_native(text):
+    return text.replace('\n', '\r\n')
+
+def _from_native(text):
+    return text.replace('\r\n', '\n')
+
+class WinDLL(CDLL):
+    
     def __getattr__(self, name):
         try:
             func = _DynFunction(name, self)
         except:
-            func = _DynFunction(name+'A', self)
+            func = _DynFunction(name+_apiMode, self)
         setattr(self, name, func)
         return func
-windll = _DLLS(WinDLLA)
+windll = _DLLS(WinDLL)
 user32 = windll.user32
 gdi32 = windll.gdi32
 kernel32 = windll.kernel32
@@ -258,16 +266,17 @@ class ComponentWrapper(AbstractWrapper):
     def setText(self,text):
         if not self.widget: return
         if _verbose: log("%s.SetWindowText('%s'(%s)) hwnd=%s(%s) self=%s" % (self.__class__.__name__,text,type(text),self.widget,type(self.widget),str(self)))
-        user32.SetWindowText(self.widget,c_string(text))
+        user32.SetWindowText(self.widget,c_string(_to_native(text)))
+
+    def _getText(self):
+        'return native text'
+        n = user32.GetWindowTextLength(self.widget)
+        t = c_string('\000'*(n+1))
+        user32.GetWindowText(self.widget,t,n+1)
+        return t.value
 
     def getText(self):
-        if not self.widget: return
-        n = user32.GetWindowTextLength(self.widget)
-        if _verbose: log('GetWindowText n=',n)
-        t = c_string('\000'*(n+1))
-        r = user32.GetWindowText(self.widget,t,n+1)
-        if _verbose: log('GetWindowText n=%d r=%d s=%s'%(n,r,repr(t.value)))
-        return repr(t.value)
+        if self.widget: return _from_native(self._getText())
 
     def setContainer(self, container):
         if container is None:
@@ -322,22 +331,14 @@ class ListBoxWrapper(ComponentWrapper):
     _win_style_ex = WS_EX_CLIENTEDGE
 
     def getSelection(self):
-        if not self.widget: return
-        return user32.SendMessage(self.widget,
-                                    LB_GETCURSEL,
-                                    0,
-                                    0)
+        if self.widget: return user32.SendMessage(self.widget, LB_GETCURSEL, 0, 0)
 
     def setItems(self,items):
         if not self.widget: return
-        user32.SendMessage(self.widget,
-                             LB_RESETCONTENT, 0, 0)
+        user32.SendMessage(self.widget, LB_RESETCONTENT, 0, 0)
         for item in map(str, list(items)):
             # FIXME: This doesn't work! Items get jumbled...
-            user32.SendMessage(self.widget,
-                                 LB_ADDSTRING,
-                                 0,
-                                 c_string(item))
+            user32.SendMessage(self.widget, LB_ADDSTRING, 0, c_string(item))
 
 
     def setSelection(self,selection):
@@ -407,36 +408,22 @@ class RadioButtonWrapper(ToggleButtonWrapper):
 
 class TextFieldWrapper(ComponentWrapper):
     _wndclass = "EDIT"
-    _win_style = ES_NOHIDESEL | ES_AUTOHSCROLL | \
-                 WS_CHILD | WS_BORDER
+    _win_style = ES_NOHIDESEL | ES_AUTOHSCROLL | WS_CHILD | WS_BORDER
     _win_style_ex = WS_EX_CLIENTEDGE
 
-    def _to_native(self, text):
-        return text.replace('\n', '\r\n')
-
-    def _from_native(self, text):
-        return text.replace('\r\n', '\n')
-
-    def getText(self):
-        if not self.widget: return
-        return self._from_native(ComponentWrapper.getText(self))
-
     def setText(self, text):
-        if not self.widget: return
-        if text==self.getText(): return
-        ComponentWrapper.setText(self, self._to_native(text))
+        if self.widget and text!=self.getText():
+            ComponentWrapper.setText(self,text)
 
     def getSelection(self):
         #log("TextField._backend_selection")
         if not self.widget: return
-        result = user32.SendMessage(self.widget,
-                                      EM_GETSEL,
-                                      0, 0)
+        result = user32.SendMessage(self.widget, EM_GETSEL, 0, 0)
         start, end = result & 0xFFFF, result >> 16
-        #log("    start,end=%s,%s"%(start,end))
-        # under windows, the natice widget contains
+        #log("TextField.getSelection: start,end=%s,%s"%(start,end))
+        # under windows, the native widget contains
         # CRLF line separators
-        text = self.getText()
+        text = self._getText()
         start -= text[:start].count('\n')
         end -= text[:end].count('\n')
         return start, end
@@ -638,8 +625,7 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
             comp.container = self.proxy
 
     def setTitle(self,title):
-        if not self.widget: return
-        if title:
+        if self.widget and title:
             user32.SetWindowText(self.widget, c_string(title))
 
     def getTitle(self):
@@ -737,35 +723,34 @@ class Application(AbstractApplication):
 
     def _register_class(self):
         if _verbose: log('Application._register_class:start',str(self))
+        class WINDOWPROC(CFunction):
+            _types_ = "iiii"
+            _stdcall_ = 1
         class WNDCLASS(Structure):
             _fields_= (
                 ('style','i'),
-                ('lpfnWndProc','i'),
+                ('lpfnWndProc',WINDOWPROC),
                 ('cls_extra','i'),
                 ('wnd_extra','i'),
                 ('hInst','i'),
                 ('hIcon','i'),
                 ('hCursor','i'),
                 ('hbrBackground','i'),
-                ('menu_name','i'),
-                ('lpzClassName','i'),
+                ('menu_name','z'),
+                ('lpzClassName','z'),
                 )
-        class WINDOWPROC(CFunction):
-            _types_ = "iiii"
-            _stdcall_ = 1
-        self.__wndproc = WINDOWPROC(self._wndproc)
-        self._class_name = c_string("dw.anygui.PythonWindow")
-        # register a window class for toplevel windows.
+
+        # register a window class for our windows.
         wc = WNDCLASS()
         wc.hbrBackground = COLOR_BTNFACE + 1
         wc.hCursor = user32.LoadCursor(0, IDC_ARROW)
         wc.hIcon = user32.LoadIcon(0, IDI_APPLICATION)
-        wc.lpzClassName = self._class_name._as_parameter_
-        wc.lpfnWndProc = self.__wndproc._as_parameter_
-        wc.hInst = kernel32.GetModuleHandle(0)
+        wc.lpzClassName = "dw.anygui.PythonWindow"
+        wc.lpfnWndProc = WINDOWPROC(self._wndproc)
+        wc.hInst = kernel32.GetModuleHandle(None)
         self._wc = wc
         user32.UnregisterClass(wc.lpzClassName,0)
-        self.__class__._wndclass = user32.RegisterClass(byref(wc))
+        self.__class__._wndclass = user32.RegisterClass(byref(wc)) & 0xFFFF
         assert self.__class__._wndclass, "RegisterClass --> %s" % WinError()
         if _verbose: log('Application._register_class:end',str(self))
 
@@ -780,7 +765,7 @@ class Application(AbstractApplication):
             _dispatch = self._dispatch.get(msg,_dispatch_DEFAULT)
             x = _dispatch(window,hwnd,msg,wParam,lParam)
         except:
-            logTraceback(None,'_wndproc.1')
+            if _verbose: logTraceback(None,'_wndproc.1')
             x = -1
         if _verbose: log("\tdispatch %s to %s %s\n" % (_dispatch.__name__[9:],window.__class__.__name__,window),"\t ==>",x)
         return x
