@@ -26,10 +26,9 @@ class AbstractWindow(AbstractFrame, Defaults.Window):
 
         # If we are inside a function call, set up a CreationSentinel
         # in surrounding local scope -- otherwise, just call
-        # ensure_created:                               (mlh20011109)
+        # ensure_created:                               (mlh20011110)
         stack = inspect.stack()
-        # FIXME: Find out if we are in the global scope...
-        if len(stack) > 2: # ... > 1...
+        if len(stack) > 1:
             #import pprint
             #print pprint.pprint(stack)
             scope = stack[1][0].f_locals
@@ -37,7 +36,8 @@ class AbstractWindow(AbstractFrame, Defaults.Window):
             while scope.has_key(`name`): name += 1
             scope[`name`] = self.CreationSentinel(self)
         else:
-            self.ensure_created()
+            pass
+            #self.ensure_created()
         
     def destroy(self):
         self._ensure_destroyed()

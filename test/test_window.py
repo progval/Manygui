@@ -16,19 +16,17 @@ def new_window():
     for i in range(5):
         win.visible = not win.visible
     win.visible = 1
-
-    #win.ensure_created() # ... Debug...
     
     print application()._windows
-    print win
 
+    # Debug:
+    #del locals()['0']
 
 btn = Button(text='Create new window', size=(200,25), x=10, y=10,
              action=new_window)
 win.add(btn)
 
 print application()._windows
-print win
 print
 
 #dlog = Window(title = "A Dialog Window", style = 'dialog',
