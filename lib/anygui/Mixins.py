@@ -31,10 +31,20 @@ class Attrib:
     a method .removed, it's called just before the attribute assignment.
     This supports Models as values for widget attributes.
 
+    Besides __setattr__ and __getattr__ special methods with this
+    functionality, Attrib supplies a set method to set many attributes
+    and options, and an __init__ with similar functionality.  __init__
+    also handles attributes listed in self.explicit_attributes.
+
     Attrib also supplies a default update method, which calls all the
     relevant methods named _ensure_* if flag _inhibit_update is false.
     In this release, all _ensure_* are called; eventually, some kind
     of mechanism will use the hints to be more selective/optimizing.
+
+    Note that Attrib embodies two patterns (attribute setting/getting
+    and update functionality) and is thus "Alexandrian dense"; cfr
+    Vlissides, "Pattern Hatching", page 30, for pluses and minuses of
+    this "dense" approach and the resulting "profound" code.
     """
 
     _all_ensures = []
@@ -81,6 +91,16 @@ class Attrib:
         _get_all_ensures(self.__class__, enset)
         self.__dict__['_all_ensures'] = enset.keys()
         self._all_ensures.sort()
+
+        # handle explicit-attributes
+        try: explicit_attributes_names = self.explicit_attributes
+        except AttributeError: pass
+        else:
+            for internal_name in explicit_attributes_names:
+                external_name = internal_name[1:]
+                if not kwds.has_key(external_name):
+                    kwds[external_name] = getattr(self, internal_name)
+
         self.set(*args, **kwds)
 
     def update(self, **ignore_kw):
