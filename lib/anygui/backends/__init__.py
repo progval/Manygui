@@ -11,3 +11,4 @@ from anygui.RadioGroups import RadioGroup
 from anygui.TextFields import AbstractTextField
 from anygui.TextAreas import AbstractTextArea
 from anygui.ListBoxes import AbstractListBox
+import anygui

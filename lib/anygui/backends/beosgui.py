@@ -45,6 +45,7 @@ implement ScrollView and make ListView/TextView use the class
 """
 
 from anygui.backends import *
+__all__ = anygui.__all__
 
 #################################################################
 
