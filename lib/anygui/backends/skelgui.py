@@ -32,10 +32,24 @@ for subscription instructions.
 Comments and criticism to jknapka@earthlink.net (Joe Knapka).
 """
 
+__all__ = '''
+
+  Application
+  ButtonWrapper
+  WindowWrapper
+  LabelWrapper
+  TextFieldWrapper
+  TextAreaWrapper
+  ListBoxWrapper
+  RadioButtonWrapper
+  CheckBoxWrapper
+
+'''.split()
+
 # Import Anygui infrastructure. You shouldn't have to change these.
 from anygui.backends import *
 from anygui.Applications import AbstractApplication
-from anygui.Wrappers import AbstractWrapper, DummyWidget, isDummy
+from anygui.Wrappers import AbstractWrapper
 from anygui.Events import *
 from anygui.Exceptions import Error
 from anygui.Utils import log
@@ -102,10 +116,10 @@ class ComponentWrapper(AbstractWrapper):
         destroy() is called when the application needs to destroy the
         native widget. You can also call it within the wrapper code if
         you need to destroy your native widget for some reason. You
-        should set self.widget to DummyWidget()
-        here, after destroying the native widget.
+        should set self.widget to None here, after destroying the
+        native widget.
         """
-        self.widget = DummyWidget()
+        self.widget = None
         raise NotImplementedError, 'should be implemented by subclasses'
 
     # From here on, all methods in this class are getters and setters.

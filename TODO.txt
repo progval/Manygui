@@ -36,6 +36,9 @@ Short-term Objectives/FIXMEs
 
 * Fix transformation push('position') -> push('x', 'y') etc.
 
+* Update documentation to include descriptions of use in IDLE and
+  other IDEs.
+
 Objectives for version 0.2a0:
 -----------------------------
 

@@ -1,12 +1,4 @@
 
-''' Event framework for Anygui.
-
-    Magnus Lie Hetland 2001-11-26
-
-    2002-02-12: Modified send() to send a single event object to the
-                event handlers.
-'''
-
 TODO = '''
     - Fix optional arguments/use of kwdargs in place of positionals etc.
 '''
