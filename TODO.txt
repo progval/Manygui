@@ -79,6 +79,8 @@ Objectives for version 0.2a1:
 * Add font, alignment, and colour (?) (etc.) attributes to all
   relevant components.
 
+* Implement the method Application.quit in all back-ends.
+
 New Components:
 
 - Menus (including popup menus)
