@@ -207,7 +207,7 @@ class ToggleButtonMixin(ComponentMixin):
         val = val & win32con.BST_CHECKED
         if val == self.on:
             return
-        self.model.value = val
+        self.on = val
         #self.do_action()
         send(self, 'click')
 
@@ -263,7 +263,7 @@ class TextField(ComponentMixin, AbstractTextField):
             start, end = result & 0xFFFF, result >> 16
             # under windows, the natice widget contains
             # CRLF line separators
-            text = self.model.value
+            text = self.text
             start -= text[:start].count('\n')
             end -= text[:end].count('\n')
             return start, end
@@ -277,7 +277,7 @@ class TextField(ComponentMixin, AbstractTextField):
     def _ensure_selection(self):
         if self._hwnd:
             start, end = self._selection
-            text = self.model.value
+            text = self.text
             start += text[:start].count('\n')
             end += text[:end].count('\n')
             win32gui.SendMessage(self._hwnd,
@@ -309,7 +309,7 @@ class TextField(ComponentMixin, AbstractTextField):
     def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
         # HIWORD(wParam): notification code
         if (wParam >> 16) == win32con.EN_KILLFOCUS:
-            self.model.value = self._get_text()
+            self.text = self._get_text()
 
 
 class TextArea(TextField, AbstractTextArea):

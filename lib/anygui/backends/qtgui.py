@@ -197,7 +197,7 @@ class TextMixin(ComponentMixin, AbstractTextField):
 			self._qt_comp.setReadOnly(not self._editable)
 
 	def _update_model(self,ev):
-		self.model.value = str(self._qt_comp.text())
+		self.text = str(self._qt_comp.text())
 
 	def _get_qt_text(self):
 		return self._text

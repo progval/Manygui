@@ -113,7 +113,7 @@ class ToggleButtonMixin(ComponentMixin):
         val = self._gtk_comp.get_active()
         if val == self.on:
             return
-        self.model.value = val
+        self.on = val
         #self.do_action()
         send(self, 'click')
 
@@ -256,7 +256,7 @@ class TextField(ComponentMixin, AbstractTextField):
 
     def _entry_changed(self, *args):
         if not self._ignore_changed:
-            self.model.value = self._backend_text()
+            self.text = self._backend_text()
 
 class ScrollableTextArea(GtkScrolledWindow):
     def __init__(self, *args, **kw):
@@ -320,7 +320,7 @@ class TextArea(ComponentMixin, AbstractTextArea):
 
     def _text_changed(self, *args):
         if not self._ignore_changed:
-            self.model.value = self._backend_text()
+            self.text = self._backend_text()
 
 ################################################################
 

@@ -281,7 +281,7 @@ class ToggleButtonMixin(ComponentMixin):
 
     def _ensure_state(self):
         if self._beos_comp is not None:
-            self._beos_comp.SetValue(self.model.value)
+            self._beos_comp.SetValue(self.on)
 
     def _ensure_enabled_state(self):
         if self._beos_comp:
@@ -295,7 +295,7 @@ class ToggleButtonMixin(ComponentMixin):
         val = self._get_on()
         if val == self.on:
             return
-        self.model.on = val
+        self.on = val
         send(self, 'click')
 
      
@@ -406,7 +406,7 @@ class TextField(ComponentMixin, AbstractTextField):
         
     def _backend_text(self):
         if self._beos_comp:
-            self.model.value = self._beos_comp.Text()
+            self.text = self._beos_comp.Text()
         
     def _backend_selection(self):
         if self._beos_comp:
@@ -419,7 +419,7 @@ class TextField(ComponentMixin, AbstractTextField):
             
     def _ensure_text(self):
         if self._beos_comp:
-            self._beos_comp.SetText(self.model.value)
+            self._beos_comp.SetText(self.text)
 
     def _ensure_editable(self):
         if self._beos_comp:
@@ -430,7 +430,7 @@ class TextField(ComponentMixin, AbstractTextField):
             self._beos_comp.SetEnabled(self._enabled)
     
     def _lost_focus(self):
-        self.model.value = self._beos_comp.Text()
+        self.text = self._beos_comp.Text()
 
 
 
@@ -466,7 +466,7 @@ class TextArea(ComponentMixin, AbstractTextArea):
             
     def _ensure_text(self):
         if self._beos_comp:
-            self._beos_sub.SetText(self.model.value)
+            self._beos_sub.SetText(self.text)
     
     def _ensure_selection(self):
         if self._beos_comp:
@@ -489,7 +489,7 @@ class TextArea(ComponentMixin, AbstractTextArea):
             self._beos_sub.MakeEditable(self._editable)
 
     def _lost_focus(self):
-        self.model.value = self._beos_sub.Text()
+        self.text = self._beos_sub.Text()
     
     def MakeFocus(self, focus=1):
         """Doesn't seem to Draw properly: clicking in another window then

@@ -142,7 +142,7 @@ class ToggleButtonMixin(ComponentMixin):
         val = self._wx_comp.GetValue()
         if val == self.on:
             return
-        self.model.value = val
+        self.on = val
         #self.do_action()
         send(self, 'click')
 
@@ -205,7 +205,7 @@ class TextField(ComponentMixin, AbstractTextField):
         EVT_KILL_FOCUS(self._wx_comp, self._wx_killfocus)
 
     def _wx_killfocus(self, event):
-        self.model.value = self._wx_comp.GetValue()
+        self.on = self._wx_comp.GetValue()
 
     def _wx_enterkey(self, event):
         #self.do_action()
@@ -230,7 +230,7 @@ class TextArea(ComponentMixin, AbstractTextArea):
                 # under windows, the natice widget contains
                 # CRLF line separators
                 # XXX Is this a wxPython bug?
-                text = self.model.value
+                text = self.text
                 start -= text[:start].count('\n')
                 end -= text[:end].count('\n')
             return start, end
@@ -249,7 +249,7 @@ class TextArea(ComponentMixin, AbstractTextArea):
                 # under windows, the natice widget contains
                 # CRLF line separators
                 # XXX Is this a wxPython bug?
-                text = self.model.value
+                text = self.text
                 start += text[:start].count('\n')
                 end += text[:end].count('\n')
             self._wx_comp.SetSelection(start, end)
@@ -262,7 +262,7 @@ class TextArea(ComponentMixin, AbstractTextArea):
         EVT_KILL_FOCUS(self._wx_comp, self._wx_killfocus)
 
     def _wx_killfocus(self, event):
-        self.model.value = self._wx_comp.GetValue()
+        self.text = self._wx_comp.GetValue()
 
     def _get_wx_text(self):
         # return the text required for creation

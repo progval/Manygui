@@ -355,7 +355,7 @@ class ToggleButtonMixin(ComponentMixin):
         val = self._java_comp.selected
         if val == self.on:
             return
-        self.model.value = val
+        self.on = val
         #self.do_action()
         send(self, 'click')
 
@@ -418,8 +418,8 @@ class TextField(ComponentMixin, AbstractTextField):
         send(self, 'enterkey')
 
     def _java_focus_lost(self, event):
-        if self.model.value != self._java_comp.text:
-            self.model.value = self._java_comp.text # FIXME: Will cause self-update
+        if self.text != self._java_comp.text:
+            self.text = self._java_comp.text
 
 class ScrollableTextArea(swing.JPanel):
     # Replacement for swing.JTextArea
@@ -496,7 +496,7 @@ class TextArea(ComponentMixin, AbstractTextArea):
             self._java_comp._jtextarea.focusLost = self._java_focus_lost
 
     def _java_focus_lost(self, event):
-        self.model.value = self._java_comp.getText() # FIXME: Will cause self-update
+        self.text = self._java_comp.getText()
 
 ################################################################
 

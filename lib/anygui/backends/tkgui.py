@@ -575,7 +575,7 @@ class TextArea(ComponentMixin, AbstractTextArea, DisabledTextBindings):
         pass
 
     def _update_model(self,ev):
-        self.model.value = self._tk_comp.get("1.0","end")
+        self.text = self._tk_comp.get("1.0","end")
 
 ################################################################
 
