@@ -947,7 +947,19 @@
 
       <para>To get more control over things, you should probably also
       override the two internal methods <code>add_components</code>
-      and <code>remove_component</code>.</para>
+      and <code>remove_component</code>:</para>
+
+      <para><apiname>add_components</apiname>(self, *<var>items</var>,
+      **<var>kws</var>)</para>
+
+      <para>Should add all the components in <var>items</var>, and
+      associate them with the options in <code>kws</code>, for later
+      resizing.</para>
+
+      <para><apiname>remove_component</apiname>(self,
+      <var>item</var>)</para>
+
+      <para>Should remove the given item.</para>
 
       <!-- configure? -->
 
@@ -1618,8 +1630,6 @@
       <code>LayoutManager</code> (and the only one supplied with the
       current release) is the <code>Placer</code> (see below).
       </para>
-
-      <!-- Implementing your own LayoutManager... -->
       
       <para><strong>Note:</strong> Although Anygui &shortversion;
       comes only with this layout manager, more will appear in the
