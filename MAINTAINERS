@@ -3,13 +3,15 @@ Developers:
 
 Magnus Lie Hetland          admin, core, javagui, tkgui, wxgui
 Thomas Heller               core, wxgui, mswgui
-Alex Martelli               dhtmlgui*
+Alex Martelli               dhtmlgui*, core
 Matthew Schinckel           beosgui
 Kalle Svensson              gtkgui
-Joe Knapka                  tkgui
+Joe Knapka                  tkgui, core
 Shanky Tiwari               pyqtgui*, javagui
 David Mertz                 cursesgui*
-Laura Creighton             tkgui
+Laura Creighton             tkgui, core
+Dallas T. Johnston          pyqtgui
+Patrick K. O'Brien          wxgui, core
 
 (* backend not yet implemented)
 
