@@ -103,8 +103,44 @@ class Label(ComponentMixin, AbstractLabel):
 
 ################################################################
 
+class ScrollableListBox(Tkinter.Frame):
+
+    # Replacement for Tkinter.Listbox
+
+    def __init__(self, *args, **kw):
+        Frame.__init__(self, *args, **kw)
+
+        self._yscrollbar = Tkinter.Scrollbar(self)
+        self._yscrollbar.pack(side=RIGHT, fill=Y)
+
+        self._listbox = Tkinter.Listbox(self,
+                                        yscrollcommand=self._yscrollbar.set)
+        self._listbox.pack(side=LEFT, expand=YES, fill=BOTH)
+        self._yscrollbar.config(command=self._listbox.yview)
+
+    def get(self, start, end):
+        return self._listbox.get(start, end)
+
+    def curselection(self):
+        return self._listbox.curselection()
+
+    def delete(self, start, end):
+        self._listbox.delete(start, end)
+
+    def insert(self, index, item):
+        self._listbox.insert(index, item)
+
+    def select_clear(self, selection):
+        self._listbox.select_clear(selection)
+
+    def select_set(self, selection):
+        self._listbox.select_set(selection)
+
+    def bind(self, event, callback):
+        self._listbox.bind(event, callback)
+
 class ListBox(ComponentMixin, AbstractListBox):
-    _tk_class = Tkinter.Listbox
+    _tk_class = ScrollableListBox
 
     def _backend_items(self):
         if self._tk_comp:
@@ -231,7 +267,7 @@ class TextField(ComponentMixin, AbstractTextField):
     def _tk_enterkey(self, event):
         self.do_action()
 
-class ScrollableTextArea(Frame):
+class ScrollableTextArea(Tkinter.Frame):
 
     # Replacemenent for Tkinter.Text
 
@@ -247,7 +283,7 @@ class ScrollableTextArea(Frame):
         self._textarea = Tkinter.Text(self,
                                       yscrollcommand=self._yscrollbar.set,
                                       xscrollcommand=self._xscrollbar.set)
-        self._textarea.pack(side=TOP, fill=BOTH)
+        self._textarea.pack(side=TOP, expand=YES, fill=BOTH)
 
         self._yscrollbar.config(command=self._textarea.yview)
         self._xscrollbar.config(command=self._textarea.xview)
