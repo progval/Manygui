@@ -26,6 +26,12 @@ from java import awt
 import java
 #from synchronize import apply_synchronized
 
+def _r(obj): # @@@ for debug
+    cl = obj.__class__.__name__
+    p = cl.rfind('.')
+    cl = cl[p+1:]
+    return "%s@%s" % (cl,id(obj))
+
 
 # Set the "look-and-feel":
 swing.UIManager.setLookAndFeel(swing.UIManager.getSystemLookAndFeelClassName())
@@ -84,29 +90,42 @@ class ComponentWrapper(Wrapper):
     def setX(self, x):
         if not self.widget: return
         self.widget.x = x
+        if self.widget.layout:
+            self.widget.validate()
 
     def setY(self, y):
         if not self.widget: return
         self.widget.y = y
+        if self.widget.layout:
+            self.widget.validate()
 
     def setWidth(self, width):
         if not self.widget: return
         self.widget.width = width
+        if self.widget.layout:
+            self.widget.validate()
 
     def setHeight(self, height):
         if not self.widget: return
         self.widget.height = height
+        if self.widget.layout:
+            self.widget.validate()
 
     def setPosition(self, x, y):
         if not self.widget: return
         self.widget.position = x, y
+        if self.widget.layout:
+            self.widget.validate()
 
     def setSize(self, width, height):
         if not self.widget: return
         self.widget.size = width, height
+        if self.widget.layout:
+            self.widget.validate()
 
     def setGeometry(self, x, y, width, height):
         if not self.widget: return
+            
         self.widget.bounds = x, y, width, height
         if self.widget.layout:
             self.widget.validate()
@@ -125,13 +144,15 @@ class ComponentWrapper(Wrapper):
             return
         parent = container.wrapper.widget 
         if parent:
-            self.destroy()
-            self.create()
             if isinstance(parent,swing.JFrame): # @@@
                 parent = parent.contentPane
-            parent.add(self.widget)
-            self._container = parent # Can this be fetched from the widget (later)?
-            self.proxy.push(blocked=['container'])
+            if parent is not self._container:
+                # @@@ print "ADD",_r(self),_r(parent) # @@@ debug
+                self.destroy()
+                self.create()
+                parent.add(self.widget)
+                self._container = parent # Can this be fetched from the widget (later)?
+                self.proxy.push(blocked=['container'])
 
     def internalDestroy(self): # WindowWrapper gets specialized version
         if not self.widget: return
@@ -405,14 +426,17 @@ class WindowWrapper(ComponentWrapper):
         if container is None:
             self.destroy()
             return
-        self.create()
-        self.proxy.push(blocked=['container'])
+        if container is not self._container:
+            # @@@ print "WINDOW",_r(self),_r(container)
+            self._container = container
+            self.create()
+            self.proxy.push(blocked=['container'])
         return
 
     def internalDestroy(self):
         if not self.widget: return
-        ComponentWrapper.internalDestroy(self)
         self.widget.dispose()
+        self._container = None
 
     def widgetSetUp(self):
         self.widget.windowClosing = self.closeHandler
