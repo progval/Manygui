@@ -1,8 +1,34 @@
 # Curses magic...
 from anygui.backends import *
-__all__ = anygui.__all__
+#__all__ = anygui.__all__
+
+__all__ = '''
+
+  Application
+  ButtonWrapper
+  WindowWrapper
+  LabelWrapper
+  TextFieldWrapper
+  TextAreaWrapper
+  ListBoxWrapper
+  RadioButtonWrapper
+  CheckBoxWrapper
+
+'''.split()
+
+Application=1
+ButtonWrapper=1
+WindowWrapper=1
+LabelWrapper=1
+TextFieldWrapper=1
+TextAreaWrapper=1
+ListBoxWrapper=1
+RadioButtonWrapper=1
+CheckBoxWrapper=1
 
 from anygui.Exceptions import Error
+from anygui.Utils import setLogFile
+setLogFile('curses.txt')
 
 import sys
 import os
@@ -22,11 +48,6 @@ def _cleanup():
 
 atexit.register(_cleanup)
 
-import anygui.backends.txtutils.scr_curses as scr_curses
-scr_curses.scr_init()
 import anygui.backends.txtutils.txtgui as txtgui
-txtgui._scr = scr_curses
-x,y = scr_curses._xsize,scr_curses._ysize
-scr_curses.dbg("x,y=",x,y)
-txtgui._set_scale(x,y)
+txtgui.setScreenPackage("curses")
 from anygui.backends.txtutils.txtgui import *

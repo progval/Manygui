@@ -2,7 +2,7 @@
 import curses
 import os
 
-_debug_messages = 0
+_debug_messages = 1
 if _debug_messages:
     _f = open("curses.txt","w")
 
@@ -127,6 +127,7 @@ def scr_init():
         SCR_URCORNER = curses.ACS_URCORNER
         SCR_LLCORNER = curses.ACS_LLCORNER
         SCR_LRCORNER = curses.ACS_LRCORNER
+
 
 def move_cursor(x,y):
     x-=_ox
