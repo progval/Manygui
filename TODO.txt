@@ -9,56 +9,13 @@ Release 0.3: Less API change, focus on robustness
              and stability
 
 
-Objectives for version 0.2:
----------------------------
+Objectives for version 0.2a1:
+-----------------------------
+(Est. early March)
 
-* Refactor to reduce code duplication (by moving things to
-  the core), simplify the backend API, and reduce coupling
-  between core and backends (having only the bare necessities
-  actually _in_ the backends). Reevaluate the _ensure_foo
-  strategy?
+* Finish the design of the new architecture.
 
-  Methods like _tk_clicked, which contain no backend-specific
-  code, should be lifted to the front-end, and linked to
-  event triggers in the backend's _ensure_events.
-
-  Should backends access frontend attributes through their
-  internal or external names? A standard should be decided on.
-
-  All methods named _refresh_foo should refer to attributes named foo.
-  Most _ensure_foo methods should be renamed to _refresh_foo, though
-  some (like _ensure_created) should be given some other names (or
-  left alone), and some (like _ensure_state) should be renamed to
-  reflect the attribute they are refreshing (e.g. _refresh_on).
-
-* Fix the relationship btw. size, position, and geometry wrt.
-  MVC etc. This should be done by making size, position, and geometry
-  ordinary attributes, and synchronise them with x, y, width, and
-  height through refresh().
-
-* Adjust defaults, and improve window staggering
-  (needs a mechanism to find the top window)
-
-* Add support for __delattr__ (in the form of _del_foobar)
-  in Mixins.Attrib, and make sure it's used where applicable
-  in the various modules.
-
-* Remove some redundante _ensure_foo calls, due to update()
-
-* Add a dialog class
-
-* Add support for native dialogs (e.g. file dialogs)
-
-* Add menus (including popup menus?)
-
-* Add full event system, based on messaging mechanism
-
-* Add a grid-based layout mechanism
-  (May require minimum_size and preferred_size properties)
-
-* Add a Canvas widget for full graphics support
-
-* Add an optional status bar to Window
+* Implement the new architecture.
 
 * Create a Container mixin for add() and remove(), and either a
   contents or items attribute. (With items it could be used with
@@ -69,6 +26,24 @@ Objectives for version 0.2:
 
 * Change add() signature?
 
+* Add font, alignment, and colour (?) (etc.) attributes to all
+  relevant components.
+
+New Components:
+
+- Menus (including popup menus?)
+  
+- Dialogs, including native dialogs (file dialog etc.)
+
+Objectives for version 0.2a2:
+-----------------------------
+(Est. late March)
+
+* Integrate an "event path" notion into the event framework,
+  facilitating the use of callbacks in containers to react to events
+  from child components, possibly through a "group" class which
+  functions as an event-relaying container.
+
 * Add support for complex widgets ("megawidgets") with default
   implementations in the basic Anygui API (in the vein of the
   piddle/sping API)
@@ -76,29 +51,47 @@ Objectives for version 0.2:
   In other words, give a standardised way of integrating
   backend-specific features into Anygui programs.
 
-* Add tree widget and notebook widget
+New Components
 
-* Add a combobox with a default implementation in terms of simpler
-  components
+- Canvas widget with full graphics support
 
-* Add "applets" -- e.g. for the Gnope panel, KDE kpanel, WindowMaker
-  dock, MacOS menu, Windows tray, etc. with a small window as
-  fallback?
+- Tree widget
 
-* Add font, alignment, and colour (etc.) attributes to all relevant
-  components.
+- Notebook/tabbed pane widget
 
-* Move main event loop to a separate GUI thread?
+Objectives for version 0.2a3:
+-----------------------------
+(Est. early April)
 
-* Integrate an "event path" notion into the event framework,
-  facilitating the use of callbacks in containers to react to events
-  from child components, possibly through a "group" class which
-  functions as an event-relaying container.
+* Adjust defaults, and improve window staggering
+  (needs a mechanism to find the top window)
 
-* Add a progress bar widget.
+* Add support for __delattr__ (in the form of _del_foobar)
+  in Mixins.Attrib, and make sure it's used where applicable
+  in the various modules.
+
+* Add a grid-based layout mechanism
+  (May require minimum_size and preferred_size properties)
+
+* Add advanced support for defaults, including default
+  "shrink-wrapping" of windows and frames that aren't
+  given an explicit size; will require a "preferred
+  size" for all widgets, based on font sizes etc.
+
+New Components:
+
+- Window status bar
+
+- Combobox
+
+- Progress bar
+
+- Tables
 
 Objectives for version 0.3:
 ---------------------------
+
+* Thorough code inspection and testing to improve stability
 
 * Implement a record/replay API for recording and simulating use of
   the GUI (on a logical level, rather than using mouse coordinates
@@ -111,20 +104,12 @@ Objectives for version 0.3:
   be picked up and acted upon by the backend (which in turn would send
   out the appropriate 'foo' event).
 
+* Add "applets" -- e.g. for the Gnome panel, KDE kpanel, WindowMaker
+  dock, MacOS menu, Windows tray, etc. with a small window as
+  fallback?
 
 Longer term goals:
 ------------------
-
-* Add table support with default implementation
-
-* Add tabbed pane support with default implementation
-
-* Add more alignment options etc. to labels
-
-* Add advanced support for default, including default
-  "shrink-wrapping" of windows and frames that aren't
-  given an explicit size; will require a "preferred
-  size" for all widgets, based on font sizes etc.
 
 * Support accessibility standards
 
