@@ -482,6 +482,8 @@ so the user can see clipped parts of the Anygui presentation.
     <section>
       <title>The set Method and the Options Class</title>
 
+      <!-- document modify -->
+
       <para>If you want to change some attributes of a widget, you can
       either just set them directly, or (if you'd like to set several
       at once), use the <code>set</code> method, just like the
@@ -905,6 +907,8 @@ so the user can see clipped parts of the Anygui presentation.
       <title>Classes</title>
        
       <para><strong>Base Classes and Common Behaviour</strong></para>
+
+      <!-- document modify() -->
 
       <!-- Add info about update() and the assignee protocol, if
       adopted; models... -->
