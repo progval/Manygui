@@ -259,7 +259,7 @@ class TextField(ComponentMixin, AbstractTextField):
 
     def _ensure_selection(self):
         if self._hwnd:
-            start, end = self.selection
+            start, end = self._selection
             win32gui.SendMessage(self._hwnd,
                                  win32con.EM_SETSEL,
                                  start, end)
@@ -315,7 +315,7 @@ class Window(ComponentMixin, AbstractWindow):
     def __init__(self, *args, **kw):
         self._hwnd_map = {} # maps child window handles to instances
         AbstractWindow.__init__(self, *args, **kw)
-    
+
     def _ensure_geometry(self):
         # take account for title bar and borders
         if self._hwnd:
@@ -363,7 +363,9 @@ class Window(ComponentMixin, AbstractWindow):
         try:
             child_window = self._hwnd_map[lParam]
         except KeyError:
-            print "CHILDWINDOW not found", hex(wParam)
+            # we receive (when running test_textfield.py)
+            # EN_CHANGE (0x300) and EN_UPDATE (0x400) notifications
+            # here even before the call to CreateWindow returns.
             return
         child_window._WM_COMMAND(hwnd, msg, wParam, lParam)
 
