@@ -2,6 +2,16 @@
 from anygui.backends import *
 __all__ = anygui.__all__
 
+from anygui.Exceptions import Error
+
+import sys
+import os
+if hasattr(sys,'ps1'):
+    try:
+        os.environ['ANYGUI_FORCE_CURSES']
+    except KeyError:
+        raise Error(None,"This appears to be an interactive session; curses disabled.")
+
 import atexit
 
 def _cleanup():
