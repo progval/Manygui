@@ -21,7 +21,7 @@ class Attrib:
 
     def __getattr__(self, name):
         if name == 'state' or not self.state.has_key(name):
-            raise AttributeError
+            raise AttributeError, name
         return self.state[name]
 
     def set(self, *args, **kwds):

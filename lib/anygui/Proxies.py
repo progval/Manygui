@@ -38,7 +38,19 @@ class Proxy(Attrib):
         if not names: state.update(self.state)
         else:
             for name in names: state[name] = self.state[name]
+        for name in self.blockedNames():
+            try: del state[name]
+            except KeyError: pass
         self.wrapper.update(state)
+
+    def blockedNames(self):
+        """
+        Returns a sequence of names that should not be passed to the backend Wrapper.
+
+        Should be overridden by subclasses which need to block
+        names. The default is an empty list.
+        """
+        return []
 
     def internalSync(self, names):
         """

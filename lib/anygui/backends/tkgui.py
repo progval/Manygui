@@ -24,14 +24,10 @@ class Application(AbstractApplication):
         AbstractApplication.__init__(self)
         self._root = Tkinter.Tk()
         self._root.withdraw()
-        # FIXME: Ugly...
-        global _app
-        _app = self
 
     def _window_deleted(self):
         if not self._windows:
             self._root.destroy()
-
     
     def _mainloop(self):
         #@ Move this to AbstractApplication?
@@ -58,47 +54,125 @@ class Wrapper(AbstractWrapper):
 
     widget = DummyWidget()
     
-    # in previous __init__: if not self in wrappers: wrappers.append(self)
-    # Put this functionality somewhere...
+    def __init__(self, *args, **kwds):
+        AbstractWrapper.__init__(self, *args, **kwds)
+        if not self in wrappers: wrappers.append(self) # Hm...
 
     def enterMainLoop(self): # ...
         try: assert self.widget.isDummy()
         except (AttributeError, AssertionError): pass
         else:
             self.widget.destroy()
-            self._prod()
+            self.internalProd()
         self.proxy.sync()
-
-    def internalProd(self): pass # ...
         
     def destroy(self):
         if self in wrappers: wrappers.remove(self) # ...
         self.widget.destroy() #@ ?
 
+# TODO: Encapsulate dummy-testing a bit...
+
+# Hm... It seems that layout stuff (e.g. hstretch and vmove) is set
+# directly as state variables/attributes... Why is that? (There is a
+# layout_data attribute too... Hm.)
+
+# Create an idempotent setupEvents method (perhaps in AbstractWrapper, even?)
 class ComponentWrapper(Wrapper):
-    pass
+
+    def setX(self, x):
+        self.widget.place(x=x)
+
+    def setY(self, y):
+        self.widget.place(y=y)
+
+    def setWidth(self, width):
+        self.widget.place(width=width)
+
+    def setHeight(self, height):
+        self.widget.place(height=height)
+
+    def setPosition(self, x, y):
+        self.widget.place(x=x, y=y)
+
+    def setSize(self, width, height):
+        self.widget.place(width=width, height=height)
+
+    def setGeometry(self, x, y, width, height):
+        self.widget.place(x=x, y=y, width=width, height=height)
+
+    def setVisible(self, visible):
+        if not visible: self.widget.place_forget()
+        # FIXME: setVisible should be called after setX and friends.
+
+    # Hm. This method is perhaps a bit hackish? :-)
+    # FIXME: Create general mechanism to deal with sync-looping like
+    # this.
+    # Clean up the parent/dummy code?
+    # (Hm. Creation is put here, but descruction directly in remove...?)
+    containerRecursionGuard = 0
+    def setContainer(self, container):
+        if self.containerRecursionGuard:
+            self.containerRecursionGuard = 0
+            return
+        else:
+            self.containerRecursionGuard = 1
+        parent = container.wrapper.widget
+        try: assert parent.isDummy()
+        except (AttributeError, AssertionError):
+            self.widget = self.widgetFactory(parent)
+            self.proxy.sync()
 
 class ButtonWrapper(ComponentWrapper):
 
-    def internalProd(self):
-        self.widget = None # Create button
+    def widgetFactory(self, *args, **kwds):
+        return Tkinter.Button(*args, **kwds)
 
     def setText(self, text):
-        pass
-        #...
-
+        self.widget.configure(text=text)
 
 class WindowWrapper(ComponentWrapper):
 
-    def internalProd(self): # ...
-        pass
+    # Creation/event setup should be placed more consistently...
+    def internalProd(self):
+        if application().isRunning():
+            try: assert self.widget.isDummy()
+            except (AttributeError, AssertionError): pass
+            else:
+                self.widget = self.widgetFactory()
+                self.widget.protocol('WM_DELETE_WINDOW', self.closeHandler)
+
+    def closeHandler(self):
+        self.destroy()
+        application().remove(self.proxy)
+        application()._window_deleted() # @@@ Should be invoced by remove...
+
+    # This works, but separate x, y, width, and height setters are
+    # still needed...
+
+    def setPosition(self, x, y):
+        geometry = "%d+%d" % (x, y)
+        self.widget.geometry(geometry)
+
+    def setSize(self, width, height):
+        geometry = "%dx%d" % (width, height)
+        self.widget.geometry(geometry)        
+    
+    def setGeometry(self, x, y, width, height):
+        geometry = "%dx%d+%d+%d" % (width, height, x, y)
+        self.widget.geometry(geometry)
     
     def setTitle(self, title):
+        self.widget.title(title)
+
+    def setContainer(self, container):
         pass
 
-    def setContainer(self, container): # ...
-        pass # Perhaps allow adding to application object...
+    def setVisible(self, visible):
+        if visible: self.widget.deiconify()
+        else: self.widget.withdraw()
 
+    def widgetFactory(self, *args, **kwds):
+        return Tkinter.Toplevel(*args, **kwds)
 
 """
 

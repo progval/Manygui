@@ -24,6 +24,8 @@ The only methods that should be explicitly called by the Proxy are:
 
 # TODO:
 # - Add attribute dependencies, i.e. (text -> selection) etc.
+#   Includes: text -> selection, container -> everything..., geometry->visible in tk?
+#   container->geometry...
 # - In __init__:
 #   Add to list of wrappers that need to be prodded...
 #   (In Application, e.g. addWrapper?)
@@ -51,7 +53,7 @@ class AbstractWrapper:
         should use the same method.
         """
         self.proxy = proxy
-        self.widget = None
+        #self.widget = None # Move DummyWidget code to front-end?
 
         self.aggregates = {}
         self.setAggregate('position', ('x', 'y'))
@@ -247,3 +249,13 @@ class AbstractWrapper:
         method.
         """
         raise NotImplementedError, 'should be implemented by subclasses'
+
+
+    def widgetFactory(self, *args, **kwds):
+        """
+        Used internally to create a new native Widget.
+
+        This is an abstract method that should be overridden in each
+        Wrapper subclass.
+        """
+        raise NotImplementedError

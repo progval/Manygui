@@ -47,3 +47,9 @@ class Component(Proxy, DefaultEventMixin):
         """
         # FIXME: Should use modify() etc...
         rules.sync(self.state, names)
+
+    def blockedNames(self):
+        """
+        Blocks all aggregates from being passed to the backend.
+        """
+        return ['position', 'size', 'geometry']

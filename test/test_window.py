@@ -7,7 +7,7 @@ class MyWindow(Window):
 app = Application()
 
 win = MyWindow(title="A Standard Window",
-               width=220, height = 45)
+               x=50, y=50, width=220, height=45)
 app.add(win)
 
 def new_window(event):
