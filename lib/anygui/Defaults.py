@@ -125,7 +125,7 @@ class RadioGroup:
 _list_attributes(RadioGroup)
 
 class TextArea:
-    _text = 'TextArea'
+    _text = ''
     _x = 0
     _y = 0
     _width = 100
@@ -141,7 +141,7 @@ class TextArea:
 _list_attributes(TextArea)
 
 class TextField:
-    _text = 'TextField'
+    _text = ''
     _default_event = 'enterkey'
     _x = 0
     _y = 0

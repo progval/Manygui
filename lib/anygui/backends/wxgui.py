@@ -74,7 +74,7 @@ class Label(ComponentMixin, AbstractLabel):
     #_width = 100 # auto ?
     #_height = 32 # auto ?
     _wx_class = wxStaticText
-    _text = "wxLabel"
+    #_text = "wxLabel"
     _wx_style = wxALIGN_LEFT
 
     def _ensure_text(self):
@@ -118,7 +118,7 @@ class ListBox(ComponentMixin, AbstractListBox):
 
 class Button(ComponentMixin, AbstractButton):
     _wx_class = wxButton
-    _text = "wxButton"
+    #_text = "wxButton"
 
     def _ensure_events(self):
         EVT_BUTTON(self._wx_comp, self._wx_id, self._wx_clicked)
@@ -153,14 +153,14 @@ class ToggleButtonMixin(ComponentMixin):
 
 class CheckBox(ToggleButtonMixin, AbstractCheckBox):
     _wx_class = wxCheckBox
-    _text = "wxCheckBox"
+    #_text = "wxCheckBox"
 
     def _ensure_events(self):
         EVT_CHECKBOX(self._wx_comp, self._wx_id, self._wx_clicked)
 
 class RadioButton(ToggleButtonMixin, AbstractRadioButton):
     _wx_class = wxRadioButton
-    _text = "wxRadioButton"
+    #_text = "wxRadioButton"
     
     def _ensure_created(self):
         # The first radiobutton in a group must have the wxRB_GROUP style

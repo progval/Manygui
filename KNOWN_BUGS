@@ -10,6 +10,9 @@ test_defaults doesn't place the text field correctly in tkinter
 in MacPython. It works with tkinter in Windows, though. (Has this
 got to do with slow updates of layout?)
 
+Windows created after app.run() seem to have only default
+geometry (i.e. size == (0, 0)) in tkgui/MacPython.
+
 In test_textfield the update button resets the text field in wxgui.
 
 There seems to be some infinite recursion associated with the text
