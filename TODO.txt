@@ -163,3 +163,5 @@ Smaller issues:
 
 * Allow all arguments to link and send to be supplied as keyword
   arguments.
+
+* Add a "resizable" (or something) attribute to windows?
