@@ -62,17 +62,14 @@ class ComponentMixin:
             self._wx_comp = None
 
     def _ensure_text(self):
-        pass
+        if self._wx_comp and hasattr(self._wx_comp, 'SetLabel'):
+            self._wx_comp.SetLabel(str(self._text))
 
 ################################################################
 
 class Label(ComponentMixin, AbstractLabel):
     _wx_class = wxStaticText
     _wx_style = wxALIGN_LEFT
-
-    def _ensure_text(self):
-        if self._wx_comp:
-            self._wx_comp.SetLabel(str(self._text))
 
     def _get_wx_text(self):
         # return the text required for creation
@@ -127,14 +124,6 @@ class ToggleButtonMixin(ComponentMixin):
         if self._wx_comp is not None:
             self._wx_comp.SetValue(int(self.on))
 
-    # FIXME: This may not be correct
-    def _wx_clicked(self, evt):
-        val = self._wx_comp.GetValue()
-        if val == self.on:
-            return
-        self.on = val
-        send(self, 'click')
-
     def _get_wx_text(self):
         # return the text required for creation
         return str(self._text)
@@ -143,11 +132,23 @@ class ToggleButtonMixin(ComponentMixin):
 class CheckBox(ToggleButtonMixin, AbstractCheckBox):
     _wx_class = wxCheckBox
 
+    def _wx_clicked(self, evt):
+        val = self._wx_comp.GetValue()
+        if val == self._on:
+            return
+        self._on = val
+        send(self, 'click')
+
     def _ensure_events(self):
         EVT_CHECKBOX(self._wx_comp, self._wx_id, self._wx_clicked)
 
 class RadioButton(ToggleButtonMixin, AbstractRadioButton):
     _wx_class = wxRadioButton
+
+    def _wx_clicked(self, evt):
+        if self.group is not None:
+            self.group.value = self.value
+        send(self, 'click')
     
     def _ensure_created(self):
         # The first radiobutton in a group must have the wxRB_GROUP style
