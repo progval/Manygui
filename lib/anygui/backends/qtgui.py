@@ -306,7 +306,7 @@ class TextArea(TextBase):
 
     def _qt_get_lines(self):
         lines = []
-        for n in range(1,self._qt_comp.numLines()):
+        for n in range(0,self._qt_comp.numLines()):
             lines.append(str(self._qt_comp.textLine(n)) + '\n')
         if DEBUG: print 'lines are: \n', lines
         return lines
@@ -355,6 +355,7 @@ class Window(ComponentMixin, AbstractWindow):
     _qt_frame = None
     _layout = None
     _connected = 0
+    _destroying_self = 0
 
     def _ensure_title(self):
         if self._qt_comp:
@@ -365,10 +366,18 @@ class Window(ComponentMixin, AbstractWindow):
         if DEBUG: print 'in _ensure_events of: ', self._qt_comp
         if self._qt_comp and not self._connected:
             events = {QEvent.Resize: self._qt_resize_handler.im_func,\
-                      QEvent.Move:   self._qt_move_handler.im_func}
+                      QEvent.Move:   self._qt_move_handler.im_func,\
+                      QEvent.Close:  self._qt_close_handler.im_func}
             self._event_filter = EventFilter(self, events)
             self._qt_comp.installEventFilter(self._event_filter)
             self._connected = 1
+
+    def _ensure_destroyed(self):
+        if self._qt_comp and not self._destroying_self:
+            if DEBUG: print 'in qt _ensure_destroyed: ', self._qt_comp
+            self._connected = 0
+            self._qt_comp.destroy()
+            self._qt_comp = None
 
     def _get_qt_title(self):
         return self._title
@@ -399,6 +408,19 @@ class Window(ComponentMixin, AbstractWindow):
         #self.modify(x=nx, y=ny)
         #self.moved(dx, dy)
         return 1
+
+    def _qt_close_handler(self, event):
+        if DEBUG: print 'in _qt_close_handler of: ', self._qt_comp
+        # What follows is a dirty hack, but PyQt will seg-fault the
+        # interpreter if a call onto QWidget.destroy() is made after
+        # the Widget has been closed. It is also necessary to inform
+        # the front-end of self being closed.
+        self._destroying_self = 1
+        self.destroy()
+        self._destroying_self = 0
+        self._connected = 0
+        self._comp = None
+        return 0
 
 ################################################################
 
