@@ -259,9 +259,9 @@ class Window(ComponentMixin, AbstractWindow):
         if result:
             # Controls should be contained in a wxPanel (which
             # is itself contained in the wxFrame)
-            # Be sure to specify style=0 and not wxTAB_TRAVERSAL
-            self._wx_frame = wxPanel(self._wx_comp, NewId(),
-                                     style=0)
+            # Using the default style gives us proper handling
+            # of TAB to move between the controls.
+            self._wx_frame = wxPanel(self._wx_comp, NewId())
         return result
     
     def _ensure_events(self):
