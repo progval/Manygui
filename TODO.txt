@@ -192,3 +192,5 @@ Smaller issues:
 * Add scrollbars or scrollable frames (or both).
 
 * Use default constructor arguments instead of Defaults module?
+
+* Add rectangle properties (like those of Pygame) to components?
