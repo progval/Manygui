@@ -29,9 +29,6 @@ fixes the problem.
 Put more comments - with the other available values, ie in
 _beos_mode, _beos_flags, etc.
 
-Work out sizes a bit more: I'm currently just using the widget's
-preferred size, which is okay for now, except in test_place.py
-
 New Classes to implement:
 
 Alert, FilePanel, Menu, Slider, StatusBar, TabView
