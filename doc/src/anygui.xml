@@ -356,6 +356,8 @@
 	<line>app.run()</line>
       </codelisting>
 
+      <!-- New visibility defaults; show()/hide() removed -->
+ 
       <para>The problem with this code is that the window would be
       invisible. At the time of creation, windows are hidden, so that
       we may add widgets to them etc. before showing them to the
