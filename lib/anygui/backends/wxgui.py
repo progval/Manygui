@@ -153,7 +153,7 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
     
     def _ensure_created(self):
         # FIXME: What about moving buttons between groups? Would that
-        # require destruction and recreation?
+        # require destruction and recreation? [mlh20011214]
         # The first radiobutton in a group must have the wxRB_GROUP style
         if self._group and 0 == self._group._items.index(self):
             self._wx_style |= wxRB_GROUP
