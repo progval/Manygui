@@ -5,8 +5,24 @@ __all__ = anygui.__all__
 import win32gui, win32con
 
 # BUGS:
-#  XXX to be supplied
 #
+#    When I start test_listbox there is no way to control it
+#    with the keyboard, even tabbing into the listbox.
+#    Actually, it seems that the arrow keys don't work here
+#    at all.
+
+#    test_place crashes upon initialisation:
+#    CHILDWINDOW not found 0x4000000
+#    CHILDWINDOW not found 0x3000000
+#    CHILDWINDOW not found 0x4000000
+#    CHILDWINDOW not found 0x3000000
+
+#    test_textarea has problems with setting the selection.
+#    (It doesn't when I press reset.)
+
+#    test_textfield has lots of "CHILDWINDOW not found"
+#    errors as well, and has the same selection problem.
+
 
 class ComponentMixin:
     # mixin class, implementing the backend methods
@@ -156,7 +172,18 @@ class Button(ComponentMixin, AbstractButton):
         if (wParam >> 16) == win32con.BN_CLICKED:
             self.do_action()
 
-class ToggleButtonMixin(Button):
+class ToggleButtonMixin(ComponentMixin):
+
+    def _get_wx_text(self):
+        # return the text required for creation
+        return self._text
+
+    def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
+        # lParam: handle of control (or NULL, if not from a control)
+        # HIWORD(wParam): notification code
+        # LOWORD(wParam): id of menu item, control, or accelerator
+        if (wParam >> 16) == win32con.BN_CLICKED:
+            self.do_action()
 
     def _ensure_state(self):
         if not self._hwnd:
