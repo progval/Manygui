@@ -7,4 +7,5 @@ include MANIFEST
 include README
 include TODO
 include VERSION
+include doc/
 include doc/anygui.*
