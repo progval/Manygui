@@ -189,6 +189,6 @@ Smaller issues:
 
 * Add a "resizable" (or something) attribute to windows?
 
-* Add scrollbars or scrollable frames (or both)
+* Add scrollbars or scrollable frames (or both).
 
 * Use default constructor arguments instead of Defaults module?
