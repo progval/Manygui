@@ -4,8 +4,8 @@ from anygui.Models import BooleanModel
 
 class AbstractToggleButton(AbstractGenericButton):
 
-    _text = "ToggleButton"
-    _on = 0
+    #_text = "ToggleButton"
+    #_on = 0
     _model = None
 
     # FIXME: When it works, the model stuff should be lifted
@@ -14,6 +14,14 @@ class AbstractToggleButton(AbstractGenericButton):
     def __init__(self, *args, **kw):
         self._set_model(BooleanModel())
         AbstractGenericButton.__init__(self, *args, **kw)
+
+    # FIXME: Temporary solution. Shouldn't just be alias for model.value
+    def _get_value(self):
+        return self._model.value
+
+    # FIXME: Temporary solution. Shouldn't just be alias for model.value
+    def _set_value(self, value):
+        self._model.value = value
 
     def _get_model(self):
         return self._model
