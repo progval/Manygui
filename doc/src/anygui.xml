@@ -13,7 +13,7 @@
 
   <author>Magnus Lie Hetland</author>
 
-  <date>October 22, 2001</date>
+  <date>October 23, 2001</date>
 
   <section>
     <title>Introduction</title>
@@ -510,13 +510,11 @@
 	<line>lb.model.append('This is the first item')</line>
       </codelisting>
 
-      <!--
-      <section>
-	<title>About the Observable Pattern</title>
-
-	<para>[To be done]</para>
-      </section>
-      -->
+      <para>Note that one of the advantages of using models like this
+      is that you can use the models separately from the GUI, not
+      worrying about updating the views etc. In a complex program you
+      probably wouldn't use code like the above where you explicitly
+      refer to the model of a specific widget.</para>
 
     </section>
 
@@ -626,6 +624,8 @@
   <section>
     <title>API Reference</title>
     
+    <para>[Under construction]</para>
+
     <!--
 
     <section>
@@ -710,6 +710,8 @@
       </section>
 
     -->
+
+    <!--
     
     <para><strong>def application()</strong></para>
     
@@ -784,12 +786,12 @@
     <para><strong>class Window</strong></para>
 
     <para>[Under construction]</para>
-    
+    -->
   </section>
-
+  
   <section>
     <title>Known Problems</title>
-
+    
     <para>For an overview of known bugs in the current release, see
     the file <code>KNOWN_BUGS</code> found in the distribution.</para>
 
