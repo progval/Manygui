@@ -4,7 +4,7 @@ Goals for version 0.1:
 
 * Add support for the document/view model
 
-* Add basic support for defaults
+* Add basic support for defaults, including window tiling
 
 * Add Frame class with utility factories e.g. col/row (?)
 
