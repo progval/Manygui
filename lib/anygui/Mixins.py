@@ -4,7 +4,7 @@ from Exceptions import SetAttributeError, GetAttributeError
 
 try:
     import weakref
-except:
+except ImportError:
     class ref:
         def __init__(self,obj):
             self.obj = obj
