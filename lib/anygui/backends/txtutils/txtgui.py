@@ -599,17 +599,84 @@ class ListBox(ComponentMixin, AbstractListBox):
                    UP_ARROW:_select_up,
                    ord(' '):_do_click }
 
+from bmpascii import *
 class Canvas(ComponentMixin, AbstractCanvas):
-    _text = "Canvas not supported in text mode."
+    #_text = "Canvas not supported in text mode."
     _gets_focus = 0
+    _use_text = 0
 
     def __init__(self,*args,**kws):
         ComponentMixin.__init__(self,*args,**kws)
         AbstractCanvas.__init__(self,*args,**kws)
+        w,h = self._screen_width(),self._screen_height()
+        self._bmpw = w*4
+        self._bmph = h*6
+        line = [0] * (self._bmpw+1)
+        self._bitmap = []
+        for ll in range(self._bmph+1):
+            self._bitmap.append(line[:])
+        self._scalew = float(self._bmpw)/float(self._width)
+        self._scaleh = float(self._bmph)/float(self._height)
+        log("w,h = ",self._width,self._height)
+        log("bmpw,bmph = ",self._bmpw,self._bmph)
+        log("scalew,scaleh = ",self._scalew,self._scaleh)
+
+    def _draw_line(self,point1,point2):
+        x1,y1 = point1
+        x2,y2 = point2
+        log("_draw_line",x1,y1,"->",x2,y2)
+        if x1 == x2:
+            if y1>y2: y2,y1 = y1,y2
+            for y in range(y1,y2+1):
+                ey = int(y*self._scaleh)
+                ex = int(x1*self._scalew)
+                log("Setting x,y --> ez,ey",x1,y,ex,ey)
+                self._bitmap[ey][ex] = 1
+            return
+        if x1<0 or x1>=self._width or x2<0 or x2>=self._width:
+            return
+        if y1<0 or y1>=self._height or y2<0 or y2>=self._height:
+            return
+        if x1>x2:
+            #x1,y1,x2,y2 = x2,y2,x1,y1
+            x1,x2 = x2,x1
+            y1,y2 = y2,y1
+        # y = mx+b, so
+        # y1 = m*x1+b
+        # y2 = m*x2+b
+        # y1-y2 = m*x1 - m*x2
+        # y1-y2 = m(x1-x2)
+        m = (float(y1)-float(y2))/(float(x1)-float(x2))
+        # and
+        b = float(y1)-m*float(x1)
+        for x in range(x1,x2+1):
+            y = m*x+b
+            ey = int(y*self._scaleh)
+            ex = int(x*self._scalew)
+            log("Setting x,y --> ez,ey",x,y,ex,ey)
+            self._bitmap[ey][ex] = 1
     
     def drawPolygon(self, pointlist,
                     edgeColor=None, edgeWidth=None, fillColor=None, closed=0):
-        pass
+        for ip in range(len(pointlist)-1):
+            self._draw_line(pointlist[ip],pointlist[ip+1])
+        if closed:
+            self._draw_line(pointlist[-1],pointlist[0])
+        self._must_render = 1
+
+    def _render(self):
+        if not self._must_render: return
+        self._must_render = 0
+        self._str = bmp2ascii(self._bitmap)
+
+    def _draw_contents(self):
+        self._render()
+        strs = self._str.split('\n')
+        y = 0
+        for line in strs:
+            self._addstr(0,y,line)
+            y += 1
+        
 
 class Button(ComponentMixin, AbstractButton):
 
