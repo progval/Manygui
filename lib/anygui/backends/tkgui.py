@@ -533,8 +533,8 @@ class WindowWrapper(ComponentWrapper):
         # No, we've already got new geometry, no need to
         # set it. - jak
         x, y, w, h = self.getGeometry()
-        dw = w - self.proxy.width
-        dh = h - self.proxy.height
+        dw = w - self.proxy.width # @@@ With lazy semantics, these will be fetched from the widget!
+        dh = h - self.proxy.height # @@@
 
         # Weird: why doesn't self.proxy.geometry give us the same values???
         oldGeo = self.proxy.x,self.proxy.y,self.proxy.width,self.proxy.height

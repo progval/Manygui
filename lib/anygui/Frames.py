@@ -28,7 +28,7 @@ class Frame(Component, Defaults.Frame):
 
         # Now add to self.contents.
         for component in items:
-            if component not in self.contents:
+            if component not in self.contents: # @@@ Hm. Shouldn't this be changed to _contents?
                 component.container = self
                 self.contents.append(component)
 

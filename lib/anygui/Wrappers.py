@@ -32,12 +32,12 @@ class DummyWidget:
     instantiated.
     """
     def isDummy(self): return 1
-    
-    def dummyMethod(self, *args, **kwds): pass
 
-    def __getattr__(self, name): return self.dummyMethod
+    def __call__(self, *args, **kwds): pass
 
-    def __setattr__(self, name): pass
+    def __getattr__(self, name): return DummyWidget() # DummyObject?
+
+    def __setattr__(self, name, value): pass
 
     def __str__(self): return '<DummyWidget>'
 

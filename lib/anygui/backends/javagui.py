@@ -1,7 +1,6 @@
 from anygui.backends import *
 import sys
 
-
 __all__ = '''
 
   Application
@@ -26,6 +25,11 @@ __all__ = '''
 
 ################################################################
 
+#@@@ FIXME: Use isDummy instead of repeated try/except :)
+from anygui.Applications import AbstractApplication
+from anygui.Wrappers import AbstractWrapper, DummyWidget, isDummy
+from anygui.Events import *
+from anygui import application
 from javax import swing
 from java import awt
 import cgi, jarray, java
@@ -93,17 +97,22 @@ class ComponentWrapper(Wrapper):
         if container is None:
             self.destroy()
             return
-        parent = container.wrapper.widget
+        try:
+            parent = container.wrapper.widget
+        except AttributeError:
+            # FIXME: Handle Application containers differently...
+            self.create()
+            return
         try:
             assert parent.isDummy()
         except (AttributeError, AssertionError):
             self.destroy()
             self.create()
             try:
-                container = container.contentPane
+                parent = parent.contentPane
             except AttributeError: pass
-            container.add(self.widget)
-            self._container = container # Can this be fetched from the widget (later)?
+            parent.add(self.widget)
+            self._container = parent # Can this be fetched from the widget (later)?
             self.proxy.push(blocked=['container'])
 
     def setEnabled(self, enabled):
@@ -120,12 +129,15 @@ class ComponentWrapper(Wrapper):
                 bounds = comp.bounds
                 container.remove(self.widget)
                 container.repaint(bounds)
-            try: comp.dispose()
+            try: self.widget.dispose()
             except AttributeError: pass
             self._container = None
 
     def setText(self, text):
-        self.widget.text = text
+        try:
+            self.widget.setText(text)
+        except AttributeError: pass # FIXME! When does this happen?
+        #self.widget.text = text # FIXME!
 
     def getText(self):
         try:
@@ -139,17 +151,17 @@ class ComponentWrapper(Wrapper):
           
 ################################################################
 
-class Label(ComponentMixin, AbstractLabel):
+class LabelWrapper(ComponentWrapper):
 
     def widgetFactory(self, *args, **kwds):
         widget = swing.JLabel()
-        widget.horizontalAlignment = swing.SwingContstants.LEFT # @@@ Should be settable from Proxy
-        widget.verticalAlignment = swing.SwingContstants.TOP    # @@@ Should be settable from Proxy
+        widget.horizontalAlignment = swing.SwingConstants.LEFT # @@@ Should be settable from Proxy
+        widget.verticalAlignment = swing.SwingConstants.TOP    # @@@ Should be settable from Proxy
         return widget
 
 ################################################################
 
-class Window(ComponentMixin, AbstractWindow):
+class WindowWrapper(ComponentWrapper):
 
     def widgetFactory(self, *args, **kwds):
         widget = swing.JFrame() # Title...
@@ -158,10 +170,11 @@ class Window(ComponentMixin, AbstractWindow):
         return widget
 
     def setGeometry(self, x, y, width, height):
-        insets = self.widget.insets
-        width += insets.left + insets.right
-        height += insets.top + insets.bottom
-        ComponentMixin.setGeometry(self, x, y, width, height)
+        if not isDummy(self.widget):
+            insets = self.widget.insets
+            width += insets.left + insets.right
+            height += insets.top + insets.bottom
+            ComponentWrapper.setGeometry(self, x, y, width, height)
 
     def widgetSetUp(self):
         self.widget.windowClosing = self.closeHandler
@@ -179,12 +192,10 @@ class Window(ComponentMixin, AbstractWindow):
         insets = self.widget.insets
         w -= insets.left + insets.right
         h -= insets.top + insets.bottom
-        dw = w - self._width
-        dh = h - self._height
-        #@@@ These should be handled by pull()
-        self.proxy.rawModify(width=w)
-        self.proxy.rawModify(height=h)
+        dw = w - self.proxy.state['width'] # @@@ Avoid invoking pull()...
+        dh = h - self.proxy.state['height'] # @@@ Avoid invoking pull()...
         self.proxy.resized(dw, dh)
 
     def closeHandler(self, evt):
         self.destroy()
+        application().remove(self.proxy) # @@@ Hm...
