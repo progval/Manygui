@@ -1,246 +1,326 @@
 from anygui.backends import *
-__all__ = anygui.__all__
+import sys
 
-######################################################
+__all__ = '''
+
+  Application
+  ButtonWrapper
+  WindowWrapper
+  LabelWrapper
+  TextFieldWrapper
+  TextAreaWrapper
+  ListBoxWrapper
+  RadioButtonWrapper
+  CheckBoxWrapper
+  MenuWrapper
+  MenuCommandWrapper
+  MenuCheckWrapper
+  MenuSeparatorWrapper
+  MenuBarWrapper
+
+'''.split()
+
+
+#==============================================================#
 from weakref import ref as wr
 from qt import *
+from anygui.Applications import AbstractApplication
+from anygui.Wrappers import AbstractWrapper, DummyWidget, isDummy
+from anygui.Events import *
+from anygui.Windows import Window
+from anygui import application
+from anygui.Menus import Menu, MenuCommand, MenuCheck, MenuSeparator
+
 TRUE = 1
 FALSE = 0
 
 DEBUG = 0
 TMP_DBG = 1
 
-class ComponentMixin:
-    _qt_comp = None
-    _qt_style = None
+#==============================================================#
 
-    def _is_created(self):
-        return self._qt_comp is not None
+class Application(AbstractApplication, QApplication):
 
-    def _ensure_created(self):
-        if DEBUG: print 'in _ensure_created of: ', self
-        if not self._qt_comp:
-            if self._container:
-                parent = self._container._qt_comp
-            else:
-                parent = None
-            if self._qt_class == QWindow:
-                new_comp = self._qt_class(parent,self._get_qt_title())
-            elif hasattr(self,'_get_qt_text') and not self._qt_class is QMultiLineEdit:
-                new_comp = self._qt_class(self._get_qt_text(),parent,str(self))
-            else:
-                new_comp = self._qt_class(parent,str(self))
-            self._qt_comp = new_comp
-            return 1
-        return 0
+    def __init__(self):
+        AbstractApplication.__init__(self)
+        QApplication.__init__(self,[])
+        self.connect(qApp, SIGNAL('lastWindowClosed()'), qApp, SLOT('quit()'))
 
-    def _ensure_events(self):
-        pass
+    def internalRun(self):
+        qApp.exec_loop()
 
-    def _ensure_geometry(self):
-        if self._qt_comp:
-            if DEBUG: print 'in _ensure_geometry of: ', self._qt_comp
-            self._qt_comp.setGeometry(self._x,self._y,self._width,self._height)
+    def internalRemove(self):
+        if not self._windows:
+            qApp.quit()
 
-    def _ensure_visibility(self):
-        if self._qt_comp:
-            if DEBUG: print 'in qt _ensure_visibility: ', self._qt_comp
-            if self._visible:
-                self._qt_comp.show()
-            else:
-                self._qt_comp.hide()
+#==============================================================#
 
-    def _ensure_enabled_state(self):
-        if self._qt_comp:
-            if DEBUG:
-                print 'in qt _ensure_enabled_state: ', self._qt_comp
-            self._qt_comp.setEnabled(self._enabled)
+class Wrapper(AbstractWrapper):
 
-    def _ensure_destroyed(self):
-        if self._qt_comp:
-            if DEBUG: print 'in qt _ensure_destroyed: ', self._qt_comp
-            try: self._connected = 0
-            except: pass
-            self._qt_comp.destroy()
-            self._qt_comp = None
+    def __init__(self, *args, **kwds):
+        AbstractWrapper.__init__(self, *args, **kwds)
+
+        # 'container' before everything...
+        self.setConstraints('container','x','y','width','height','text','selection')
+        # Note: x,y,width, and height probably have no effect here, due to
+        # the way getSetters() works. I'm not sure if that's something
+        # that needs fixing or not... - jak
+
+        self.addConstraint('geometry', 'visible')
+        # FIXME: Is this the right place to put it? Make sure
+        # 'geometry' implies 'x', 'y', etc. too (see Wrappers.py)
+        # Also, this scheme will cause flashing... (place before
+        # place_forget)
+
+    def enterMainLoop(self): # ...
+        #if not isDummy(self.widget):
+        #    self.widget.destroy()
+        #    sys.stdout.flush()
+        self.proxy.push() # FIXME: Why is this needed when push is called in internalProd (by prod)?
+
+    def internalDestroy(self):
+        self.widget.destroy()
+
+#==============================================================#
+
+# FIXME: It seems that layout stuff (e.g. hstretch and vmove) is set
+# directly as state variables/attributes... Why is that? (There is a
+# layout_data attribute too... Hm.)
+class ComponentWrapper(Wrapper):
+
+    visible=1
+
+    def setX(self, x):
+        self.widget.setGeometry(x,self.y,self.width,self.heigth)
+
+    def setY(self, y):
+        self.widget.setGeometry(self.x,y,self.width,self.heigth)
+
+    def setWidth(self, width):
+        self.widget.setGeometry(self.x,self.y,width,self.heigth)
+
+    def setHeight(self, height):
+        self.widget.setGeometry(self.x,self.y,self.width,heigth)
+
+    def setPosition(self, x, y):
+        self.widget.setGeometry(x,y,self.width,self.heigth)
+
+    def setSize(self, width, height):
+        self.widget.setGeometry(self.x,self.y,width,heigth)
+
+    def setGeometry(self, x, y, width, height):
+        self.widget.setGeometry(x,y,width,heigth)
+
+    def setVisible(self, visible):
+        if visible:
+            self.widget.show()
+        else:
+            self.widget.hide()
+
+    def setContainer(self, container):
+        if container is None:
+            try:
+                self.destroy()
+            except:
+                pass
+            return
+        parent = container.wrapper.widget
+        try:
+            assert parent.isDummy()
+        except (AttributeError, AssertionError):
+            self.destroy()
+            self.create(parent)
+            self.proxy.push(blocked=['container'])
+
+    def setEnabled(self, enabled):
+           self.widget.setEnabled(enabled)
+
+
+    def setText(self, text):
+        try:
+            self.widget.setText(QString(text))
+
+    def getText(self):
+        try:
+            return str(self.widget.text())
+        except:
+            # Widget has no text.
+            return ""
+
+
+#==============================================================#
 
 class EventFilter(QObject):
     _comp = None
     _events = {}
 
     def __init__(self, parent, events):
-        QObject.__init__(self, parent._qt_comp)
+        QObject.__init__(self, parent.widget)
         self._comp = wr(parent)
         self._events = events
 
     def eventFilter(self, object, event):
-        #if DEBUG: print 'in eventFilter of: ', self._window_obj()._qt_comp
+        #if DEBUG: print 'in eventFilter of: ', self._window_obj().widget
         type = event.type()
         if not type in self._events.keys():
             return 0
         return self._events[type](self._comp(), event)
 
-#########################################################
+#==============================================================#
 
-class Label(ComponentMixin,AbstractLabel):
-    _qt_class = QLabel
-    _qt_style = Qt.AlignLeft | Qt.AlignVCenter
+class LabelWrapper(ComponentWrapper):
 
-    def _ensure_created(self):
-        result = ComponentMixin._ensure_created(self)
-        if result:
-            self._qt_comp.setAlignment(self._qt_style)
-        return result
+    def widgetFactory(self, *args, **kws):
+        widget = QLabel(*args, **kws)
+        self.widget.self.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        return widget
 
-    def _ensure_text(self):
-        if self._qt_comp:
-            self._qt_comp.setText(self._get_qt_text())
+#==============================================================#
 
-    def _get_qt_text(self):
-        return self._text
+class ListBox(ComponentWrapper):
+    connected = 0
 
-##########################################################
+    def __init__(self, *args, **kws):
+        ComponentWrapper.__init__(self, *args, **kws)
+        self.items = []
 
-class ListBox(ComponentMixin, AbstractListBox):
-    _qt_class = QListBox
-    _connected = 0
+    def widgetFactory(self, *args, **kws):
+        widget= QListbox(*args, **kws)
+        if not self.connected:
+            qApp.connect(self.widget, SIGNAL('highlighted(int)'),
+                         self.clickHandler)
+            self.connected = 1
+        return widget
 
-    def _backend_selection(self):
-        if self._qt_comp:
-            return int(self._qt_comp.currentItem())
+    def setItems(self, items):
+        self.widget.clear()
+        self.items = items[:]
+        for item in self.items:
+            self.widget.insertItem(QString(str(item)),-1)
 
-    def _ensure_items(self):
-        if self._qt_comp:
-            self._qt_comp.clear()
-            for item in self._items:
-                self._qt_comp.insertItem(QString(str(item)),-1)
+    def getItems(self):
+        return self.items
 
-    def _ensure_selection(self):
-        if self._qt_comp:
-            self._qt_comp.setCurrentItem(int(self._selection))
+    def setSelection(self, selection):
+        self.widget.setCurrentItem(int(selection))
 
-    def _ensure_events(self):
-        if DEBUG: print 'in _ensure_events of: ', self
-        if self._qt_comp and not self._connected:
-            qApp.connect(self._qt_comp, SIGNAL('highlighted(int)'),\
-                         self._qt_item_select_handler)
-            self._connected = 1
+    def getSelection(self):
+        selection = int(self.widget.currentItem())
+        return selection
 
-    def _qt_item_select_handler(self, index):
-        if DEBUG: print 'in _qt_item_select_handler of: ', self._qt_comp
-        self._selection = self._backend_selection()
-        #send(self,'select',index=self._qt_comp.index(item),text=str(item.text()))
-        send(self,'select')
+    def clickHandler(self, index):
+        # self.selection = int(index)
+        send(self.proxy, 'select')
 
+#==============================================================#
 
-################################################################
+class ButtonWrapperBase(ComponentWrapper):
+    connected = 0
 
-class ButtonBase(ComponentMixin):
-    _connected = 0
+    def widgetSetUp(self):
+        if not self._connected:
+            qApp.connect(self.widget,SIGNAL('clicked()'),self.clickHandler)
+            self.connected = 1
 
-    def _ensure_events(self):
-        if self._qt_comp and not self._connected:
-            if DEBUG: print 'in _ensure_events of: ', self._qt_comp
-            qApp.connect(self._qt_comp,SIGNAL('clicked()'),self._qt_click_handler)
-            self._connected = 1
+#--------------------------------------------------------------#
 
-    def _ensure_text(self):
-        if self._qt_comp:
-            if DEBUG: print 'in _ensure_text of: ', self._qt_comp
-            self._qt_comp.setText(self._get_qt_text())
+class ButtonWrapper(ButtonWrapperBase):
 
-    def _get_qt_text(self):
-        if DEBUG: print 'in _get_qt_text of: ', self
-        return QString(str(self._text))
+    def widgetFactory(self, *args, **kwds):
+        return QPushButton(*args, **kwds)
 
-class Button(ButtonBase, AbstractButton):
-    _qt_class = QPushButton
-
-    def _qt_click_handler(self):
-        if DEBUG: print 'in _qt_btn_clicked of: ', self._qt_comp
+    def clickHandler(self):
         send(self,'click')
 
-class ToggleButtonBase(ButtonBase):
+#--------------------------------------------------------------#
 
-    def _ensure_state(self):
-        if DEBUG: print 'in _ensure_state of: ', self._qt_comp
-        if self._qt_comp:
-            if not self._qt_comp.isChecked() == self._on:
-                self._qt_comp.setChecked(self._on)
+class ToggleButtonWrapperBase(ButtonWrapperBase):
 
-class CheckBox(ToggleButtonBase, AbstractCheckBox):
-    _qt_class = QCheckBox
+    def setOn(self, on):
+        self.widget.setChecked(on)
 
-    def _qt_click_handler(self):
-        if DEBUG: print 'in _qt_click_handler of: ', self._qt_comp
-        val = self._qt_comp.isChecked()
-        if self.on == val:
-            return
-        self.modify(on=val)
-        send(self, 'click')
+    def getOn(self):
+        return self.widget.isChecked()
 
-class RadioButton(ToggleButtonBase, AbstractRadioButton):
-    _qt_class = QRadioButton
+    def clickHandler(self, *args, **kws): # Should perhaps be in a ButtonMixin superclass?
+        send(self.proxy, 'click')
 
-    def _qt_click_handler(self):
-        if DEBUG: print 'in _qt_click_handler of: ', self._qt_comp
-        val = self._qt_comp.isChecked()
-        if self._on == val:
-            return
-        if self.group is not None:
-            self.group.modify(value=self.value)
-        send(self, 'click')
+#--------------------------------------------------------------#
 
-################################################################
+class CheckBox(ToggleButtonWrapperBase):
 
-class TextBase(ComponentMixin, AbstractTextField):
-    _connected = 0
+    def widgetFactory(self, *args, **kwds):
+        return QCheckBox(*args, **kwds)
 
-    def _ensure_events(self):
-        if self._qt_comp and not self._connected:
-            events = {QEvent.KeyRelease: self._qt_key_press_handler.im_func,\
-                      QEvent.FocusIn:    self._qt_got_focus_handler.im_func,\
-                      QEvent.FocusOut:   self._qt_lost_focus_handler.im_func}
-            self._event_filter = EventFilter(self, events)
-            self._qt_comp.installEventFilter(self._event_filter)
-            self._connected = 1
+#--------------------------------------------------------------#
 
-    def _ensure_text(self):
-        if self._qt_comp:
-            if DEBUG: print 'in _ensure_text of: ', self._qt_comp
-            self._qt_comp.setText(self._get_qt_text())
+class RadioButtonWrapper(ToggleButtonWrapperBase):
+    groupMap = {}
 
-    def _ensure_editable(self):
-        if DEBUG: print 'in _ensure_editable of: ', self._qt_comp
-        if self._qt_comp:
-            self._qt_comp.setReadOnly(not self._editable)
+    def __init__(self, *args, **kws):
+        ComponentWrapper.__init__(self, *args, **kws)
+        ToggleButtonMixin.__init__(self)
 
-    def _backend_text(self):
-        if self._qt_comp:
-            return str(self._qt_comp.text())
+    def widgetFactory(self, *args, **kwds):
+        return QCheckBox(*args, **kwds)
 
-    def _get_qt_text(self):
-        return QString(str(self._text))
+    def setGroup(self, group):
+        if not group._items:
+            group._items.append(self.proxy)
+            btnGroup = QButtonGroup(self.text, self.container.widget)
+            RadioButtonWrapper.groupMap[group] = btnGroup
+            btnGroup.insert(this.widget)
+        elif self.proxy not in group._items:
+            group._items.append(self.proxy)
+            btnGroup = RadioButtonWrapper.groupMap[group]
+            btnGroup.insert(this.widget)
 
-    def _qt_key_press_handler(self, event):
-        if DEBUG: print 'in _qt_key_press_handler of: ', self._qt_comp
-        self._text = self._backend_text()
+    def setValue(self, value):
+        self.widget.setChecked(int(value))
+
+    def getValue(self):
+        return int(self.widget.isChecked())
+
+#==============================================================#
+
+class TextWrapperBase(ComponentWrapper):
+    connected = 0
+
+    def widgetSetUp(self):
+        if not self._connected:
+            events = {QEvent.KeyRelease: self.keyPressHandler.im_func,
+                      QEvent.FocusIn:    self.gotFocusHandler.im_func,
+                      QEvent.FocusOut:   self.lostFocusHandler.im_func}
+            self.eventFilter = EventFilter(self, events)
+            self.widget.installEventFilter(self.eventFilter)
+            self.connected = 1
+
+    def setEditable(self, editable):
+        self.widget.setReadOnly(not editable)
+
+    def qtText(self):
+        return QString(self.text)
+
+    def keyPressHandler(self, event):
+        if DEBUG: print 'in keyPressHandler of: ', self.widget
+        self.text = self.text()
         #self.modify(text=self._backend_text())
         if int(event.key()) == 0x1004: #Qt Return Key Code
             send(self, 'enterkey')
         return 1
 
-    def _qt_lost_focus_handler(self, event):
-        if DEBUG: print 'in _qt_lost_focus_handler of: ', self._qt_comp
-        return 1
-        #   send(self, 'lostfocus')
 
-    def _qt_got_focus_handler(self, event):
-        if DEBUG: print 'in _qt_got_focus_handler of: ', self._qt_comp
+    def gotFocusHandler(self, event):
+        if DEBUG: print 'in gotFocusHandler of: ', self.widget
         return 1
         #   send(self, 'gotfocus')
 
-    def _qt_calc_start_end(self, text, mtxt, pos):
+    def lostFocusHandler(self, event):
+        if DEBUG: print 'in lostFocusHandler of: ', self.widget
+        return 1
+        #   send(self, 'lostfocus')
+
+    def qtCalcStartEnd(self, text, mtxt, pos):
         start, idx = 0, -1
         for n in range(text.count(mtxt)):
             idx = text.find(mtxt, idx+1)
@@ -251,84 +331,88 @@ class TextBase(ComponentMixin, AbstractTextField):
         if DEBUG: print 'returning => start: %s | end: %s' %(start,end)
         return start,  end
 
-class TextField(TextBase):
-    _qt_class = QLineEdit
+#--------------------------------------------------------------#
 
-    def _ensure_selection(self):
-        if self._qt_comp:
-            if DEBUG: print 'in _ensure_selection of: ', self._qt_comp
-            start, end = self._selection
-            self._qt_comp.setSelection(start, end-start)
-            self._qt_comp.setCursorPosition(end)
+class TextFieldWrapper(TextWrapperBase):
 
-    def _backend_selection(self):
-        if self._qt_comp:
-            if DEBUG: print 'in _backend_selection of: ', self._qt_comp
-            pos = self._qt_comp.cursorPosition()
-            if self._qt_comp.hasMarkedText():
-                text = self._backend_text()
-                mtxt = str(self._qt_comp.markedText())
-                return self._qt_calc_start_end(text,mtxt,pos)
-            else:
-                return pos, pos
+    def widgetFactory(self, *args, **kwds):
+        return QLineEdit(*args, **kwds)
 
-class TextArea(TextBase):
-    _qt_class = QMultiLineEdit
+    def setSelection(self, selection):
+        if DEBUG: print 'in _ensure_selection of: ', self.widget
+        start, end = selection
+        self.widget.setSelection(start, end-start)
+        self.widget.setCursorPosition(end)
 
-    def _ensure_selection(self):
+    def getSelection(self):
+        if DEBUG: print 'in _backend_selection of: ', self.widget
+        pos = self.widget.cursorPosition()
+        if self.widget.hasMarkedText():
+            text = self.text()
+            mtxt = str(self.widget.markedText())
+            return self.qtCalcStartEnd(text,mtxt,pos)
+        else:
+            return pos, pos
+
+#--------------------------------------------------------------#
+
+class TextAreaWrapper(TextWrapperBase):
+
+    def widgetFactory(self, *args, **kwds):
+        return QMultiLineEdit(*args, **kwds)
+
+    def setSelection(self, selection):
         #QMultiLineEdit.setSelection is yet to be implemented...
         #Hacked it so that it will work until the proper method can be used.
-        if self._qt_comp:
-            if DEBUG: print 'in _ensure_selection of: ', self._qt_comp
-            start, end = self._selection
-            srow, scol = self._qt_translate_row_col(start)
-            erow, ecol = self._qt_translate_row_col(end)
-            #Enter hack...
-            self._qt_comp.setCursorPosition(srow, scol, FALSE)
-            self._qt_comp.setCursorPosition(erow, ecol, TRUE)
-            #Exit hack...
-            #self._qt_comp.setSelection(srow, scol, erow, ecol)
-            #self._qt_comp.setCursorPosition(erow,ecol)
+        if DEBUG: print 'in _ensure_selection of: ', self.widget
+        start, end = selection
+        srow, scol = self.qtTranslateRowCol(start)
+        erow, ecol = self.qtTranslateRowCol(end)
+        #Enter hack...
+        self.widget.setCursorPosition(srow, scol, FALSE)
+        self.widget.setCursorPosition(erow, ecol, TRUE)
+        #Exit hack...
+        #self.widget.setSelection(srow, scol, erow, ecol)
+        #self.widget.setCursorPosition(erow,ecol)
 
-    def _backend_selection(self):
-        if self._qt_comp:
-            if DEBUG: print 'in _backend_selection of: ', self._qt_comp
-            row, col = self._qt_comp.getCursorPosition()
-            if DEBUG: print 'cursor -> row: %s| col: %s' %(row,col)
-            pos = self._qt_translate_position(row, col)
-            if DEBUG: print 'pos of cursor is: ', pos
-            if self._qt_comp.hasMarkedText():
-                text = self._backend_text()
-                mtxt = str(self._qt_comp.markedText())
-                return self._qt_calc_start_end(text,mtxt,pos)
-            else:
-                return pos, pos
+    def getSelection(self):
+        if DEBUG: print 'in _backend_selection of: ', self.widget
+        row, col = self.widget.getCursorPosition()
+        if DEBUG: print 'cursor -> row: %s| col: %s' %(row,col)
+        pos = self.qtTranslatePosition(row, col)
+        if DEBUG: print 'pos of cursor is: ', pos
+        if self.widget.hasMarkedText():
+            text = self.text()
+            mtxt = str(self.widget.markedText())
+            return self.qtCalcStartEnd(text,mtxt,pos)
+        else:
+            return pos, pos
 
-    def _qt_get_lines(self):
+    def qtGetLines(self):
         lines = []
-        for n in range(0,self._qt_comp.numLines()):
-            lines.append(str(self._qt_comp.textLine(n)) + '\n')
+        for n in range(0,self.widget.numLines()):
+            lines.append(str(self.widget.textLine(n)) + '\n')
         if DEBUG: print 'lines are: \n', lines
         return lines
 
-    def _qt_translate_row_col(self, pos):
+    def qtTranslateRowCol(self, pos):
         if DEBUG: print 'translating pos to row/col...'
-        row, col, curr_row, tot_len = 0, 0, 0, 0
-        for ln in self._qt_get_lines():
+        row, col, currRow, totLen = 0, 0, 0, 0
+        for ln in self.qtGetLines():
             if pos <= len(str(ln)) + tot_len:
-                row = curr_row
-                col = pos - tot_len
+                row = currRow
+                col = pos - totLen
                 if DEBUG: print 'returning => row: %s| col: %s' %(row,col)
                 return row, col
             else:
-                curr_row += 1
-                tot_len += len(str(ln))
+                currRow += 1
+                totLen += len(str(ln))
         if DEBUG: print 'returning => row: %s| col: %s' %(row,col)
         return row, col
 
-    def _qt_translate_position(self, row, col):
+    def qtTranslatePosition(self, row, col):
         if DEBUG: print 'translating row/col to pos...'
-        lines = self._qt_get_lines()
+        lines = self.qtGetLines()
         pos = 0
         for n in range(len(lines)):
             if row != n:
@@ -339,103 +423,79 @@ class TextArea(TextBase):
         if DEBUG: print 'returning pos => ', pos
         return pos
 
-################################################################
+#==============================================================#
 
-class Frame(ComponentMixin, AbstractFrame):
-    _qt_class = QFrame
-    _qt_style = QFrame.Plain
+class FrameWrapper(ComponentWrapper):
 
-################################################################
+    def widgetFactory(self, *args, **kws):
+        widget = QFrame(*args, **kws)
+        widget.setFrameStyle(QFrame.Plain)
+        return widget
+
+#==============================================================#
 
 class QWindow(QWidget): pass #Alias for clarity
 
 class Window(ComponentMixin, AbstractWindow):
-    _qt_class = QWindow
-    _qt_style = None #Check on this...
-    _qt_frame = None
-    _layout = None
-    _connected = 0
-    _destroying_self = 0
+    connected = 0
+    destroyingSelf = 0
 
-    def _ensure_title(self):
-        if self._qt_comp:
-            if DEBUG: print 'in _ensure_title of: ', self._qt_comp
-            self._qt_comp.setCaption(self._get_qt_title())
+    def setTitle(self, title):
+        if self.widget:
+            self.widget.setCaption(QString(title))
 
-    def _ensure_events(self):
-        if DEBUG: print 'in _ensure_events of: ', self._qt_comp
-        if self._qt_comp and not self._connected:
-            events = {QEvent.Resize: self._qt_resize_handler.im_func,\
-                      QEvent.Move:   self._qt_move_handler.im_func,\
-                      QEvent.Close:  self._qt_close_handler.im_func}
-            self._event_filter = EventFilter(self, events)
-            self._qt_comp.installEventFilter(self._event_filter)
-            self._connected = 1
+    def widgetSetUp(self):
+        if not self.connected:
+            events = {QEvent.Resize: self.resizeHandler.im_func,
+                      QEvent.Move:   self.moveHandler.im_func,
+                      QEvent.Close:  self.closeHandler.im_func}
+            self.eventFilter = EventFilter(self, events)
+            self.widget.installEventFilter(self.eventFilter)
+            self.connected = 1
 
-    def _ensure_destroyed(self):
-        if self._qt_comp and not self._destroying_self:
-            if DEBUG: print 'in qt _ensure_destroyed: ', self._qt_comp
-            self._connected = 0
-            self._qt_comp.destroy()
-            self._qt_comp = None
 
-    def _get_qt_title(self):
-        return self._title
+    def getTitle(self):
+        return str(self.widget.title())
 
-    def _get_panel(self):
-        return self._qt_frame
+    def resizeHandler(self, event):
+        if DEBUG: print 'in _qt_resize_handler of: ', self.widget
 
-    def _qt_resize_handler(self, event):
-        if DEBUG: print 'in _qt_resize_handler of: ', self._qt_comp
-        w = self._qt_comp.width()
-        h = self._qt_comp.height()
-        dw = w - self._width
-        dh = h - self._height
-        #self.modify(width=w, height=h)
-        self._width = w
-        self._height = h
-        self.resized(dw, dh)
+        x, y, w, h = self.getGeometry()
+        dw = w - self.proxy.state['width'] # @@@ With lazy semantics, these will be fetched from the widget!
+        dh = h - self.proxy.state['height'] # @@@ (and therefore will tell us nothing!)
+
+        self.proxy.height
+        self.proxy.width
+
+        self.proxy.resized(dw, dh)
         return 1
 
-    def _qt_move_handler(self, event):
-        if DEBUG: print 'in _qt_move_handler of: ', self._qt_comp
-        nx = self._qt_comp.x()
-        ny = self._qt_comp.y()
-        dx = nx - self._x
-        dy = ny - self._y
-        self._x = nx
-        self._y = ny
-        #self.modify(x=nx, y=ny)
-        #self.moved(dx, dy)
+    def moveHandler(self, event):
+        if DEBUG: print 'in _qt_move_handler of: ', self.widget
+        nx = self.widget.x()
+        ny = self.widget.y()
+        dx = nx - self.proxy.state['x']
+        dy = ny - self.proxy.state['y']
+
+        self.proxy.x
+        self.proxy.y
+
+        #self.proxy.moved(dx, dy)
         return 1
 
-    def _qt_close_handler(self, event):
-        if DEBUG: print 'in _qt_close_handler of: ', self._qt_comp
+    def closeHandler(self, event):
+        if DEBUG: print 'in _qt_close_handler of: ', self.widget
         # What follows is a dirty hack, but PyQt will seg-fault the
         # interpreter if a call onto QWidget.destroy() is made after
         # the Widget has been closed. It is also necessary to inform
         # the front-end of self being closed.
-        self._destroying_self = 1
+        self.destroyingSelf = 1
         self.destroy()
-        self._destroying_self = 0
-        self._connected = 0
-        self._comp = None
+        self.destroyingSelf = 0
+        self.connected = 0
+        self.widget = None
+        application().remove(self.proxy)
         return 0
 
-################################################################
 
-class Application(AbstractApplication, QApplication):
-
-    def __init__(self, *argv):
-        AbstractApplication.__init__(self)
-        if not argv:
-            argv = list(argv)
-            QApplication.__init__(self,argv)
-        else:
-            apply(QApplication.__init__,(self,)+argv)
-        self.connect(qApp, SIGNAL('lastWindowClosed()'), qApp, SLOT('quit()'))
-
-    def _mainloop(self):
-        qApp.exec_loop()
-
-################################################################
+#==============================================================#
