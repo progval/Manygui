@@ -933,7 +933,7 @@
       <line>MenuItem</line>
       <line>ProgressBar</line>
       <line>StatusBar</line>
-      <line>Tabbed</line>
+      <line>Notebook</line>
       <line>Table</line>
       <line>Tree</line>
     </codelisting>
