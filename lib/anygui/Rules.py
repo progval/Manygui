@@ -1,8 +1,19 @@
 
 class IllegalState(Exception): pass
+class ValueUnchanged(Exception): pass
+class CannotCalculate(Exception): pass
 
 def addSubKey(dict, key, subkey):
     dict.setdefault(key, {})[subkey] = 1
+
+def equiv(a, b):
+    try:
+        if len(a) != len(b): return 0
+        for x, y in zip(a, b):
+            if x != y: return 0
+        return 1
+    except TypeError:
+        return a == b
 
 class RuleEngine:
     
@@ -39,13 +50,17 @@ class RuleEngine:
             addSubKey(self.parts, whole, part)
         self.rules[whole] = rule
 
-    def check(self, state):
+    def check(self, state, names, undef):
+        for name in names:
+            try: newValue = self.newValue(name, state, undef)
+            except ValueUnchanged: pass
+            else: raise IllegalState('inconsistent attribute values')
+
+    def checkAll(self, state):
         names = self.parts.copy()
         names.update(self.whole)
         names = names.keys()
-        for name in names:
-            if not state[name] == self.newValue(name, state, {}):
-                raise IllegalState('inconsistent attribute values')
+        self.check(state, names, {})
     
     def sync(self, state, defs):
         undef = {}
@@ -53,14 +68,23 @@ class RuleEngine:
             undef.update(self.getChildren(name))
             undef.update(self.getParents(name))
             undef.update(self.getSpouses(name))
-        if not undef:
-            self.check(state)
+        check_names = []
+        for name in undef.keys():
+            if name in defs:
+                del undef[name]
+                check_names.append(name)
+        if check_names: # Hm...
+            self.check(state, check_names, undef) # Hm...
+        elif not undef: # Hm...
+            self.checkAll(state) # Hm...
         stable = 0
         while undef and not stable:
             stable = 1
             for name in undef.keys():
-                newValue = self.newValue(name, state, undef)
-                if newValue is not None: # FIXME: None is not safe here; use exception
+                try:
+                    newValue = self.newValue(name, state, undef)
+                except (ValueUnchanged, CannotCalculate): pass
+                else:
                     state[name] = newValue
                     del undef[name]
                     stable = 0
@@ -70,11 +94,15 @@ class RuleEngine:
         for parent in self.getParents(name).keys():
             if not undef.has_key(parent):
                 pos = self.rules[parent].index(name)
-                return state[parent][pos]
+                value = state[parent][pos]
+                if equiv(state[name], value): raise ValueUnchanged
+                return value
         value = []
         for child in self.getOrderedChildren(name):
             if undef.has_key(child):
-                return None
+                raise CannotCalculate
             else:
                 value.append(state[child])
-        return tuple(value) or None
+        value = tuple(value)
+        if equiv(state[name], value): raise ValueUnchanged
+        return value

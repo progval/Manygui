@@ -110,7 +110,7 @@ class RectangleTestCase(TestCase):
         
         # Generalize...
         state['x'] = 42
-        state['position'] = 42, 30
+        state['position'] = 42, 10
         self.assertEqual(self.eng.sync(state, ['x', 'position']), [])        
 
 if __name__ == '__main__': main()
