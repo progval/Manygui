@@ -1,6 +1,5 @@
 from anygui import application
-from anygui.Utils import topologicalSort, getSetter, getGetter
-import sys
+from anygui.Utils import getSetter, getGetter
 
 """
 The back-end wrapper presents a unified and simple interface for
@@ -78,15 +77,7 @@ class AbstractWrapper:
         self.aggregateGetters = {}
 
         self.constraints = []
-        self.addConstraint('text', 'selection')
 
-        # 'container' before everything... Handler through added sync call?
-        self.prioritizedAttrs = []
-        self.addPrioritizedAttrs('container','x','y','width','height')
-        # Note: x,y,width, and height probably have no effect here, due to
-        # the way getSetters() works. I'm not sure if that's something
-        # that needs fixing or not... - jak
-        
         application().manage(self)
         self.inMainLoop = 0
         self.prod() #@@@ ?
@@ -109,34 +100,40 @@ class AbstractWrapper:
         """
         self.aggregateGetters[signature] = name
 
-    def addConstraint(self, before, after):
+    def setConstraints(self, *attrs):
         """
-        Adds a setter ordering constraint.
+        Set the attribute-setting constraints. Attributes named in *attrs
+        are always set first, in the order in which they appear in the
+        setConstraints() call, when they appear in a push() operation.
+        Backends may use this facility to express mandatory explicit
+        ordering of attribute set operations.
+        """
+        self.constraints=list(attrs)
 
-        This ensures that the before-name is set before the
-        after-name, if possible.
-        """
-        # FIXME: Should handle setaggregates automatically...
-        # E.g. ('geometry', 'visible') should imply ('x', 'visible') and
-        # ('x', 'visible') should imply ('geometry', 'visible') etc.
-        constraint = before, after
-        if not constraint in self.constraints:
-            self.constraints.append((before, after))
+    def addConstraints(self, *attrs):
+        """ Add additional set-order constraints. """
+        self.constraints.extend(list(attrs))
 
-    def addPrioritizedAttrs(self, *attrs):
-        """
-        Add a prioritized attribute. Prioritized attributes are always
-        set first, in the order in which they were added, when they appear
-        in a push() operation. Backends may use this facility to
-        express mandatory explicit ordering of attribute set operations.
+    def addConstraint(self,attr1,attr2):
+        try:
+            if self.constraints.index(attr2) > self.constraints.index(attr1):
+                # Constraint is already present.
+                return
+            else:
+                # Constraint is already violated.
+                raise InternalError(self,"Inconsistent constraint order.")
+        except ValueError:
+            pass
 
-        NOTE: If you use a prioritized attribute in an addConstraint()
-        call, you may experience undefined behavior, disk crashes,
-        uncontrollable vomiting, or a surprise tax audit. Don't
-        do it. (Hmm, maybe this mechanism can completely replace
-        the constraint mechanism?)
-        """
-        self.prioritizedAttrs.extend(list(attrs))
+        if attr2 in self.constraints:
+            # We cannot possibly satisfy the constraint.
+            raise InternalError(self,"Inconsistent constraint order.")
+
+        # Make it so.
+        if attr1 in self.constraints:
+            self.constraints.append(attr2)
+        else:
+            self.constraints.extend([attr1,attr2])
 
     def getSetters(self, attrs):
         """
@@ -182,12 +179,9 @@ class AbstractWrapper:
             else:
                 unhandled.append(attr)
 
-        # Make sure the order is legal:
-        topologicalSort(names, result, self.constraints)
-
         # Move all prioritized attribs to the front.
         nameResults = zip(names,result)
-        for pri in self.prioritizedAttrs:
+        for pri in self.constraints:
             try:
                 idx = names.index(pri)
                 nameResults[:idx+1] = [nameResults[idx]] + nameResults[:idx]
@@ -234,6 +228,8 @@ class AbstractWrapper:
 
     def getGetters(self, attrs):
         """
+        TODO: get aggregate getters first, then handle the riffraff.
+        
         Returns a pair (getters, unhandled) where getters is a
         sequence of the form [(getter, attrs), ...] and unhandled is a
         sequence of unhandled attributes.
@@ -266,6 +262,7 @@ class AbstractWrapper:
         candidates = self.aggregateGetters.items()        
         def moreSpecific(aggr1, aggr2):
             return cmp(len(aggr1[0]), len(aggr2[0]))
+
         # Get the aggregates:
         candidates.sort(moreSpecific)
         candidates.reverse()

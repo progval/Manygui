@@ -41,6 +41,13 @@ class Wrapper(AbstractWrapper):
     
     def __init__(self, *args, **kwds):
         AbstractWrapper.__init__(self, *args, **kwds)
+
+        # 'container' before everything...
+        self.setConstraints('container','x','y','width','height','text','selection')
+        # Note: x,y,width, and height probably have no effect here, due to
+        # the way getSetters() works. I'm not sure if that's something
+        # that needs fixing or not... - jak
+        
         self.addConstraint('geometry', 'visible')
         # FIXME: Is this the right place to put it? Make sure
         # 'geometry' implies 'x', 'y', etc. too (see Wrappers.py)
