@@ -41,26 +41,26 @@ demo/chmodgui.py OK
 
 """
 
-try:
-    # Import Anygui infrastructure. You shouldn't have to change these.
-    from anygui.backends import *
-    from anygui.Applications import AbstractApplication
-    from anygui.Wrappers import AbstractWrapper
-    from anygui.Events import *
-    from anygui import application
-    # End Anygui imports.
+#try:
+# Import Anygui infrastructure. You shouldn't have to change these.
+from anygui.backends import *
+from anygui.Applications import AbstractApplication
+from anygui.Wrappers import AbstractWrapper
+from anygui.Events import *
+from anygui import application
+# End Anygui imports.
 
-    # Import anything needed to access the backend API. This is
-    # your job!
-    import pygtk
+# Import anything needed to access the backend API. This is
+# your job!
+import pygtk
+   
+pygtk.require('2.0')
     
-    pygtk.require('2.0')
-    
-    import gtk
-    # End backend API imports.
-except:
-    import traceback
-    traceback.print_exc()
+import gtk
+# End backend API imports.
+#except:
+#    import traceback
+#    traceback.print_exc()
 
 __all__ = '''
 
