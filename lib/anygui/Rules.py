@@ -2,19 +2,13 @@
 class IllegalState(Exception): pass
 
 # TODO:
-# - Add generic split/join mechanism etc.
-# State checking:
-# - If no def-names are given (full update), check that
-#   there are no discrepancies between aggregates and their atomic
-#   components
-# - If def-names are given, for any discrepancies between atomic
-#   components and aggregates, check that only either (1) the
-#   aggregate is being redefined, or (2) one or more of the atomic
-#   components of the aggregate (must include all the discrepant ones)
-#   are being redefined
+# - Add checking of state integrity
+# - Add support for "full sync" without defs
 
 def addSubKey(dict, key, subkey):
     dict.setdefault(key, {})[subkey] = 1
+
+# This is extremely klutzy and sketchy at the moment
 
 class AggregateRuleEngine:
     
@@ -23,14 +17,24 @@ class AggregateRuleEngine:
         self.whole = {}
         self.rules = {}
 
-    def add(self, rule):
-        """
-        Add a rule to the rule engine.
+    def getChildren(self, name):
+        return self.parts.get(name, {})
 
-        The rule must be a string of the form 'x = y, z, w' with a
-        single name on the left hand side of the assignment, and a
-        tuple (without parentheses) of names on the right hand side.
-        """
+    def getOrderedChildren(self, name):
+        return self.rules.get(name, [])
+
+    def getParents(self, name):
+        return self.whole.get(name, {})
+
+    def getSpouses(self, name):
+        result = {}
+        for child in self.getChildren(name).keys():
+            result.update(self.getParents(child))
+        try: del result[name]
+        except: pass
+        return result
+
+    def define(self, rule):
         whole, parts = rule.split('=')
         whole = whole.strip()
         rule = []
@@ -44,39 +48,29 @@ class AggregateRuleEngine:
     def sync(self, state, defs):
         undef = {}
         for name in defs:
-            for whole in self.whole[name].keys():
-                undef[whole] = 1
-            for part in welf.parts[name].keys():
-                undef[part] = 1
-
-        # Add inconsistency checks here
-        # (Possibly also below -- if an "illegal" computation causes
-        # no change, there is no problem.)
-
+            undef.update(self.getChildren(name))
+            undef.update(self.getParents(name))
+            undef.update(self.getSpouses(name))
         stable = 0
         while undef and not stable:
             stable = 1
             for name in undef.keys():
-                # ...
-
-        """
-        undef = {}
-        for name in defs:
-            for dep in self.affected[name]:
-                if vals.has_key(dep):
-                    if dep in defs: raise IllegalState
-                    undef[dep] = 1
-        stable = 0
-        while undef and not stable:
-            stable = 1
-            for name in undef.keys():
-                for rule in self.rules[name]:
-                    for dep in rule.deps:
-                        if undef.has_key(dep): break
-                    else:               
-                        rule.fire(vals)
-                        stable = 0
-                        del undef[name]
-                        break
+                newValue = self.newValue(name, state, undef)
+                if newValue is not None:
+                    state[name] = newValue
+                    del undef[name]
+                    stable = 0
         return undef.keys()
-        """
+
+    def newValue(self, name, state, undef):
+        for parent in self.getParents(name).keys():
+            if not undef.has_key(parent):
+                pos = self.rules[parent].index(name)
+                return state[parent][pos]
+        value = []
+        for child in self.getOrderedChildren(name):
+            if undef.has_key(child):
+                return None
+            else:
+                value.append(state[child])
+        return tuple(value) or None
