@@ -448,10 +448,20 @@ class TextField(ComponentMixin, AbstractTextField):
         self._ensure_enabled_state()
         self._ensure_text()
         return result
-                           
+    
+    def _ensure_events(self):
+        ComponentMixin._ensure_events(self)
+        
     def _backend_text(self):
         if self._beos_comp:
-            return self._beos_comp.Text()
+            self.model.value = self._beos_comp.Text()
+    
+    def MakeFocus(self, focus):
+        print "Here 1"
+        if not focus:
+            print "Here"
+            self.model.value = self._beos_comp.Text()
+        _beos_class.MakeFocus(self, focus)
     
     def _backend_selection(self):
         if self._beos_comp:
@@ -464,7 +474,7 @@ class TextField(ComponentMixin, AbstractTextField):
             
     def _ensure_text(self):
         if self._beos_comp:
-            self._beos_comp.SetText(self._text)
+            self._beos_comp.SetText(self.model.value)
 
     def _ensure_editable(self):
         if self._beos_comp:
@@ -483,7 +493,6 @@ class TextArea(ComponentMixin, AbstractTextArea):
     _beos_border = B_FANCY_BORDER
     
     def _ensure_created(self):
-        "Within Scroll Boxes"
         self._beos_id = str(self._beos_id)
         if self._beos_sub is None:
             self.sub_wrap(self._beos_sub_class(self._beos_bounds,
@@ -503,23 +512,10 @@ class TextArea(ComponentMixin, AbstractTextArea):
         self._ensure_enabled_state()
         self._ensure_text()
         return result
-    
-    def _ensure_created2(self):
-        "No Scroll Boxes"
-        self._beos_id = str(self._beos_id)
-        self._beos_class = self._beos_sub_class
-        self._init_args = (self._beos_bounds,
-                           self._beos_id,
-                           (0.0,0.0, self._beos_bounds[2], self._beos_bounds[3]),
-                           self._beos_mode,
-                           self._beos_flags)
-        result = ComponentMixin._ensure_created(self)
-        self._beos_sub = self._beos_comp
-        return result
-        
+            
     def _ensure_text(self):
         if self._beos_comp:
-            self._beos_sub.SetText(self._text)
+            self._beos_sub.SetText(self.model.value)
     
     def _ensure_selection(self):
         if self._beos_comp:
@@ -531,13 +527,23 @@ class TextArea(ComponentMixin, AbstractTextArea):
             start, end = self._beos_sub.GetSelection()
             return (start, end)
     
-    def _backend_text(self):
-        if self._beos_comp:
-            return self._beos_sub.Text()
-    
     def _ensure_editable(self):
         if self._beos_comp:
             self._beos_sub.MakeEditable(self._editable)
+
+    def _lost_focus(self):
+        self.model.value = self._beos_sub.Text()
+    
+    """def MakeFocus(self, focus):
+        print self._beos_sub.IsFocus(), focus
+        if not focus:
+            print "Here"
+            self.model.value = self._beos_comp.Text()
+        else:
+            print "There"
+            #self._beos_sub.Draw(self._beos_comp.Bounds())
+            #self._beos_sub.Flush()
+            #self._beos_sub.MakeFocus(focus)"""
 
 #################################################################
 
@@ -554,6 +560,7 @@ class Window(ComponentMixin, AbstractWindow):
                      'bordered' : B_BORDERED_WINDOW,
                      'other' : B_UNTYPED_WINDOW
                    }
+    _focus = None
     
     def _ensure_created(self):
         self._ensure_style()
@@ -579,7 +586,7 @@ class Window(ComponentMixin, AbstractWindow):
     def _ensure_geometry(self):
         self._beos_bounds = (float(self._x)+10.0,     # Because these are inside
                              float(self._y)+30.0,     # values, not outside!
-                             float(self._width), # Not Wide enough...?
+                             float(self._width), 
                              float(self._height))
         if self._beos_comp:
             self._beos_comp.MoveTo(self._beos_bounds[0], self._beos_bounds[1])
@@ -594,7 +601,7 @@ class Window(ComponentMixin, AbstractWindow):
         self.destroy()
         if self._beos_comp:
             self._beos_comp = None
-            
+    
     def QuitRequested(self):
         """
         This BeOS hook function is called whenever a quit type action is requested.
@@ -631,18 +638,6 @@ class Window(ComponentMixin, AbstractWindow):
         if object._beos_comp is None:
             object._ensure_geometry()
             object._ensure_created()
-        """
-        if object._beos_class == RadioButton._beos_class: ###HACK CITY
-            if object.group:
-                if object.group._beos_comp is None:
-                    object.group._ensure_created()
-                    self._beos_comp.AddChild(object.group._beos_comp)
-                object.group.add([object])
-                object.group._ensure_geometry()
-            else:
-                self._beos_comp.AddChild(object._beos_comp)
-        else:
-        """
         self._beos_comp.AddChild(object._beos_comp)
         AbstractWindow.add(self, object)
     
@@ -653,7 +648,7 @@ class Window(ComponentMixin, AbstractWindow):
         self._ensure_visibility()
     
     def hide(self):
-        AbstractWindow.show(self)
+        AbstractWindow.hide(self)
         self._ensure_visibility()
     
 ###################################################################
@@ -676,7 +671,7 @@ class Application(WrapThis, AbstractApplication):
         "BeOS hook function called when files dropped on our icon"
         # Don't know if this will work, since we don't really have an icon!
         print msg.refs
-    
+            
     def AboutRequested(self):
         about = BAlert.BAlert("About", __doc__, "Dismiss")
         about.Go()
