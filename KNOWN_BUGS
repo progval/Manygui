@@ -27,10 +27,6 @@ behaviour.)
 
 wxgui windows flicker excessively when resized.
 
-All the text of a tkgui TextField or TextArea is selected when one
-tabs into it. This is not consistent with wxgui and javagui, where the
-selection is preserved.
-
 The backends don't behave consistently wrt. setting or not setting
 focus when the selection of a TextField or TextArea is set
 programmatically.
