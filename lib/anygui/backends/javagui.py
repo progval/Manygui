@@ -263,9 +263,8 @@ class JScrollableTextArea(swing.JPanel):
         self._jtextarea.editable = editable
 
 # FIXME: 'Copy-Paste' inheritance...
-def TextAreaWrapper(ComponentWrapper):
+class TextAreaWrapper(ComponentWrapper):
 
-    #[mlh@20020831] It seems that this is never called...
     def widgetFactory(self, *args, **kwds):
         return JScrollableTextArea()
 
