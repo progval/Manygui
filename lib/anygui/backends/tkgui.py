@@ -522,8 +522,6 @@ class WindowWrapper(ComponentWrapper):
         # Should check for None, but not properly implemented yet...
         try: self.proxy.container
         except AttributeError: return
-        self.create()
-        self.proxy.push()
 
     def closeHandler(self):
         self.destroy()
@@ -609,6 +607,15 @@ class WindowWrapper(ComponentWrapper):
         self.widget.title(title)
 
     def setContainer(self, container):
+        if container is None: return
+        try:
+            assert(self.widget.isDummy())
+            self.create()
+        except (AttributeError):
+            self.create()
+        except (AssertionError):
+            pass
+        self.proxy.push(blocked=['container'])
         # Ensure contents are properly created.
         for component in self.proxy.contents:
             component.container = self.proxy
