@@ -250,6 +250,46 @@
       <line>app.run()</line>
     </codelisting>
 
+    <section>
+      <title>Avoiding Namespace Pollution</title>
+      
+      <para>Importing everything from <name>Anygui</name> (as in
+      <code>from anygui import *</code>) is finde for small programs,
+      where you're certain that there will be no name clashes. You may
+      also simply import the names you need:</para>
+
+      <codelisting>
+	<line>from anygui import Application, Window</line>
+      </codelisting>
+
+      <para>The preferred way to use modules like this is usually to
+      avoid cluttering your namespace, by using simply <code>import
+      anygui</code>. However, if you are going to create a lot of
+      widgets, the <code>anygui</code> prefix may be
+      cumbersome. Therefore, I suggest renaming it to
+      <code>gui</code>, either with a simple assignment...</para>
+
+      <codelisting>
+	<line>import anygui; gui = anygui</line>
+      </codelisting>
+
+      <para>... or, in recent versions of <name>Python</name>:</para>
+
+      <codelisting>
+	<line>import anygui as gui</line>
+      </codelisting>
+
+      <para>Then you can instantiate widgets like this:</para>
+
+      <codelisting>
+	<line>win = gui.Window()</line>
+      </codelisting>
+
+      <para>Although I would recommend this practice in general, the
+      examples in this documentation use the starred import, for
+      simplicity.</para>
+
+    </section>
 
     <section>
       <title>Importing the Backends Directly</title>
@@ -277,6 +317,12 @@
       (<url>http://www.mcmillan-inc.com/install1.html</url>), or with
       <code>jythonc</code> with the <code>--deep</code> option or
       equivalent.</para>
+
+      <para>Note that the namespace handling still works just fine:</para>
+
+      <codelisting>
+	<line>import anygui.backends.tkgui as gui</line>
+      </codelisting>
 
     </section>
 
