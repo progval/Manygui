@@ -1,14 +1,63 @@
-from Exceptions import SetAttributeError, GetAttributeError
 from Events import link, send
 
-def optsAndKwdItems(args, kwds):
+class Attrib:
+    # TODO: Add new docstring (see below for old one)
+
+    def __init__(self, *args, **kwds):
+        defaults = getattr(self, 'state', {})
+        self.state = defaults.copy()
+        self.rawSet(*args, **kwds)
+        self.sync()
+
+    def sync(self, *names): pass
+
+    def __setattr__(self, name, value):
+        if name == 'state':
+            self.__dict__[name] = value
+        else: self.set(name=value)
+
+    def __getattr__(self, name):
+        if name == 'state':
+            raise AttributeError()
+        return self.state[name]
+
+    def set(self, *args, **kwds):
+        names = self.rawSet(*args, **kwds)
+        self.sync(*names)
+
+    def rawSet(self, *args, **kwds):
+        names = []
+        for key, val in optsAndKwdsItems(args, kwds):
+            old_val = getattr(self, key, None)
+            try: old_val.removed(self, key)
+            except: pass
+            self.state[key] = val
+            try: val.assigned(self, key)
+            except: pass
+            names.append(key)
+        return names
+
+    def modify(self, *args, **kwds):
+        names = self.rawModify(*args, **kwds)
+        self.sync(*names)
+
+    def rawModify(self, *args, **kwds):
+        names = []
+        for key, val in optsAndKwdsItems(args, kwds):
+            modattr(self, key, val)
+            names.append(key)
+        return names
+
+
+def optsAndKwdsItems(args, kwds):
     items = kwds.items()
     for opt in args:
         items.extend(opt.__dict__.items())
     return items
 
+
 def modattr(obj, name, value):
-    old_value = getattr(self, name, None)
+    old_value = getattr(obj, name, None)
     # try assigning to the "all-object slice"
     try: old_value[:] = value
     except:
@@ -16,16 +65,20 @@ def modattr(obj, name, value):
         try: old_value.value = value
         except:
             # no in-place mod, so, just set it (bind or re-bind)
-            obj.__dict__[name] = value
+            # Use rawSet() if available:
+            setter = getattr('rawSet', obj, None)
+            if callable(setter): setter(name=value)
+            else: setattr(obj, name, value)
             return
     # in-place modification has succeeded, alert the old_value (if
-    # it supplies a suitable method) and any watchers of 'self'
-    try: old_value.modified()
+    # it supplies a suitable method)
+    try: old_value.sync()
     except: pass
 
-class Attrib:
-    # REWRITE THIS:
-    TO_BE_REWRITTEN = """Attrib: mix-in class to support attribute getting & setting.
+
+
+
+OLD_DOCSTRING = """Attrib: mix-in class to support attribute getting & setting.
 
 
     Each attribute name may have a setter method _set_name and/or a getter
@@ -67,40 +120,3 @@ class Attrib:
     Vlissides, "Pattern Hatching", page 30, for pluses and minuses of
     such "dense" approaches and the resulting "profound" code.
     """
-
-    def __init__(self, *args, **kwds):
-        defaults = getattr(self, 'state', {})
-        self.state = defaults.copy()
-        self.rawSet(*args, **kwds)
-        self.sync()
-
-    def __setattr__(self, name, value):
-        if name == 'state':
-            self.__dict__[name] = value
-        else: self.set(name=value)
-
-    def __getattr__(self, name):
-        assert name != 'state'
-        return self.state[name]
-
-    def set(self, *args, **kwds):
-        names = self.rawSet(*args, **kwds)
-        self.sync(*names)
-
-    def rawSet(self, *args, **kwds):
-        names = []
-        for key, val in optsAndKwdsItems(args, kwds):
-            self.__dict__[key] = val
-            names.append(key)
-        return names
-
-    def modify(self, *args, **kwds):
-        names = self.rawModify(*args, **Kwds)
-        self.sync(*names)
-
-    def rawModify(self, *args, **kwds):
-        names = []
-        for key, val in optsAndKwdsItems(args, kwds):
-            modattr(self, key, val)
-            names.append(key)
-        return names

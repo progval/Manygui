@@ -13,7 +13,7 @@ class Assignee:
 
     def assigned(self, object, name):
         sync = getattr(object, 'sync', None)
-        if refresh is not None:
+        if sync is not None:
             self.names.append(name)
             link(self, sync)
 
@@ -29,7 +29,7 @@ class Assignee:
 
 class Model(Attrib, Assignee):
 
-    def sync(self, event):
+    def sync(self, event): # FIXME: Wrong signature
         self.send(**event.dict)
 
     def __init__(self, *arg, **kw):
