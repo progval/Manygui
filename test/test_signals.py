@@ -13,7 +13,7 @@ Begin doctest cases:
 >>> def allSigs(name):
 ...   print "Signal %s sent"%name
 ...
->>> connect(None,"ALL",allSigs,{"signal_name":"name"})
+>>> connect(None,None,allSigs,{"signal_name":"name"})
 >>> s1.sayHello("joe")
 Saying hello to joe
 Signal HELLO sent
@@ -36,7 +36,7 @@ Signal NAMECHANGE sent
 >>> s1.changeName("bob")
 Sender carl changing name to bob
 Signal NAMECHANGE sent
->>> disconnect(None,"ALL",allSigs)
+>>> disconnect(None,None,allSigs)
 >>> s1.changeName("fred")
 Sender bob changing name to fred
 >>> print "Hi"
@@ -88,6 +88,6 @@ class Receiver:
 # Do the doctest thing.
 if __name__ == "__main__":
     print "If you want detailed output, use \"python test_signals.py -v\"."
-    print "The only output after this line should be \"r2 DYING!!!\""
+    print "No output after this line indicates success."
     import doctest, test_signals
     doctest.testmod(test_signals)
