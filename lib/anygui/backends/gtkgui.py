@@ -247,7 +247,7 @@ class ScrollableTextArea(GtkScrolledWindow):
         self._textarea = GtkText()
         self._textarea.show()
         self.set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC)
-        self.add_with_viewport(self._textarea)
+        self.add(self._textarea) # _with_viewport(self._textarea)
 
 class TextArea(ComponentMixin, AbstractTextArea):
     _gtk_class = ScrollableTextArea
