@@ -966,6 +966,12 @@
 	<line>text      -- text associated with the component</line>
       </codelisting>
 
+      <para>Common to <code>Application</code>, <code>Window</code>,
+      and <code>Frame</code> is the <code>contents</code> attribute,
+      as well as the <code>add</code> and <code>remove</code>
+      methods. These will be described with the individual classes
+      below.</para>
+
       <para><strong>class Application</strong></para>
 
       <para>To instantiate <code>Window</code>s, you must have an
