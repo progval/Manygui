@@ -4,7 +4,7 @@ app = Application()
 
 def report():
   print "Radio button clicked"
-  btn.model.value = not btn.model.value
+  btn.on = not btn.on
 
 win = Window(width = 160, height = 90)
 btn = RadioButton(x = 30, y = 30, width = 100, height = 30, 

@@ -16,12 +16,12 @@ class AbstractToggleButton(AbstractGenericButton):
         AbstractGenericButton.__init__(self, *args, **kw)
 
     # FIXME: Temporary solution. Shouldn't just be alias for model.value
-    def _get_value(self):
+    def _get_on(self):
         return self._model.value
 
     # FIXME: Temporary solution. Shouldn't just be alias for model.value
-    def _set_value(self, value):
-        self._model.value = value
+    def _set_on(self, on):
+        self._model.value = on
 
     def _get_model(self):
         return self._model
