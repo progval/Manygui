@@ -150,6 +150,11 @@ class ComponentWrapper(Wrapper):
             # Widget has no text.
             return ""
 
+    def rebuild(self): pass
+
+    def rebuild_all(self): pass
+    
+
 class ButtonWrapper(ComponentWrapper):
 
     def clickHandler(self): 
