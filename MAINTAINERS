@@ -10,7 +10,7 @@ Joe Knapka                  tkgui, core, cursesgui, textgui
 Shanky Tiwari               qtgui, javagui, fltkgui*
 David Mertz                 cursesgui
 Laura Creighton             tkgui, core
-Dallas T. Johnston          qtgui
+Dallas T. Johnston          qtgui, gtkgui
 Patrick K. O'Brien          wxgui, core
 
 (* backend not yet implemented)
