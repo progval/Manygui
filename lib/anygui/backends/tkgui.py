@@ -24,7 +24,7 @@ __all__ = '''
 
 import Tkinter, re
 from anygui.Applications import AbstractApplication
-from anygui.Wrappers import AbstractWrapper, DummyWidget, isDummy
+from anygui.Wrappers import AbstractWrapper
 from anygui.Events import *
 from anygui.Windows import Window
 from anygui import application
@@ -78,41 +78,49 @@ class ComponentWrapper(Wrapper):
     visible=1
 
     def __str__(self):
-        if self.noWidget():
+        if not self.widget:
             widg = "NOWIDGET"
         else:
             widg = self.widget
         return "%s %s@%s w%s"%(self.__class__.__name__.split('.')[-1],self.proxy.state.get('text','NONE'),id(self),widg)
 
     def setX(self, x):
+        if not self.widget: return
         if not self.visible: return
         self.widget.place(x=x)
 
     def setY(self, y):
+        if not self.widget: return
         if not self.visible: return
         self.widget.place(y=y)
 
     def setWidth(self, width):
+        if not self.widget: return
         if not self.visible: return
         self.widget.place(width=width)
 
     def setHeight(self, height):
+        if not self.widget: return
         if not self.visible: return
         self.widget.place(height=height)
 
     def setPosition(self, x, y):
+        if not self.widget: return
         if not self.visible: return
         self.widget.place(x=x, y=y)
 
     def setSize(self, width, height):
+        if not self.widget: return
         if not self.visible: return
         self.widget.place(width=width, height=height)
 
     def setGeometry(self, x, y, width, height):
+        if not self.widget: return
         if not self.visible: return
         self.widget.place(x=x, y=y, width=width, height=height)
 
     def setVisible(self, visible):
+        if not self.widget: return
         if not visible:
             self.widget.place_forget()
             self.visible=0
@@ -128,14 +136,13 @@ class ComponentWrapper(Wrapper):
                 pass
             return
         parent = container.wrapper.widget
-        try:
-            assert parent.isDummy()
-        except (AttributeError, AssertionError):
+        if parent:
             self.destroy()
             self.create(parent)
             self.proxy.push(blocked=['container'])
 
     def setEnabled(self, enabled):
+        if not self.widget: return
         if enabled: newstate = Tkinter.NORMAL
         else: newstate = Tkinter.DISABLED
         try: self.widget.config(state=newstate)
@@ -144,6 +151,7 @@ class ComponentWrapper(Wrapper):
             pass
 
     def setText(self, text):
+        if not self.widget: return
         try:
             self.widget.configure(text=text)
         except:
@@ -151,6 +159,7 @@ class ComponentWrapper(Wrapper):
             pass
 
     def getText(self):
+        assert self.widget,"?! wrapper getXxx w/o widget"
         try:
             return self.widget.cget('text')
         except:
@@ -174,6 +183,7 @@ class ButtonWrapper(ComponentWrapper):
         return Tkinter.Button(*args, **kwds)
 
     def setText(self, text):
+        if not self.widget: return
         self.widget.configure(text=text)
 
 class LabelWrapper(ComponentWrapper):
@@ -182,6 +192,7 @@ class LabelWrapper(ComponentWrapper):
         return Tkinter.Label(*args, **kws)
 
     def setText(self, text):
+        if not self.widget: return
         self.widget.configure(text=text)
 
 class TkTextMixin:
@@ -276,6 +287,7 @@ class TextFieldWrapper(ComponentWrapper, TkTextMixin):
         pass
 
     def setText(self, text):
+        if not self.widget: return
         disabled=0
         if self.widget.cget('state') != Tkinter.NORMAL:
             self.widget.configure(state=Tkinter.NORMAL)
@@ -286,15 +298,19 @@ class TextFieldWrapper(ComponentWrapper, TkTextMixin):
             self.widget.configure(state=Tkinter.DISABLED)
 
     def getText(self):
+        assert self.widget,"?! wrapper getXxx w/o widget"
         return self.widget.get()
 
     def setEditable(self, editable):
+        if not self.widget: return # @@@ really needed?
         self.editable=editable
 
     def setSelection(self, selection):
+        if not self.widget: return
         self.widget.selection_range(*selection)
 
     def getSelection(self):
+        assert self.widget,"?! wrapper getXxx w/o widget"
         if self.widget.select_present():
             start = self.widget.index('sel.first')
             end = self.widget.index('sel.last')
@@ -337,6 +353,7 @@ class TextAreaWrapper(ComponentWrapper, TkTextMixin):
         return widget
 
     def getText(self):
+        assert self.widget,"?! wrapper getXxx w/o widget"
         return self.widget.get(1.0, Tkinter.END)[:-1] # Remove the extra newline. (Always?)
 
     def _to_char_index(self, idx):
@@ -354,6 +371,7 @@ class TextAreaWrapper(ComponentWrapper, TkTextMixin):
         return tlen
 
     def getSelection(self):
+        assert self.widget,"?! wrapper getXxx w/o widget"
         try:
             start = self.widget.index('sel.first')
             end = self.widget.index('sel.last')
@@ -367,6 +385,7 @@ class TextAreaWrapper(ComponentWrapper, TkTextMixin):
         return start, end
 
     def setText(self, text):
+        if not self.widget: return
         disabled=0
         if self.widget.cget('state') != Tkinter.NORMAL:
             self.widget.config(state=Tkinter.NORMAL) # Make sure we can change the text
@@ -377,6 +396,7 @@ class TextAreaWrapper(ComponentWrapper, TkTextMixin):
             self.widget.config(state=Tkinter.DISABLED)
 
     def setSelection(self, selection):
+        if not self.widget: return
         start, end = selection
         self.widget.tag_remove('sel', '1.0', 'end')
         self.widget.tag_add('sel', '1.0 + %s char' % start, '1.0 + %s char' % end)
@@ -390,6 +410,7 @@ class TextAreaWrapper(ComponentWrapper, TkTextMixin):
         pass
 
     def setEditable(self, editable):
+        if not self.widget: return # @@@ really needed?
         self.editable=editable
 
 class ListBoxWrapper(ComponentWrapper):
@@ -405,19 +426,23 @@ class ListBoxWrapper(ComponentWrapper):
         return widget
 
     def setItems(self, items):
+        if not self.widget: return
         self.widget.delete(0, Tkinter.END)
         self.items = items[:]
         for item in self.items:
             self.widget.insert(Tkinter.END, str(item))
 
     def getItems(self):
+        assert self.widget,"?! wrapper getXxx w/o widget"
         return self.items
 
     def setSelection(self, selection):
+        if not self.widget: return
         self.widget.select_clear(0, Tkinter.END)
         self.widget.select_set(selection)
 
     def getSelection(self):
+        assert self.widget,"?! wrapper getXxx w/o widget"
         selection = self.widget.curselection()[0]
         try:
             selection = int(selection)
@@ -441,12 +466,14 @@ class ToggleButtonMixin:
                 'anchor':'w'}
                 
     def setOn(self, on):
+        if not self.widget: return
         if on:
             self.widget.select()
         else:
             self.widget.deselect()
 
     def getOn(self):
+        assert self.widget,"?! wrapper getXxx w/o widget"
         return self._var.get()
 
     def widgetSetUp(self): # Should perhaps be in a ButtonMixin superclass?
@@ -468,9 +495,11 @@ class RadioButtonWrapper(ToggleButtonMixin, ComponentWrapper):
         return Tkinter.Radiobutton(*args, **kws)
 
     def getOn(self):
+        assert self.widget,"?! wrapper getXxx w/o widget"
         return self._var.get() == int(self.widget.cget('value'))
 
     def setGroup(self, group):
+        if not self.widget: return
         if group is None:
             self._var = Tkinter.IntVar()
             self.widget.configure(variable=self._var)
@@ -486,9 +515,11 @@ class RadioButtonWrapper(ToggleButtonMixin, ComponentWrapper):
         self.widget.configure(variable=self._var)
 
     def setValue(self, value):
+        if not self.widget: return
         self.widget.configure(value=int(value))
 
     def getValue(self):
+        assert self.widget,"?! wrapper getXxx w/o widget"
         return int(self.widget.cget('value'))
 
 
@@ -510,6 +541,7 @@ class CheckBoxWrapper(ToggleButtonMixin, ComponentWrapper):
         return Tkinter.Checkbutton(*args, **kws)
 
     def getOn(self):
+        assert self.widget,"?! wrapper getXxx w/o widget"
         return self._var.get() == int(self.widget.cget('onvalue'))
 
 class FrameWrapper(ComponentWrapper):
@@ -538,7 +570,7 @@ class WindowWrapper(ComponentWrapper):
         ComponentWrapper.__init__(self, proxy)
 
     def internalProd(self):
-        # Should check for None, but not properly implemented yet...
+        # @@@ Should check for None, but not properly implemented yet...
         try: self.proxy.container
         except AttributeError: return
 
@@ -578,8 +610,11 @@ class WindowWrapper(ComponentWrapper):
         self.widget.bind('<Configure>', self.resizeHandler)
 
     def getGeometry(self):
+        assert self.widget,"?! wrapper getXxx w/o widget"
         g = self.widget.geometry()
-        m = re.match('^(\d+)x(\d+)\+(\d+)\+(\d+)', g) # Hm...
+        # geometry x,y can be negative
+        m = re.match('^(\d+)x(\d+)\+(-?\d+)\+(-?\d+)', g) # Hm...
+        assert m,"geometry capture mismatch" # @@@
         w = int(m.group(1))
         h = int(m.group(2))
         x = int(m.group(3))
@@ -587,54 +622,58 @@ class WindowWrapper(ComponentWrapper):
         return x, y, w, h
     
     def setX(self, x):
+        if not self.widget: return
         ox, y, w, h = self.getGeometry()
         self.setGeometry(x, y, w, h)
 
     def setY(self, y):
+        if not self.widget: return
         x, oy, w, h = self.getGeometry()
         self.setGeometry(x, y, w, h)
 
     def setWidth(self, width):
+        if not self.widget: return        
         x, y, ow, h = self.getGeometry()
         self.setGeometry(x, y, width, h)
 
     def setHeight(self, height):
+        if not self.widget: return
         x, y, w, oh = self.getGeometry()
         self.setGeometry(x, y, w, height)
 
     def setPosition(self, x, y):
+        if not self.widget: return
         ox, oy, w, h = self.getGeometry()
         geometry = "%dx%d+%d+%d" % (w, h, x, y)
         self.widget.geometry(geometry)
 
     def setSize(self, width, height):
+        if not self.widget: return
         x, y, ow, oh = self.getGeometry()
         geometry = "%dx%d+%d+%d" % (width, height, x, y)
         self.widget.geometry(geometry)        
     
     def setGeometry(self, x, y, width, height):
+        if not self.widget: return
         geometry = "%dx%d+%d+%d" % (width, height, x, y)
         self.widget.geometry(geometry)
         self.widget.update()
     
     def setTitle(self, title):
+        if not self.widget: return
         self.widget.title(title)
 
     def setContainer(self, container):
         if container is None: return
-        try:
-            assert(self.widget.isDummy())
+        if not self.widget:
             self.create()
-        except (AttributeError):
-            self.create()
-        except (AssertionError):
-            pass
         self.proxy.push(blocked=['container'])
         # Ensure contents are properly created.
         for component in self.proxy.contents:
             component.container = self.proxy
 
     def setVisible(self, visible):
+        if not self.widget: return
         if visible: self.widget.deiconify()
         else: self.widget.withdraw()
 
@@ -644,7 +683,7 @@ class WindowWrapper(ComponentWrapper):
 class MenuItemMixin:
 
     def __str__(self):
-        if self.noWidget():
+        if not self.widget:
             widg = "NOWIDGET"
         else:
             widg = self.widget
@@ -659,7 +698,7 @@ class MenuItemMixin:
         return TkMenuDummy()
 
     def createIfNeeded(self):
-        if self.noWidget(): self.create()
+        if not self.widget: self.create()
 
     def tryRebuild(self):
         try:
@@ -672,7 +711,7 @@ class MenuItemMixin:
         if not container:
             if self.proxy.container is None:
                 return
-            self.widget = DummyWidget()
+            self.widget = None
             self.proxy.container.wrapper.rebuild()
         else:
             self.proxy.container.wrapper.rebuild()
@@ -709,10 +748,10 @@ class MenuWrapper(MenuItemMixin,AbstractWrapper):
 
     def setContainer(self,container):
         if container is None:
-            if not self.noWidget():
+            if self.widget:
                 self.widget.destroy()
             return
-        if container.wrapper.noWidget():
+        if not container.wrapper.widget:
             return
         container.wrapper.rebuild()
 
@@ -730,9 +769,9 @@ class MenuWrapper(MenuItemMixin,AbstractWrapper):
         """
         if self.proxy.container is None:
             return
-        if self.proxy.container.wrapper.noWidget():
+        if not self.proxy.container.wrapper.widget:
             return
-        if self.noWidget():
+        if not self.widget:
             return
         self.widget.delete(0,'end')
         for item in self.proxy.contents:
@@ -745,10 +784,10 @@ class MenuBarWrapper(MenuWrapper):
 
     def setContainer(self,container):
         if container is None:
-            if not self.noWidget():
+            if self.widget:
                 self.widget.destroy()
             return
-        if container.wrapper.noWidget():
+        if not container.wrapper.widget:
             return
         self.createIfNeeded()
         container.wrapper.widget.configure(menu=self.widget)

@@ -14,7 +14,10 @@ class Attrib:
         self._getstack=[]
         defaults = getattr(self, 'state', {})
         self.state = defaults.copy()
-        self.set(*args, **kwds) # Hm...
+        self.set(*args, **kwds)
+        # @@@ should this really be here, I think I would be better
+        # factored out and be responsability of the subclasses to call this,
+        # for examples for proxies it generates a redundant push
 
     def push(self, *names): pass
 

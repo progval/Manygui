@@ -22,25 +22,26 @@ The only methods that should be explicitly called by the Proxy are:
 
 """
 
-def isDummy(obj):
-    try: return obj.isDummy()
-    except AttributeError: return 0
-
-class DummyWidget:
-    """
-    A dummy object used when a wrapper currently has no native widget
-    instantiated.
-    """
-    def isDummy(self): return 1
-
-    def __call__(self, *args, **kwds): pass
-
-    def __getattr__(self, name): return DummyWidget() # DummyObject?
-
-    def __setattr__(self, name, value): pass
-
-    def __str__(self): return '<DummyWidget>'
-
+##def isDummy(obj): # not needed if __nonzero__ implemented
+##    return isinstance(obj,DummyWidget)
+##
+##class DummyWidget:
+##    """
+##    A dummy object used when a wrapper currently has no native widget
+##    instantiated.
+##    """
+##    #def isDummy(self): return 1 # impossible to use/exploit
+##
+##    def __call__(self, *args, **kwds): pass
+##
+##    def __getattr__(self, name): return DummyWidget() # DummyObject?
+##
+##    def __setattr__(self, name, value): pass
+##
+##    def __str__(self): return '<DummyWidget>'
+##
+##    # perhaps def __nonzero__(self): return 0
+##
 
 class AbstractWrapper:
 
@@ -50,7 +51,7 @@ class AbstractWrapper:
     wrappers (such as ButtonWrapper etc.).
     """
 
-    widget = DummyWidget()
+    widget = None # @@@ was DummyWidget()
 
     def __init__(self, proxy):
         """
@@ -396,18 +397,7 @@ class AbstractWrapper:
         """
         # FIXME: Deal with dummy widgets...
         if application().isRunning():
-            if self.noWidget():
-            #try:
-            #    widget = self.widget
-            #except AttributeError:
-            #    widget = None
-            #try:
-            #    assert self.widget.isDummy()
-            #except (AttributeError, AssertionError):
-            #    if widget is None:
-            #        self.widget = self.widgetFactory(*args, **kwds)
-            #        self.widgetSetUp()        
-            #else:
+            if not self.widget:
                 self.widget = self.widgetFactory(*args, **kwds)
                 self.widgetSetUp()
 
@@ -425,10 +415,10 @@ class AbstractWrapper:
         resources. This method is used by the Proxy's destroy()
         method.
         """
+        if not self.widget: return
         self.widgetTearDown()
         self.internalDestroy()
-        try: del self.widget # Restore DummyWidget
-        except AttributeError: pass
+        del self.widget # Restore None
 
     def internalDestroy(self):
         """
@@ -466,19 +456,9 @@ class AbstractWrapper:
         enableEvent) are removed.
         """
 
-    def noWidget(self):
-        """
-        Returns true if this wrapper's widget has not yet been
-        created by the backend (i.e. it doesn't exist, or is
-        a DummyWidget).
-        """
-        try:
-            try:
-                widget = self.widget
-            except AttributeError:
-                return 1
-            assert(widget.isDummy())
-            return 1
-        except (AttributeError,AssertionError):
-            return 0
-
+##    def noWidget(self):
+##        """
+##        Returns true if this wrapper's widget has not yet been
+##        created by the backend.
+##        """
+##        return isDummy(self.widget) # perhaps not self.widget

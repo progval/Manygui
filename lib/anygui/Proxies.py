@@ -4,10 +4,14 @@ class Proxy(Attrib):
 
     # TBD: Add docstring for class
 
+    _wrapper_set = 0 # FIXME: if set get refactored out from Attrib.__init__
+                     # it would be no longer necessary
+
     def __init__(self, *args, **kwds):
         Attrib.__init__(self, *args, **kwds)
         self.rawSet(container=None)
-        self.rawSet(wrapper=self.wrapperFactory()) # wrapper in state?
+        self.rawSet(wrapper=self.wrapperFactory()) # wrapper in state ?
+        self._wrapper_set = 1 # FIXME
         self.push() # Hm... Move to wrapper.internalProd?
 
     def wrapperFactory(self):
@@ -49,14 +53,11 @@ class Proxy(Attrib):
         Upon return, the Proxy updates its own state dictionary
         with the result.
         """
-        try:
-            # Never pull if our widget is a dummy - we need
-            # to keep all proxy state until a real widget
-            # exists.
-            assert self.wrapper.widget.isDummy()
-            return
-        except (AttributeError, AssertionError):
-            pass
+        if not self._wrapper_set: return
+        # Never pull if our widget is non-existent - we need
+        # to keep all proxy state until a real widget
+        # exists.
+        if not self.wrapper.widget: return
         state = self._partialState(*names)
         self.wrapper.pull(state)
         self.state.update(state)
@@ -72,7 +73,7 @@ class Proxy(Attrib):
         mentioned. (Whether this is done or not is not defined as part
         of the interface.) If no names are supplied, all state
         variables must be supplied. If names are supplied, these must
-        at a minimum be supplied. Before Proxy/Wrapper
+        at a minimum be supplied. # @@@ unused Before Proxy/Wrapper
         synchronisation, the internalPush method is called.
 
         There is one exception to the above:
@@ -84,21 +85,19 @@ class Proxy(Attrib):
         """
         # We may need to modify names, so...
         names = list(names)
-        self.internalPush(names) # @@@ May no longer be needed
-        try:
-            assert(self.wrapper)
-        except (AttributeError,AssertionError):
-            return
+        ## @@@ unused self.internalPush(names) # @@@ May no longer be needed
+        if not self._wrapper_set: return
         self.wrapper.push(self._partialState(*names,**kwds))
 
-    def internalPush(self, names): # @@@ May no longer be needed!
-        """
-        Used for internal synchronisation in the Proxy.
-
-        This method is especially important for dealing with aliased
-        attributes (e.g. position being an alias for (x, y)). It
-        should be implemented by subclasses, if needed.
-        """
+## @@@ unused
+##    def internalPush(self, names): # @@@ May no longer be needed!
+##        """
+##        Used for internal synchronisation in the Proxy.
+##
+##        This method is especially important for dealing with aliased
+##        attributes (e.g. position being an alias for (x, y)). It
+##        should be implemented by subclasses, if needed.
+##        """
 
     def enableEvent(self, event):
         """
@@ -112,8 +111,8 @@ class Proxy(Attrib):
         """
         # FIXME: try/except not really acceptable... (Create backlog?
         # Rearrange __init__ stuff to avoid loop?
-        try: self.wrapper.enableEvent(event)
-        except AttributeError: pass
+        if not self._wrapper_set: return
+        self.wrapper.enableEvent(event)
 
     def destroy(self):
         """
@@ -122,4 +121,5 @@ class Proxy(Attrib):
         This is used by the application programmer in the occasions
         where a native widget must be explicitly destroyed.
         """
+        assert self._wrapper_set,"?! absent wrapper in proxy" # @@@ can wrapper be absent/non set?
         self.wrapper.destroy()
