@@ -1,3 +1,6 @@
+There seems to be some infinite recursion associated with
+the text components in javagui.
+
 For some reason, it's impossible to set the width of the
 window in test_textchange below a certain value...
 
