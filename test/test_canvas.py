@@ -2,7 +2,8 @@ from anygui import *
 from anygui.Colors import *
 
 # Only javagui implements this so far:
-from anygui.backends.javagui import Canvas
+#from anygui.backends.javagui import Canvas
+from anygui.backends.tkgui import Canvas
 
 app = Application()
 win = Window(size=(300,300))

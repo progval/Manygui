@@ -104,6 +104,76 @@ class ComponentMixin:
 
 ################################################################
 
+# NOTE: This is not finished!
+
+class Canvas(ComponentMixin, AbstractCanvas):
+
+    # TODO: Add native versions of other drawing methods
+
+    # FIXME: Has to store figures until backend component is
+    #        created...
+
+    _tk_class = Tkinter.Canvas
+
+    def __init__(self, *args, **kwds):
+        AbstractCanvas.__init__(self, *args, **kwds)
+        self._items = []
+
+    def _ensure_create(self):
+        result = ComponentMixin._ensure_create(self)
+        self._tk_comp.configure(background='white')
+        return result
+
+    def clear(self):
+        if self._tk_comp:
+            map(self._tk_comp.delete, self._item_ids)
+
+    def flush(self):
+        if self._tk_comp:
+            Tkinter.Canvas.update(self._tk_comp)
+
+    def drawPolygon(self, pointlist,
+                    edgeColor=None, edgeWidth=None, fillColor=None, closed=0):
+        if edgeColor is None:
+            edgeColor = self.defaultLineColor
+        if edgeWidth is None:
+            edgeWidth = self.defaultLineWidth
+        if fillColor is None:
+            fillColor = self.defaultFillColor
+
+        edgeColor = _convert_color(edgeColor)
+        fillColor = _convert_color(fillColor)
+
+        if closed:
+            # FIXME: Won't work until component is created!
+            item = self._tk_comp.create_polygon(pointlist,
+                                                fill=fillColor,
+                                                width=edgeWidth,
+                                                outline=edgeColor)
+        else:
+            if fillColor == '':
+                d = {'fill': edgeColor, 'width': edgeWidth}
+                item = apply(self._tk_comp.create_line, pointlist, d)
+            else:
+                item = self._tk_comp.create_polygon(pointlist,
+                                                    fill=fillColor,
+                                                    outline='')
+                self._items.append(item)
+                d = {'fill': edgeColor, 'width': edgeWidth}
+                item = apply(self.create_line, pointlist, d)
+
+        self._items.append(new_item)
+
+def _convert_color(c):
+    if c is None:
+        if c is Colors.transparent:
+            return ''
+        else:
+            return '#%02X%02X%02X' % \
+                   (int(c.red*255), int(c.green*255), int(c.blue*255))
+
+################################################################
+
 class Label(ComponentMixin, AbstractLabel):
     #_width = 100 # auto ?
     #_height = 32 # auto ?

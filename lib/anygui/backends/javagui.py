@@ -193,6 +193,9 @@ class Canvas(ComponentMixin, AbstractCanvas):
         g2.setPaint(p)
         self._offscreen = img
 
+    def flush(self): # FIXME: Do something useful :)
+        pass
+
     def drawPolygon(self, pointlist,
                     edgeColor=None, edgeWidth=None, fillColor=None, closed=0):
         if edgeColor is None:

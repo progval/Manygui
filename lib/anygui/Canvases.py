@@ -8,6 +8,9 @@ figureLine = 1
 figureArc = 2
 figureCurve = 3
 
+# FIXME: Should include "vcr" functionality, and use a call to
+#        _ensure_graphics in backend.
+
 class AbstractCanvas(AbstractComponent, Defaults.Canvas):
 
     """This is the base class for a drawing canvas.  The backend
