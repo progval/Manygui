@@ -1443,7 +1443,7 @@ class Application(AbstractApplication):
         # Present the initial help screen, without which the
         # UI remains forever mysterious.
         global _inithelp
-        if not _inithelp and not os.environ['ANYGUI_CURSES_NOHELP']:
+        if not _inithelp and not os.getenv('ANYGUI_CURSES_NOHELP', 0):
             HelpWindow()
             _inithelp = 1
 
