@@ -1,41 +1,65 @@
 
-import re
-name_pat = re.compile('[a-zA-Z_][a-zA-Z_0-9]*')
-
 class IllegalState(Exception): pass
 
-class Rule:    
-    def __init__(self, ruleString):
-        assert '"' not in ruleString and "'" not in ruleString
-        name, expr = ruleString.split('=', 1)
-        self.name = name.strip()
-        self.expr = compile(expr.strip(), '', 'eval')
-        self.deps = name_pat.findall(expr)
-    def fire(self, scope):
-        name = self.name
-        value = eval(self.expr, globals(), scope)
-        scope[name] = value
+# TODO:
+# - Add generic split/join mechanism etc.
+# State checking:
+# - If no def-names are given (full update), check that
+#   there are no discrepancies between aggregates and their atomic
+#   components
+# - If def-names are given, for any discrepancies between atomic
+#   components and aggregates, check that only either (1) the
+#   aggregate is being redefined, or (2) one or more of the atomic
+#   components of the aggregate (must include all the discrepant ones)
+#   are being redefined
 
-class RuleEngine:
-    """
-    A simple rule engine which can maintain relationships between a
-    set of key/value pairs in a dictionary.
-    """
+def addSubKey(dict, key, subkey):
+    dict.setdefault(key, {})[subkey] = 1
+
+class AggregateRuleEngine:
     
     def __init__(self):
+        self.parts = {}
+        self.whole = {}
         self.rules = {}
-        self.affected = {}
-        
-    def addRule(self, ruleString):
-        rule = Rule(ruleString)
-        name = rule.name
-        try: self.rules[name].append(rule)
-        except KeyError: self.rules[name] = [rule]
 
-    def setAffected(self, name, affected):
-        self.affected[name] = affected
-        
-    def adjust(self, vals, defs):
+    def add(self, rule):
+        """
+        Add a rule to the rule engine.
+
+        The rule must be a string of the form 'x = y, z, w' with a
+        single name on the left hand side of the assignment, and a
+        tuple (without parentheses) of names on the right hand side.
+        """
+        whole, parts = rule.split('=')
+        whole = whole.strip()
+        rule = []
+        for part in parts.split(','):
+            part = part.strip()
+            rule.append(part)
+            addSubKey(self.whole, part, whole)
+            addSubKey(self.parts, whole, part)
+        self.rules[whole] = rule
+    
+    def sync(self, state, defs):
+        undef = {}
+        for name in defs:
+            for whole in self.whole[name].keys():
+                undef[whole] = 1
+            for part in welf.parts[name].keys():
+                undef[part] = 1
+
+        # Add inconsistency checks here
+        # (Possibly also below -- if an "illegal" computation causes
+        # no change, there is no problem.)
+
+        stable = 0
+        while undef and not stable:
+            stable = 1
+            for name in undef.keys():
+                # ...
+
+        """
         undef = {}
         for name in defs:
             for dep in self.affected[name]:
@@ -55,3 +79,4 @@ class RuleEngine:
                         del undef[name]
                         break
         return undef.keys()
+        """

@@ -31,7 +31,7 @@ Objectives for version 0.2a1:
 
 New Components:
 
-- Menus (including popup menus?)
+- Menus (including popup menus)
   
 - Dialogs, including native dialogs (file dialog etc.)
 
@@ -77,6 +77,8 @@ Objectives for version 0.2a3:
   "shrink-wrapping" of windows and frames that aren't
   given an explicit size; will require a "preferred
   size" for all widgets, based on font sizes etc.
+
+* Fix the setup() mechanism.
 
 * Implement "full" event list
 
