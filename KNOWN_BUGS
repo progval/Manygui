@@ -1,5 +1,3 @@
-beosgui does not support BooleanModel yet.
-
 Tabbing between fields and/or other controls doesn't work
 in mswgui.
 
@@ -34,6 +32,9 @@ programmatically.
 
 test/test.py crashes under systems where more than one application
 object is not permitted.  [beosgui and wxgui]
+
+Using the global Command-Q (Alt-Q under x86?) causes a thread related
+error under beosgui.
 
 RadioGroups don't work properly under BeOS.  BeOS will not allow
 multiple groups within the one view - hence, at this stage, all radio
