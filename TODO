@@ -9,7 +9,7 @@ Tentative release date: December 10th, 2001
   mechanism
 
 * Simplify the widget API by detaching models, using
-  signals
+  signals. (Also fix "value" vs "on" in ToggleButtons)
 
 * Adjust defaults, and improve window staggering
 
