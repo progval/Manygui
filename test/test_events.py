@@ -61,7 +61,7 @@ Loop blocking:
 >>> t = Test()
 >>> s = Test()
 >>> connect(Event(), t.handle, weak=1)
->>> dispatch(Event(source=s))
+>>> dispatch(Event(source=s, tag='debug'))
 Handled!
 >>> dispatch(Event(source=t))
 >>> disconnect(Event(), t.handle)

@@ -2,11 +2,8 @@
 ''' Event framework for Anygui. For more information, see Anygui
     IRFC 0010 at http://anygui.sf.net/irfc.
 
-    Magnus Lie Hetland, 2001-11-16
+    Magnus Lie Hetland, 2001-11-19
 '''
-
-# TBD (?): Add callbacks to CallableReference and implement
-# RefValueList, so weeding won't be necessary in dispatch()
 
 __all__ = '''
 
@@ -27,13 +24,12 @@ from References import ref, RefKeyDictionary
 registry = RefKeyDictionary()
 source_stack = []
 
-# Internal wildcard key
 class Any: pass
-Any = Any()
+any = Any()
 
 def locators(event, weak=0):
-    src = ref(getattr(event, 'source', Any), weak)
-    type = getattr(event, 'type', Any)
+    src = ref(getattr(event, 'source', any), weak)
+    type = getattr(event, 'type', any)
     return src, type
 
 def connect(event, handler, weak=0):
@@ -62,9 +58,9 @@ def lookup(event):
     source, type = locators(event)
     lists = []
     sources = [source]
-    if source() is not Any: sources.append(ref(Any, weak=0))
+    if source() is not any: sources.append(ref(any, weak=0))
     types = [type]
-    if type is not Any: types.append(Any)
+    if type is not any: types.append(any)
     for s in sources:
         for t in types:
             try:
