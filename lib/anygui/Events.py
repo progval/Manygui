@@ -26,6 +26,7 @@ __all__ = '''
 categories = BOTH, SOURCE, TYPE, ANON = range(4)
 registry   = {}, {}, {}, {}
 
+import time
 from Utils import WeakMethod, HashableWeakRef
 ref = HashableWeakRef
 
@@ -76,6 +77,8 @@ def dispatch(event):
     'Call the appropriate event handlers with event as the argument.'
     source_stack.append(id(getattr(event, 'source', None)))
     try:
+        if not hasattr(event, 'time'):
+            event.time = time.time()
         event.freeze()
         cat1, key = locators(event)
         src, type = key
@@ -125,7 +128,7 @@ class Event:
     def freeze(self):
         if not self.__frozen:
             self.__frozen = 1
-    def match(self, other): # Should Event(source=s).match(Event()) == 1 etc. too?
+    def match(self, other):
         """
         Match another event if it has the same type and source as self.
         Ignore either type or source or both if self doesn't have them.
@@ -146,7 +149,10 @@ class CallbackAdapter:
         If self has a proper callback, call it, then call global
         dispatch().
         '''
-        event.source = self
+        if not hasattr(event, 'source'):
+            event.source = self
+        if not hasattr(event, 'time'):
+            event.time = time.time()
         event.freeze()
         callback = getattr(self, event.type, None)
         if callback:
