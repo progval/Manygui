@@ -190,7 +190,7 @@ class TextField(ComponentMixin, AbstractTextField):
 
     def _ensure_selection(self):
         if self._wx_comp:
-            start, end = self.selection
+            start, end = self._selection
             self._wx_comp.SetSelection(start, end)
 
     def _ensure_editable(self):
@@ -229,7 +229,7 @@ class TextArea(ComponentMixin, AbstractTextArea):
 
     def _ensure_selection(self):
         if self._wx_comp:
-            start, end = self.selection
+            start, end = self._selection
             self._wx_comp.SetSelection(start, end)
 
     def _ensure_editable(self):
