@@ -19,6 +19,7 @@ from anygui.Applications import AbstractApplication
 from anygui.Wrappers import AbstractWrapper
 from anygui.Events import *
 from anygui import application
+from anygui.Utils import log, setLogFile, logTraceback
 
 ################################################################
 from dynwin import windll, structob, gencb
@@ -88,9 +89,8 @@ PBM_SETPOS=WM_USER+2
 PBM_SETRANGE=WM_USER+1
 
 GetLastError = kernel32.GetLastError
-_verbose=1
+_verbose=0
 if _verbose:
-    from anygui.Utils import log, setLogFile
     setLogFile('/tmp/dbg.txt')
 
 def _lastErrorMessage(n=None):
@@ -202,8 +202,7 @@ class ComponentWrapper(AbstractWrapper):
         except AttributeError:
             pass
         except:
-            import traceback
-            traceback.print_exc(1)
+            logTraceback(1)
         return l,t,w,h
 
     def setX(self,x):
@@ -561,6 +560,49 @@ class FrameWrapper(ComponentWrapper,ContainerMixin):
         # Proxy handles resizing.
         pass
 
+
+class Resource:
+    inline = None
+    def __init__(self,text=None,suffix='.bmp',kind='bitmap'):
+        self.text = text
+        self.suffix = suffix
+        self.kind = kind
+        self._handle = None
+
+    def _fn2handle(self,fn):
+        if self.kind=='bitmap':
+            try:
+                self._handle = user32.LoadImage(0,windll.cstring(fn),
+                    IMAGE_BITMAP,0,0,LR_DEFAULTSIZE|LR_LOADFROMFILE)
+            except:
+                logTraceback(0)
+                from anygui.backends.dwgui import _lastErrorMessage 
+                log(_lastErrorMessage())
+
+    def handle(self):
+        if not self._handle:
+            if self.inline:
+                import zlib, base64, tempfile, os
+                fn = tempfile.mktemp(self.suffix)
+                if _verbose: log('resource:','fn',fn,'kind',self.kind)
+                open(fn,'wb').write(zlib.decompress(base64.decodestring(self.text)))
+                try:
+                    self._fn2handle(fn)
+                finally:
+                    os.remove(fn)
+            else:
+                self._fn2handle(self.text)
+        if _verbose: log('resource:','-->',self._handle)
+        return self._handle
+
+    def __del__(self):
+        if self._handle:
+            if self.kind=='bitmap':
+                gdi32.DeleteObject(self._handle)
+
+class inlineResource(Resource):
+    inline = 1
+
 ##################################################################
 class ImageWrapper(ComponentWrapper):
     _win_style = WS_CHILD | WS_VISIBLE
@@ -568,29 +610,27 @@ class ImageWrapper(ComponentWrapper):
 
     def _WM_PAINT(self, hwnd, msg, wParam, lParam):
         if not self.widget: return
-        if _verbose: log('in dwImage _WM_PAINT')
+        if _verbose: log('Image _WM_PAINT self.__dict__',self.__dict__)
         r = ComponentWrapper._WM_PAINT(self, hwnd, msg, wParam, lParam)
         self.draw()
         return r
 
     def draw(self,*arg,**kw):
-        if not self.widget: return
+        if _verbose: log('Image.draw',self.widget,self._image)
+        if not self.widget or not self._image: return
         dc = user32.GetDC(self.widget)
-        name = windll.cstring('/python/rlextra/distro/demo/RLImage.bmp')
-        if _verbose: log('in draw widget=%s dc=%s dim=%sx%s' % (hex(self.widget),hex(dc),self.proxy.width,self.proxy.height))
-        try:
-            bmp=user32.LoadImage(0,name,IMAGE_BITMAP,0,0,LR_DEFAULTSIZE|LR_LOADFROMFILE)
-        except:
-            import traceback
-            traceback.print_exc()
-            from anygui.backends.dwgui import _lastErrorMessage 
-            log(_lastErrorMessage())
         memdc = gdi32.CreateCompatibleDC(dc)
-        old = gdi32.SelectObject(memdc,bmp)
+        if _verbose: log('Image.draw dc, memdc',dc,memdc)
+        old = gdi32.SelectObject(memdc,self._image.handle())
         gdi32.BitBlt(dc,0,0,self.proxy.width,self.proxy.height,memdc,0,0,0x00CC0020)
         gdi32.SelectObject(memdc,old)
         gdi32.DeleteDC(memdc)
-        gdi32.DeleteObject(bmp)
+
+    def setImage(self,image):
+        self._image = image
+
+    def getImage(self):
+        return self._image
 
 class WindowWrapper(ContainerMixin,ComponentWrapper):
     _win_style = WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN
