@@ -1,5 +1,5 @@
-#_backends = 'msw gtk java wx tk beos qt curses text'
-_backends = 'java msw wx qt tk'
+_backends = 'msw gtk java wx tk beos qt curses text'
+#_backends = 'java msw wx qt tk'
 
 # 20020208:mlh -- starting to experiment with new architecture
 __all__ = """

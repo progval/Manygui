@@ -1,4 +1,7 @@
 # TODO: Use unittest
+import sys
+sys.exit('test_interface is not currently pertinent')
+
 from anygui.Utils import log
 
 import anygui

@@ -1,3 +1,5 @@
+import sys
+sys.exit('test_component is not currently pertinent')
 
 from unittest import TestCase, main
 
