@@ -99,7 +99,7 @@
     installation (because you don't have it installed or something
     similar). However, at times this may not be the reason; it may
     simple be that a given backend contains a bug. To track down the
-    bug, set the <code>ANYGUI_WISHLIST</code> to some true (in a
+    bug, set the <code>ANYGUI_DEBUG</code> to some true (in a
     <name>Python</name> sense) value. (If the value supplied can be
     converted to an integer, it will. Otherwise, it will be treated as
     a string.) This will make <name>Anygui</name> print out the stack
