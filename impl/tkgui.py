@@ -4,12 +4,13 @@
 
 viable = 0
 try:
-   from Tkinter import *
-   viable = 1
+    from Tkinter import *
+    viable = 1
+
+    class Window(Tk):
+        'Dummy implementation'
+        def __init__(self, title):
+            Tk.__init__(self)
+
 except:
    pass
-
-class Window(Tk):
-    'Dummy implementation'
-    def __init__(self, title):
-        Tk.__init__(self)
