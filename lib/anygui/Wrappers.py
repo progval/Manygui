@@ -23,12 +23,6 @@ The only methods that should be explicitly called by the Proxy are:
 # TODO:
 # - Add attribute dependencies, i.e. (text -> selection) etc.
 # - Fix use of dir() to get attributes/methods... ("Broken" until 2.2)
-# - The specificity sort (in Utils) simply counts 'And' -- should work
-#   like the splitting itself (if that mechanism is kept)
-# - Check for the presence of 'And' in attributes (raise exception) or
-#   similar stuff (for other mechanisms)
-# - Find new setter dispatch mechanism, possibly doing any introspection
-#   as preprocessing
 
 class AbstractWrapper:
 
@@ -45,14 +39,73 @@ class AbstractWrapper:
         If the main loop has been entered already, the Wrapper will
         prod itself. Otherwise, the Proxy should call prod() at some
         later point, when the event loop has been entered.
+
+        The constructor sets up the self.aggregates dictionary with
+        aggregate setters, by calling the setAggregate
+        method. Subclasses wanting to add (or override) aggregates
+        should use the same method.
         """
         # TODO: Add to list of wrappers that need to be prodded...
         #       (In Application, e.g. addWrapper?)
         #       Should the Wrapper realy prod itself?
         self.proxy = proxy
         self.widget = None
+
+        self.aggregates = {}
+        self.setAggregate('position', ('x', 'y'))
+        self.setAggregate('size', ('width', 'height'))
+        self.setAggregate('geometry', ('x', 'y', 'width', 'height'))
+
         self.inMainLoop = 0
-        if application().isRunning(): self.prod()
+        self.prod()
+
+    def setAggregate(self, name, signature):
+        """
+        Sets the signature of an aggregate setter function.
+
+        The resulting mapping is used by getSetters() during setter
+        dispatch in update().        
+        """
+        self.aggregates[setter] = setter
+
+    def getSetters(self, attrs):
+        """
+        Returns a pair (setters, unhandled) where setters is a
+        sequence of the form [(setter, attrs), ...] and unhandled is a
+        sequence of unhandled attributes.
+
+        Each pair (setter, attrs) consists of a setter method and the
+        names of the attributes it uses. When finding the set of
+        setters, more specific aggregate setters (that can set more
+        than one attribute) are preferred over less specific ones. For
+        instance, if both 'x' and 'y' are found in the attrs argument,
+        and there is an aggregate setter such as setPosition that
+        handles both, it will be preferred over setX and setY
+        individually. The dictionary self.aggregates is used to find
+        such aggregate setters.
+        """
+        result = []
+        candidates = self.aggregates.items()
+        def moreSpecific(aggr1, aggr2):
+            return cmp(len(aggr1[0]), len(aggr2[0]))
+        # Get the aggregates:
+        candidates.sort(moreSpecific)
+        for candidate in candidates:
+            for attr in candidate[0]:
+                if not attr in attrs: break
+            else:
+                for attr in candidate[0]: attrs.remove(attr)
+                result.append(attr[1], attr[0])
+        # Get the plain setters:
+        unhandled = []
+        for attr in attrs:
+            setter = getSetter(self, attr)
+            if setter is not None:
+                result.append(setter, (attr,))
+            else:
+                unhandled.append(attr)
+
+        return result, unhandled
     
     def update(self, state):
         """
@@ -66,6 +119,7 @@ class AbstractWrapper:
         supplied. If no native widget has been created, this method
         will have no effect.
 
+        # [Rewrite this:]
         The default implementation automatically looks for setter
         methods in the Wrapper object (with the function
         anygui.Utils.getSetters). This will find the most specific set
@@ -110,10 +164,10 @@ class AbstractWrapper:
         """
         if application().isRunning() and not self.inMainLoop:
             self.inMainLoop = 1
-            self.enterMainloop()
+            self.enterMainLoop()
         self.internalProd()
 
-    def enterMainloop(self):
+    def enterMainLoop(self):
         """
         Make the adjustments needed when entering the main event loop.
 

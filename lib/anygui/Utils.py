@@ -16,6 +16,8 @@ def flatten(seq):
         result += flatten(item)
     return result
 
+# --------------------------------------------------------------------
+
 def setterName(attribute):
     return 'set' + capitalizeAttribute(attribute)
 
@@ -131,6 +133,8 @@ def getSetters(obj, attrs):
 
 def getGetter(obj, attr):
     return getattr(obj, getterName(attr), None)
+
+# --------------------------------------------------------------------
 
 class Bunch:
     def __init__(self, **kwds):
