@@ -161,6 +161,8 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
         if self.on:
             # XXX: Hack!
             #self.do_action()
+            if self.group is not None:
+                self.group.value = self.value
             send(self, 'click')
 
 ################################################################
