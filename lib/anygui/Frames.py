@@ -182,6 +182,7 @@ class AbstractFrame(AbstractComponent, Defaults.Frame):
     def resized(self, dw, dh):
         for c in self._contents:
             c.container_resized(dw, dh)
+            c.resized(c._width,c._height)
 
     def _add(self, comp):
         self._contents.append(comp)

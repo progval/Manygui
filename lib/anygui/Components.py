@@ -70,12 +70,19 @@ class AbstractComponent(Attrib, CallbackAdapter):
         "Return the current vertical position."""
         return self._y
 
+    def resized(self,dw,dh):
+        """ Do any necessary resizing of contents. Only relevant for
+        Frames and Windows, but provided here to allow Frames and
+        Windows to easily resize their contents. """
+        pass
+
     def _set_width(self, w):
         """Set a new width."""
         if w == self._width:
             return
         self._width = w
         self._ensure_geometry()
+        self.resized(self._width,self._height)
 
     def _get_width(self):
         "Return the current width."""
@@ -87,6 +94,7 @@ class AbstractComponent(Attrib, CallbackAdapter):
             return
         self._height = h
         self._ensure_geometry()
+        self.resized(self._width,self._height)
 
     def _get_height(self):
         "Return the current height."""
@@ -99,6 +107,7 @@ class AbstractComponent(Attrib, CallbackAdapter):
         self._width = w
         self._height = h
         self._ensure_geometry()
+        self.resized(self._width,self._height)
 
     def _get_size(self):
         """Return the current size."""
@@ -125,6 +134,7 @@ class AbstractComponent(Attrib, CallbackAdapter):
         self._width = w
         self._height = h
         self._ensure_geometry()
+        self.resized(self._width,self._height)
 
     def _get_geometry(self):
         """Return position and size."""
