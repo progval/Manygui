@@ -2,7 +2,7 @@ from anygui import application
 from anygui.Frames import AbstractFrame
 from anygui.Exceptions import UnimplementedMethod
 from anygui import Defaults
-import inspect
+#import inspect
 
 class AbstractWindow(AbstractFrame, Defaults.Window):
 

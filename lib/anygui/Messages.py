@@ -49,8 +49,7 @@ indicate the sender object and signal name.
 
 """
 
-import Utils
-ref = Utils.import_weakref().ref
+from weakref import ref
 
 class MessageException:
     """ Exception raised when a message can't be delivered. """

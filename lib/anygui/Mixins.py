@@ -1,9 +1,7 @@
 "Mixins: mix-in classes for the anygui package"
 
 from Exceptions import SetAttributeError, GetAttributeError
-import Utils
-
-weakref = Utils.import_weakref()
+import weakref
 
 class Attrib:
     """Attrib: mix-in class to support attribute getting & setting
