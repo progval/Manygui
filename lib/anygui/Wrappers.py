@@ -75,6 +75,7 @@ class AbstractWrapper:
         self.setAggregateSetter('geometry', ('x', 'y', 'width', 'height'))
 
         self.aggregateGetters = {}
+        self.setAggregateGetter('geometry', ('x', 'y', 'width', 'height'))
 
         self.constraints = []
 
@@ -277,11 +278,14 @@ class AbstractWrapper:
 
             if names:
                 # This getter is good for one or more names.
-                setter = getSetter(self, candidate[1])
-                if setter is not None:
-                    result.append((setter, candidate[0]))
+                getter = getGetter(self, candidate[1])
+                if getter is not None:
+                    result.append((getter, candidate[0]))
                     for attr in names:
-                        unhandled.remove(attr)
+                        try:
+                            unhandled.remove(attr)
+                        except ValueError:
+                            pass
 
         return result, unhandled
 
