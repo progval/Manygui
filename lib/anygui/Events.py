@@ -5,8 +5,6 @@
     Magnus Lie Hetland, 2001-11-16
 '''
 
-# Dispatch-loop blocking not yet implemented
-
 __all__ = '''
 
     connect
@@ -62,15 +60,25 @@ def compatible(cat, filter):
     elif cat == ANON:
         return filter == ANON
 
+''' Sources sending events. '''
+source_stack = []
+
 def dispatch(event):
     'Call the appropriate event handlers with event as the argument.'
-    event.freeze()
-    cat1, key = locators(event)
-    for cat2 in categories:
-        if not compatible(cat1, cat2): continue
-        handlers = registry[cat][key]
-        for handler in handlers:
-            handler(event)
+    global source_stack
+    source_stack.append(getattr(event,'source',None))
+    try:
+        event.freeze()
+        cat1, key = locators(event)
+        for cat2 in categories:
+            if not compatible(cat1, cat2): continue
+            src, type = key
+            if src in source_stack: continue
+            handlers = registry[cat][key]
+            for handler in handlers:
+                handler(event)
+    finally:
+        del source_stack[-1]
 
 def disconnectSource(source):
     'Disconnect all handlers connected to a given source.'
