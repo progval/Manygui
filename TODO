@@ -4,31 +4,18 @@ The Big Picture:
 
 Release 0.1: Basic functionality and main API
 
-Release 0.2: Refactoring, menus, full event set,
-             more complete functionality
+Release 0.2: Refactoring, menus, full event set, graphics,
+             native dialogs; more complete functionality
 
 Release 0.3: Less API change, focus on robustness
              and stability
 
 Remaining objectives for version 0.1:
 -------------------------------------
-Tentative release date: December 10th, 2001
+Tentative release date: Mid-December, 2001
 
-* Make sure all widgets support _ensure_text etc. in all
+* Fix remaining bugs and make sure the tests work in all
   backends
-
-* Simplify the widget API by detaching models, using
-  signals, update() and the Assignee protocol. (This
-  may also be useful for LayoutManager code.)
-
-* Change add() argument structure.
-
-* Adjust defaults, and improve window staggering
-  (needs a mechanism to find the top window)
-
-* Update default wishlist to reflect new backends.
-
-* Document special controls for cursesgui/textgui.
 
 Objectives for version 0.2:
 ---------------------------
@@ -43,6 +30,9 @@ Tentative release date: February 28th, 2002
   Methods like _tk_clicked, which contain no backend-specific
   code, should be lifted to the front-end, and linked to
   event triggers in the backend's _ensure_events.
+
+* Adjust defaults, and improve window staggering
+  (needs a mechanism to find the top window)
 
 * Add support for __delattr__ (in the form of _del_foobar)
   in Mixins.Attrib, and make sure it's used where applicable
@@ -64,6 +54,8 @@ Tentative release date: February 28th, 2002
 * Add a Canvas widget for full graphics support
 
 * Add an optional status bar to Window
+
+* Change add() signature?
 
 Longer term goals:
 ------------------
