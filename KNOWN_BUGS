@@ -44,8 +44,7 @@ test/test_textarea.py : under BeOS, both text areas are placed in
 the same position.  I don't know if this is a textarea or place bug.
 
 All List- and Text- Views always have scrollbars under BeOS.
-
-The environment variables don't work as they should with jython.
+(Similar behaviour in other backends.)
 
 When using the -D switch with jython, the values (e.g. for
 ANYGUI_WISHLIST) cannot contain spaces.
