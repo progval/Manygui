@@ -43,12 +43,18 @@ class Attrib:
         else:
             return getter()
 
-    def set(self, **kwds):
+    def set(self, *args, **kwds):
+        for opt in args:
+            kwds.update(opt.__dict__)
         for name, value in kwds.items():
             setattr(self, name, value)
 
+    def __init__(self, *args, **kwds):
+        self.set(*args, **kwds)
+
+class Options:
     def __init__(self, **kwds):
-        self.set(**kwds)
+        self.__dict__.update(kwds)
 
 class Action:
     """Action: mix-in class recording a user-specified action procedure

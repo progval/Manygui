@@ -394,6 +394,8 @@
 	<line>w = Window(title='Hello, world!', size=(200,100), visible=1)</line>
       </codelisting>
       
+      <!-- Options class, and the Attrib.set() method -->
+
     </section>
 
     <section>
@@ -445,6 +447,8 @@
       horizontally (to maintain the other specifications) when the
       containing <code>Frame</code> is resized. (The vertical version
       is <code>vstretch</code>.)</para>
+
+      <!-- hmove and vmove -->
 
       <para><emphasis>Note</emphasis>: <code>add</code> and
       <code>place</code> may be merged in a future release, making
