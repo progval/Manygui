@@ -145,10 +145,23 @@ class ComponentWrapper(Wrapper):
            self.widget.setEnabled(enabled)
 
     def setText(self, text):
-        pass
+        try:
+            self.widget.setText(QString(text))
+        except:
+            pass
 
     def getText(self):
-        return ""
+        try:
+            return str(self.widget.text())
+        except:
+            # Widget has no text.
+            return ""
+
+#    def setText(self, text):
+#        try: self.widget
+#
+#    def getText(self):
+#        return ""
 
     def setupChildWidgets(self):
         pass
@@ -184,16 +197,6 @@ class LabelWrapper(ComponentWrapper):
         widget = QLabel(*args, **kws)
         widget.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         return widget
-
-    def setText(self, text):
-        self.widget.setText(QString(text))
-
-    def getText(self):
-        try:
-            return str(self.widget.text())
-        except:
-            # Widget has no text.
-            return ""
 
 #==============================================================#
 
@@ -245,16 +248,6 @@ class ButtonWrapperBase(ComponentWrapper):
         if not self.connected:
             qApp.connect(self.widget,SIGNAL('clicked()'),self.clickHandler)
             self.connected = 1
-
-    def setText(self, text):
-        self.widget.setText(QString(text))
-
-    def getText(self):
-        try:
-            return str(self.widget.text())
-        except:
-            # Widget has no text.
-            return ""
 
     def clickHandler(self):
         send(self.proxy,'click')
@@ -349,7 +342,7 @@ class TextWrapperBase(ComponentWrapper):
 
     def keyPressHandler(self, event):
         if DEBUG: print 'in keyPressHandler of: ', self.widget
-        self.text = self.widget.text()
+        self.proxy.text = self.widget.text()
         #self.modify(text=self._backend_text())
         if int(event.key()) == 0x1004: #Qt Return Key Code
             send(self, 'enterkey')
@@ -377,16 +370,6 @@ class TextWrapperBase(ComponentWrapper):
         if DEBUG: print 'returning => start: %s | end: %s' %(start,end)
         return start,  end
 
-    def setText(self, text):
-        self.widget.setText(QString(text))
-
-    def getText(self):
-        try:
-            return str(self.widget.text())
-        except:
-            # Widget has no text.
-            return ""
-
 #--------------------------------------------------------------#
 
 class TextFieldWrapper(TextWrapperBase):
@@ -398,18 +381,15 @@ class TextFieldWrapper(TextWrapperBase):
         return QLineEdit(*args, **kwds)
 
     def setSelection(self, selection):
-        if DEBUG: print 'in _ensure_selection of: ', self.widget
+        if DEBUG: print 'in setSelection of: ', self.widget
         start, end = selection
         self.widget.setSelection(start, end-start)
-        self.widget.setCursorPosition(end)
-
+        
     def getSelection(self):
-        if DEBUG: print 'in _backend_selection of: ', self.widget
+        if DEBUG: print 'in getSelection of: ', self.widget
         pos = self.widget.cursorPosition()
-        if self.widget.hasMarkedText():
-            text = str(self.widget.text())
-            mtxt = str(self.widget.markedText())
-            return self.qtCalcStartEnd(text,mtxt,pos)
+        if self.widget.hasSelectedText():
+            return self.widget.getSelection()[1:] #ignore bool
         else:
             return pos, pos
 
@@ -421,67 +401,64 @@ class TextAreaWrapper(TextWrapperBase):
         TextWrapperBase.__init__(self, *args, **kws)
 
     def widgetFactory(self, *args, **kwds):
-        return QMultiLineEdit(*args, **kwds)
+        return QTextEdit(*args, **kwds)
 
     def setSelection(self, selection):
-        #QMultiLineEdit.setSelection is yet to be implemented...
-        #Hacked it so that it will work until the proper method can be used.
-        if DEBUG: print 'in _ensure_selection of: ', self.widget
+        if DEBUG: print 'in setSelection of: ', self.widget
         start, end = selection
-        srow, scol = self.qtTranslateRowCol(start)
-        erow, ecol = self.qtTranslateRowCol(end)
-        #Enter hack...
-        self.widget.setCursorPosition(srow, scol, FALSE)
-        self.widget.setCursorPosition(erow, ecol, TRUE)
-        #Exit hack...
-        #self.widget.setSelection(srow, scol, erow, ecol)
-        #self.widget.setCursorPosition(erow,ecol)
+        spara, sidx = self.qtTranslateParaIdx(start)
+        epara, eidx = self.qtTranslateParaIdx(end)
+        self.widget.setSelection(spara, sidx, epara, eidx)
 
     def getSelection(self):
-        if DEBUG: print 'in _backend_selection of: ', self.widget
-        row, col = self.widget.getCursorPosition()
-        if DEBUG: print 'cursor -> row: %s| col: %s' %(row,col)
-        pos = self.qtTranslatePosition(row, col)
+        if DEBUG: print 'in getSelection of: ', self.widget
+        para, idx = self.widget.getCursorPosition()
+        if DEBUG: print 'cursor -> para: %s| idx: %s' %(para,idx)
+        pos = self.qtTranslatePosition(para, idx)
         if DEBUG: print 'pos of cursor is: ', pos
-        if self.widget.hasMarkedText():
-            text = str(self.widget.text())
-            mtxt = str(self.widget.markedText())
-            return self.qtCalcStartEnd(text,mtxt,pos)
+        if self.widget.hasSelectedText():
+            spara, sidx, epara, eidx = self.widget.getSelection()
+            spos = self.qtTranslatePosition(spara, sidx)
+            epos = self.qtTranslatePosition(epara, eidx)
+            return spos, epos
         else:
             return pos, pos
 
-    def qtGetLines(self):
-        lines = []
+    def qtGetParagraphs(self):
+        paras = []
         if not self.noWidget():
-            for n in range(0, self.widget.numLines()):
-                lines.append(str(self.widget.textLine(n)) + '\n')
-        if DEBUG: print 'lines are: \n', lines
-        return lines
+            for n in range(self.widget.paragraphs()):
+                paras.append(str(self.widget.text(n)) + '\n')
+        if DEBUG:
+            print 'paragraphs are: \n'
+            for para in paras:
+                print para
+        return paras
 
-    def qtTranslateRowCol(self, pos):
-        if DEBUG: print 'translating pos to row/col...'
-        row, col, currRow, totLen = 0, 0, 0, 0
-        for ln in self.qtGetLines():
-            if pos <= len(str(ln)) + totLen:
-                row = currRow
-                col = pos - totLen
-                if DEBUG: print 'returning => row: %s| col: %s' %(row,col)
-                return row, col
+    def qtTranslateParaIdx(self, pos):
+        if DEBUG: print 'translating pos to para/idx...'
+        para, idx, currPara, totLen = 0, 0, 0, 0
+        for prg in self.qtGetParagraphs():
+            if pos <= len(prg) + totLen:
+                para = currPara
+                idx  = pos - totLen
+                if DEBUG: print 'returning => para: %s| idx: %s' %(para,idx)
+                return para, idx
             else:
-                currRow += 1
-                totLen += len(str(ln))
-        if DEBUG: print 'returning => row: %s| col: %s' %(row,col)
-        return row, col
+                currPara += 1
+                totLen   += len(prg)
+        if DEBUG: print 'returning => para: %s| idx: %s' %(para,idx)
+        return para, idx
 
-    def qtTranslatePosition(self, row, col):
-        if DEBUG: print 'translating row/col to pos...'
-        lines = self.qtGetLines()
+    def qtTranslatePosition(self, para, idx):
+        if DEBUG: print 'translating para/idx to pos...'
+        paras = self.qtGetParagraphs()
         pos = 0
-        for n in range(len(lines)):
-            if row != n:
-                pos += len(lines[n])
+        for n in range(len(paras)):
+            if para != n:
+                pos += len(paras[n])
             else:
-                pos += col
+                pos += idx
                 break
         if DEBUG: print 'returning pos => ', pos
         return pos
@@ -533,7 +510,7 @@ class WindowWrapper(ComponentWrapper):
         return str(self.widget.title())
 
     def resizeHandler(self, event):
-        if DEBUG: print 'in _qt_resize_handler of: ', self.widget
+        if DEBUG: print 'in resizeHandler of: ', self.widget
 
         x, y, w, h = self.getGeometry()
         dw = w - self.proxy.state['width'] # @@@ With lazy semantics, these will be fetched from the widget!
@@ -546,7 +523,7 @@ class WindowWrapper(ComponentWrapper):
         return 1
 
     def moveHandler(self, event):
-        if DEBUG: print 'in _qt_move_handler of: ', self.widget
+        if DEBUG: print 'in moveHandler of: ', self.widget
         nx = self.widget.x()
         ny = self.widget.y()
         dx = nx - self.proxy.state['x']
@@ -559,7 +536,7 @@ class WindowWrapper(ComponentWrapper):
         return 1
 
     def closeHandler(self, event):
-        if DEBUG: print 'in _qt_close_handler of: ', self.widget
+        if DEBUG: print 'in closeHandler of: ', self.widget
         # What follows is a dirty hack, but PyQt will seg-fault the
         # interpreter if a call onto QWidget.destroy() is made after
         # the Widget has been closed. It is also necessary to inform
@@ -641,17 +618,6 @@ class GroupBoxWrapper(ComponentWrapper):
         for component in self.proxy.contents:
             component.container = self.proxy
 
-    def setText(self, text):
-        self.widget.setTitle(QString(text))
-
-    def getText(self):
-        try:
-            return str(self.widget.title())
-        except:
-            # Widget has no text.
-            return ""
-
-
 #==============================================================#
 
 class MenuItemMixin:
@@ -727,9 +693,7 @@ class MenuWrapper(MenuItemMixin, ComponentWrapper):
         """
         Rebuild the entire menu structure starting from the toplevel menu.
         """
-        if self.proxy.container is None:
-            return
-        if self.noWidget():
+        if self.proxy.container is None or self.noWidget():
             return
         if self.proxy.container.wrapper.noWidget():
             return
@@ -743,13 +707,11 @@ class MenuWrapper(MenuItemMixin, ComponentWrapper):
         Rebuild the menu structure of self and all children; re-add
         self to parent.
         """
-        if self.proxy.container is None:
-            return
-        if self.proxy.container.wrapper.noWidget():
+        if self.proxy.container is None or self.proxy.container.wrapper.noWidget():
             return
 
         parent = self.proxy.container.wrapper.widget
-        #print "\nREBUILDING",self,self.proxy.contents
+        if DEBUG: print "\nREBUILDING: ", self,self.proxy.contents
         if not self.noWidget():
             self.widget.clear()
         else:
@@ -786,7 +748,7 @@ class MenuCommandWrapper(MenuItemMixin, AbstractWrapper):
         self.itemId = widget.insertItem(self.proxy.text, self.clickHandler)
 
     def clickHandler(self,*args,**kws):
-        #print "CLICKED",self
+        if DEBUG: print "CLICKED: ", self
         send(self.proxy,'click',text=self.proxy.text)
 
 class MenuCheckWrapper(MenuCommandWrapper):
