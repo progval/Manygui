@@ -1,8 +1,6 @@
 
 ''' Event framework for Anygui. For more information, see Anygui
     IRFC 0010 at http://anygui.sf.net/irfc.
-
-    Magnus Lie Hetland, 2001-11-19
 '''
 
 __all__ = '''
@@ -36,9 +34,12 @@ def connect(event, handler, weak=0):
     'Connect an event pattern to an event handler.'
     src, type = locators(event, weak)
     h = ref(handler, weak)
-    if not registry.has_key(src): registry[src] = {}
-    try: registry[src][type].append(h)
-    except KeyError: registry[src][type] = [h]
+    if not registry.has_key(src):
+        registry[src] = {}
+    if not registry[src].has_key(type):
+        registry[src][type] = []
+    if not h in registry[src][type]:
+        registry[src][type].append(h)
 
 def disconnect(event, handler):
     'Disconnect an event handler from an event pattern.'
