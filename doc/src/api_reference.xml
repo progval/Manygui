@@ -935,7 +935,7 @@
       <line>StatusBar</line>
       <line>Notebook</line>
       <line>Table</line>
-      <line>Tree</line>
+      <line>TreeBox</line>
     </codelisting>
 
   </section>
