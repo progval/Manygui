@@ -113,7 +113,19 @@ Here I am!
 
 [Other API functions]
 
-[Exceptions in handlers]
+Exception handling:
+
+>>> def faulty_handler(**kw):
+...     print 1/0
+...
+>>> s = Test()
+>>> link(s, faulty_handler)
+>>> try:
+...     send(s)
+... except:
+...     print 'Caught something'
+...
+Caught something
 
 """
 
