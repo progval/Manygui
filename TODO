@@ -10,7 +10,7 @@ Tentative release date: December 10th, 2001
 
 * Adjust defaults, and improve window staggering
 
-* Add simple Frame class
+* Add Frame to all backends
 
 * Separate layout mechanism from the Frame class (including
   the place() method), using signals
@@ -21,7 +21,8 @@ Tentative release date: December 10th, 2001
   in Mixins.Attrib, and make sure it's used where applicable
   in the various modules.
 
-* Add tags to dispatcher
+* Only import weakrefs when necessary, to allow programs not
+  using them to run in earlier versions of Python/Jython
 
 Objectives for version 0.2:
 ---------------------------
