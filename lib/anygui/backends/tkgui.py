@@ -439,6 +439,7 @@ class ListBoxWrapper(ComponentWrapper):
         self.items = []
 
     def widgetFactory(self, *args, **kws):
+        kws.setdefault('exportselection', 0)
         widget=Tkinter.Listbox(*args, **kws)
         widget.bind('<ButtonRelease-1>', self.clickHandler)
         widget.bind('<KeyRelease-space>', self.clickHandler)
