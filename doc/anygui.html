@@ -1,0 +1,1945 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>Anygui: Generic GUI for Python</title>
+<style>
+body                    { color: #000000;
+                          background-color: #ffffff;
+                          margin: 2.0cm }
+
+a:active                { color: #ff0000; }
+a:visited               { color: #551a8b; }
+a:link                  { color: #0000bb; }
+
+h1, h2, h3, h4, h5, h6,
+.author, .date          { font-family: avantgarde, sans-serif;
+                          font-weight: bold; }
+h2, h3, h4, h5, h6      { margin-left: -0.75cm; }
+
+code                    { font-family: monospace }
+.verbatim               { color: #00008b }
+h1, .author, .date      { text-align: center }
+.date                   { padding-bottom: 2cm }
+	</style>
+</head>
+<body>
+<!--
+TODO:
+
+  Describe MVC mechanism/attribute semantics. Some is experimental,
+  some is undefined (for release 0.2a0).
+-->
+<h1>Anygui: Generic GUI for Python</h1>
+<p class="author">Magnus Lie Hetland</p>
+<p class="date">June 6th, 2002</p>
+<h2>1. Introduction</h2>
+<p>
+<b>Note:</b> This version of the manual deals with
+    the upcoming 0.2 release, and is not usable with the
+    current release. Please consult the documentation in the
+    distribution itself.</p>
+<p>The <em>Python</em> standard library currently does not
+    contain any platform-independent GUI packages. It is the goal of
+    the <em>Anygui</em> project to change this situation. There
+    are many such packages available, but none has been defined as
+    <em>standard</em>, so when writing GUI programs for
+    <em>Python</em>, you cannot assume that your user has the
+    right package installed.</p>
+<p>The problem is that declaring a GUI package as standard
+    would be quite controversial. There are some packages that are
+    quite commonly available, such as <em>Tkinter</em>; but it
+    would not be practical to require all installations to include it,
+    nor would it be desirable to require all <em>Python</em> GUI
+    programs to use it, since there are many programmers who prefer
+    other packages.</p>
+<p>
+<em>Anygui</em> tries to solve this problem in a manner
+    similar to the standard <code>anydbm</code> package. There is no
+    need to choose <em>one</em> package at the expense of
+    all others. Instead, <em>Anygui</em> gives generic access to
+    several popular packages through a simple API, which makes it
+    possible to write GUI applications that work with all these
+    packages. Thus, one gets a platform-independent GUI module which
+    is written entirely in <em>Python</em>.</p>
+<p>To get the latest <em>Anygui</em> distribution, or to
+    get in touch with the developers, please visit the
+    <em>Anygui</em> website:
+    <code><a href="http://www.anygui.org">http://www.anygui.org</a></code>.</p>
+<h3>1.1 Design Goals</h3>
+<p>
+<b>A</b>. <em>Anygui</em> should be an easy
+      to use GUI package which may be used to create simple graphical
+      programs, or which may serve as the basis for more complex
+      application frameworks.</p>
+<p>
+<b>B</b>. <em>Anygui</em> should be a pure
+      <em>Python</em> package which serves as a front-end for as
+      many as possible of the GUI packages available for
+      <em>Python</em>, in a transparent manner.</p>
+<p>
+<b>C</b>. <em>Anygui</em> should include
+      functionality needed to perform most GUI tasks, but should
+      remain as simple and basic as possible.</p>
+<h3>1.2 Warning</h3>
+<p>The <em>Anygui</em> API is currently very much in flux
+      as the <em>Anygui</em> team keeps experimenting with
+      it. Because of that, incompatibilities may occur between
+      releases. The current release (0.2) should be regarded
+      as a prototype.</p>
+<h3>1.3 Tutorial</h3>
+<p>There is also a short tutorial available, which is
+      included in the installation (<code>doc/tutorial.txt</code>) and
+      is available from the website
+      (<code><a href="http://www.anygui.org">http://www.anygui.org</a></code>).</p>
+<h2>2. Installation</h2>
+<p>The <em>Anygui</em> package comes in the form of a
+    <code>gzip</code> compressed <code>tar</code> archive, a binary
+    Windows installer and as an RPM package. The Windows installer and
+    RPM package should be fairly easy to install. To install the
+    <code>tar</code> archive, it you will first have to uncompress the
+    archive. On <em>Windows</em> this can be done with
+    <em>WinZip</em>. in <em>Mac OS</em>, you can use
+    <em>StuffIt Expander</em>. In <em>Unix</em>, first move to
+    a directory where you'd like to put <em>Anygui</em>, and then
+    do something like the following:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+foo:~/python$ tar xzvf anygui-0.2.tar.gz
+</pre>
+</dd>
+</dl>
+<p>If your version of tar doesn't support the <code>z</code>
+    switch, you can do something like this:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+foo:~/python$ zcat anygui-0.2.tar.gz | tar xvf
+</pre>
+</dd>
+</dl>
+<p>Another possibility is:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+foo:~/python$ gunzip anygui-0.2.tar.gz
+foo:~/python$ tar -xvf anygui-0.2.tar
+</pre>
+</dd>
+</dl>
+<p>No matter which version you choose, you should end up with a
+    directory named <code>anygui-0.2</code>.</p>
+<h3>2.1 Running setup.py</h3>
+<p>The simple way of installing <em>Anygui</em> is to use
+      the installation script that's included in the
+      distribution. This requires <em>Distutils</em>
+      (<code><a href="http://www.python.org/sigs/distutils-sig">http://www.python.org/sigs/distutils-sig</a></code>), which is
+      included in <em>Python</em> distributions from version
+      2.0. To install the <em>Anygui</em> package in the default
+      location, simply run the setup script with the
+      <code>install</code> command:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+foo:~$ python setup.py install
+</pre>
+</dd>
+</dl>
+<p>This will install <em>Anygui</em> in your standard
+      <em>Python</em> directory structure. If you don't have
+      access to this directory (e.g. because <em>Python</em> was
+      installed by a sysadmin, and you don't have root access) you can
+      install it somewhere else with the <code>--prefix</code>
+      option:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+foo:~$ python setup.py install --prefix=${HOME}/python
+</pre>
+</dd>
+</dl>
+<h3>2.2 Doing it Manually</h3>
+<p>Since <em>Anygui</em> consists of only
+      <em>Python</em> code, nothing needs to be compiled. And the
+      only thing needed to install <em>Python</em> code is to
+      ensure that the packages and modules are found by your
+      <em>Python</em> interpreter. This is as simple as including
+      the <code>lib</code> directory of the <em>Anygui</em>
+      distribution in your <code>PYTHONPATH</code> environment
+      variable. In <code>bash</code>
+      (<code><a href="http://www.gnu.org/manual/bash/">http://www.gnu.org/manual/bash/</a></code>), you could do
+      something like this:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+foo:~$ export PYTHONPATH=$PYTHONPATH:/path/to/anygui/lib
+</pre>
+</dd>
+</dl>
+<p>To make this permanent, you should put it in your
+      <code>.bash_profile</code> file, or something equivalent. If you
+      don't want to mess around with this, and already have a standard
+      directory where you place your <em>Python</em> modules, you
+      can simply copy (or move) the <code>anygui</code> package (found
+      in <code>anygui-0.2/lib</code>) there, or possibly
+      place a symlink in that directory to the <code>anygui</code>
+      package.</p>
+<h3>2.3 Making Sure You Have a Usable GUI Package</h3>
+<p>Once you have <em>Anygui</em> installed, you'll want
+      to make sure you have a usable GUI package. This is easy to
+      check: Simply start an interactive <em>Python</em>
+      interpreter and try to execute the following:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+&gt;&gt;&gt; from anygui import *
+&gt;&gt;&gt; backend()
+</pre>
+</dd>
+</dl>
+<p>The <code>backend</code> function will return the name of
+      the backend in use. If it is neither <code>'curses'</code> nor
+      <code>'text'</code> you should be all set for making GUI
+      programs with <em>Anygui</em>. (The <code>'curses'</code>
+      and <code>'text'</code> backends use plain text to emulate
+      graphical interfaces on platforms that don't have them.)
+      <em>Anygui</em> currently supports the following
+      packages:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+PythonWin  (mswgui)    <code><a href="http://starship.python.net/crew/mhammond/win32">http://starship.python.net/crew/mhammond/win32</a></code>
+Tkinter    (tkgui)     <code><a href="http://www.python.org/topics/tkinter">http://www.python.org/topics/tkinter</a></code>
+wxPython   (wxgui)     <code><a href="http://www.wxpython.org">http://www.wxpython.org</a></code>
+Java Swing (javagui)   <code><a href="http://www.jython.org">http://www.jython.org</a></code>
+PyGTK      (gtkgui)    <code><a href="http://www.daa.com.au/~james/pygtk">http://www.daa.com.au/~james/pygtk</a></code>
+Bethon     (beosgui)   <code><a href="http://www.bebits.com/app/1564">http://www.bebits.com/app/1564</a></code>
+PyQt       (qtgui)     <code><a href="http://www.thekompany.com/projects/pykde">http://www.thekompany.com/projects/pykde</a></code>
+Curses     (cursesgui) -- used when no GUI package is available
+Plain text (textgui)   -- used if curses is not available
+</pre>
+</dd>
+</dl>
+<p>Add <code>gui</code> to name returned by the
+      <code>backend</code> function to get the full name of the
+      backend module (in the <code>anygui.backends</code>
+      package). For instance, the <code>msw</code> backend is found in
+      <code>anygui.backends.mswgui</code> module.</p>
+<p>In general, if you end up with a text-based solution,
+      <code>cursesgui</code> will be preferred over
+      <code>textgui</code>if your <em>Python</em>-installation has
+      a wrorking <code>curses</code> module. The exception is if you
+      are using <em>Anygui</em> in the interactive interpreter, in
+      which <code>textgui</code> will be preferred, to avoid
+      interfering with the terminal and locking up the interpreter
+      prompt. (If you'd like to, for some reason, you can override
+      this behaviour with the environment variable
+      <code>ANYGUI_FORCE_CURSES</code>; see the API Reference
+      below.)</p>
+<p>
+<b>BeOS Note:</b> The BeOS backend
+      (<code>beosgui</code>) is currently not fully functional, but is
+      included nonetheless.</p>
+<p>Of these, <em>Tkinter</em> is compiled in by default
+      in the <em>MS Windows</em> distribution of
+      <em>Python</em> (available from
+      <code><a href="http://www.python.org">http://www.python.org</a></code>), <em>PythonWin</em> (as
+      well as <em>Tkinter</em>) is included in the
+      <em>ActiveState</em> distribution, <em>ActivePython</em>
+      (available from <code><a href="http://www.activestate.com">http://www.activestate.com</a></code>), and
+      <em>Java Swing</em> is automatically available in
+      <em>Jython</em>, the <em>Java</em> implementation of
+      <em>Python</em>.</p>
+<p>
+<b>Note:</b> In <em>Mac OS</em> 9,
+      <em>Anygui</em> (using <em>Tkinter</em>) works with with
+      <em>Python Classic</em> and recent versions of <em>Python
+      Carbon</em>, but older versions have problems with
+      <em>Tkinter</em>.</p>
+<h2>3. Using Anygui</h2>
+<p>
+<em>Note</em>: For some examples of working
+    <em>Anygui</em> code, see the <code>test</code> and
+    <code>demo</code> directories of the distribution. Remember that
+    the test scripts are written to test certain features of
+    <em>Anygui</em>, not to represent recommended coding
+    practices.</p>
+<p>Using <em>Anygui</em> is simple; it's simply a matter of
+    importing the classes and functions you need from the
+    <code>anygui</code> module, e.g.:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+from anygui import *
+</pre>
+</dd>
+</dl>
+<p>After doing this you must create an <code>Application</code>
+    object, at least one <code>Window</code>, and probably a few
+    components such as <code>Button</code>s and
+    <code>TextField</code>s. The <code>Window</code>s are added to the
+    <code>Application</code> (through its <code>add</code> method),
+    and the various components are added to the
+    <code>Window</code>. When you have done this, you call the
+    <code>run</code> method of your <code>Application</code>
+    instance.</p>
+<dl>
+<dd>
+<pre class="verbatim">
+# Make components here
+win = Window()
+# Add components to the Window
+app = Application()
+app.add(win)
+app.run()
+</pre>
+</dd>
+</dl>
+<h3>3.1 Avoiding Namespace Pollution</h3>
+<p>Importing everything from <em>Anygui</em> (as in
+      <code>from anygui import *</code>) is fine for small programs,
+      where you're certain that there will be no name clashes. You may
+      also simply import the names you need:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+from anygui import Application, Window
+</pre>
+</dd>
+</dl>
+<p>The preferred way to use modules like this is usually to
+      avoid cluttering your namespace, by using simply
+      <code>import anygui</code>. However, if you are going to create a lot of
+      widgets, the <code>anygui</code> prefix may be
+      cumbersome. Therefore, I suggest renaming it to
+      <code>gui</code>, either with a simple assignment...</p>
+<dl>
+<dd>
+<pre class="verbatim">
+import anygui; gui = anygui
+</pre>
+</dd>
+</dl>
+<p>... or, in recent versions of <em>Python</em>:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+import anygui as gui
+</pre>
+</dd>
+</dl>
+<p>Then you can instantiate widgets like this:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+win = gui.Window()
+</pre>
+</dd>
+</dl>
+<p>The examples in this documentation use the starred import,
+      for simplicity.</p>
+<h3>3.2 Importing the Backends Directly</h3>
+<p>If you wish to import a backend directly (and "hardwire
+      it" into your program), you may do so. For instance, if you
+      wanted to use the <em>wxPython</em> backend,
+      <code>wxgui</code>, you'd replace
+      </p>
+<dl>
+<dd>
+<pre class="verbatim">
+from anygui import *
+</pre>
+</dd>
+</dl>
+<p>with</p>
+<dl>
+<dd>
+<pre class="verbatim">
+from anygui.backends.wxgui import *
+</pre>
+</dd>
+</dl>
+<p>Note that the namespace handling still works just fine:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+import anygui.backends.tkgui as gui
+</pre>
+</dd>
+</dl>
+<h3>3.3 Creating a Window</h3>
+<p>One of the most important classes in <em>Anygui</em>
+      is <code>Window</code>. Without a <code>Window</code> you have
+      no GUI; all the other widgets are added to
+      <code>Window</code>s. Knowing this, we may suspect that the
+      following is a minimal <em>Anygui</em> program (and we would
+      be right):</p>
+<dl>
+<dd>
+<pre class="verbatim">
+from anygui import *
+app = Application()
+win = Window()
+app.add(win)
+app.run()
+</pre>
+</dd>
+</dl>
+<p>This example gives us a rather uninteresting default
+      window. You may customise it by setting some of its properties,
+      like <code>title</code> and <code>size</code>:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+w = Window()
+w.title = 'Hello, world!'
+w.size = (200, 100)
+</pre>
+</dd>
+</dl>
+<p>If we want to, we can supply the widget properties as
+      keyword arguments to the constructor:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+w = Window(title='Hello, world!', size=(200,100))
+</pre>
+</dd>
+</dl>
+<h3>3.4 The set Method and the Options Class</h3>
+<p>If you want to change some attributes of a widget, you can
+      either just set them directly, or (if you'd like to set several
+      at once), use the <code>set</code> method, just like the
+      constructor:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+w.set(title='Hello, again', size=(300,200))
+</pre>
+</dd>
+</dl>
+<p>Supplying the same attributes with the same values to a
+      lot of widgets (if you are making several buttons with the same
+      size, for instance) can be a bit impractical (you'll learn more
+      about buttons in a little while):</p>
+<dl>
+<dd>
+<pre class="verbatim">
+bt1 = Button(left=10, width=50, height=30, text='Button 1')
+bt2 = Button(left=10, width=50, height=30, text='Button 2')
+bt3 = Button(left=10, width=50, height=30, text='Button 3')
+</pre>
+</dd>
+</dl>
+<p>To deal with this, the widget constructors (and the
+      <code>set</code> method) can take <code>Options</code> objects
+      as positional parameters:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+opt = Options(left=10, width=50, height=30)
+bt1 = Button(opt, text='Button 1')
+bt2 = Button(opt, text='Button 2')
+bt3 = Button(opt, text='Button 3')
+</pre>
+</dd>
+</dl>
+<p>As you can see, this saves quite a lot of typing. You can
+      use as many <code>Options</code> arguments as you like.</p>
+<h3>3.5 The modify Method</h3>
+<p>Just like <code>set</code> can be used to set the
+      attributes of a <code>Component</code>, the <code>modify</code>
+      method can be used to <em>modify</em> them, without
+      rebinding them to another value. To show the difference,
+      consider the following example (where <code>foo</code> is an
+      attribute that does nothing special):</p>
+<dl>
+<dd>
+<pre class="verbatim">
+&gt;&gt;&gt; from anygui import *
+&gt;&gt;&gt; btn = Button()
+&gt;&gt;&gt; some_list = [1, 2, 3]
+&gt;&gt;&gt; btn.foo = some_list
+&gt;&gt;&gt; btn.modify(foo=[4, 5, 6])
+&gt;&gt;&gt; btn.foo
+[4, 5, 6]
+&gt;&gt;&gt; some_list
+[4, 5, 6]
+&gt;&gt;&gt; btn.set(foo=[7, 8, 9])
+&gt;&gt;&gt; btn.foo
+[7, 8, 9]
+&gt;&gt;&gt; some_list
+[4, 5, 6]
+</pre>
+</dd>
+</dl>
+<p>As you can see, using <code>modify</code> modifies the
+      list, while <code>set</code> replaces it. The
+      <code>modify</code> method is used for (among other things)
+      implementing Model-View-Controller systems. (More about that
+      later.)</p>
+<p>The <code>modify</code> method works as follows: If there
+      is a specific internal method for modifying an attribute, that
+      is called. Otherwise, the supplied value will be assigned to
+      <code>self.name[:]</code> (where <code>name</code> is the
+      attribute in question). If that doesn't work (a
+      <code>TypeError</code> exception is raised), the value will be
+      assigned to <code>self.name.value</code>. If that doesn't work
+      either, the attribute will be rebound to the new value, with the
+      same result as using <code>set</code>. So, to avoid any in-place
+      modification, all you need to do is use immutable values:
+      </p>
+<dl>
+<dd>
+<pre class="verbatim">
+&gt;&gt;&gt; from anygui import *
+&gt;&gt;&gt; btn = Button()
+&gt;&gt;&gt; some_list = [1, 2, 3]
+&gt;&gt;&gt; btn.foo = tuple(some_list)
+&gt;&gt;&gt; btn.modify(foo=[4, 5, 6])
+&gt;&gt;&gt; btn.foo
+[4, 5, 6]
+&gt;&gt;&gt; some_list
+[1, 2, 3]
+</pre>
+</dd>
+</dl>
+<h3>3.6 The sync Method</h3>
+<p>The <code>modify</code> method is used to modify
+      attributes in-place, e.g. to keep them in sync with a
+      widget. This is done automatically when you change a widget
+      through the graphical interface. In a way, the
+      <code>sync</code> method works the other way: If you modify an
+      attribute, you can call the <code>sync</code> method to keep
+      the widget's appearance in sync with its state. When you assign
+      to an attribute, <code>sync</code> is called automatically;
+      you only have to call it yourself if you have an attribute which
+      is a mutable object, and you modify that object.</p>
+<p>For more info about the use of <code>sync</code>, see
+      the section "About Models, Views, and Controllers",
+      below.</p>
+<h3>3.7 Adding a Label</h3>
+<p>Simple labels are created with the <code>Label</code>
+      class:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+lab = Label(text='Hello, again!', position=(10,10))
+</pre>
+</dd>
+</dl>
+<p>Here we have specified a position just for fun; we don't
+      really have to. If we add the label to our window, we'll see
+      that it's placed with its left topmost corner at the point
+      <code>(10,10)</code>:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+w.add(lab)
+</pre>
+</dd>
+</dl>
+<h3>3.8 Layout: Placing Widgets in a Frame</h3>
+<p>This section goves a simple example of positioning
+      <code>Components</code>; for more information about the
+      <em>Anygui</em> layout mechanism, please refer to the API
+      Reference (below).</p>
+<dl>
+<dd>
+<pre class="verbatim">
+win.add(lab, position=(10,10))
+win.add(lab, left=10, top=10)
+win.add(lab, top=10, right=10)
+win.add(lab, position=(10,10), right=10, hstretch=1)
+</pre>
+</dd>
+</dl>
+<p>In the last example <code>hstretch</code> is a Boolean
+      value indicating whether the widget should be stretched
+      horizontally (to maintain the other specifications) when the
+      containing <code>Frame</code> is resized. (The vertical version
+      is <code>vstretch</code>.)</p>
+<p>Just like in component constructors, you can use
+      <code>Options</code> objects in the <code>add</code> method,
+      after the component to be added:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+win.add(lab, opt, left=10)
+</pre>
+</dd>
+</dl>
+<h4>3.8.1 Placing More Than One Widget</h4>
+<p>The <code>add</code> method can also position a
+	<em>sequence</em> of widgets. The first widget
+	will be placed as before, while the subsequent ones will be
+	placed either to the <code>right</code>, to the
+	<code>left</code>, above (<code>up</code>), or below
+	(<code>down</code>), according to the <code>direction</code>
+	argument, at a given distance (<code>space</code>):</p>
+<dl>
+<dd>
+<pre class="verbatim">
+win.add((lab1, lab2), position=(10,10),
+        direction='right', space=10)
+</pre>
+</dd>
+</dl>
+<p>
+<b>Note:</b> Remember to enclose your
+	components in a sequence (such as a tuple or a list), since
+	<code>add</code> allows you to use more positional arguments,
+	but will treat them differently. If you want to use
+	<code>Options</code> objects, place them outside (after) the
+	sequence. For more information see the section about the
+	<code>Frame</code> class in the API Reference below.</p>
+<h3>3.9 Buttons and Event Handling</h3>
+<p>
+<code>Buttons</code> (as most components) work more or
+      less the same way as <code>Labels</code>. You can set their
+      <code>size</code>, their <code>position</code>, their
+      <code>text</code>, etc. and then <code>add</code> them to a
+      <code>Frame</code> (such as a <code>Window</code>). The thing
+      that makes them interesting is that they emit
+      <em>events</em>. Each time the user clicks a button,
+      it sends out a <code>click</code> event. You can catch these
+      events by linking your button to one or more <em>event
+      handlers</em>. It's really simple:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+btn = Button(text='Greet Environment')
+def greeting(event):
+    print 'Hello, World!'
+link(btn, greeting)
+</pre>
+</dd>
+</dl>
+<p>The event handling is taken care of by the call to
+      <code>link</code>. An event handler receives a single
+      <code>Event</code> object as its parameter. (For information
+      about these, see the API Reference, below.)</p>
+<h3>3.10 About Models, Views, and Controllers</h3>
+<p>The <em>Anygui</em> MVC mechanism (based on the
+      <code>sync</code> method and the <code>Assignee</code>
+      protocol) is described in the API Reference below. Here is a
+      short overview on how to use it.</p>
+<p>A <em>model</em> is an object that can be
+      modified, and that can notify other objects, called
+      <code>views</code>, when it has been modified. A
+      <em>controller</em> is an object that can modify the
+      model, in particular as a direct response to a user action (such
+      as clicking the mouse or typing some text). In
+      <em>Anygui</em>, <code>Component</code>s double as both
+      views (showing a model's state to the user) and controllers
+      (letting the user modify the model). Even though
+      <em>Anygui</em> supports using models this way, you can also
+      create complete applications without using them (or, at least,
+      without thinking about them) .</p>
+<p>Models are in general instances of some subclass of the
+      <code>Model</code> class, although they don't have to be; see
+      the API Reference below for a description of how they work. (The
+      <code>Model</code> class is currently internal to the
+      <code>Anygui</code> package, but it can be found in the
+      <code>anygui.Models</code> module.) The <code>Model</code>s that
+      are included in <em>Anygui</em> are:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+BooleanModel     -- represents a Boolean value
+ListModel        -- behaves like a list
+NumberModel      -- represents a numerical value
+TextModel        -- acts like a mutable string
+</pre>
+</dd>
+</dl>
+<p>These all have a <code>value</code> attribute which may be
+      used to change their internal value. They also support other
+      operations, such as indexing and slicing etc. for
+      <code>ListModel</code>. These are very easy to use: Just assign
+      them to an attribute of a <code>Component</code>:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+# You'll learn about CheckBoxes in a minute
+cbx = CheckBox(text='Simple model test')
+state = BooleanModel(value=1)
+cbx.on = state
+</pre>
+</dd>
+</dl>
+<p>Now, if you change <code>state</code> (e.g. with the
+      statement <code>state.value=0</code>) this will automatically be
+      reflected in the <code>CheckBox</code> (which will be acting
+      like a view). If the user clicks the <code>CheckBox</code>, the
+      model will be changed.</p>
+<p>To keep a view up-to-date manually you can call its
+      <code>sync</code> method. This can be useful if you use a
+      simple (non-<code>Model</code>) mutable value such as a list in
+      an attribute:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+btn = Button()
+rect = [0, 0, 10, 10]
+btn.geometry = rect
+rect[3] = 20
+btn.sync('geometry')
+</pre>
+</dd>
+</dl>
+<p>After modifying <code>rect</code>, the button will not
+      have changed, since it can't detect the change by
+      itself. (That's only possible when you use a real model.)
+      Therefore, you call <code>btn.sync</code> to tell it to update
+      itself.</p>
+<p>
+<b>Note:</b> When modifying either
+      <code>x</code>, <code>y</code>, <code>width</code>,
+      <code>height</code>, <code>position</code>, <code>size</code>,
+      or <code>geometry</code> in place like this, you should supply
+      the name of the attribute as an argument to <code>sync</code>,
+      to avoid confusing <em>Anygui</em>. That is because these
+      attributes mirror each other in various ways, and if you don't
+      supply a name, <em>Anygui</em> won't know which one you
+      modified.</p>
+<p>If you assign a value to an attribute, the
+      <code>sync</code> method will be called automatically, so
+      another way of doing the same thing is:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+btn = Button()
+rect = [0, 0, 10, 10]
+btn.geometry = rect
+rect[3] = 20
+btn.geometry = rect
+</pre>
+</dd>
+</dl>
+<p>
+<b>Caution:</b> Because of the controller behaviour
+      of <code>Component</code>s, if the <code>Button</code> is
+      resized, <code>rect</code> will be modified. If you don't want
+      this behaviour, use a tuple instead of a list, since tuples
+      can't be modified.</p>
+<p>If you want another object to monitor a
+      <code>Model</code>, you can simply use the <code>link</code>
+      method, since all <code>Model</code>s generate an event (of the
+      type <code>default</code>) when they are modified.</p>
+<p>Example:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+&gt;&gt;&gt; from anygui import *
+&gt;&gt;&gt; mdl = BooleanModel()
+&gt;&gt;&gt; mdl.value = 1
+&gt;&gt;&gt; def model_changed(event):
+&gt;&gt;&gt;     print 'The model has changed!'
+
+&gt;&gt;&gt; link(mdl, model_changed)
+&gt;&gt;&gt; mdl.value = 0
+The model has changed
+&gt;&gt;&gt; mdl.value = 0
+The model has changed
+</pre>
+</dd>
+</dl>
+<p>Note the last two lines: We haven't really changed the
+      model, but the event handler is called nonetheless. If you want
+      to know whether the model really changed, you must retain a copy
+      of its state, and compare it with the new value.</p>
+<h3>3.11 Using CheckBoxes</h3>
+<p>A <code>CheckBox</code> is a <em>toggle
+      button</em>, a button which can be in one of two states,
+      "on" or "off". Except for that, it works more or less like any
+      other button in that you can place it, set its text, and
+      link an event handler to it.</p>
+<p>Whether a <code>CheckBox</code> is currently on or off is
+      indicated by its <code>on</code> attribute.</p>
+<h3>3.12 RadioButtons and RadioGroups</h3>
+<p>
+<code>RadioButton</code>s are toggle buttons, just like
+      <code>CheckBox</code>es. The main differences are that they look
+      slightly different, and that they should belong to a
+      <code>RadioGroup</code>.</p>
+<p>A <code>RadioGroup</code> is a set of
+      <code>RadioButton</code>s where only <em>one</em><code>RadioButton</code> is permitted to be "on" at one
+      time. Thus, when one of the buttons in the group is turned on,
+      the others are automatically turned off. This can be useful for
+      selecting among different alternatives.</p>
+<p>
+<code>RadioButton</code>s are added to a
+      <code>RadioGroup</code> by setting their <code>group</code>
+      property:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+radiobutton.group = radiogroup
+</pre>
+</dd>
+</dl>
+<p>This may also be done when constructing the button:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+grp = RadioGroup()
+rbn = RadioButton(group=grp)
+</pre>
+</dd>
+</dl>
+<p>
+<b>Caution:</b> The behaviour of a
+      <code>RadioButton</code> when it does not belong to a
+      <code>RadioGroup</code> is not defined by the
+      <em>Anygui</em> API, and may vary between
+      backends. Basically, a <code>RadioButton</code> without a
+      <code>RadioGroup</code> is meaningless; use a
+      <code>CheckBox</code> instead.</p>
+<p>
+<code>RadioGroups</code> also support an <code>add</code>
+      method, as all other <em>Anygui</em> container-like
+      objects:</p>
+<p>
+<code><b>add</b></code>(<i>button</i>)</p>
+<p>Adds the <i>button</i> to the group, including setting
+      <i>button</i><code>.group</code> to the group. As with the
+      other <code>add</code> methods, the argument may be either a
+      single object, or a sequence of objects.</p>
+<h3>3.13 ListBox</h3>
+<p>A <code>ListBox</code> is a vertical list of items that
+      can be selected, either by clicking on them, or by moving the
+      selection up and down with the arrow keys. (For the arrow keys
+      to work, you must make sure that the <code>ListBox</code> has
+      keyboard focus. In some backends this requires using the
+      <code>tab</code> key.)</p>
+<p>
+<em>Note</em>: When using <em>Anygui</em>
+      with <em>Tkinter</em>, using the arrow keys won't change the
+      selection, only which item is underlined. You'll have to use the
+      arrow keys until the item you want to select is underlined; then
+      select it by pressing the space bar.</p>
+<p>A <code>ListBox</code>'s items are stored in its attribute
+      <code>items</code>, a sequence of arbitrary objects. The
+      text displayed in the widget will be the result of applying the
+      built-in <em>Python</em> function <code>str</code> to each
+      object.</p>
+<dl>
+<dd>
+<pre class="verbatim">
+lbx = ListBox()
+lbx.items = 'This is a test'.split()
+</pre>
+</dd>
+</dl>
+<p>The currently selected item can be queried or set through
+      the <code>selection</code> property (an integer index, counting
+      from zero). Also, when an item is selected, a
+      <code>select</code> event is generated, which is the default
+      event type for a <code>ListBox</code>. This means that you can
+      either do</p>
+<dl>
+<dd>
+<pre class="verbatim">
+link(lbx, 'select', handler)
+</pre>
+</dd>
+</dl>
+<p>or</p>
+<dl>
+<dd>
+<pre class="verbatim">
+link(lbx, handler)
+</pre>
+</dd>
+</dl>
+<p>with the same result. (This is similar to the
+      <code>click</code> event, which is default for
+      <code>Buttons</code>; for more information, see the API
+      Reference below.)</p>
+<h3>3.14 TextField and TextArea</h3>
+<p>
+<em>Anygui</em>'s two text widgets,
+      <code>TextField</code> and <code>TextArea</code> are quite
+      similar. The difference between them is that
+      <code>TextField</code> permits neither newlines or tab
+      characters to be typed, while <code>TextArea</code> does. Typing
+      a tab in a <code>TextField</code> will simply move the focus to
+      another widget, while pressing the enter key will send an
+      <code>enterkey</code> event (which is the
+      <code>TextField</code>'s default event type).</p>
+<p>The text in a text component is stored in its
+      <code>text</code> property (a string or equivalent), and the
+      current selection is stored in its <code>selection</code>
+      property (a tuple of two integer indices).</p>
+<h3>3.15 Making Your Own Components and LayoutManagers</h3>
+<p>Currently, you can create your own components by combining
+      others in <code>Frame</code>s, and wrapping the whole thing up
+      as a class. One of the main reasons for doing this would be to
+      emulate a feature (such as a tabbed pane) available in some
+      backends, but not in others. One could then actually
+      <em>use</em> the native version in the backends
+      where it is available (such as <code>wx</code>, in this case),
+      and use the "emulation" in the others. There is some limited
+      support for this in the <code>backend</code> function (which
+      will allow you to check whether you are currently using the
+      correct backend), but in the future, a more complete API will be
+      developed for this, allowing you access to the coolest features
+      of your favorite GUI package, while staying "package
+      independent".</p>
+<p>You can already create your own layout managers, by
+      properly supporting the methods <code>add</code>,
+      <code>remove</code>, and <code>resized</code>. The simplest way
+      of doing this is to subclass <code>LayoutManager</code>, which
+      gives you the <code>add</code> and <code>remove</code> methods
+      for free. You can then concentrate on the method
+      <code>resized</code> which takes two positional arguments,
+      <code>dw</code>, and <code>dh</code> (change in width and change
+      in height) and is responsible for changing the geometries of all
+      the components in the <code>Frame</code> the
+      <code>LayoutManager</code> is managing. (This frame is available
+      through the attribute <code>self.container</code>.)
+      </p>
+<p>To get more control over things, you should probably also
+      override the two internal methods <code>internalAdd</code>
+      and <code>internalRemove</code>:</p>
+<p>
+<code>internalAdd</code>(self, *<i>items</i>,
+      **<i>kws</i>)</p>
+<p>Should add all the components in <i>items</i>, and
+      associate them with the options in <code>kws</code>, for later
+      resizing.</p>
+<p>
+<code>internalRemove</code>(self,
+      <i>item</i>)</p>
+<p>Should remove the given item.</p>
+<h3>3.16 More Stuff</h3>
+<p>More stuff to come... See the API reference.</p>
+<h2>4. API Reference</h2>
+<p>The following reference will describe the full official API of
+  the current version (0.2) of <em>Anygui</em> but is
+  currently under development.</p>
+<h3>4.1 Environment Variables</h3>
+<p>
+<b>Note:</b>The environment variables may be
+    renamed, and their use may be deprecated. Use the
+    <code>setup</code> function instead.</p>
+<p>Some environment variables affect the behaviour of the
+    <em>Anygui</em> package. These must be set in the environment
+    of the program using <em>Anygui</em>. They may either be set
+    permanently through normal operating system channels (check your
+    OS documentation for this), or possibly just set temporarily when
+    running your program. In <em>Unix</em> shells like
+    <em>bash</em>, you can set the variables on the command line
+    before your comand, like this:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+foo:~$ ANYGUI_SOMEVAR='some value' python someprogram.py
+</pre>
+</dd>
+</dl>
+<p>where <code>ANYGUI_SOMEVAR</code> is some environment
+    variable used by <em>Anygui</em>.</p>
+<p>Since <em>Jython</em> doesn't support OS environment
+    variables, you'll have to supply them with the command-line switch
+    <code>-D</code>: </p>
+<dl>
+<dd>
+<pre class="verbatim">
+foo:~$ jython -DANYGUI_SOMEVAR='some value' someprogram.py
+</pre>
+</dd>
+</dl>
+<p>You can also set these environment variables in your own
+    program, by using code like the following before you import
+    <em>Anygui</em>:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+import os
+os.environ['ANYGUI_SOMEVAR'] = 'some value'
+</pre>
+</dd>
+</dl>
+<p>This will probably not work well in <em>Jython</em>, though.</p>
+<p>The environment variables used by <em>Anygui</em>
+    are:</p>
+<p>
+<code>ANYGUI_WISHLIST</code>: A whitespace separated list of
+    backend names in the order you wish for <em>Anygui</em> to try
+    to use them. The backends are identified with a short prefix such
+    as <code>wx</code> for <code>wxgui</code>, or <code>tk</code> for
+    <code>tkgui</code>. For a full list of available backends, see the
+    section "Making Sure You Have a GUI Backend" above. Only the
+    backends in this list will be tried; if you don't set
+    <code>ANYGUI_WISHLIST</code>, then the following is the
+    default:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+'msw gtk java wx tk beos qt curses text'
+</pre>
+</dd>
+</dl>
+<p>If you insert an asterisk in the wishlist, it will be
+    interpreted as "the rest of the backends, in default order". So,
+    for instance,</p>
+<dl>
+<dd>
+<pre class="verbatim">
+ANYGUI_WISHLIST='tk wx * text curses'
+</pre>
+</dd>
+</dl>
+<p>is equivalent to</p>
+<dl>
+<dd>
+<pre class="verbatim">
+ANYGUI_WISHLIST='tk wx msq gtk java beos qt text curses'
+</pre>
+</dd>
+</dl>
+<p>Example:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+foo:~$ ANYGUI_WISHLIST='tk wx qt' python someprogram.py
+</pre>
+</dd>
+</dl>
+<p>
+<code>ANYGUI_DEBUG</code>: When <em>Anygui</em> tries to
+    import a backend, it hides all exceptions, assuming they are
+    caused by the fact that a given backend doesn't work in your
+    installation (because you don't have it installed or something
+    similar). However, at times this may not be the reason; it may
+    simple be that a given backend contains a bug. To track down the
+    bug, set the <code>ANYGUI_DEBUG</code> to some true (in a
+    <em>Python</em> sense) value. (If the value supplied can be
+    converted to an integer, it will. Otherwise, it will be treated as
+    a string.) This will make <em>Anygui</em> print out the stack
+    traces from each backend it tries to import.</p>
+<p>There is one exception to this rule: If the true value
+    supplied is the name of one of the backends (such as
+    <code>tk</code> or <code>curses</code>) only the traceback caused
+    by importing that backend will be shown. This can be useful to
+    make the output somewhat less verbose.</p>
+<p>Example:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+foo:~$ ANYGUI_DEBUG=1 python someprogram.py
+</pre>
+</dd>
+</dl>
+<p>
+<code>ANYGUI_ALTERNATE_BORDER</code>: This Boolean variable
+    affects <code>cursesgui</code>, making it use the same
+    border-drawing characters as <code>textgui</code>
+    (<code>'+'</code>, <code>'-'</code>, and <code>'|'</code>). This
+    may be useful if your terminal can't show the special
+    <code>curses</code> box-drawing characters properly.</p>
+<p>
+<code>ANYGUI_SCREENSIZE</code>: Affects
+    <code>textgui</code>. Gives the terminal ("screen") dimensions, in
+    characters. This should be in the format
+    <i>width</i><code>x</code><i>height</i>,
+    e.g. <code>80x24</code>. If this environment variable is not
+    supplied, the standard <em>Unix</em> variables
+    <code>COLUMNS</code> and <code>LINES</code> will be used. If
+    neither is provided, the default size <code>80x23</code> will be
+    used.</p>
+<p>
+<code>ANYGUI_FORCE_CURSES</code>: Normally,
+    <code>cursesgui</code> will not be selected if you are in the
+    interactive interpreter. If you want to force the normal selection
+    order (trying to use <code>cursesgui</code> before resorting to
+    <code>textgui</code>) you can set this variable to a true
+    value. Note that this is not the same as setting
+    <code>ANYGUI_WISHLIST</code> to <code>'curses'</code>, since that
+    will ignore all other backends.</p>
+<p>
+<code>ANYGUI_CURSES_NOHELP</code>: If you don't want the
+    help-screen that appears when an <em>Anygui</em> application
+    is started using <code>cursesgui</code> (or <code>textgui</code>),
+    you can set this variable to a true value.</p>
+<h3>4.2 Global Functions</h3>
+<p>
+<code><b>application</b></code>()</p>
+<p>Returns the current <code>Application</code>
+    object.</p>
+<p>
+<code><b>backend</b></code>()</p>
+<p>Returns the name (as used in <code>ANYGUI_WISHLIST</code>)
+    of the backend currently in use.</p>
+<p>Example:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+if backend() == 'wx':
+    some_wx_code()
+else:
+    some_generic_code()
+</pre>
+</dd>
+</dl>
+<p>
+<code><b>link</b></code>(<i>source</i>,
+    [<i>event</i>,] <i>handler</i>, <i>weak</i>=0,
+    <i>loop</i>=0)</p>
+<p>Creates a link in the <em>Anygui</em> event system,
+    between the <code>source</code> (any object) and the
+    <code>handler</code> (any callable, or a <code>(obj,func)</code>
+    pair, where <code>func</code> is an unbound method or function,
+    and <code>obj</code> is an object which will be supplied as the
+    first parameter to <code>func</code>). Supplying an
+    <code>event</code> (a string) will make the link carry only
+    information about events of that type. If no event is supplied,
+    <code>'default'</code> will be assumed. Setting <code>weak</code>
+    to a true value will use weak references when setting up the link,
+    so that no objects will be "kept alive" by the link.</p>
+<p>A send-loop occurs if an object sends an event "to itself"
+    (i.e. it is the <code>source</code> argument of a call to
+    <code>send</code> which hasn't returned at the point where one of
+    its methods are about to be activated as a handler). The truth
+    value <code>loop</code> decides whether this handler will be
+    activated in such a loop. (If <code>send</code> was called with
+    <code>loop=1</code>, loops will be allowed anyway.)
+    </p>
+<p>Note that <code>source</code>, <code>event</code>, and
+    <code>handler</code> are strictly positional parameters, while the
+    others (<code>weak</code>, and <code>loop</code>) must be supplied
+    as keyword parameters.</p>
+<p>Sometimes one might want an event handler that reacts to a
+    specific event from <em>any</em> source, or
+    <em>any</em> event from a specific source; or even
+    <em>any</em> event from <em>any</em>
+    source. To do that, simply use the special value <code>any</code>
+    as either source, event, or both.</p>
+<p>Example:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+from anygui import *
+&gt;&gt;&gt; def monitor_events(event):
+...     print 'An event occurred:', event.event
+...
+&gt;&gt;&gt; link(any, any, monitor_events)
+&gt;&gt;&gt; btn = Button()
+&gt;&gt;&gt; send(btn, 'foobar')
+An event occurred: foobar
+</pre>
+</dd>
+</dl>
+<p>If you use <code>send(btn, 'click')</code> in this example,
+    you will get <em>two</em> events, since the
+    <code>Button</code> will detect the <code>click</code> event
+    (which is its default), and issue a <code>default</code> event as
+    well.</p>
+<p>
+<b>Note:</b> You need to explicitly supply the
+    event type if you want to respond to any event type; otherwise you
+    will only respond to the <code>default</code> type.</p>
+<p>Event handlers that react to the same event will be called
+    in the order they were registered (with <code>link</code>),
+    subject to the following: (1) All handlers registered with a
+    specific source will be called before handlers with the value
+    <code>any</code> as source; (2) all handlers registered with a
+    specific event (including <code>default</code>) are called before
+    handlers with the value <code>any</code> as event.</p>
+<p>For more information on sending events, see
+    <code>send</code>, below.</p>
+<p>
+<code><b>send</b></code>(<i>source</i>,
+    <i>event</i>=<code>'default'</code>, <i>loop</i>=0,
+    **<i>kwds</i>)</p>
+<p>When this is called, any handlers (callables) linked to the
+    source, but which will not cause a send-loop (unless
+    <code>loop</code> is true) will be called with an
+    <code>Event</code> object which stores all the keyword arguments
+    provided (except <code>loop</code>), in the order in which they
+    were linked. In addition to the supplied keyword arguments, the
+    event framework will add <code>source</code>, <code>event</code>,
+    and the time (as measured by the standard <em>Python</em>
+    function <code>time.time</code>) when <code>send</code> was
+    called, supplied with the <code>time</code> argument.</p>
+<p>The <code>Event</code> object is simly a "bunch" object,
+    with each keyword argument stored as an attribute.</p>
+<p>Note that <code>source</code>, and <code>event</code>, are
+    strictly positional parameters, while the others
+    (<code>loop</code>, and any additional arguments the user might
+    add) must be supplied as keyword parameters.</p>
+<p>Example:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+# Link an event handler to a button, and then manually send a
+# default event from the button. This event would have been
+# sent automatically if we clicked the button.
+
+def click(event):
+    source = event.source
+    time = event.time
+    print 'Button %s clicked at %f.' % (source.text, event.time)
+
+btn = Button(text='Click me')
+link(btn, click)
+
+send(btn) # Fake a button click -- will call click()
+</pre>
+</dd>
+</dl>
+<p>For information about the order in which event handlers are
+    called, see <code>link</code>, above.</p>
+<p>
+<b>Important:</b> Due to the current semantics of
+    the <code>any</code> value, using it in <code>send</code> may not
+    be a good idea, since the result might not be what you expect. For
+    instance, calling <code>send(any, any)</code> will only activate
+    event handlers which have been linked to the value
+    <code>any</code> as both source and event, not to "event handlers
+    with any source and any event". This may change in future
+    releases. The current behaviour of <code>send</code> with
+    <code>any</code> is consistent with <code>unlink</code>.</p>
+<p>
+<code><b>unlink</b></code>(<i>source</i>,
+    [<i>event</i>,] <i>handler</i>)</p>
+<p>Undoes a call to <code>link</code> with the same positional
+    arguments. If <i>handler</i> has been registered with either
+    <i>source</i> or <i>event</i> as <code>any</code>, that
+    parameter will be irrelevant when deciding whether or not to
+    remove that link. For instance:
+    </p>
+<dl>
+<dd>
+<pre class="verbatim">
+link(foo, any, bar)
+unlink(foo, baz, bar)
+</pre>
+</dd>
+</dl>
+<p>Here the link created by <code>link(foo, any, bar)</code>
+    will be removed by the call to <code>unlink</code>.</p>
+<p>
+<b>Note:</b> This behaviour (unlinking handlers
+    registered with the <code>any</code> value) may change in future
+    releases.</p>
+<p>
+<b>Default Events</b>: When used without the event
+    argument, both <code>link</code> and <code>send</code> use an
+    event type called <code>default</code>. Most event-generating
+    components have a default event type, such as <code>click</code>
+    for <code>Button</code>s. The fact that this event type is default
+    for <code>Button</code> means that when a <code>Button</code>
+    generates a <code>click</code> event it will
+    <em>also</em> generate a <code>default</code>
+    event. So, if you listen to both <code>click</code> events and
+    <code>default</code> events from a <code>Button</code>, your event
+    handler will always be called twice.</p>
+<p>
+<code><b>unlinkHandler</b></code>(<i>handler</i>)</p>
+<p>Removes a handler completely from the event
+    framework.</p>
+<p>
+<code><b>unlinkMethods</b></code>(<i>obj</i>)</p>
+<p>Unlinks all handlers that are methods of
+    <code>obj</code>.</p>
+<p>
+<code><b>unlinkSource</b></code>(<i>source</i>)</p>
+<p>Remove the source (and all handlers linked to it) from the
+    event framework.</p>
+<h3>4.3 Classes</h3>
+<p>
+<b>Base Classes and Common Behaviour</b>
+</p>
+<p>All components are subclasses the base class
+    <code>Component</code>, which means that they all share some
+    common behaviour.</p>
+<p>Perhaps the most important behaviour is attribute handling
+    (inherited from the <code>Attrib</code> mixin), which means that
+    setting a components attributes may trigger some internal method
+    calls. For instance,</p>
+<dl>
+<dd>
+<pre class="verbatim">
+win.size = 300, 200
+</pre>
+</dd>
+</dl>
+<p>will automatically resize the component
+    <code>win</code>. Attributes common to all components are:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+x         -- x-coordinate of upper left corner
+y         -- y-coordinate of upper left corner
+position  -- equivalent to (x, y)
+width     -- component width
+height    -- component height
+size      -- equivalent to (width, height)
+geometry  -- equivalent to (x, y, width, height)
+visible   -- whether the component is visible
+enabled   -- whether the component is enabled
+text      -- text associated with the component
+container -- the containing component
+</pre>
+</dd>
+</dl>
+<p>These can all be set as keyword arguments to the component
+    constructors. Also, <code>Options</code> objects (with similar
+    constructors) can be used as positional arguments in the
+    constructor, with all the <code>Options</code>'s attributes being
+    set in the component as well.</p>
+<p>
+<b>Note:</b> The <code>container</code> attribute
+    will rarely be set directly, but rather implicitly by using the
+    containing component's <code>add</code> method.</p>
+<p>Common to <code>Application</code>, <code>Window</code>, and
+    <code>Frame</code> are the <code>add</code> and
+    <code>remove</code> methods. These will be described with the
+    individual classes below.</p>
+<p>All <code>Attrib</code> subclasses (including components,
+    <code>Application</code>, and <code>RadioGroup</code>) share the
+    following methods:</p>
+<p>
+<code><b>set</b></code>(*<i>args</i>, **<i>kwds</i>)</p>
+<p>Used to set attributes. Works like the <code>Attrib</code>
+    constructor, setting attributes, and optionally using
+    <code>Options</code> objects.</p>
+<p>There is a variant called <code>rawSet</code> which does
+    not call <code>sync</code>.</p>
+<p>
+<code><b>modify</b></code>(*<i>args</i>, **<i>kwds</i>)</p>
+<p>Works like the <code>set</code> method, except that the
+    attributes are modified <em>in place</em>. That means
+    the following (for an attribute named <code>foo</code>): (1) try
+    to use slice assignment to change the value (will work for lists
+    and <code>ListModels</code> etc.); if that doesn't work, (2)
+    assign to the value's <code>value</code> attribute (used to modify
+    <code>Model</code>s). If neither of these approaches work, simply
+    rebind the attribute (equivalent to using the <code>set</code>
+    method).</p>
+<p>As with <code>set</code> and ordinary attribute assignment,
+    the <code>sync</code> method will automatically be called when you
+    use <code>modify</code>.</p>
+<p>There is a variant called <code>rawModify</code> which does
+    not call <code>sync</code>.</p>
+<p>
+<code><b>sync</b></code>(*<i>names</i>)</p>
+<p>When an attribute of a <code>Component</code> (or
+    <code>Application</code>, <code>RadioGroup</code>, or an instance
+    of another <code>Attrib</code> subclass) is assigned a value, the
+    <code>Component</code> is automatically updated to reflect its new
+    state. For instance, if you have a <code>Label</code><code>lbl</code>, assigning a value to <code>lbl.geometry</code>
+    would immediately change the <code>Label</code>'s geometry, and
+    assigning to <code>lbl.text</code> would change its text.</p>
+<p>This is good enough for most cases, but sometimes an
+    attribute can contain a mutable value, such as a list, and
+    changing that will not update the <code>Component</code>. For
+    instance, if you use a list to hold the <code>items</code> of a
+    <code>ListBox</code>, you could end up in the following
+    situation:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+lbx = ListBox()
+lbx.items = 'first second third'.split()
+# More code...
+lbx.items.append('fourth')
+</pre>
+</dd>
+</dl>
+<p>After performing this code, nothing will have happened to
+    the <code>ListBox</code>, because it has no way of knowing that
+    the list has changed. To fix that, you can simply call its
+    <code>sync</code> method:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+lbx.sync()
+</pre>
+</dd>
+</dl>
+<p>This method checks whether any attributes have changed,
+    and make sure that the <code>Component</code> us up to
+    date.</p>
+<p>Optionally, you can supply the name(s) of the attribute(s)
+    which have changed. Usually this is just an optimisation (which
+    may be used by some backends to avoid unnecessary updates), but in
+    one particular case it is very important: When modifying either
+    <code>x</code>, <code>y</code>, <code>width</code>,
+    <code>height</code>, <code>position</code>, <code>size</code>, or
+    <code>geometry</code>. <code>Component</code>s automatically
+    synchronise these geometric attributes, but since these depend on
+    each other, you need to specify which one(s) you have
+    modified.</p>
+<p>For instance, the following will confuse <em>Anygui</em>
+    and will raise an exception:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+btn.geometry = [10, 10, 50, 50]
+btn.geometry[1] += 1
+btn.sync()
+</pre>
+</dd>
+</dl>
+<p>The first line is fine, since it will automatically lead to
+    an internal call to <code>btn.sync('geometry')</code>. The last
+    line, however, will have <em>Anygui</em> trying to synchronise
+    <code>btn.geometry</code>, <code>btn.position</code>, and
+    <code>btn.y</code> without knowing which one was modified. It
+    refuses to guess, and raises an exception. This could be solved by
+    changing the last line to:
+    </p>
+<dl>
+<dd>
+<pre class="verbatim">
+btn.sync('geometry')
+</pre>
+</dd>
+</dl>
+<p>
+<b>Updating Automatically</b>
+</p>
+<p>
+<b>Note:</b> The following section is not
+    currently correct.</p>
+<p>Updating <code>Components</code> explicitly can be useful,
+    but sometimes you would want it to be done for you, automatically,
+    each time you modify an object that is referred to by a
+    <code>Component</code> attribute. This can be taken care of by
+    <code>link</code> and <code>send</code>. If your object uses
+    <code>send</code> every time it's modified, and you
+    <code>link</code> the object to your <code>Component</code>'s
+    <code>sync</code> method, things will happen by themselves:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+class TriggerList:
+    def __init__(self):
+        self.list = []
+    def append(self, obj):
+        self.list.append(obj)
+        send(self)
+    def __getitem__(self, i):
+        return self.list[i]
+
+lbx = ListBox()
+lbx.items = TriggerList()
+link(lbx.items, lbx.sync)
+</pre>
+</dd>
+</dl>
+<p>Now, if we call <code>lbx.items.append('fourth')</code>,
+    <code>lbx.sync</code> will automatically be called. To make your
+    life easier, <em>Anygui</em> already contains some classes
+    that send signals whend they are modified; these classes are
+    called <code>Model</code>s.</p>
+<p>
+<b>Model and Assignee</b>
+</p>
+<p>
+<b>Note:</b> The following section is not
+    currently correct.</p>
+<p>The <em>Anygui</em> models (<code>BooleanModel</code>,
+    <code>ListModel</code>, <code>TextModel</code>, and
+    <code>NumberModel</code>) are objects that call <code>send</code>
+    (with the <code>'default'</code> event) when they are
+    modified.</p>
+<p>An <code>Assignee</code> (part of the <em>Anygui</em>
+    Model-View-Controller mechanism) is an object that supports the
+    methods <code>assigned</code> and <code>removed</code>. These are
+    automatically called (if present) when the object is assigned to
+    one of the attributes of an <code>Attrib</code> object (such as a
+    <code>Component</code>). <code>Model</code>s use this behaviour to
+    automatically call <code>link</code> and <code>unlink</code>, so
+    when the <code>Model</code> is modified, the <code>sync</code>
+    method of the <code>Attrib</code> object is called
+    automatically.</p>
+<p>All models have a <code>value</code> attribute, which
+    contains a "simple" version of its state (such as a number for
+    <code>NumberModel</code>, a list for <code>ListModel</code>, etc.)
+    Assigning to this attribute is a simple way of modifying the model
+    in place.</p>
+<p>
+<b>class Application</b>
+</p>
+<p>To instantiate <code>Window</code>s, you must have an
+    <code>Application</code> to manage them. You typically instantiate
+    an application at the beginning of your program:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+app = Application()
+# Build GUI and run application
+</pre>
+</dd>
+</dl>
+<p>In some cases subclassing <code>Application</code> might be
+    a useful way of structuring your program, but it is in no way
+    required.</p>
+<p>
+<code>Application</code> has the following methods:</p>
+<p>
+<code><b>run</b></code>()</p>
+<p>Starts the main event loop of the graphical user
+    interface. Usually called at the end of the program which set up
+    the interface:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+app = Application()
+# Set up interface
+app.run()
+</pre>
+</dd>
+</dl>
+<p>
+<code><b>add</b></code>(<i>win</i>)</p>
+<p>Adds a <code>Window</code> to the <code>Application</code>,
+    in the same way <code>Components</code> can be added to
+    <code>Frame</code>s (see below). A <code>Window</code> will not be
+    visible until it has been <code>add</code>ed to the current
+    <code>Application</code> object, and that <code>Application</code>
+    is running. When constructing new <code>Window</code>s after
+    <code>Application.run</code> has been called, you should ensure
+    that you <code>add</code> your <code>Window</code> to your running
+    <code>Application</code> after all the <code>Components</code>
+    have been added to your <code>Window</code>; otherwise, you may
+    see them appearing and moving about as <em>Anygui</em> takes
+    care of the layout. (Before <code>Application.run</code> is
+    called, this is not an issue, since no <code>Window</code>s will
+    be appear before that time.)</p>
+<p>The parameter <code>win</code> can be either a single
+    <code>Window</code>, or a sequence of <code>Windows</code>.</p>
+<p>
+<code><b>remove</b></code>(<i>win</i>)</p>
+<p>Removes a <code>Window</code> from the application. This
+    will make the <code>Window</code> disappear.</p>
+<p>
+<b>class Button</b>
+</p>
+<p>A component which, when pressed, generate a
+    <code>'click'</code> event, as well as a <code>'default'</code>
+    event. Thus, in the following example, both <code>handler1</code>
+    and <code>handler2</code> will be called when the button is
+    pressed:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+btn = Button()
+def handler1(event): print 'Handler 1'
+def handler2(event): print 'Handler 2'
+link(btn, 'click', handler1)
+link(btn, handler2)
+</pre>
+</dd>
+</dl>
+<p>
+<b>class CheckBox</b>
+</p>
+<p>
+<code>CheckBox</code> is a kind of button, and thus will
+    also generate <code>'click'</code> and <code>'default'</code>
+    events when clicked. But in addition, each <code>CheckBox</code>
+    has a Boolean attribute <code>on</code>, which is toggled each
+    time the box is clicked. The state of the <code>CheckBox</code>
+    can be altered by assigning to this attribute.</p>
+<p>The <code>on</code> property will be automatically modified
+    (as per the MVC mechanism) when the user clicks the
+    <code>CheckBox</code>. This will also cause the
+    <code>CheckBox</code> to <code>send</code> a <code>click</code>
+    and a <code>default</code>event.</p>
+<p>The <code>on</code> attribute is a useful place to use a
+    <code>BooleanModel</code>.</p>
+<p>
+<b>class Frame</b>
+</p>
+<p>
+<code>Frame</code> is a component which can contain other
+    components. Components are added to the <code>Frame</code> with
+    the <code>add</code> method:</p>
+<p>
+<code><b>add</b></code>(<i>comp</i>, [<i>opts</i>,] **<i>kwds</i>)</p>
+<p>Adds one or more components. The parameter <code>comp</code>
+    may be either a single component, or a sequence of components. In
+    the latter case, all the components will be added.</p>
+<p>The <code>opts</code> parameter containes an
+    <code>Options</code> object (see below) which gives information
+    about how the object should be laid out. These options can be
+    overridden with keyword arguments, and all this information will
+    be passed to the <code>LayoutManager</code> (see below) of the
+    <code>Frame</code>, if any. This <code>LayoutManager</code> is
+    stored in the <code>layout</code> property.</p>
+<p>
+<code><b>remove</b></code>(<i>comp</i>)</p>
+<p>Removes a component from the <code>Frame</code>.</p>
+<p>
+<b>class Label</b>
+</p>
+<p>A <code>Label</code> is a simple component which displays a
+    string of text. (<code>Label</code> can only handle one line of
+    text.)</p>
+<p>
+<b>class LayoutManager</b>
+</p>
+<p>A layout manager is responsible for setting the
+    <code>geometry</code> properties of a set of components when their
+    parent <code>Frame</code> changes shape. The default
+    <code>LayoutManager</code> is the <code>Placer</code> (see below).
+    </p>
+<p>
+<b>Note:</b> Other <code>LayoutManager</code>s
+    will be documented later.</p>
+<p>
+<b>class ListBox</b>
+</p>
+<p>Shows a list of options, of which one may be selected. The
+    <code>ListBox</code> has two special attributes:
+    <code>items</code>, a sequence of items to display, and
+    <code>selection</code>, the currently selected (as an index in the
+    <code>items</code> sequence).</p>
+<p>The <code>selection</code> property will be automatically
+    modified (as per the MVC mechanism) when the user makes a
+    selection. This will also cause the <code>ListBox</code> to
+    <code>send</code> a <code>select</code> and a
+    <code>default</code>event.</p>
+<p>
+<b>class Model</b>
+</p>
+<p>See the section on <code>Model</code> and
+    <code>Assignee</code> above.</p>
+<p>
+<b>class Options</b>
+</p>
+<p>
+<code>Options</code> is a very simple class. It is simply
+    used to store a bunch of named values; basically a dictionary with
+    a different syntax. (For more information about the
+    <em>bunch</em> class, see
+    <code><a href="http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52308">http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52308</a></code>.)</p>
+<p>You can set the attributes of an <code>Options</code> object
+    and then supply it as an optional first parameter to the
+    constructors of widgets:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+opt = Options()
+opt.width = 100
+opt.height = 50
+opt.x = 10
+btn = Button(opt, y=10)
+lbl = Label(opt, y=70)
+</pre>
+</dd>
+</dl>
+<p>Here <code>btn</code> and <code>lbl</code> will have the
+    same <code>width</code>, <code>height</code>, and <code>x</code>
+    attributes, but differing <code>y</code> attributes.</p>
+<p>You can also set the attributes of an <code>Options</code>
+    object through its constructur, just like with components:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+opt = Options(width=100, height=50, x=10)
+</pre>
+</dd>
+</dl>
+<p>
+<code>Options</code> objects can also be used when
+    supplying arguments to the <code>add</code> method of
+    <code>Frame</code>:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+# Assuming a Placer LayoutManager:
+opt = Options(left=10, right=10, hstretch=1)
+win.add(lbl, opt, top=10)
+win.add(btn, opt, top=(lbl,10))
+</pre>
+</dd>
+</dl>
+<p>
+<b>class Placer</b>
+</p>
+<p>A simple but powerful layout manager. When adding components
+    to a <code>Frame</code> whose <code>layout</code> attribute is set
+    to a <code>Placer</code>, you can supply the following keyword
+    arguments:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+left         -- the Component's left edge
+right        -- the Component's right edge
+top          -- the Component's top edge
+bottom       -- the Component's bottom edge
+hmove        -- move horizontally on resize
+vmove        -- move vertically on resize
+hstretch     -- stretch horizontally on resize
+vstretch     -- stretch vertically on resize
+direction    -- 'left', 'right', 'up', or 'down'
+space        -- spacing between multiple Components
+</pre>
+</dd>
+</dl>
+<p>The geometry specifiers (<code>left</code>,
+    <code>right</code>, <code>top</code>, and <code>bottom</code>) can
+    be set to either <code>None</code> (the default; will use the
+    <code>Component</code>'s existing coordinates), a distance (from
+    the corresponding <code>Frame</code> edge), a
+    <code>Component</code> (will align the edge with the opposite edge
+    of the given component), or a tuple
+    (<em>component</em>, <em>distance</em>)
+    (as with only a <code>Component</code>, except that a gap of size
+    <em>distance</em> is inserted between the two).</p>
+<p>The movement arguments (<code>hmove</code> and
+    <code>vmove</code>) specify (with a Boolean value) whether the
+    <code>Component</code> should be moved (horizontally, vertically,
+    or both) to maintain the given distance to the surrounding
+    <code>Frame</code>'s edges; the stretching arguments
+    (<code>hstretch</code> and <code>vstretch</code>) specify whether
+    the <code>Component</code> may be stretched to maintain these
+    distances.</p>
+<p>
+<b>class RadioButton</b>
+</p>
+<p>A <code>RadioButton</code> is a toggle button, just like
+    <code>CheckBox</code>, with slightly different appearance, and
+    with the difference that it belongs to a
+    <code>RadioGroup</code>. Only one <code>RadioButton</code> can be
+    active (have its <code>on</code> attribute be a true Boolean
+    value)in the <code>RadioGroup</code> at one time, so when one is
+    clicked or programmatically turned on, the others are
+    automatically switched off by the <code>RadioGroup</code>. Each
+    <code>RadioButton</code> also has a <code>value</code> attribute,
+    which should be unique within its <code>RadioGroup</code>. When
+    one <code>RadioButton</code> is active, the <code>value</code>
+    attribute of its <code>RadioGroup</code> is automatically set to
+    that of the active <code>RadioButton</code>. The
+    <code>RadioGroup</code> of a <code>RadioButton</code> is set by
+    assigning the <code>RadioGroup</code> to the <code>group</code>
+    attribute of the <code>RadioButton</code>. Setting the
+    <code>value</code> attribute of the <code>RadioGroup</code> will
+    automatically activate the correct
+    <code>RadioButton</code>.</p>
+<p>
+<b>class RadioGroup</b>
+</p>
+<p>See <code>RadioButton</code> above.</p>
+<p>
+<b>class TextArea</b>
+</p>
+<p>A multiline text-editing <code>Component</code>. Its text is
+    stored in the <code>text</code> attribute, which will be modified
+    (according to the MVC mechanism) when the component loses
+    focus. It also supports the Boolean <code>editable</code>
+    property, which may be used to control whether the user can edit
+    the text area or not.</p>
+<p>
+<b>class TextField</b>
+</p>
+<p>A one-line text-editing <code>Component</code>. (See also
+    <code>TextArea</code>, above.) If the enter/return key is pressed
+    within a <code>TextField</code>, the <code>TextField</code> will
+    <code>send</code> a <code>enterkey</code> event.</p>
+<p>
+<b>class Window</b>
+</p>
+<p>A window, plain and simple. <code>Window</code> is a type of
+    <code>Frame</code>, so you can add components to it and set its
+    <code>layout</code> property etc. To make your window appear, you
+    must remember to add it to your <code>Application</code>, just
+    like you add other components to <code>Frame</code>s and
+    <code>Window</code>s:</p>
+<dl>
+<dd>
+<pre class="verbatim">
+win = Window()
+app = Application()
+app.add(win)
+app.run()
+</pre>
+</dd>
+</dl>
+<p>
+<code>Window</code>s have a <code>title</code> attribute
+    which may be used by the operating system or window
+    manager to identify the window to the user in various ways.</p>
+<h3>4.4 Planned Components</h3>
+<p>The following components are planned as part of release 0.2.
+    </p>
+<p>
+<b>Note:</b> The current API description is very
+    tentative.</p>
+<p>
+<b>class Canvas</b>
+</p>
+<dl>
+<dd>
+<pre class="verbatim">
+TBD
+</pre>
+</dd>
+</dl>
+<p>
+<b>class ComboBox</b>
+</p>
+<dl>
+<dd>
+<pre class="verbatim">
+box.items             -- C.f. ListBox
+</pre>
+</dd>
+</dl>
+<p>
+<b>class Dialog</b>
+</p>
+<dl>
+<dd>
+<pre class="verbatim">
+TBD
+</pre>
+</dd>
+</dl>
+<p>
+<b>class FileDialog</b>
+</p>
+<dl>
+<dd>
+<pre class="verbatim">
+TBD
+</pre>
+</dd>
+</dl>
+<p>
+<b>class Menu</b>
+</p>
+<dl>
+<dd>
+<pre class="verbatim">
+menu.add(item)        -- Add a MenuItem
+</pre>
+</dd>
+</dl>
+<p>
+<b>class MenuBar</b>
+</p>
+<dl>
+<dd>
+<pre class="verbatim">
+menubar.add(menu)     -- Add a Menu
+</pre>
+</dd>
+</dl>
+<p>A <code>MenuBar</code> is added to a <code>Window</code>
+    with <code>win.add(bar)</code>. This will automatically set
+    <code>win.menubar</code> to <code>bar</code>.</p>
+<p>
+<b>class MenuItem</b>
+</p>
+<dl>
+<dd>
+<pre class="verbatim">
+item.text             -- The MenuItem text
+</pre>
+</dd>
+</dl>
+<p>
+<b>class ProgressBar</b>
+</p>
+<dl>
+<dd>
+<pre class="verbatim">
+bar.value             -- Progress (from 0 to 1)
+</pre>
+</dd>
+</dl>
+<p>
+<b>class StatusBar</b>
+</p>
+<dl>
+<dd>
+<pre class="verbatim">
+bar.text              -- StatusBar text
+</pre>
+</dd>
+</dl>
+<p>
+<b>class Notebook</b>
+</p>
+<dl>
+<dd>
+<pre class="verbatim">
+book.add(frame)       -- Add a Frame
+</pre>
+</dd>
+</dl>
+<p>The <code>Frame</code>s added to a <code>Notebook</code>
+    should have their <code>title</code> attribute set. This will be
+    used as the text on the tabs of the <code>Notebook</code>.</p>
+<p>
+<b>class Table</b>
+</p>
+<dl>
+<dd>
+<pre class="verbatim">
+TBD
+</pre>
+</dd>
+</dl>
+<p>
+<b>class TreeBox</b>
+</p>
+<dl>
+<dd>
+<pre class="verbatim">
+TBD
+</pre>
+</dd>
+</dl>
+<h2>5. Known Problems</h2>
+<p>For an overview of known bugs in the current release, see
+    the file <code>KNOWN_BUGS</code> found in the distribution.</p>
+<h2>6. Plans for Future Releases</h2>
+<p>For an overview of future plans, see the <code>TODO</code>
+    file found in the distribution. </p>
+<h2>7. Contributing</h2>
+<p>If you want to contribute to the <em>Anygui</em>
+    project, we could certainly use your help. First of all, you
+    should visit the <em>Anygui</em> web site at
+    <code><a href="http://www.anygui.org">http://www.anygui.org</a></code>, subscribe to the developer's mailing
+    list (<code>devel@anygui.org</code>) and the user's list
+    (<code>users@anygui.org</code>), and try to familiarise yourself
+    with how the package works behind the scenes. Then, you may either
+    help develop the currently supported GUI packages, or you may
+    start writing a backend of your own. Several potential backend
+    targets may be found at
+    <code><a href="http://starbase.neosoft.com/~claird/comp.lang.python/python_GUI.html">http://starbase.neosoft.com/~claird/comp.lang.python/python_GUI.html</a></code>.
+    </p>
+<h2>8. Anygui License</h2>
+<p>Copyright &copy; 2001, 2002 Magnus Lie Hetland, Thomas Heller, Alex Martelli, Greg Ewing, Joseph
+A. Knapka, Matthew Schinckel, Kalle Svensson,
+Shanky Tiwari, Laura Creighton, Dallas T. Johnston, Patrick K. O'Brien.
+.</p>
+<p>Permission is hereby granted, free of charge, to any person
+    obtaining a copy of this software and associated documentation
+    files (the "Software"), to deal in the Software without
+    restriction, including without limitation the rights to use, copy,
+    modify, merge, publish, distribute, sublicense, and/or sell copies
+    of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:</p>
+<p>The above copyright notice and this permission notice shall
+    be included in all copies or substantial portions of the
+    Software.</p>
+<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+    KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+    WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+    AND NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+    HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.</p>
+</body>
+</html>
