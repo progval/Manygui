@@ -11,6 +11,8 @@ Release 0.3: Less API change, focus on robustness
 Short-term Objectives/FIXMEs [mlh]
 ----------------------------------
 
+* Add test suite for Rectangles.py
+
 * Rewrite AbstractApplication; clear up prodding issue
 
 * Clean up exception use (Exceptions module -- perhaps not needed)
