@@ -2,7 +2,7 @@
 
 <!DOCTYPE document SYSTEM "minimal.dtd" [
 <!ENTITY shortversion            "0.1">
-<!ENTITY longversion             "0.1a1">
+<!ENTITY longversion             "0.1a2">
 <!ENTITY copy                    "<copyright/>">
 <!ENTITY copyrightholders SYSTEM "copyrightholders.xml">
 ]>
