@@ -44,6 +44,10 @@ Objectives for version 0.2a1:
 
 * Change add() signature?
 
+* Store LayoutInfo objects in LayoutManagers, not in the Proxies
+  themselves. Return the LayoutInfo object(s) from calls to add() to
+  allow the caller to modify it directly.
+
 * Add font, alignment, and colour (?) (etc.) attributes to all
   relevant components.
 
