@@ -23,7 +23,7 @@ from anygui.Events import *
 from anygui import application
 
 ################################################################
-import win32gui, win32con
+import win32gui, win32con, win32api
 
 # BUGS:
 #
@@ -80,30 +80,17 @@ class ComponentWrapper(AbstractWrapper):
         self.setVisible(1)
 
     def getGeometry(self):
-        # Gag me with a cat.
-        # Child window positions are reported relative to the
-        # *toplevel* window, not relative to the parent.
-        # Refactor this. - jak
-        if isinstance(self,WindowWrapper):
-            l,t,r,b = win32gui.GetClientRect(self.widget)
-            w = r-l
-            h = b-t
-            return l,t,w,h
-
         l,t,r,b = win32gui.GetWindowRect(self.widget)
         w = r-l
         h = b-t
 
-        if not isinstance(self.container.wrapper,WindowWrapper):
-            try:
-                if isinstance(self.proxy.container.wrapper,FrameWrapper):
-                    px,py,pw,ph = self.proxy.container.geometry
-                    l-=px
-                    t-=py
-                else:
-                    done=1
-            except AttributeError:
-                pass
+        try:
+            l,t = win32gui.ScreenToClient(self.proxy.container.wrapper.widget,(l,t))
+        except AttributeError:
+            pass
+        except:
+            import traceback
+            traceback.print_exc(1)
 
         return l,t,w,h
 
@@ -222,7 +209,7 @@ class ButtonWrapper(ComponentWrapper):
 
 class ListBoxWrapper(ComponentWrapper):
     _wndclass = "LISTBOX"
-    _win_style = win32con.WS_CHILD | win32con.WS_VSCROLL | win32con.WS_BORDER | win32con.LBS_NOTIFY
+    _win_style = win32con.WS_CHILD | win32con.WS_VSCROLL | win32con.WS_BORDER | win32con.LBS_NOTIFY| win32con.LBS_NOINTEGRALHEIGHT
     _win_style_ex = win32con.WS_EX_CLIENTEDGE
 
     def getSelection(self):
@@ -468,23 +455,27 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
 
     _win_style = win32con.WS_OVERLAPPEDWINDOW | win32con.WS_CLIPCHILDREN
     _win_style_ex = 0
+    _extraWidth = 2*win32api.GetSystemMetrics(win32con.SM_CXFRAME)
+    _extraHeight = win32api.GetSystemMetrics(win32con.SM_CYCAPTION) + 2*win32api.GetSystemMetrics(win32con.SM_CYFRAME)
 
     def __init__(self,*args,**kws):
         ComponentWrapper.__init__(self,*args,**kws)
         self.widget_map = {}
 
+    def getGeometry(self):
+        l,t,r,b = win32gui.GetWindowRect(self.widget)
+        w = r-l-self._extraWidth
+        h = b-t-self._extraHeight
+        return l,t,w,h
+
     def setGeometry(self,x,y,width,height):
         if not self.widget: return
         # take account for title bar and borders
-        import win32api
         win32gui.SetWindowPos(self.widget,
                               0,
                               x, y,
-                              width \
-                              + 2*win32api.GetSystemMetrics(win32con.SM_CXFRAME),
-                              height \
-                              + win32api.GetSystemMetrics(win32con.SM_CYCAPTION) \
-                              + 2*win32api.GetSystemMetrics(win32con.SM_CYFRAME),
+                              width + self._extraWidth,
+                              height + self._extraHeight,
                               win32con.SWP_NOACTIVATE | win32con.SWP_NOZORDER)
 
     def setContainer(self,container):
