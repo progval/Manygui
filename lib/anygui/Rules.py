@@ -2,29 +2,46 @@
 import re
 name_pat = re.compile('[a-zA-Z_][a-zA-Z_0-9]*')
 
-class NoChange(Exception): pass
+class IllegalState(Exception): pass
 
-class Rule:
-    
+class Rule:    
     def __init__(self, ruleString):
         assert '"' not in ruleString and "'" not in ruleString
         name, expr = ruleString.split('=', 1)
         self.name = name.strip()
-        self.DEBUG = expr.strip() # DELETE ME
         self.expr = compile(expr.strip(), '', 'eval')
         self.deps = name_pat.findall(expr)
-
     def fire(self, scope):
         name = self.name
         value = eval(self.expr, scope)
-        if value == scope[name]: raise NoChange
         scope[name] = eval(self.expr, scope)        
 
-# TODO: - Add "rule checks" -- if a rule is satisfied, dependencies
-#         are irrelevant (which means that the name may indeed be
-#         "defined")...
-#       - Refactor adjust()
-#       - Write separate test suite
+class DependencyGraph:
+    """
+    Graph for representing rule dependencies.
+
+    An edge A->B represents that the value of A must be known before B
+    can be calculated.
+    """
+    def __init__(self):
+        self.edges = {}
+    def addEdge(self, src, dst):
+        self.edges.setdefault(src,{})[dst] = 1
+    def children(self, node):
+        try: return self.edges[node].keys()
+        except KeyError: return []
+    def closure(self, node):
+        for dep in self.dependents(node):
+            self.addEdge(node, dep)
+    def dependents(self, node, status=None):
+        if status is None: status = {}
+        status[node] = 1
+        result = []
+        for child in self.children(node):
+            if not status.has_key(child):
+                result.extend(self.dependents(child, status))
+        status[node] = 'finished'
+        return result
 
 class RuleEngine:
     """
@@ -34,40 +51,34 @@ class RuleEngine:
     
     def __init__(self):
         self.rules = {}
-        self.is_dep = {}
+        self.deps = DependencyGraph()
         
     def addRule(self, ruleString):
         rule = Rule(ruleString)
-        for dep in rule.deps: self.is_dep[dep] = 1
-        self.rules.setdefault(rule.name, []).append(rule) # Ahem... ;)
+        name = rule.name
+        try: self.rules[name].append(rule)
+        except KeyError: self.rules[name] = [rule]
+        for dep in rule.deps:
+            self.deps.addEdge(dep, name)
+            self.deps.closure(dep)
         
     def adjust(self, vals, defs):
-        undef = self.rules.copy() # Hm. Only need a set of the keys...
-        dirty = 0
+        undef = {}
         for name in defs:
-            if self.is_dep[name]: dirty = 1
-            try: del undef[name]
-            except: pass
-        if not dirty: return
-        for key in undef.keys():
-            if not vals.has_key(key):
-                del undef[key]
+            for child in self.deps.children(name):
+                if vals.has_key(child):
+                    if child in defs: raise IllegalState
+                    undef[child] = 1
         stable = 0
         while undef and not stable:
             stable = 1
             for name in undef.keys():
                 for rule in self.rules[name]:
-                    #print 'rule:', name, '=', rule.DEBUG # FIXME
                     for dep in rule.deps:
-                        if undef.has_key(dep):
-                            #print 'dropping rule (%s is undefined)\n' % dep # FIXME
-                            break
+                        if undef.has_key(dep): break
                     else:               
-                        try: rule.fire(vals)
-                        except NoChange: pass
-                        else: stable = 0
-                        #print 'DEFINED:', name # FIXME
-                        #print # FIXME
+                        rule.fire(vals)
+                        stable = 0
                         del undef[name]
                         break
         return undef.keys()
@@ -94,13 +105,19 @@ if __name__ == '__main__':
     vals['size'] = 9999, 9999
     vals['position'] = 10, 10
     vals['geometry'] = 10, 10, 9999, 9999
-    print eng.adjust(vals, ['y', 'x', 'size']) # 'x' and 'size' shouldn't be necessary... Use value checks
 
-    print vals['position'], vals['geometry'] # Geometry isn't set properly here...
+    print eng.adjust(vals, ['y'])
+
+    print vals['position'], vals['geometry']
     vals['position'] = 42, 42
-    print eng.adjust(vals, ['position', 'size']) # 'size' shouldn't be necessary...
+    print eng.adjust(vals, ['position'])
     print (vals['x'], vals['y']), vals['geometry']
 
     vals['geometry'] = 1, 2, 3, 4
     print eng.adjust(vals, ['geometry'])
     print (vals['x'], vals['y'], vals['width'], vals['height']), vals['position']+vals['size']
+
+    # If the "illegal state" actually checked the expression and the
+    # values etc. (no change), this shouldn't raise an exception...
+    try: eng.adjust(vals, ['x', 'position'])
+    except IllegalState: print 'Expected exception received'
