@@ -105,6 +105,9 @@ Longer term goals:
 
 * Add constructive area geometry to Canvas
 
+* Make passive attributes (like text selection) active
+  through basic event handling
+
 Smaller issues:
 ---------------
 

@@ -766,6 +766,13 @@ so the user can see clipped parts of the Anygui presentation.
       Document default order.
       Documentation synch problem?
       Document the star symbol and the new semantics.
+
+      From Joe:
+
+You can now set ANYGUI_ALTERNATE_BORDER=1 in the environment
+to get +-| borders on strange terminal emulators. This is
+mentioned on the initial help screen as well.
+
       -->
 
       <para>Example:</para>
