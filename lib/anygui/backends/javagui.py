@@ -47,8 +47,8 @@ class ComponentMixin:
                 # text set properly.
                 frame.text = self._get_java_text()
             self._java_comp = frame
-            if hasattr(self, '_ensure_text'):
-                self._ensure_text() # FIXME: Should be called by anygui
+            #if hasattr(self, '_ensure_text'):
+            #    self._ensure_text() # FIXME: Should be called by anygui
             return 1
         return 0
 
