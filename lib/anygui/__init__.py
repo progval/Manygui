@@ -1,4 +1,4 @@
-import os
+import os # FIXME: Environment stuff doesn't work in jython
 
 _backends = 'x java wx tk beos'
 wishlist = os.environ.get('ANYGUI_WISHLIST', _backends).split()
