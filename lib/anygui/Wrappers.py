@@ -23,9 +23,6 @@ The only methods that should be explicitly called by the Proxy are:
 """
 
 # TODO:
-# - Add attribute dependencies, i.e. (text -> selection) etc.
-#   Includes: text -> selection, container -> everything..., geometry->visible in tk?
-#   container->geometry...
 # - In __init__:
 #   Add to list of wrappers that need to be prodded...
 #   (In Application, e.g. addWrapper?)
@@ -53,15 +50,21 @@ class AbstractWrapper:
         should use the same method.
         """
         self.proxy = proxy
-        #self.widget = None # Move DummyWidget code to front-end?
+        # Move DummyWidget code to front-end?
 
+        #@@@ Hm. Some of this could be done globally/class-wide...
+        
         self.aggregates = {}
         self.setAggregate('position', ('x', 'y'))
         self.setAggregate('size', ('width', 'height'))
         self.setAggregate('geometry', ('x', 'y', 'width', 'height'))
 
+        self.constraints = []
+        self.addConstraint('text', 'selection')
+        # 'container' before everything... Handler through added sync call?
+
         self.inMainLoop = 0
-        self.prod()
+        self.prod() #@@@ ?
 
     def setAggregate(self, name, signature):
         """
@@ -71,6 +74,20 @@ class AbstractWrapper:
         dispatch in update().        
         """
         self.aggregates[signature] = name
+
+    def addConstraint(self, before, after):
+        """
+        Adds a setter ordering constraint.
+
+        This ensures that the before-name is set before the
+        after-name, if possible.
+        """
+        # FIXME: Should handle aggregates automatically...
+        # E.g. ('geometry', 'visible') should imply ('x', 'visible') and
+        # ('x', 'visible') should imply ('geometry', 'visible') etc.
+        constraint = before, after
+        if not constraint in self.constraints:
+            self.constraints.append((before, after))
 
     def getSetters(self, attrs):
         """
@@ -89,6 +106,7 @@ class AbstractWrapper:
         such aggregate setters.
         """
         result = []
+        names = []
         candidates = self.aggregates.items()
         attrs = attrs[:]
         def moreSpecific(aggr1, aggr2):
@@ -101,18 +119,22 @@ class AbstractWrapper:
                 if not attr in attrs: break
             else:
                 setter = getSetter(self, candidate[1])
-                if not setter is None:
+                if setter is not None:
                     for attr in candidate[0]: attrs.remove(attr)
                     result.append((setter, candidate[0]))
+                    names.append(candidate[1])
         # Get the plain setters:
         unhandled = []
         for attr in attrs:
             setter = getSetter(self, attr)
             if setter is not None:
                 result.append((setter, (attr,)))
+                names.append(attr)
             else:
                 unhandled.append(attr)
 
+        # Make sure the order is legal:
+        topologicalSort(names, result, self.constraints)
         return result, unhandled
     
     def update(self, state):

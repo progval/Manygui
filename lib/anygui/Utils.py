@@ -1,6 +1,7 @@
 'Anygui utilities.'
 
 import sys
+from Exceptions import InternalError
 
 # To be phased out with the place() method
 def flatten(seq):
@@ -199,9 +200,12 @@ class IdentityStack:
             def __contains__(self,obj):
                 return id(obj) in self._stk
 
-def topologicalSort(items, constraints):
-    """ topological sort (stable) of list 'items' to respect pairwise
-        constraints coded as pairs (before, after) in sequence 'constraints'
+def topologicalSort(items, payload, constraints):
+    """
+    In-place topological sort (stable) of list 'items' to respect
+    pairwise constraints coded as pairs (before, after) in sequence
+    'constraints'. The 'payload' sequence will have its items subject
+    to the same reordering as the 'items'.
     """
     # prepare mappings 'followers' [item -> set of items that must follow it]
     # and 'nleaders' [item -> number of items that must precede it]
@@ -215,20 +219,25 @@ def topologicalSort(items, constraints):
                 these_followers[after] = before
     # while there are items, pick one with no leaders, append it
     # to result, update list 'items' and mapping 'nleaders'
-    result = []
+    result1 = []
+    result2 = []
     while items:
         # find first item left that has no 'leaders'
-        for item in items:
-            if nleaders.get(item,0)==0: break
+        for i in xrange(len(items)):
+            if nleaders.get(items[i], 0)==0: break
         else:
-            raise InternalError(items,"dependency loop")
+            raise InternalError(items, "dependency loop")
         # move the item from 'items' to 'result'
-        items.remove(item)
-        result.append(item)
+        item = items[i]
+        piggyback = payload[i]
+        del items[i], payload[i]
+        result1.append(item)
+        result2.append(piggyback)
         # update the mapping 'nleaders'
         for follower in followers.get(item,{}).keys():
             nleaders[follower] -= 1
-    return result
+    items[:] = result1
+    payload[:] = result2
 
 def _test():
     import doctest, Utils

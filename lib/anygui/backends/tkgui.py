@@ -57,6 +57,11 @@ class Wrapper(AbstractWrapper):
     def __init__(self, *args, **kwds):
         AbstractWrapper.__init__(self, *args, **kwds)
         if not self in wrappers: wrappers.append(self) # Hm...
+        self.addConstraint('geometry', 'visible')
+        # FIXME: Is this the right place to put it? Make sure
+        # 'geometry' implies 'x', 'y', etc. too (see Wrappers.py)
+        # Also, this scheme will cause flashing... (place before
+        # place_forget)
 
     def enterMainLoop(self): # ...
         try: assert self.widget.isDummy()
@@ -102,25 +107,17 @@ class ComponentWrapper(Wrapper):
 
     def setVisible(self, visible):
         if not visible: self.widget.place_forget()
-        # FIXME: setVisible should be called after setX and friends.
+        # Other case handled by geometric setters
 
     # Hm. This method is perhaps a bit hackish? :-)
-    # FIXME: Create general mechanism to deal with sync-looping like
-    # this.
     # Clean up the parent/dummy code?
     # (Hm. Creation is put here, but descruction directly in remove...?)
-    containerRecursionGuard = 0
     def setContainer(self, container):
-        if self.containerRecursionGuard:
-            self.containerRecursionGuard = 0
-            return
-        else:
-            self.containerRecursionGuard = 1
         parent = container.wrapper.widget
         try: assert parent.isDummy()
         except (AttributeError, AssertionError):
             self.widget = self.widgetFactory(parent)
-            self.proxy.sync()
+            self.proxy.sync(blocked=['container'])
 
 class ButtonWrapper(ComponentWrapper):
 

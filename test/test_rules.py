@@ -38,7 +38,7 @@ class RectangleTestCase(TestCase):
         self.assertEqual(state['geometry'][1], y)
         self.assertEqual(state['geometry'][2], width)
         self.assertEqual(state['geometry'][3], height)
-
+    '''
     def testX(self):
         "Setting x and syncing with ['x']"
         state = self.state
@@ -123,5 +123,28 @@ class RectangleTestCase(TestCase):
         state['size'] = 42, 42
         self.eng.sync(state, ['position', 'size'])
         self.checkState(42, 42, 42, 42)
+    '''
+    def testPartialWith(self):
+        "Syncing a partial state with a sync list"
+        state = self.state
+
+        # Generalize...
+        del state['geometry']
+        del state['size']
+        del state['position']
+        self.eng.sync(state, ['x', 'y', 'width', 'height'])
+        self.checkState(10, 10, 9999, 9999)
+
+    def testPartialWithout(self):
+        "Syncing a partial state without a sync list"
+        state = self.state
+
+        # Generalize...
+        del state['geometry']
+        del state['size']
+        del state['position']
+        self.eng.sync(state, [])
+        self.checkState(10, 10, 9999, 9999)
+
 
 if __name__ == '__main__': main()

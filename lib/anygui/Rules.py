@@ -1,13 +1,11 @@
 
+# Currently not working (and bloating terribly :P)
+
 class IllegalState(Exception): pass
 class CannotCalculate(Exception): pass
 class ValueUnchanged(Exception): pass
 class Undefined: pass
 Undefined = Undefined()
-
-# FIXME: Fix the Undefined stuff. Fetch a value for the Undefineds
-# from the others in the same class, or remove them all from state if
-# they are all Undefined. (Or something...)
 
 class EquivalencePartition:
     """
@@ -67,7 +65,8 @@ class RuleEngine:
     def complete(self, state):
         """
         Adds placeholder values for missing names covered by the
-        engine.
+        engine. These placeholder values should eventually be removed by
+        sync.
         """
         for name, size in self.sizes.items():
             try: state[name]
@@ -75,6 +74,23 @@ class RuleEngine:
                 if size == 1: state[name] = Undefined
                 else:
                     state[name] = [Undefined]*size
+
+    def getMissing(self, state):
+        """
+        Returns the elements that are covered by the rules but which
+        are missing from the state. These elements are returned as a
+        dictionary with tuples of the form (aggregate, index) or
+        (atom, None) as keys and 1 as values.
+        """
+        result = {}
+        for name, size in self.sizes.items():
+            try: state[name]
+            except KeyError:
+                if size == 1: result[(name, None)] = 1
+                else:
+                    for i in xrange(size):
+                        result[(name, i)] = 1
+        return result
 
     def define(self, rule):
         """
@@ -125,7 +141,6 @@ class RuleEngine:
     def getUndefs(self, state, defs):
         undefs = {}
         for key in defs:
-            print state
             value = self.getValue(state, key)
             c = self.equiv.getClass(key)
             for other in c.keys():
@@ -144,16 +159,20 @@ class RuleEngine:
                     break
             else:
                 if c:
-                    k, v = c.popitem()
-                    value = self.getValue(state, k)
+                    value = Undefined
                     while 1:
                         try: k, v = c.popitem()
                         except KeyError: break
-                        if value is Undefined:
-                            pass
-                            #print 'UNDEFINED' # ...
-                        elif value != self.getValue(state, k):
-                            raise IllegalState
+                        try: value = self.getValue(state, k)
+                        except KeyError: pass
+                    if value is not Undefined:
+                        while 1:
+                            try: k, v = c.popitem()
+                            except KeyError: break
+                            try:
+                                if value != self.getValue(state, k):
+                                    raise IllegalState
+                            except KeyError: pass
 
     def sync(self, state, defs):
         """
@@ -185,9 +204,18 @@ class RuleEngine:
         One important property of the sync method is that it (unlike
         define) does not alter the state of the RuleEngine.
         """
-        self.complete(state)
         defs = self.explode(defs)
+        self.complete(state)
         undefs = self.getUndefs(state, defs)
+        # FIXME: Check whether defs contains one of the missing values...
+        missing = self.getMissing(state)
+        undefs.update(missing)
+        # FIXME: Add values to the defs to get the missing defined
+        for m in missing.keys():
+            c = self.equiv.getClass(m)
+            for other in c.keys():
+                
+        reps = self.getRepresentatives
         self.check(state, defs)
         stable = 0
         while undefs and not stable:
@@ -206,7 +234,7 @@ class RuleEngine:
         for other in self.equiv.getClass(key).keys():
             if not undefs.has_key(other):
                 newValue = self.getValue(state, other)
-                break
+                if newValue is not Undefined: break
         else:
             raise CannotCalculate
         if oldValue == newValue: raise ValueUnchanged

@@ -22,6 +22,7 @@ def new_window(event):
     app.add(win)
     
 btn = Button(text='Create new window', size=(200,25), x=10, y=10)
+#btn = Button(text='Create new window', width=200, height=25, x=10, y=10)
 link(btn, new_window)
 win.add(btn)
 

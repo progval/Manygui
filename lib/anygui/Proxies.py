@@ -19,7 +19,7 @@ class Proxy(Attrib):
         """
         raise NotImplementedError, 'should be implemented by subclasses'
 
-    def sync(self, *names):
+    def sync(self, *names, **kwds):
         """
         Synchronises the Proxy and its Wrapper.
 
@@ -32,13 +32,26 @@ class Proxy(Attrib):
         variables must be supplied. If names are supplied, these must
         at a minimum be supplied. Before Proxy/Wrapper
         synchronisation, the internalSync method is called.
+
+        There are two exceptions to the above:
+
+          - Names in the sequence returned by self.blockedNames()
+            should never be supplied to the backend.
+
+          - If the keyword argument 'blocked' is used, it must contain
+            a sequence of names. These names will not be supplied to
+            the backend either.
+          
         """
         self.internalSync(names)
         state = {}
+        try: blocked = kwds['blocked']
+        except KeyError: blocked = []
+        blocked.extend(self.blockedNames())
         if not names: state.update(self.state)
         else:
             for name in names: state[name] = self.state[name]
-        for name in self.blockedNames():
+        for name in blocked:
             try: del state[name]
             except KeyError: pass
         self.wrapper.update(state)
