@@ -46,12 +46,19 @@ def scr_quit():
     curses.noraw()
     curses.endwin()
 
+_inited = 0
+_xsize = 80
+_ysize = 24
 def scr_init():
-    global _scr
+    global _scr, _inited, _xsize, _ysize
+    if _inited:
+        return
+    _inited = 1
     _scr = curses.initscr()
     curses.noecho()
     curses.cbreak()
     curses.raw()
+    _ysize, _xsize = _scr.getmaxyx()
 
     global SCR_LVLINE
     global SCR_RVLINE

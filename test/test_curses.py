@@ -1,46 +1,51 @@
-from anygui.backends.cursesgui import *
+from anygui import *
+import anygui
+#import anygui.backends.cursesgui as cg
 
 app = Application()
 
-win = Window(geometry=(10,10,40,10),title="Window 1")
-win.geometry=(10,5,40,8)
+win = Window(title="Window 1")
+win.geometry=(10,10,400,200)
 
-win2 = Window(geometry=(20,15,40,8),title="Window 2")
-win2.geometry=(20,15,40,8)
-# Test...
+win.add(Label(text="^F focus; ^Q quit; space click",
+              geometry=(30,30,300,30)))
+b1_1 = Button(text="Click Me",
+            geometry=(30,60,100,30))
+lb1_1 = Label(text="Label 1",
+            geometry=(150,60,200,30))
+win.add(b1_1)
+win.add(lb1_1)
 
-lb1 = Label(geometry=(3,3,20,3),text="Label 1")
-win2.add(lb1)
-
-def change_lb1(*args,**kws):
-    if lb1.text != "Hello":
-        lb1.text = "Hello"
+def change_lb1_1(*args,**kws):
+    if lb1_1.text != "Hello":
+        lb1_1.text = "Hello"
     else:
-        lb1.text = "World"
+        lb1_1.text = "World"
+link(b1_1,change_lb1_1)
 
-b1 = Button(geometry=(24,3,10,3),text="Click Me")
-link(b1,change_lb1)
-win2.add(b1)
-
-lb2 = Label(geometry=(1,1,36,3),text="f changes focus; q quits; c clicks")
-b2, b3 = Button(geometry=(2,4,10,3),text="A button"), Button(geometry=(14,4,12,3),text="Button 0")
+win2 = Window(title="Window 2")
+win2.geometry=(100,250,400,200)
 
 n = 0
-def change_b3(*args,**kws):
+b2_1 = Button(text="Cheshire",geometry=(30,60,100,30))
+b2_2 = Button(text="0",geometry=(150,60,100,30))
+
+def change_b2_2(*args,**kws):
     global n
     n += 1
-    b3.text = "Button %d"%n
-link(b2,change_b3)
+    b2_2.text = "%d"%n
 
-def toggle_b2(*args,**kws):
-    if b2 in win._contents:
-        win.remove(b2)
+def toggle_b2_1(*args,**kws):
+    if b2_1 in win2._contents:
+        win2.remove(b2_1)
     else:
-        win.add(b2)
-link(b3,toggle_b2)
+        win2.add(b2_1)
 
-win.add(b2)
-win.add(b3)
-win.add(lb2)
+link(b2_1,change_b2_2)
+link(b2_2,toggle_b2_1)
+
+win2.add((b2_1,b2_2))
+
+
 
 app.run()

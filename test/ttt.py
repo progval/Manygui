@@ -89,7 +89,7 @@ def doMove(the_btn = -1):
 
 app = Application()
 
-win = Window(width = 160, height = 250)
+win = Window(width = 200, height = 400)
 win.layout = SimpleGridManager(3,4)
 
 b1 =  Button(height = 32, width=32, text = "")

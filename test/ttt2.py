@@ -94,7 +94,7 @@ def doMove(the_btn = -1):
 
 app = Application()
 
-win = Window(width = 180, height = 180)
+win = Window(width = 250, height = 450)
 win.layout = GridManager(3)
 
 b1 =  Button(height = 32, width=32, text = "")

@@ -43,19 +43,22 @@ def addstr(x,y,ch,n=0,attr=0):
     if n == 0: n = len(ch)
     n = min(n,len(ch))
     for xx in range(0,n):
-        _scrbuf[y][x+xx] = ch[xx]
+        addch(y,x+xx,ord(ch[xx]))
     dbg("SCRBUF: %s"%_scrbuf)
 
 def erase(x,y,w,h):
     dbg('erase %s,%s,%s,%s'%(x,y,w,h))
-    global _scrbuf
+    global _scrbuf, _under_curs
     for y in range(y,y+h):
         _scrbuf[y][x:x+w] = [' ']*w
+    if _cursx>=x and _cursx<x+w and _cursy>y and _cursy<y+w:
+        _under_curs = ' '
 
 def addch(y,x,ch):
     dbg('addch %s,%s,%s'%(x,y,ch))
-    global _scrbuf
+    global _scrbuf, _under_curs
     _scrbuf[y][x] = chr(ch)
+    if x==_cursx and y==_cursy: _under_curs = chr(ch)
 
 def refresh():
     print join(reduce(op.add,_scrbuf),'')
@@ -74,6 +77,7 @@ _cursy = 0
 _under_curs = ' '
 def move_cursor(x,y):
     global _under_curs, _cursx, _cursy
+    if x==_cursx and y==_cursy: return
     _scrbuf[_cursy][_cursx] = _under_curs
     _under_curs = _scrbuf[y][x]
     _cursx = x

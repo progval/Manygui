@@ -4,8 +4,8 @@ import sys
 from anygui.backends import *
 from anygui.Exceptions import Error
 
+# Screen-management package.
 _support = None
-#def dbg(msg): _support.dbg(msg)
 
 class CursesGUIException(Error):
 
@@ -22,6 +22,10 @@ def _discard_focus():
     for comp in _all_components:
         comp._focus = 0
 
+def _set_scale(x,y):
+    ComponentMixin._horiz_scale = float(x)/640.0
+    ComponentMixin._vert_scale = float(y)/480.0
+
 class ComponentMixin:
     """ Mixin class for components.
     We're really only using curses as a screen-addressing
@@ -32,10 +36,10 @@ class ComponentMixin:
     # This lets normal anygui programs run under curses without
     # having to scroll the screen. This might not be such a
     # good idea, but it's worth a try.
-    #_horiz_scale = 80.0/800.0
-    #_vert_scale = 24.0/600.0
-    _horiz_scale = 1.0
-    _vert_scale = 1.0
+    _horiz_scale = 80.0/640.0
+    _vert_scale = 24.0/480.0
+    #_horiz_scale = 1.0
+    #_vert_scale = 1.0
 
     # If true for a particular class or component, we'll draw
     # a border around the component when it's displayed.
@@ -272,20 +276,18 @@ class ListBox(ComponentMixin, AbstractListBox):
 
 class Button(ComponentMixin, AbstractButton):
 
-    _texty = 0
-
     def __init__(self,*args,**kws):
         ComponentMixin.__init__(self,*args,**kws)
         AbstractButton.__init__(self,*args,**kws)
-        self._LVLINE = ord('<')
-        self._RVLINE = ord('>')
-        self._UHLINE = ord(' ')
-        self._LHLINE = ord(' ')
-        self._ULCORNER = ord('<')
-        self._URCORNER = ord('>')
-        self._LLCORNER = ord('<')
-        self._LRCORNER = ord('>')
-        self._attr = _support.ATTR_UNDERLINE
+        #self._LVLINE = ord('<')
+        #self._RVLINE = ord('>')
+        #self._UHLINE = ord(' ')
+        #self._LHLINE = ord(' ')
+        #self._ULCORNER = ord('<')
+        #self._URCORNER = ord('>')
+        #self._LLCORNER = ord('<')
+        #self._LRCORNER = ord('>')
+        #self._attr = _support.ATTR_UNDERLINE
 
     def __str__(self): return "Button "+self._text
 
