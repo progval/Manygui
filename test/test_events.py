@@ -94,6 +94,21 @@ Return values from event handlers:
 >>> send(s, 'return-values')
 [1, 2, 3]
 
+Globbing:
+
+>>> def globbed_handler(**kw):
+...     print 'Here I am!'
+...
+>>> link(any, any, globbed_handler)
+>>> s = Test()
+>>> send(s, 'something')
+Here I am!
+>>> unlink(any, any, globbed_handler)
+>>> link(any, globbed_handler)
+>>> send(s)
+Here I am!
+>>> send(s, 'something')
+
 [Tag handling]
 
 [Other API functions]
