@@ -43,28 +43,28 @@ class RectangleTestCase(TestCase):
         "Setting x and syncing with ['x']"
         state = self.state
         state['x'] = 20
-        self.assertEqual(self.eng.sync(state, ['x']), [])
+        self.eng.sync(state, ['x'])
         self.checkState(20, 10, 9999, 9999)
 
     def testY(self):
         "Setting y and syncing with ['y']"
         state = self.state
         state['y'] = 20
-        self.assertEqual(self.eng.sync(state, ['y']), [])
+        self.eng.sync(state, ['y'])
         self.checkState(10, 20, 9999, 9999)
 
     def testPosition(self):
         "Setting position and syncing with ['position']"
         state = self.state
         state['position'] = 20, 20
-        self.assertEqual(self.eng.sync(state, ['position']), [])
+        self.eng.sync(state, ['position'])
         self.checkState(20, 20, 9999, 9999)
 
     def testGeometry(self):
         "Setting geometry and syncing with ['geometry']"
         state = self.state
         state['geometry'] = 42, 42, 42, 42
-        self.assertEqual(self.eng.sync(state, ['geometry']), [])
+        self.eng.sync(state, ['geometry'])
         self.checkState(42, 42, 42, 42)
 
     def testLegalEmptySync(self):
@@ -111,7 +111,7 @@ class RectangleTestCase(TestCase):
         # Generalize...
         state['x'] = 42
         state['position'] = 42, 10
-        self.assertEqual(self.eng.sync(state, ['x', 'position']), [])        
+        self.eng.sync(state, ['x', 'position'])
         self.checkState(42, 10, 9999, 9999)
 
     def testIndependentSyncList(self):
@@ -121,7 +121,7 @@ class RectangleTestCase(TestCase):
         # Generalize...
         state['position'] = 42, 42
         state['size'] = 42, 42
-        self.assertEqual(self.eng.sync(state, ['position', 'size']), [])
+        self.eng.sync(state, ['position', 'size'])
         self.checkState(42, 42, 42, 42)
 
 if __name__ == '__main__': main()

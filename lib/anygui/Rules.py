@@ -155,7 +155,7 @@ class RuleEngine:
              modify all the others so they are equal to these
              elements.
 
-        One important invariant of the sync method is that it (unlike
+        One important property of the sync method is that it (unlike
         define) does not alter the state of the RuleEngine.
         """
         defs = self.explode(defs)
