@@ -439,7 +439,6 @@ class ListBox(ComponentMixin, AbstractListBox):
             return 1
         return 0
 
-
 class Button(ComponentMixin, AbstractButton):
 
     def __init__(self,*args,**kws):
@@ -518,11 +517,62 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
 
 class DisabledTextBindings: pass
 
-class TextField(ComponentMixin, AbstractTextField, DisabledTextBindings):
-    pass
+import string
+class TextMixin(ComponentMixin):
 
-class TextArea(ComponentMixin, AbstractTextArea, DisabledTextBindings):
-    pass
+    _use_text = 0 # Prevent naive text presentation.
+
+    def __init__(self,*args,**kws):
+        ComponentMixin.__init__(self,*args,**kws)
+
+    def _event_handler(self,ev):
+        if ev < 256 and chr(ev) in string.printable:
+            self._text += chr(ev)
+            self._redraw()
+            return 1
+        if ev == 127:
+            self._text = self._text[:-1]
+            self._redraw()
+            return 1
+        return 0
+
+    def _draw_contents(self):
+        t = self._text
+        x=1;y=1
+        lines = self._text.split('\n')
+        for li in lines:
+            self._addstr(x,y,li)
+            y+=1
+
+    def _ensure_editable(self):
+        pass
+
+    def _ensure_selection(self):
+        pass
+
+    def _backend_text(self):
+        return self._text
+
+    def _backend_selection(self):
+        return 0,0
+
+class TextField(TextMixin, AbstractTextField):
+
+    def __init__(self,*args,**kws):
+        TextMixin.__init__(self,*args,**kws)
+        AbstractTextField.__init__(self,*args,**kws)
+
+    def _event_handler(self,ev):
+        if ev == 10:
+            _app._change_focus()
+            return 1
+        return TextMixin._event_handler(self,ev)
+
+class TextArea(TextMixin, AbstractTextArea):
+
+    def __init__(self,*args,**kws):
+        TextMixin.__init__(self,*args,**kws)
+        AbstractTextArea.__init__(self,*args,**kws)
 
 class Frame(ContainerMixin, AbstractFrame):
 
