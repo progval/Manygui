@@ -34,12 +34,6 @@ defaults in mswgui.
 Label alignment (both vertical and horizontal) varies
 across backends.
 
-Labels display HTML tags in Jython on some platforms. (Old
-Swing versions)
-
-ListModel._set_value doesn't work properly; fails during
-notification.
-
 Setting tf.model.value moves selection to the end of
 textfields/textareas in javagui.
 
@@ -87,9 +81,6 @@ error under beosgui.
 RadioGroups don't work properly under BeOS.  BeOS will not allow
 multiple groups within the one view - hence, at this stage, all radio
 buttons are in the same group.
-
-Labels under BeOS display line breaks as an unprintable character: 
-this is because they are designed for single line use only.
 
 All List- and Text- Views always have scrollbars under BeOS.
 (Similar behaviour in other backends.)
