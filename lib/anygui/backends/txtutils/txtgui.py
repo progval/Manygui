@@ -331,7 +331,7 @@ class ComponentMixin:
             ety = self._effective_texty()
             #_scr.dbg("ety ",ety,self,self._height*self._vert_scale)
             if self._use_text:
-                self._addstr(self._textx,ety,self._text)
+                self._addstr(self._textx,ety,str(self._text))
 
     def _erase(self):
         if not self._curses_created: return
@@ -732,15 +732,15 @@ class TextMixin(ComponentMixin):
         pass
 
     def _backend_text(self):
-        return self._text
+        return str(self._text)
 
     ### Event handlers ###
     def _backspace(self,ev):
         """Erase character before cursor."""
         if not self._editable: return
         if self._tpos < 1: return 1
-        #self.modify(text=self._text[:self._tpos-1] + self._text[self._tpos:])
-        self._text=self._text[:self._tpos-1] + self._text[self._tpos:]
+        self.modify(text=self._text[:self._tpos-1] + self._text[self._tpos:])
+        #self._text=self._text[:self._tpos-1] + self._text[self._tpos:]
         self._tpos -= 1
         self._redraw()
         return 1
@@ -750,8 +750,8 @@ class TextMixin(ComponentMixin):
         if not self._editable: return
         if not chr(ev) in string.printable:
             return 0
-        #self.modify(text=self._text[:self._tpos] + chr(ev) + self._text[self._tpos:])
-        self._text=self._text[:self._tpos] + chr(ev) + self._text[self._tpos:]
+        self.modify(text=self._text[:self._tpos] + chr(ev) + self._text[self._tpos:])
+        #self._text=self._text[:self._tpos] + chr(ev) + self._text[self._tpos:]
         self._tpos += 1
         self._redraw() # FIXME: only really need to redraw current line.
         return 1
@@ -827,7 +827,7 @@ class TextMixin(ComponentMixin):
     ### Event handler end ###
 
     def _move_line(self,n):
-        lines = self._text.split('\n')
+        lines = str(self._text).split('\n')
         nlines = len(lines)
         self._cur_line += n
         cur_line_not_0 = 1
@@ -846,10 +846,10 @@ class TextMixin(ComponentMixin):
     def _draw_contents(self):
         if self._screen_height()<3: return
         
-        t = self._text
+        t = str(self._text)
         x=1;y=1
         try:
-            lines = self._text.split('\n')
+            lines = t.split('\n')
         except:
             lines = "COULD NOT RENDER TEXT IN CONTROL"
         line,col = self._find_cursor_pos(lines)
@@ -1160,12 +1160,13 @@ class HelpWindow(Window):
                   "",
                   
                   "The main difference between the curses binding and",
-                  "the text binding is that if the text binding is",
+                  "the text binding is that curses responds to characters",
+                  "as soon as they are typed, whereas if the text binding is",
                   "used, you must press the <Return> key in order for",
                   "the application to respond to input. You may type",
-                  "ESC-<Return> if you need to send a return character",
+                  "ESC-m if you need to send a return character",
                   "to the application.",
-                  
+
                   "",
                   
                   "ESC-f and ESC-b move forward and backward, respectively,",
@@ -1175,7 +1176,15 @@ class HelpWindow(Window):
                   "to zoom the presentation in and out. ESC-arrows",
                   "may be used to scroll the entire screen.",
                   
-                  "",]
+                  "",
+
+                  "Some terminal emulation programs may not display the",
+                  "borders of windows properly when using curses. If",
+                  "borders are drawn using strange characters, set",
+                  "the environment variable ANYGUI_ALTERNATE_BORDER",
+                  "to a non-zero value."
+                  
+                  ]
         lb.items = items
 
     def _dismiss(self,ev):
@@ -1224,8 +1233,8 @@ _escape_sequence_map = {
     (ord('f'),):FOCUS_FORWARD_EVENT,
     (ord('b'),):FOCUS_BACKWARD_EVENT,
 
-    # Convert ESC-Return into Return, for textgui's benefit.
-    (ord('\n'),):ord('\n'),
+    # Convert ESC-m into Return, for textgui's benefit.
+    (ord('m'),):ord('\n'),
 
     (ord('s'),):SELECT_BEGIN_EVENT,
     (ord('e'),):SELECT_END_EVENT,

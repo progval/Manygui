@@ -1,5 +1,6 @@
 # Curses magic...
 import curses
+import os
 
 _debug_messages = 0
 if _debug_messages:
@@ -93,21 +94,38 @@ def scr_init():
     dbg("xsize",_xsize,"; ysize",_ysize)
     
     global SCR_LVLINE
-    SCR_LVLINE = curses.ACS_VLINE
     global SCR_RVLINE
-    SCR_RVLINE = curses.ACS_VLINE
     global SCR_UHLINE
-    SCR_UHLINE = curses.ACS_HLINE
     global SCR_LHLINE
-    SCR_LHLINE = curses.ACS_HLINE
     global SCR_ULCORNER
-    SCR_ULCORNER = curses.ACS_ULCORNER
     global SCR_URCORNER
-    SCR_URCORNER = curses.ACS_URCORNER
     global SCR_LLCORNER
-    SCR_LLCORNER = curses.ACS_LLCORNER
     global SCR_LRCORNER
-    SCR_LRCORNER = curses.ACS_LRCORNER
+
+    sillychars = 0
+    try:
+        sillychars = os.environ['ANYGUI_ALTERNATE_BORDER']
+    except KeyError:
+        pass
+
+    if sillychars:
+        SCR_LVLINE = '|'
+        SCR_RVLINE = '|'
+        SCR_UHLINE = '-'
+        SCR_LHLINE = '-'
+        SCR_ULCORNER = '+'
+        SCR_URCORNER = '+'
+        SCR_LLCORNER = '+'
+        SCR_LRCORNER = '+'
+    else:
+        SCR_LVLINE = curses.ACS_VLINE
+        SCR_RVLINE = curses.ACS_VLINE
+        SCR_UHLINE = curses.ACS_HLINE
+        SCR_LHLINE = curses.ACS_HLINE
+        SCR_ULCORNER = curses.ACS_ULCORNER
+        SCR_URCORNER = curses.ACS_URCORNER
+        SCR_LLCORNER = curses.ACS_LLCORNER
+        SCR_LRCORNER = curses.ACS_LRCORNER
 
 def move_cursor(x,y):
     x-=_ox
