@@ -5,8 +5,15 @@ from Events import link, send
 #import weakref
 weakref = None
 
+# One key responsibility of class Mixins.Attrib is dealing with methods
+# called _ensure_* in Attrib subclasses' instances.  There are several
+# supporting data structures and functions for the purpose:
+
 # _ensure_* methods that it might be dangerous to auto-call
 _no_auto_ensures = '_ensure_created _ensure_destroyed'.split()
+
+# _ensure_* methods that must be called no more than once per object
+_ensures_once = '_ensure_events'.split()
 
 # pairwise order constraints on _ensure_* method calls
 _ensures_constraints = (
@@ -19,6 +26,7 @@ _ensures_constraints = (
 # sequence-of-pairs klass._ensures_constraints, if any, defaulting to the
 # global ones in this module's _ensures_constraints variable
 def _get_all_ensures_helper(klass, theset):
+    """ recursively get all methods in klass and bases named _ensure_* """
     for name in dir(klass):
         if name.startswith('_ensure_'):
             if name in _no_auto_ensures: continue
@@ -27,14 +35,20 @@ def _get_all_ensures_helper(klass, theset):
     for base in klass.__bases__: _get_all_ensures_helper(base, theset)
 
 def _get_all_ensures(klass):
+    """ get all methods in klass and its bases named _ensure_*, sorted """
     enset = {}
     _get_all_ensures_helper(klass, enset)
     constraints = getattr(klass, '_ensures_constraints', _ensures_constraints)
-    return topological_sort(enset.keys(), constraints)
+    ensures_names = enset.keys()
+    ensures_names.sort()
+    return topological_sort(ensures_names, constraints)
 
 def topological_sort(items, constraints):
-    # prepare followers mapping [item -> set of followers] and
-    # nleaders mapping [item -> number of leaders]
+    """ topological sort (stable) of list 'items' to respect pairwise
+        constraints coded as pairs (before, after) in sequence 'constraints'
+    """
+    # prepare mappings 'followers' [item -> set of items that must follow it]
+    # and 'nleaders' [item -> number of items that must precede it]
     followers = {}
     nleaders = {}
     for before, after in constraints:
@@ -43,20 +57,20 @@ def topological_sort(items, constraints):
             nleaders[after] = 1 + nleaders.get(after, 0)
             these_followers[after] = before
     # while there are items, pick one with no leaders, append it
-    # to result, update items list and mapping nleaders
-    items.sort()    # for definiteness
+    # to result, update list 'items' and mapping 'nleaders'
     result = []
-    # print 'sorting:',items
     while items:
+        # find first item left that has no 'leaders'
         for item in items:
             if nleaders.get(item,0)==0: break
         else:
             raise InternalError(items,"dependency loop")
+        # move the item from 'items' to 'result'
         items.remove(item)
         result.append(item)
+        # update the mapping 'nleaders'
         for follower in followers.get(item,{}).keys():
             nleaders[follower] -= 1
-    # print 'got:',result
     return result
 
 class Attrib:
@@ -80,11 +94,13 @@ class Attrib:
     relevant methods named _ensure_* if flag _inhibit_update is false.
     In this release, all _ensure_* are called; eventually, some kind
     of mechanism will use the hints to be more selective/optimizing.
+    Attrib's responsibilities include calling certain _ensure_* methods
+    only once, and enforcing a calling order among _ensure_* methods.
 
     Note that Attrib embodies two patterns (attribute setting/getting
     and update functionality) and is thus "Alexandrian dense"; cfr
     Vlissides, "Pattern Hatching", page 30, for pluses and minuses of
-    this "dense" approach and the resulting "profound" code.
+    such "dense" approaches and the resulting "profound" code.
     """
 
     _all_ensures = []
@@ -130,15 +146,13 @@ class Attrib:
     def __init__(self, *args, **kwds):
         # _all_ensures must be computed exactly once per concrete class
         klass = self.__class__
-        # print "For class",klass
         if not klass.__dict__.has_key('_all_ensures'):
             klass.__dict__['_all_ensures'] = _get_all_ensures(klass)
-        # else:
-            # print klass._all_ensures
+        self._ensures_called = []
 
         """
-        # handle explicit-attributes -- currently disabled (breaks some
-        # top-level window geometry/sizing [?])
+        # handle explicit-attributes -- currently [pre 0.1 beta] disabled
+        # (breaks some top-level window geometry/sizing in tkgui [?])
         try: explicit_attributes_names = self.explicit_attributes
         except AttributeError: pass
         else:
@@ -153,6 +167,11 @@ class Attrib:
     def update(self, **ignore_kw):
         if self._inhibit_update: return
         for ensure_name in self._all_ensures:
+            if ensure_name in _ensures_once:
+                if ensure_name in self._ensures_called:
+                    continue
+                self._ensures_called.append(ensure_name)
+            # obtain and call the bound-method
             getattr(self, ensure_name)()
 
 
