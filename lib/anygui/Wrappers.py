@@ -181,18 +181,9 @@ class AbstractWrapper:
                 unhandled.append(attr)
 
         # Move all prioritized attribs to the front.
-        nameResults = zip(names,result)
-        rcons = self.constraints[:]
-        rcons.reverse()
-        for pri in rcons:
-            try:
-                idx = names.index(pri)
-                nameResults[:idx+1] = [nameResults[idx]] + nameResults[:idx]
-                names[:idx+1] = [names[idx]] + names[:idx]
-            except ValueError:
-                pass
-        result = [r for (n,r) in nameResults]
-        
+        result = [result[names.index(c)] for c in self.constraints if c in names] + \
+                 [result[names.index(n)] for n in names if n not in self.constraints]
+
         return result, unhandled
     
     def push(self, state):
