@@ -1106,6 +1106,10 @@
 	<line>win.add(btn, opt, top=(lbl,10))</line>
       </codelisting>
 
+      <para><strong>class Placer</strong></para>
+
+      <para>[Under construction]</para>
+
       <para><strong>class RadioButton</strong></para>
       
       <para>A <code>RadioButton</code> is a toggle button, just like
@@ -1141,6 +1145,8 @@
       <para>[Under construction]</para>
         
       <para><strong>class Window</strong></para>
+
+      <!-- title -->
 
       <para>A window, plain and simple. <code>Window</code> is a type
       of <code>Frame</code>, so you can add components to it and set
