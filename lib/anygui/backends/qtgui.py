@@ -433,6 +433,7 @@ class Application(AbstractApplication, QApplication):
             QApplication.__init__(self,argv)
         else:
             apply(QApplication.__init__,(self,)+argv)
+        self.setStyle(QWindowsStyle())
         self.connect(qApp, SIGNAL('lastWindowClosed()'), qApp, SLOT('quit()'))
 
     def _mainloop(self):
