@@ -49,6 +49,12 @@ Objectives for version 0.2a0:
 * Clarify the requirements placed on Wrapper setters/getters (checks
   for "widget is None" etc.)
 
+* Consider: Make a "no windows" event, rather than making Application
+  exit on default when there are no more windows? (Would be
+  problematic for applications that relied on the exiting behaviour.
+  Alternatives? Make it possible to override it, perhaps only link per
+  default, and use unlink to remove the behaviour?)
+
 Objectives for version 0.2a1:
 -----------------------------
 
