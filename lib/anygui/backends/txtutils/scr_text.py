@@ -25,14 +25,16 @@ SCR_URCORNER = ord('+')
 SCR_LLCORNER = ord('+')
 SCR_LRCORNER = ord('+')
 
+
 ATTR_NORMAL = 0
 ATTR_UNDERLINE = 0
 
 # Screen buffer.
-_line = [' ']*80
-
+_xsize=80
+_ysize=23
+_line = [' ']*_xsize
 _scrbuf = []
-for ii in range(0,23):
+for ii in range(0,_ysize):
     _scrbuf.append(_line[:])
 
 def addstr(x,y,ch,n=0,attr=0):
@@ -47,13 +49,22 @@ def addstr(x,y,ch,n=0,attr=0):
 def erase(x,y,w,h):
     dbg('erase %s,%s,%s,%s'%(x,y,w,h))
     global _scrbuf, _under_curs
-    for y in range(y,y+h):
-        _scrbuf[y][x:x+w] = [' ']*w
+    x = max(0,x)
+    ex = min(_xsize,x+w)
+    y = max(y,0)
+    ey = min(_ysize,y+h)
+    if ex <= x: return
+    if ey <= y: return
+    w = ex-x
+    for y in range(y,ey):
+        _scrbuf[y][x:ex] = [' ']*w
     if _cursx>=x and _cursx<x+w and _cursy>y and _cursy<y+w:
         _under_curs = ' '
 
 def addch(y,x,ch):
     dbg('addch %s,%s,%s'%(x,y,ch))
+    if x<0 or y<0 or x>=_xsize or y>=_ysize:
+        return
     global _scrbuf, _under_curs
     _scrbuf[y][x] = chr(ch)
     if x==_cursx and y==_cursy: _under_curs = chr(ch)
@@ -77,14 +88,14 @@ _cursx = 0
 _cursy = 0
 _under_curs = ' '
 def move_cursor(x,y):
+    if x<0 or y<0 or x>=_xsize or y >= _ysize:
+        return
     global _under_curs, _cursx, _cursy
-    if x==_cursx and y==_cursy: return
     _scrbuf[_cursy][_cursx] = _under_curs
     _under_curs = _scrbuf[y][x]
     _cursx = x
     _cursy = y
     _scrbuf[_cursy][_cursx] = '*'
-    refresh()
 
 _inbuf = ""
 def get_char():

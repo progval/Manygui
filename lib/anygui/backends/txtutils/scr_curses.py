@@ -1,7 +1,7 @@
 # Curses magic...
 import curses
 
-_debug_messages = 0
+_debug_messages = 1
 if _debug_messages:
     _f = open("curses.txt","w")
 
@@ -19,22 +19,37 @@ _scr = None
 
 def addstr(x,y,ch,n=0,attr=curses.A_NORMAL):
     #dbg("adding at %s,%s: <%s>"%(x,y,ch))
-    try:
-        if n != 0:
-            _scr.addnstr(y,x,ch,n,attr)
-        else:
-            _scr.addstr(y,x,ch,attr)
-    except:
-        raise CursesGUIException(value="addstr/addnstr error: %d,%d <- \"%s\""%(x,y,ch))
+    if n == 0: n = len(ch)
+    n = min(n,len(ch))
+    for xx in range(0,n):
+        addch(y,x+xx,ord(ch[xx]))
 
 def erase(x,y,w,h):
-    #dbg("Erasing %s,%s,%s,%s"%(x,y,w,h))
-    for xx in range(x,x+w):
-        for yy in range(y,y+h):
-            addstr(xx,yy,' ')        
+    dbg("Erasing %s,%s,%s,%s"%(x,y,w,h))
+    x = max(0,x)
+    ex = min(_xsize,x+w)
+    y = max(y,0)
+    ey = min(_ysize,y+h)
+    if ex <= x: return
+    if ey <= y: return
+    line = ' '*(ex-x)
+    dbg("Erasing %s,%s,%s,%s"%(x,y,ex,ey))
+    for yy in range(y,ey-1):
+        _scr.addstr(yy,x,line)
+    if ey == _ysize and ex == _xsize:
+        line = line[:-1]
+    _scr.addstr(ey-1,x,line)
 
 def addch(y,x,ch):
-    _scr.addch(y,x,ch)
+    if x<0 or y<0 or x>=_xsize or y>=_ysize:
+        return
+    if x==_xsize-1 and y==_ysize-1:
+        # Can't address lower-right corner?
+        return
+    try:
+        _scr.addch(y,x,ch)
+    except:
+        dbg("Exception addch",x,y)
 
 def refresh():
     _scr.refresh()
@@ -43,7 +58,7 @@ def erase_all():
     _scr.erase()
 
 def scr_quit():
-    _scr.keypad(1)
+    _scr.keypad(0)
     curses.echo()
     curses.nocbreak()
     curses.noraw()
@@ -61,7 +76,9 @@ def scr_init():
     curses.noecho()
     curses.cbreak()
     curses.raw()
+    _scr.keypad(1)
     _ysize, _xsize = _scr.getmaxyx()
+    dbg("xsize",_xsize,"; ysize",_ysize)
 
     global SCR_LVLINE
     global SCR_RVLINE
@@ -83,6 +100,11 @@ def scr_init():
 
 def move_cursor(x,y):
     dbg("Moving cursor",x,y)
+    if x<0 or y<0 or x>=_xsize or y >= _ysize:
+        return
+    if x==_xsize-1 and y==_ysize-1:
+        # Can't address lower-right corner?
+        return
     _scr.move(y,x)
 
 def get_char():
