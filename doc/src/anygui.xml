@@ -937,9 +937,9 @@
       <code>resized</code> which takes two positional arguments,
       <code>dw</code>, and <code>dh</code> (change in width and change
       in height) and is responsible for changing the geometries of all
-      the components in the <code>Frame</code> the <code>LayoutManager
-      is managing</code>. (This frame is available through the private
-      attribute <code>self._container</code>.)
+      the components in the <code>Frame</code> the
+      <code>LayoutManager</code> is managing. (This frame is available
+      through the private attribute <code>self._container</code>.)
       </para>
 
       <!-- Why only allow one Options object?
@@ -949,14 +949,14 @@
       override the two internal methods <code>add_components</code>
       and <code>remove_component</code>:</para>
 
-      <para><apiname>add_components</apiname>(self, *<var>items</var>,
+      <para><code>add_components</code>(self, *<var>items</var>,
       **<var>kws</var>)</para>
 
       <para>Should add all the components in <var>items</var>, and
       associate them with the options in <code>kws</code>, for later
       resizing.</para>
 
-      <para><apiname>remove_component</apiname>(self,
+      <para><code>remove_component</code>(self,
       <var>item</var>)</para>
 
       <para>Should remove the given item.</para>
