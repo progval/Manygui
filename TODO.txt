@@ -24,19 +24,12 @@ Short-term Objectives/FIXMEs [mlh]
 
 * Review layout manager mechanism
 
-* Fix Models wrt. the new architecture
-
-* Implement other front-end components in new architecture (delegate)
-  (Joe: Text components; Kalle: labels/checkboxes.)
-
 * Get more work done on a list of events
 
-* Fix transformation sync('position') -> sync('x', 'y') etc.
+* Fix transformation push('position') -> push('x', 'y') etc.
 
 Objectives for version 0.2a1:
 -----------------------------
-
-* Implement the new architecture.
 
 * Fix default events so that their event type is the real type
   (e.g. 'click'), not 'default'.
