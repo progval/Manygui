@@ -10,4 +10,5 @@ include doc/anygui.html
 include doc/anygui.pdf
 include doc/anygui.ps
 include doc/anygui.txt
+include doc/tutorial.txt
 include demo/*
