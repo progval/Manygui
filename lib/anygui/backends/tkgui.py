@@ -339,8 +339,9 @@ class TextField(ComponentMixin, AbstractTextField, DisabledTextBindings):
 
     def _ensure_text(self):
         if self._tk_comp:
-            self._tk_comp.delete(0, END)
-            self._tk_comp.insert(0, self._text)
+            if self._text != self._tk_comp.get():
+                self._tk_comp.delete(0, END)
+                self._tk_comp.insert(0, self._text)
 
     def _ensure_selection(self):
         if self._tk_comp:
@@ -360,7 +361,6 @@ class TextField(ComponentMixin, AbstractTextField, DisabledTextBindings):
                 self._tk_comp.bind('<KeyRelease-Tab>',self._do_ensure_selection)
 
     def _update_model(self,ev):
-        self.model.about_to_update(self)
         self.model.value = self._tk_comp.get()
 
 class ScrollableTextArea(Tkinter.Frame):
@@ -461,10 +461,11 @@ class TextArea(ComponentMixin, AbstractTextArea, DisabledTextBindings):
 
     def _ensure_text(self):
         if self._tk_comp:
-            self._tk_comp.config(state=NORMAL) # Make sure we can change the text
-            self._tk_comp.delete(1.0, END)
-            self._tk_comp.insert(1.0, self._text)
-            self._ensure_editable() # Make the state is synched
+            if self._text != self._tk_comp.get("1.0","end"):
+                self._tk_comp.config(state=NORMAL) # Make sure we can change the text
+                self._tk_comp.delete(1.0, END)
+                self._tk_comp.insert(1.0, self._text)
+                self._ensure_editable() # Make the state is synched
 
     def _ensure_selection(self):
         if self._tk_comp:
@@ -473,10 +474,10 @@ class TextArea(ComponentMixin, AbstractTextArea, DisabledTextBindings):
             self._tk_comp.tag_add('sel', '1.0 + %s char' % start, '1.0 + %s char' % end)
 
     def _ensure_editable(self):
+        # Inheriting from DisabledTextBindings nullifies the need for this. - jak
         pass
 
     def _update_model(self,ev):
-        self.model.about_to_update(self)
         self.model.value = self._tk_comp.get("1.0","end")
 
 ################################################################
