@@ -21,6 +21,8 @@ Tentative release date: December 10th, 2001
   in Mixins.Attrib, and make sure it's used where applicable
   in the various modules.
 
+* Add tags to dispatcher
+
 Objectives for version 0.2:
 ---------------------------
 Tentative release date: February 28th, 2002
