@@ -121,7 +121,7 @@ f.layout = SimpleGridManager()
 
 btns = [b1,b2,b3,b4,b5,b6,b7,b8,b9]
 
-win.add(b1,b2,b3,b4,b5,b6,b7,b8,b9)
+win.add((b1,b2,b3,b4,b5,b6,b7,b8,b9))
 win.add(f,row=3,col=0,colspan=3)
 f.add(b10,insets=(5,2))
 f.add(l1,insets=(5,5))

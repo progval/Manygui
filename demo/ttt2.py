@@ -123,9 +123,9 @@ btns = [b1,b2,b3,b4,b5,b6,b7,b8,b9]
 
 # You can add components either to the layout or to the
 # Window, the result is the same:
-win.add(b1,b2,b3,row=0,col=0,xweight=1,yweight=1)
-win.layout.add(b4,b5,b6,row=1,col=0,xweight=1,yweight=1)
-win.add(b7,b8,b9,row=2,col=0,xweight=1,yweight=1)
+win.add((b1,b2,b3),row=0,col=0,xweight=1,yweight=1)
+win.layout.add((b4,b5,b6),row=1,col=0,xweight=1,yweight=1)
+win.add((b7,b8,b9),row=2,col=0,xweight=1,yweight=1)
 win.layout.add(b10,row=3,col=0,colspan=3,insets=(20,2),yweight=0)
 win.add(l1,row=4,col=0,colspan=2,insets=(20,2),yweight=0)
 
