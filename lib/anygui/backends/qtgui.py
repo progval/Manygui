@@ -1,9 +1,8 @@
-from weakref import ref as wr
 from anygui.backends import *
 __all__ = anygui.__all__
 
 ######################################################
-
+from weakref import ref as wr
 from qt import *
 TRUE = 1
 FALSE = 0
@@ -199,12 +198,19 @@ class TextBase(ComponentMixin, AbstractTextField):
 		if self._qt_comp:
 			return str(self._qt_comp.text())
 
-	def _update_model(self,ev):
-		#self.model.value = str(self._qt_comp.text())
-		pass
-
 	def _get_qt_text(self):
 		return QString(self._text)
+
+	def _calc_start_end(self,text,mtxt,pos):
+		start, idx = 0, -1
+		for n in range(text.count(mtxt)):
+			idx = text.find(mtxt, idx+1)
+			if idx == pos or idx == pos - len(mtxt):
+				start = idx
+				break
+		end = start + len(mtxt)
+		if DEBUG: print 'returning => start: %s | end: %s' %(start,end)
+		return start,  end
 
 class TextField(TextBase):
 	_qt_class = QLineEdit
@@ -219,6 +225,7 @@ class TextField(TextBase):
 			if DEBUG: print 'in _ensure_selection of: ', self._qt_comp
 			start, end = self._selection
 			self._qt_comp.setSelection(start, end-start)
+			self._qt_comp.setCursorPosition(end)
 
 	def _backend_selection(self):
 		if self._qt_comp:
@@ -227,17 +234,7 @@ class TextField(TextBase):
 				text = self._backend_text()
 				mtxt = str(self._qt_comp.markedText())
 				pos = self._qt_comp.cursorPosition()
-				start, idx = 0, 0
-				for n in range(text.count(mtxt)):
-					if n > 0:
-						idx += 1
-					idx = text.find(mtxt, idx)
-					if idx == pos or idx == pos - len(mtxt):
-						start = idx
-						break
-				end = start + len(mtxt)
-				if DEBUG: print 'returning => start: %s | end: %s' %(start,end)
-				return start,  end
+				return self._calc_start_end(text,mtxt,pos)
 			else:
 				return 0, 0
 
@@ -267,6 +264,7 @@ class TextArea(TextBase):
 			self._qt_comp.setCursorPosition(erow, ecol, TRUE)
 			#Exit hack...
 			#self._qt_comp.setSelection(srow, scol, erow, ecol)
+			#self._qt_comp.setCursorPosition(erow,ecol)
 
 	def _backend_selection(self):
 		if self._qt_comp:
@@ -278,33 +276,19 @@ class TextArea(TextBase):
 				if DEBUG: print 'row, col -> %s, %s' %(row,col) 
 				pos = self._qt_translate_position(row, col)
 				if DEBUG: print 'pos of cursor is: ', pos
-				start, idx = 0, 0
-				for n in range(text.count(mtxt)):
-					if n > 0:
-						idx += 1
-					idx = text.find(mtxt, idx)
-					if DEBUG:
-						print 'idx -> ', idx
-						print 'idx >= pos -> ', idx >= pos
-						print 'pos - len(mtxt) -> ', pos - len(mtxt)
-						print 'idx == pos - len(mtxt) -> ', idx == pos - len(mtxt)
-					if idx == pos or idx == pos - len(mtxt):
-						start = idx
-						break
-				end = start + len(mtxt)
-				if DEBUG: print 'returning => start: %s | end: %s' %(start,end)
-				return start,  end
+				return self._calc_start_end(text,mtxt,pos)
 			else:
 				return 0, 0
 
 	def _qt_get_lines(self):
 		lines = []
 		for n in range(1,self._qt_comp.numLines()):
-			lines.append(self._qt_comp.textLine(n))
+			lines.append(str(self._qt_comp.textLine(n)) + '\n')
+		print 'lines are: \n', lines
 		return lines
 
 	def _qt_translate_row_col(self, lines, pos):
-		row, col, curr_row = 1, 1, 1
+		row, col, curr_row = 0, 0, 0
 		tot_len = 0
 		for ln in lines:
 			if pos <= len(str(ln)) + tot_len:
