@@ -1081,7 +1081,7 @@
 
       <para><apiname>link</apiname>(<var>source</var>,
       [<var>event</var>,] <var>handler</var>, <var>weak</var>=0,
-      <var>loop</var>=0)</para> <!-- change to [] -->
+      <var>loop</var>=0)</para> <!-- change to []? -->
 
       <para>Creates a link in the <name>Anygui</name> event system,
       between the <code>source</code> (any object) and the
@@ -1147,7 +1147,7 @@
 
       <para><apiname>send</apiname>(<var>source</var>,
       <var>event</var>=<code>'default'</code>, <var>loop</var>=0,
-      **<var>kwds</var>)</para> <!-- change to [] -->
+      **<var>kwds</var>)</para> <!-- change to []? -->
 
       <para>When this is called, any handlers (callables) linked to
       the source, but which will not cause a send-loop (unless
@@ -1187,9 +1187,23 @@
       [<var>event</var>,] <var>handler</var>)</para>
 
       <para>Undoes a call to <code>link</code> with the same
-      positional arguments.  <!-- @@@ Describe use of the "any"
-      value -->
+      positional arguments. If <var>handler</var> has been registered
+      with either <var>source</var> or <var>event</var> as
+      <code>any</code>, that parameter will be irrelevant when
+      deciding whether or not to remove that link. For instance:
       </para>
+
+      <codelisting>
+	<line>link(foo, any, bar)</line>
+	<line>unlink(foo, baz, bar)</line>
+      </codelisting>
+
+      <para>Here the link created by <code>link(foo, any, bar)</code>
+      will be removed by the call to <code>unlink</code>.</para>
+
+      <para><strong>Note:</strong> This behaviour (unlinking handlers
+      registered with the <code>any</code> value) may change in future
+      releases.</para>
 
       <para><strong>Default Events</strong>: When used without the
       event argument, both <code>link</code> and <code>send</code> use
@@ -1226,9 +1240,6 @@
       <para><strong>Base Classes and Common Behaviour</strong></para>
 
       <!-- document set and modify -->
-
-      <!-- Add info about update() and the assignee protocol, if
-      adopted; models... -->
 
       <para>All components are subclasses of corresponding abstract
       components which implement behaviour common to all the
