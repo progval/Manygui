@@ -1,9 +1,5 @@
 _backends = 'msw gtk x java wx tk beos qt curses text'
 
-# Try to get the environment variables ANYGUI_WISHLIST (used
-# before anygui.wishlist), and ANYGUI_DEBUG (to print out
-# stacktraces when importing backends):
-
 import os, sys
 
 __all__ = ['application', 'Application',
@@ -14,6 +10,10 @@ __all__ = ['application', 'Application',
            'send', 'link', 'unlink', 'unlinkSource', 'unlinkHandler',
            'unlinkMethods', 'Frame', 'Placer', 'backend'
            ] # FIXME: Add stuff from Colors and Fonts
+
+# Try to get the environment variables ANYGUI_WISHLIST (overrides
+# anygui.wishlist), and ANYGUI_DEBUG (to print out stacktraces when
+# importing backends):
 
 if hasattr(sys, 'registry'):
     # Jython:
@@ -48,7 +48,12 @@ def _backend_passthrough():
     global _backends, _backend
     _backends = _backends.split()
     _backends = [b for b in _backends if not b in wishlist]
-    _backends = wishlist + _backends
+    if wishlist:
+        try:
+            idx = wishlist.index('*')
+            wishlist[idx:idx+1] = _backends
+        except ValueError: pass
+        _backends = wishlist
     for name in _backends:
         try:
             mod = _dotted_import('anygui.backends.%sgui' % name,)

@@ -732,6 +732,7 @@ Fixed focus indicator in textgui - it now always shows up.
       <!--
       Document default order.
       Documentation synch problem?
+      Document the star symbol and the new semantics.
       -->
 
       <para>Example:</para>
