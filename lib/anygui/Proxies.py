@@ -65,7 +65,7 @@ class Proxy(Attrib):
         # ==== MODEL SUPPORT ==== #
         # After we have pulled the actual values from the widget,
         # We need to update all installed models with them.
-        for prop in state:
+        for prop in state.keys():
             try:
                 model = self._installedModels[prop]
                 # locked update of model, this keeps model
