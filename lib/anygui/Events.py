@@ -29,7 +29,7 @@ import time
 from Utils import WeakMethod, HashableWeakRef
 ref = HashableWeakRef
 
-def locators(event):
+def locators(event, weak=0):
     'Get indexing information about an event.'
     source = getattr(event, 'source', None)
     type   = getattr(event, 'type',   None)
@@ -41,13 +41,13 @@ def locators(event):
         cat = TYPE
     else:
         cat = ANON
-    if source != None: source = ref(source)
+    if source != None: source = ref(source, weak)
     key = source, type
     return cat, key
 
 def connect(event, handler, weak=0):
     'Connect an event pattern to an event handler.'
-    cat, key = locators(event)
+    cat, key = locators(event, weak)
     handler = WeakMethod(handler, weak)
     try:
         if not handler in registry[cat][key]:
