@@ -23,6 +23,7 @@ class ComponentMixin:
     _tk_comp = None
     _tk_id = None
     _tk_style = 0
+    _tk_opts = {}
     
     def _is_created(self):
         return self._tk_comp is not None
@@ -33,7 +34,7 @@ class ComponentMixin:
                 parent = self._container._tk_comp
             else:
                 parent = None
-            frame = self._tk_class(parent
+            frame = self._tk_class(parent,**self._tk_opts
                                    #text=self._get_tk_text(),
                                    #style=self._tk_style
                                    )
@@ -491,7 +492,11 @@ class TextArea(ComponentMixin, AbstractTextArea, DisabledTextBindings):
 ################################################################
 
 class Frame(ComponentMixin, AbstractFrame):
-    _tk_class = Tkinter.Frame        
+    _tk_class = Tkinter.Frame
+    _tk_opts = {'relief':'raised','borderwidth':2}
+
+#from anygui.Frames import FakeFrame
+#class Frame(FakeFrame): pass
 
 ################################################################
 
