@@ -14,8 +14,6 @@ Remaining objectives for version 0.1:
 -------------------------------------
 Tentative release date: Mid-December, 2001
 
-* Rename the update method
-
 * Fix remaining bugs and make sure the tests work in all
   backends
 
