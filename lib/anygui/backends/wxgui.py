@@ -45,7 +45,7 @@ CheckBoxWrapper=1
 from wxPython.wx import *
 from anygui.Utils import log
 from anygui.Applications import AbstractApplication
-from anygui.Wrappers import AbstractWrapper, DummyWidget, isDummy
+from anygui.Wrappers import AbstractWrapper
 from anygui.Events import *
 from anygui import application
 
@@ -90,15 +90,14 @@ class ComponentWrapper(AbstractWrapper):
                 pass
             return
         parent = container.wrapper.widget
-        try:
-            assert parent.isDummy()
-        except (AttributeError, AssertionError):
+        if parent is not None:
             self.destroy()
             self.create(parent)
             self.proxy.push(blocked=['container'])
 
     def setGeometry(self,x,y,width,height):
-        if self.noWidget(): return
+        #if self.noWidget(): return
+        if self.widget is None: return
         self.widget.SetPosition((int(x), int(y)))
         self.widget.SetSize((int(width), int(height)))
 
@@ -109,57 +108,58 @@ class ComponentWrapper(AbstractWrapper):
 
     # COMMON W/MSWGUI
     def setX(self,x):
-        if self.noWidget(): return
+        if self.widget is None: return
         ox,y,w,h = self.getGeometry()
         self.setGeometry(x,y,w,h)
 
     def setY(self,y):
-        if self.noWidget(): return
+        if self.widget is None: return
         x,oy,w,h = self.getGeometry()
         self.setGeometry(x,y,w,h)
 
     def setWidth(self,width):
-        if self.noWidget(): return
+        if self.widget is None: return
         x,y,ow,h = self.getGeometry()
         self.setGeometry(x,y,width,h)
 
     def setHeight(self,height):
-        if self.noWidget(): return
+        if self.widget is None: return
         x,y,w,oh = self.getGeometry()
         self.setGeometry(x,y,w,height)
     # END COMMON W/MSWGUI
 
     def setSize(self,width,height):
-        if self.noWidget(): return
+        if self.widget is None: return
         self.widget.SetSize(width,height)
 
     def setPosition(self,x,y):
-        if self.noWidget(): return
+        if self.widget is None: return
         self.widget.SetPosition(x,y)
 
     def setVisible(self,visible):
-        if not self.noWidget():
+        if not self.widget is None:
             self.widget.Show(int(visible))
 
     def setEnabled(self,enabled):
-        if not self.noWidget():
+        if not self.widget is None:
             self.widget.Enable(int(enabled))
 
     def destroy(self):
-        if not self.noWidget():
+        if not self.widget is None:
             self.widget.Destroy()
-            self.widget = DummyWidget()
+            #self.widget = DummyWidget()
+            self.widget = None # @@@
         try:
             self._forgetContents()
         except AttributeError:
             pass
 
     def setText(self,text):
-        if not self.noWidget() and hasattr(self.widget, 'SetLabel'):
+        if not self.widget is None and hasattr(self.widget, 'SetLabel'):
             self.widget.SetLabel(str(text))
 
     def getText(self):
-        if not self.noWidget() and hasattr(self.widget, 'SetLabel'):
+        if not self.widget is None and hasattr(self.widget, 'SetLabel'):
             return self.widget.GetLabel()
         return ""
 
@@ -191,22 +191,22 @@ class ListBoxWrapper(ComponentWrapper):
     _needsCreationText=0
 
     def getSelection(self):
-        if not self.noWidget():
+        if not self.widget is None:
             return self.widget.GetSelection()
 
     def setItems(self,items):
-        if not self.noWidget():
+        if not self.widget is None:
             for index in range(self.widget.Number()):
                 self.widget.Delete(0)
             self.widget.InsertItems(map(str, list(items)), 0)
 
     def setSelection(self,selection):
-        if not self.noWidget():
+        if not self.widget is None:
             if self.widget.Number() > 0:
                 self.widget.SetSelection(int(selection)) # Does not cause an event
 
     def widgetSetUp(self):
-        if not self.noWidget():
+        if not self.widget is None:
             EVT_LISTBOX(self.widget, self._wx_id, self._wx_clicked)
 
     def _wx_clicked(self, event):
@@ -217,11 +217,11 @@ class ListBoxWrapper(ComponentWrapper):
 class ToggleButtonWrapper(ComponentWrapper):
 
     def setOn(self,on):
-        if not self.noWidget():
+        if not self.widget is None:
             self.widget.SetValue(int(on))
 
     def getOn(self):
-        if not self.noWidget():
+        if not self.widget is None:
             return self.widget.GetValue()
 
 class CheckBoxWrapper(ToggleButtonWrapper):
@@ -271,32 +271,32 @@ class RadioButtonWrapper(ToggleButtonWrapper):
 class TextControlMixin:
 
     def getText(self):
-        if not self.noWidget():
+        if not self.widget is None:
             if sys.platform[:3] == 'win':
                 return self.widget.GetValue().replace('\r','')
             else:
                 return self.widget.GetValue()
             
     def setText(self,text):
-        if not self.noWidget():
+        if not self.widget is None:
             # XXX Recursive updates seem to be no problem here,
             # wx does not seem to trigger the EVT_TEXT handler
             # when a new text equal to the old one is set.
             self.widget.SetValue(str(text))
 
     def setEditable(self,editable):
-        if not self.noWidget():
+        if not self.widget is None:
             self.widget.SetEditable(int(editable))
 
 class TextFieldWrapper(TextControlMixin,ComponentWrapper):
     _wx_class = wxTextCtrl
 
     def getSelection(self):
-        if not self.noWidget():
+        if not self.widget is None:
             return self.widget.GetSelection()
 
     def setSelection(self,selection):
-        if not self.noWidget():
+        if not self.widget is None:
             start, end = selection
             self.widget.SetSelection(int(start), int(end))
 
@@ -311,7 +311,7 @@ class TextAreaWrapper(TextControlMixin,ComponentWrapper,TextControlMixin):
     _wx_style = wxTE_MULTILINE | wxHSCROLL
 
     def getSelection(self):
-        if not self.noWidget():
+        if not self.widget is None:
             start, end = self.widget.GetSelection()
             if sys.platform[:3] == 'win':
                 # under windows, the native widget contains
@@ -340,7 +340,7 @@ class TextAreaWrapper(TextControlMixin,ComponentWrapper,TextControlMixin):
             return start, end
 
     def setSelection(self,selection):
-        if not self.noWidget():
+        if not self.widget is None:
             start, end = selection
             if sys.platform[:3] == 'win':
                 # under windows, the natice widget contains
@@ -370,7 +370,8 @@ class FrameWrapper(ComponentWrapper):
                 comp.wrapper._forgetContents()
             except AttributeError:
                 pass
-            comp.wrapper.widget = DummyWidget()
+            #comp.wrapper.widget = DummyWidget()
+            comp.wrapper.widget = None # @@@
 
     def setContainer(self, *args, **kws):
         """
@@ -397,7 +398,7 @@ class WindowWrapper(ComponentWrapper):
     def setGeometry(self,x,y,width,height):
         # override this to set the CLIENT size (not the window size)
         # to take account for title bar, borders and so on.
-        if not self.noWidget():
+        if not self.widget is None:
             self.widget.SetPosition((int(x), int(y)))
             self.widget.SetClientSize((int(width), int(height)))
 
@@ -422,13 +423,13 @@ class WindowWrapper(ComponentWrapper):
         EVT_SIZE(self.widget, self._wx_size_handler)
 
     def setTitle(self,title):
-        if not self.noWidget():
+        if not self.widget is None:
             self.widget.SetTitle(str(title))
 
     def setContainer(self,container):
         if not application().isRunning(): return
         if container is None: return
-        if self.noWidget():
+        if self.widget is None:
             self.create()
         self.proxy.push(blocked=['container'])
         # Ensure contents are properly created.
@@ -486,13 +487,14 @@ class MenuItemMixin:
         return MenuItemMixin._idSrc
 
     def createIfNeeded(self):
-        if self.noWidget():
+        if self.widget is None:
             self.create()
             self._id = self.getId()
 
     def setEnabled(self,enabled):
         #print "setEnabled",self,enabled
-        if self.proxy.container is None or self.proxy.container.wrapper.noWidget():
+        if self.proxy.container is None or \
+           self.proxy.container.wrapper.widget is None:
             return
         self.rebuild_all()
 
@@ -503,14 +505,16 @@ class MenuItemMixin:
                 return
             if self.proxy in self.proxy.container.contents:
                 self.proxy.container.contents.remove(self.proxy)
-            self.widget = DummyWidget()
+            #self.widget = DummyWidget()
+            self.widget = None # @@@
             self.proxy.container.wrapper.rebuild()
         else:
             self.createIfNeeded()
             self.proxy.container.wrapper.rebuild()
 
     def setText(self,text):
-        if self.proxy.container is None or self.proxy.container.wrapper.noWidget():
+        if self.proxy.container is None or \
+           self.proxy.container.wrapper.widget is None:
             return
         try:
             self.rebuild_all()
@@ -524,7 +528,7 @@ class MenuItemMixin:
         pass
 
     def __str__(self):
-        if self.noWidget():
+        if self.widget is None:
             widg = "NOWIDGET"
         else:
             widg = self.widget
@@ -541,13 +545,14 @@ class MenuBarWrapper(MenuItemMixin,AbstractWrapper):
 
     def setContainer(self,container):
         if not container:
-            if self.noWidget:
+            if self.widget is None:
                 return
             #print "DESTROYING",self
             #self.widget.destroy()
-            self.widget = DummyWidget()
+            #self.widget = DummyWidget()
+            self.widget = None # @@@
         else:
-            if container.wrapper.noWidget():
+            if container.wrapper.widget is None:
                 return
             #print "Adding menubar",self,"to",self.proxy.container.wrapper
             self.createIfNeeded()
@@ -565,7 +570,7 @@ class MenuBarWrapper(MenuItemMixin,AbstractWrapper):
         #print "REBUILDING",self
         if self.proxy.container is None:
             return
-        if self.proxy.container.wrapper.noWidget():
+        if self.proxy.container.wrapper.widget is None:
             return
 
         self.removeAll()
@@ -574,7 +579,8 @@ class MenuBarWrapper(MenuItemMixin,AbstractWrapper):
 
         pos = 0
         for item in self.proxy.contents:
-            item.wrapper.widget = DummyWidget()
+            #item.wrapper.widget = DummyWidget()
+            item.wrapper.widget = None # @@@
             item.wrapper.rebuild()
             #print "\tAdding",item.wrapper
             self.widget.Append(item.wrapper.widget,item.text)
@@ -601,16 +607,17 @@ class MenuWrapper(MenuItemMixin,AbstractWrapper):
 
     def setContainer(self,container):
         if not container:
-            if self.noWidget:
+            if self.widget is None:
                 return
             #if self.proxy in self.proxy.container.contents:
             #    self.proxy.container.contents.remove(self.proxy)
             #print "DESTROYING",self
             #self.widget.destroy()
-            self.widget = DummyWidget()
+            #self.widget = DummyWidget()
+            self.widget = None
             self.proxy.container.wrapper.rebuild()
         else:
-            if container.wrapper.noWidget():
+            if container.wrapper.widget is None:
                 return
             self.full = 0
             self.rebuild()
@@ -624,9 +631,9 @@ class MenuWrapper(MenuItemMixin,AbstractWrapper):
         """
         if self.proxy.container is None:
             return
-        if self.noWidget():
+        if self.widget is None:
             return
-        if self.proxy.container.wrapper.noWidget():
+        if self.proxy.container.wrapper.widget is None:
             return
         proxies = [self.proxy]
         while not isinstance(proxies[-1],Window):
@@ -640,11 +647,11 @@ class MenuWrapper(MenuItemMixin,AbstractWrapper):
         """
         if self.proxy.container is None:
             return
-        if self.proxy.container.wrapper.noWidget():
+        if self.proxy.container.wrapper.widget is None:
             return
 
         #print "\tREBUILDING",self,self.proxy.contents
-        if not self.noWidget() and self.full:
+        if not self.widget is None and self.full:
             #print "\t\tDELETING CONTENTS OF",self.widget
             ids = [p.wrapper._id for p in self.proxy.contents]
             for id in ids:
@@ -663,7 +670,8 @@ class MenuWrapper(MenuItemMixin,AbstractWrapper):
 
         for item in self.proxy.contents:
             if isinstance(item,Menu):
-                item.wrapper.widget = DummyWidget()
+                #item.wrapper.widget = DummyWidget()
+                item.wrapper.widget = None # @@@
                 item.wrapper.rebuild()
                 #print "\t\t\tADDING",item.wrapper,item.wrapper._id
                 self.widget.AppendMenu(item.wrapper._id,item.text,item.wrapper.widget)
@@ -711,7 +719,7 @@ class MenuCheckWrapper(MenuCommandWrapper):
         # FIX ME! self.var = Tkinter.IntVar()
 
     def setOn(self,on):
-        if self.noWidget():
+        if self.widget is None:
             return
         #print "setOn",self.proxy,self.proxy.container
         #print "MenuCheck.setOn",self,on
@@ -719,7 +727,7 @@ class MenuCheckWrapper(MenuCommandWrapper):
         self.proxy.container.wrapper.widget.Check(self._id,on)
 
     def getOn(self):
-        if self.noWidget():
+        if self.widget is None:
             return
         #print "getOn",self.proxy,self.proxy.container
         #print "MenuCheck.getOn",self,self.var.get()

@@ -1,5 +1,5 @@
 #_backends = 'msw gtk java wx tk beos qt curses text'
-_backends = 'java msw wx msw wx qt tk'
+_backends = 'java msw wx qt tk'
 
 def application():
     'Returns the global application object'
