@@ -1,7 +1,7 @@
 from anygui import *
 from anygui.Utils import log
 
-class SelectionPrinter(ListBox):
+class SelectionPrinter:
 
     def __init__(self, lb):
         self._lb = lb

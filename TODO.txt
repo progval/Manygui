@@ -165,6 +165,9 @@ Longer term goals:
 Smaller issues:
 ---------------
 
+* Move stuff like clickHandlers that only send 'click' to
+  the front-end?
+
 * Add support for borders?
 
 * Add a linkMethods (or something) function for callback support?
