@@ -1096,9 +1096,9 @@
       setting up the link, so that no objects will be "kept alive" by
       the link.</para>
 
-      <para>[[@@@ Rewrite]] A send-loop occurs if an object sends an
-      event "to itself" (i.e. it is the source of a call to
-      <code>link</code> which hasn't returned at the point where one
+      <para>A send-loop occurs if an object sends an event "to itself"
+      (i.e. it is the <code>source</code> argument of a call to
+      <code>send</code> which hasn't returned at the point where one
       of its methods are about to be activated as a handler). The
       truth value <code>loop</code> decides whether this handler will
       be activated in such a loop. (If <code>send</code> was called
@@ -1110,24 +1110,55 @@
       the others (<code>weak</code>, and <code>loop</code>) must be
       supplied as keyword parameters.</para>
 
+      <para>Sometimes one might want an event handler that reacts to a
+      specific event from <emphasis>any</emphasis> source, or
+      <emphasis>any</emphasis> event from a specific source; or even
+      <emphasis>any</emphasis> event from <emphasis>any</emphasis>
+      source. To do that, simply use the special value
+      <code>any</code> as either source, event, or both.</para>
+
+      <para>Example:</para>
+
+      <codelisting>
+	<line>from anygui import *</line>
+	<line>>>> def monitor_events(event, **kw):</line>
+	<line>...     print 'An event occurred:', event</line>
+	<line>...</line>
+	<line>>>> link(any, any, monitor_events)</line>
+	<line>>>> btn = Button()</line>
+	<line>>>> send(btn, 'foobar')</line>
+	<line>An event occurred: foobar</line>
+      </codelisting>
+
+      <para>If you use <code>send(btn, 'click')</code> in this
+      example, you will get <emphasis>two</emphasis> events, since the
+      <code>Button</code> will detect the <code>click</code> event
+      (which is its default), and issue a <code>default</code> event
+      as well.</para>
+
+      <para><strong>Note:</strong> You need to explicitly supply the
+      event type if you want to respond to any event type; otherwise
+      you will only respond to the <code>default</code> type.</para>
+
       <para>For more information on sending events, see
       <code>send</code>, below.</para>
+
+      <!-- Add stuff about order -->
 
       <para><apiname>send</apiname>(<var>source</var>,
       <var>event</var>=<code>'default'</code>, <var>loop</var>=0,
       **<var>kwds</var>)</para> <!-- change to [] -->
 
-      <!-- Add stuff about order, especially any-sources etc. -->
-
       <para>When this is called, any handlers (callables) linked to
       the source, but which will not cause a send-loop (unless
       <code>loop</code> is true) will be called with all the keyword
-      arguments provided [[@@@]], in the order in which they were
-      linked. In addition to the supplied keyword arguments, the event
-      framework will add <code>source</code>, <code>event</code>, and
-      the time (as measured by the standard <name>Python</name>
-      function <code>time.time</code>) when <code>send</code> was
-      called, supplied with the <code>time</code> argument.
+      arguments provided (except <code>loop</code>), in the order in
+      which they were linked. In addition to the supplied keyword
+      arguments, the event framework will add <code>source</code>,
+      <code>event</code>, and the time (as measured by the standard
+      <name>Python</name> function <code>time.time</code>) when
+      <code>send</code> was called, supplied with the
+      <code>time</code> argument.
       </para>
 
       <para>Note that <code>source</code>, and <code>event</code>, are
