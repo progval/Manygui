@@ -12,11 +12,6 @@ if os.name in ['nt', 'os2']:
 
 class ComponentMixin:
     # mixin class, implementing the backend methods
-    # FIXME: Defaults...
-    #_height = -1
-    #_width = -1
-    #_x = -1
-    #_y = -1
 
     _tk_comp = None
     _tk_id = None
