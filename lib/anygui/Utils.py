@@ -3,6 +3,18 @@
 import sys
 from Exceptions import InternalError
 
+# for debugging...
+
+def shortClassName(cl):
+    name = cl.__name__
+    lastdot = name.rfind('.')
+    return name[lastdot+1:]
+
+def objDescr(obj):
+    return "%s@%s" % (shortClassName(obj.__class__),id(obj))
+
+# --------------------------------------------------------------------
+
 # To be phased out with the place() method
 def flatten(seq):
     """
@@ -165,6 +177,9 @@ class Log:
         else:
             self._f = fileobj
 
+    def flush(self):
+        self._f.flush()
+
 _logger = Log()
 
 def log(*items):
@@ -172,6 +187,9 @@ def log(*items):
 
 def setLogFile(fileobj):
     _logger.setLogFile(fileobj)
+
+def logFlush():
+    _logger.flush()
     
 _jython = sys.platform[:4] == 'java'
 
