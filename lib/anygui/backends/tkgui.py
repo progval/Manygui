@@ -118,11 +118,18 @@ class Canvas(ComponentMixin, AbstractCanvas):
     def __init__(self, *args, **kwds):
         AbstractCanvas.__init__(self, *args, **kwds)
         self._items = []
+        self._deferred_methods = []
 
     def _ensure_created(self):
         result = ComponentMixin._ensure_created(self)
         self._tk_comp.configure(background='white')
+        self._call_deferred_methods()
         return result
+
+    def _call_deferred_methods(self):
+        for methcall in self._deferred_methods:
+            meth = getattr(self,methcall[0])
+            apply(meth,methcall[1:])
 
     def clear(self):
         if self._tk_comp:
@@ -134,6 +141,10 @@ class Canvas(ComponentMixin, AbstractCanvas):
 
     def drawPolygon(self, pointlist,
                     edgeColor=None, edgeWidth=None, fillColor=None, closed=0):
+        if not self._tk_comp:
+            self._deferred_methods.append(("drawPolygon",pointlist,edgeColor,
+                                          edgeWidth,fillColor,closed))
+            return
         if edgeColor is None:
             edgeColor = self.defaultLineColor
         if edgeWidth is None:
@@ -154,15 +165,15 @@ class Canvas(ComponentMixin, AbstractCanvas):
             if fillColor == '':
                 d = {'fill': edgeColor, 'width': edgeWidth}
                 item = apply(self._tk_comp.create_line, pointlist, d)
+                self._items.append(item)
             else:
                 item = self._tk_comp.create_polygon(pointlist,
                                                     fill=fillColor,
                                                     outline='')
                 self._items.append(item)
                 d = {'fill': edgeColor, 'width': edgeWidth}
-                item = apply(self.create_line, pointlist, d)
-
-        self._items.append(new_item)
+                item = apply(self._tk_comp.create_line, pointlist, d)
+                self._items.append(item)
 
 def _convert_color(c):
     if c is None:
