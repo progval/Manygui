@@ -13,6 +13,8 @@ Short-term Objectives/FIXMEs [mlh]
 
 * Rewrite AbstractApplication; clear up prodding issue
 
+* Remove the use of Rules.py -- use Rectangles.py instead
+
 * Clean up exception use (Exceptions module -- perhaps not needed)
 
 * Clear up the issue of encapsulation wrt. attributes like container,
