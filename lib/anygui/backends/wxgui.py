@@ -130,6 +130,10 @@ class ComponentWrapper(AbstractWrapper):
         if not self.noWidget():
             self.widget.Destroy()
             self.widget = DummyWidget()
+        try:
+            self._forgetContents()
+        except AttributeError:
+            pass
 
     def setText(self,text):
         if not self.noWidget() and hasattr(self.widget, 'SetLabel'):
@@ -336,6 +340,34 @@ class FrameWrapper(ComponentWrapper):
 
     def _getContainer(self): return self.widget
 
+    def _forgetContents(self):
+        # Special code to blow away contents when a frame is destroyed.
+        # This is necessary because wx widgets are apparently implicitly
+        # destroyed when their container is, and if we try to call
+        # ComponentWrapper.destroy() on a widget that's been destroyed
+        # in this way, we crash and burn (on Windows anyway).
+        for comp in self.proxy.contents:
+            try:
+                comp.wrapper._forgetContents()
+            except AttributeError:
+                pass
+            comp.wrapper.widget = DummyWidget()
+
+    def setContainer(self, *args, **kws):
+        """
+        OK, this probably needs to be pulled into a mixin heritable by
+        various backends.
+        
+        Ensure all contents are properly created. This looks like it could
+        be handled at the Proxy level, but it probably *shouldn't* be -
+        it's handling a Tk-specific requirement about the order in which
+        widgets must be created. (I did it the Proxy way too. This way
+        is definitely "the simplest thing that could possibly work.") - jak
+        """
+        ComponentWrapper.setContainer(self, *args, **kws)
+        for component in self.proxy.contents:
+            component.container = self.proxy
+
 ################################################################
 
 class WindowWrapper(ComponentWrapper):
@@ -401,7 +433,6 @@ class WindowWrapper(ComponentWrapper):
         dh = h - oh
         if (dw,dh) == (0,0):
             return
-        print "Resizing...",dw,dh
         self.proxy.resized(dw,dh)
 
 ################################################################
