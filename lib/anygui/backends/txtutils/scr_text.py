@@ -34,8 +34,6 @@ _line = [' ']*80
 _scrbuf = []
 for ii in range(0,23):
     _scrbuf.append(_line[:])
-print len(_scrbuf)
-print len(_scrbuf[0])
 
 def addstr(x,y,ch,n=0,attr=0):
     dbg('addstr %s,%s,%s,%s'%(x,y,ch,n))
@@ -64,7 +62,10 @@ def refresh():
     print join(reduce(op.add,_scrbuf),'')
 
 def erase_all():
-    _scrbuf = [' '*80]*23
+    global _scrbuf
+    _scrbuf = []
+    for ii in range(0,23):
+        _scrbuf.append(_line[:])
 
 def scr_quit():
     pass

@@ -641,6 +641,8 @@ class Application(AbstractApplication):
             return 0
         if ch == 6:  # ^F
             self._change_focus()
+        if ch == 12:
+            _refresh_all()
         return 1
 
     def _check_for_events(self):
