@@ -1,6 +1,8 @@
 #==============================================================#
 # Imports
 
+# FIXME: The "if widget" stuff doesn't seem quite consistent. [mlh]
+
 try:
     # Anygui specific imports
     from anygui.backends import *
@@ -75,7 +77,8 @@ class Wrapper(AbstractWrapper):
 
     def internalDestroy(self):
         if DEBUG: print "in internalDestroy of: ", self
-        self.widget.destroy()
+        if self.widget:
+            self.widget.destroy()
 
     def rebuild(self): pass
 
@@ -312,14 +315,15 @@ class RadioButtonWrapper(ToggleButtonWrapperBase):
                     container = self.proxy.container
                     btnGroup = QButtonGroup(container.wrapper.widget)
                     RadioButtonWrapper.groupMap[group] = btnGroup
-                    btnGroup.insert(self.widget)
+                    btnGroup.insert(self.widget) # What if widget is None?
             elif self.proxy not in group._items:
                 group._items.append(self.proxy)
                 btnGroup = RadioButtonWrapper.groupMap[group]
                 btnGroup.insert(self.widget)
 
     def setValue(self, value):
-        self.widget.setChecked(bool(value))
+        if self.widget:
+            self.widget.setChecked(bool(value))
 
     def getValue(self):
         return bool(self.widget.isChecked())
@@ -536,8 +540,8 @@ class WindowWrapper(ComponentWrapper):
         dx = nx - self.proxy.state['x']
         dy = ny - self.proxy.state['y']
 
-        self.proxy.x
-        self.proxy.y
+        self.proxy.x # FIXME: What's this? [mlh]
+        self.proxy.y # FIXME: What's this? [mlh]
 
         #self.proxy.moved(dx, dy)
         return 1

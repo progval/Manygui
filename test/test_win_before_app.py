@@ -1,6 +1,6 @@
 from anygui import *
 
-win = Window(title="You will be assimilated!")
+win = Window()
 
 app = Application()
 app.add(win)
