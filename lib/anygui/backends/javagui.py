@@ -48,7 +48,7 @@ class ComponentMixin:
                                       self._y,
                                       self._width,
                                       self._height)
-	    if self._java_comp.layout:
+            if self._java_comp.layout:
                 self._java_comp.validate()
 
     def _ensure_visibility(self):
@@ -318,8 +318,8 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
         if val == self.on: # FIXME: this way or == self._on?
             return
         if self.group is not None:
-	   self.group.modify(value=self.value)
-	else: # FIXME: is this branch needed?
+           self.group.modify(value=self.value)
+        else: # FIXME: is this branch needed?
           self.modify(on=val)
         send(self, 'click')
 
