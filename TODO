@@ -8,10 +8,7 @@ Goals for version 0.1:
 
 * Adjust defaults, and add proper window tiling
 
-* Add Frame class with utility factories e.g. col/row,
-  and/or change the standard layout mechanism to some
-  form of grid(), including proportional scaling and
-  positioning
+* Add Frame class
 
 * Make new Windows invisible until event loop is entered
   or re-entered, e.g. after a callback
@@ -26,6 +23,8 @@ Goals for version 0.2:
 * Add menus (including popup menus?)
 
 * Add full event system, based on signal()
+
+* Add a grid-based layout mechanism
 
 * Add support for borders?
 
