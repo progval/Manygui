@@ -88,7 +88,7 @@ PBM_SETPOS=WM_USER+2
 PBM_SETRANGE=WM_USER+1
 
 GetLastError = kernel32.GetLastError
-_verbose=0
+_verbose=1
 if _verbose:
     from anygui.Utils import log, setLogFile
     setLogFile('/tmp/dbg.txt')
@@ -175,12 +175,15 @@ class ComponentWrapper(AbstractWrapper):
     def widgetSetUp(self):
         if _verbose: log('widgetSetup',str(self))
         self.proxy.container.wrapper.widget_map[self.widget] = self
-        self.proxy.push(blocked=['container'])
         user32.SendMessage(self.widget,
                              WM_SETFONT,
                              self._hfont,
                              0)
         self.setVisible(1)
+
+    def internalProd(self):
+        if _verbose: log('internalProd',str(self))
+        self.proxy.push(blocked=['container'])
 
     def getGeometry(self):
         r = t_rect()
@@ -569,11 +572,6 @@ class ImageWrapper(ComponentWrapper):
         r = ComponentWrapper._WM_PAINT(self, hwnd, msg, wParam, lParam)
         self.draw()
         return r
-
-    def setVisible(self,visible):
-        if not self.widget: return
-        self.draw()
-        ComponentWrapper.setVisible(self,visible)
 
     def draw(self,*arg,**kw):
         if not self.widget: return

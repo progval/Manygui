@@ -73,12 +73,14 @@ class ComponentWrapper(AbstractWrapper):
 
     def widgetSetUp(self):
         self.proxy.container.wrapper.widget_map[self.widget] = self
-        self.proxy.push(blocked=['container'])
         win32gui.SendMessage(self.widget,
                              win32con.WM_SETFONT,
                              self._hfont,
                              0)
         self.setVisible(1)
+
+    def internalProd(self):
+        self.proxy.push(blocked=['container'])
 
     def getGeometry(self):
         l,t,r,b = win32gui.GetWindowRect(self.widget)
