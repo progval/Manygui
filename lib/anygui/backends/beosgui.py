@@ -189,20 +189,6 @@ class Label(ComponentMixin, AbstractLabel):
         self._ensure_text()
         return result
     
-    def _ensure_created2(self):
-        "Multiple Lines...Not Working Yet"
-        self._beos_class = BTextView.BTextView
-        self._beos_id = str(self._beos_id)
-        self._init_args = (self._beos_bounds,
-                           self._beos_id,
-                           (0.0,0.0,self._beos_bounds[2], self._beos_bounds[3]),
-                           self._beos_mode,
-                           self._beos_flags)
-        result = ComponentMixin._ensure_created(self)
-        self._ensure_text()
-        print self._text
-        return result
-    
     def _ensure_text(self):
         if self._beos_comp:
             self._beos_comp.SetText(self._text)
@@ -307,7 +293,7 @@ class ToggleButtonMixin(ComponentMixin):
         val = self._get_on()
         if val == self.on:
             return
-        self.model.value = val
+        self.model.on = val
         # self.do_action()
 
      
@@ -517,6 +503,28 @@ Please look in the Documentation for details, or visit www.bebits.com/app/2501""
 
 #################################################################
 
+class Frame(ComponentMixin, AbstractFrame):
+    _beos_class = BView.BView
+    
+    def _ensure_created(self):
+        self._beos_id = str(self._beos_id)
+        self._ensure_geometry()
+        self._init_args = (self._beos_bounds,
+                           self._beos_id,
+                           self._beos_mode,
+                           self._beos_flags)
+        return ComponentMixin._ensure_created(self)
+        
+    def add(self, object):
+        if self._beos_comp is None:
+            self._ensure_created()
+        if object._beos_comp is None:
+            object._ensure_geometry()
+            object._ensure_created()
+        self._beos_comp.AddChild(object._beos_comp)
+        AbstractFrame.add(self, object)
+
+
 class Window(ComponentMixin, AbstractWindow):
     _beos_class = BWindow.BWindow
     _beos_style = B_TITLED_WINDOW                       # See below for other styles
@@ -616,17 +624,6 @@ Look in the docs for details, or visit www.bebits.net/app/2501"""
             object._ensure_created()
         self._beos_comp.AddChild(object._beos_comp)
         AbstractWindow.add(self, object)
-    
-    # Had to overload these methods, but they still call the parent.
-    # Shouldn't this bit be in the Abstract class?
-    
-    def show(self):
-        AbstractWindow.show(self)
-        self._ensure_visibility()
-    
-    def hide(self):
-        AbstractWindow.hide(self)
-        self._ensure_visibility()
     
 ###################################################################
 
