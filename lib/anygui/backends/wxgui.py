@@ -146,6 +146,7 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
     _wx_class = wxRadioButton
 
     def _wx_clicked(self, evt):
+        # FIXME: Is called both on mouse press and mouse release...
         if self.group is not None:
             self.group.value = self.value
         send(self, 'click')
