@@ -625,9 +625,9 @@
 
   <section>
     <title>API Reference</title>
-
+    
     <para>Under construction.</para>
-
+    
     <!--
 
     <section>
@@ -711,62 +711,49 @@
 	
       </section>
 
-      <section>
-	<title>application</title>
-	
-	<para>When an <code>Application</code> is instantiated, it is
-	automatically set as the current application, overwriting any
-	previous ones. If you ever need to get a hold of this current
-	application object, you may do so by using the
-	<code>application</code> function. Calling
-	<code>application</code> when no <code>Application</code>
-	object has been instantiated will raise an exception.</para>
-
-      </section>
-
-    </section>
-
-    <section>
-      <title>Application</title>
-    </section>
-
-    <section>
-      <title>Button</title>
-    </section>
-
-    <section>
-      <title>CheckBox</title>
-    </section>
-
-    <section>
-      <title>Label</title>
-    </section>
-
-    <section>
-      <title>ListBox</title>
-    </section>
-
-    <section>
-      <title>RadioButton</title>
-    </section>
-
-    <section>
-      <title>RadioGroup</title>
-    </section>
-
-    <section>
-      <title>TextArea</title>
-    </section>
-
-    <section>
-      <title>TextField</title>
-    </section>
-
-    <section>
-      <title>Window</title>
-    </section>
-
     -->
+    
+    <para><strong>def application()</strong></para>
+    
+    <para>When an <code>Application</code> is instantiated, it is
+    automatically set as the current application, overwriting any
+    previous ones. If you ever need to get a hold of this current
+    application object, you may do so by using the
+    <code>application</code> function. Calling
+    <code>application</code> when no <code>Application</code> object
+    has been instantiated will raise an exception.</para>
+        
+    <para><strong>class Application</strong></para>
+    
+    <para><strong>class BooleanModel</strong></para>
+    
+    <para><strong>class Button</strong></para>
+    
+    <para><strong>class CheckBox</strong></para>
+    
+    <para><strong>class Label</strong></para>
+    
+    <para><strong>class ListBox</strong></para>
+    
+    <para><strong>class ListModel</strong></para>
+    
+    <para><strong>class RadioButton</strong></para>
+    
+    <para><strong>class RadioGroup</strong></para>
+    
+    <para><strong>def register(src, sig, slot)</strong></para>
+    
+    <para><strong>def signal(src, sig, kw)</strong></para>
+    
+    <para><strong>class TextArea</strong></para>
+    
+    <para><strong>class TextField</strong></para>
+    
+    <para><strong>class TextModel</strong></para>
+    
+    <para><strong>def unregister(src, sig, slot)</strong></para>
+    
+    <para><strong>class Window</strong></para>
     
   </section>
 
