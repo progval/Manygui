@@ -128,6 +128,4 @@ is never called.
 In cursesgui/textgui, text controls are always editable, even if
 _editable == 0. It seems _ensure_editable() never being called.
 
-test_radiogroup.py crashes under cursesgui/textgui.
-
-It is not (yet) possible to select text in cursesgui/textgui.
+z-ordering of widgets is not consistent across backends.

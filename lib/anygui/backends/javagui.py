@@ -485,19 +485,26 @@ class Window(ComponentMixin, AbstractWindow):
 class Application(AbstractApplication):
     
     def _mainloop(self):
+        """
+        # Non-portable code:
+        
         from java.lang import Thread
         curthread = Thread.currentThread()
 
         threads = jarray.zeros(curthread.activeCount(), Thread)
-        #@@@ Risky - activeCount may change here...
         curthread.enumerate(threads)
 
         for thread in threads:
-            #@@@ Shaky condition (platform dependent?):
             if thread.name.find('AWT-EventQueue') != -1:
                 thread.join() # Wait for AWT thread to finish
                 break
         else:
             raise RuntimeError, 'unable to find AWT thread'
+        """
+
+        # Ignores the possibility of delayed window-creating events:
+        from time import sleep
+        while self._windows:
+            sleep(0.5)
 
 ################################################################

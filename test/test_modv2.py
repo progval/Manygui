@@ -9,13 +9,15 @@ app.add(win)
 newbtn = None
 
 def printit1(**ignore_kwds):
+    return
     print 'printit1:',newbtn.text
 
 def printit2(**ignore_kwds):
+    return
     print 'printit2:',newbtn.text
 
 def say_hello(**kw):
-    print "Hello, world!"
+    #print "Hello, world!"
     global newbtn
     if newbtn is None:
         newbtn = TextField(opt, y = g_y)
