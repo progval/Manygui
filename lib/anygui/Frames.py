@@ -11,13 +11,15 @@ class AbstractFrame(AbstractComponent, Defaults.Frame):
         AbstractComponent.__init__(self, *args, **kw)
 
     def ensure_created(self):
-        if self._ensure_created():
-            for item in self._contents:
-                if item._ensure_created():
-                    item._finish_creation()
-            self._finish_creation()
-            return 1
-        return 0
+        result = self._ensure_created()
+        if self._is_created():
+            self.ensure_contents_created()
+        return result
+
+    def ensure_contents_created(self):
+        for item in self._contents:
+            if item.ensure_created():
+                item._finish_creation()
 
     def _get_contents(self):
         return self._contents
