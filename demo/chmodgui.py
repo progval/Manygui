@@ -53,5 +53,5 @@ ok     = Button(opt, x=190, text='OK')
 link(cancel, exit)
 link(ok, chmod)
 
-win.add(cancel, ok)
+win.add((cancel, ok))
 app.run()
