@@ -117,6 +117,8 @@ Longer term goals:
 
 * Add support for styled text
 
+* Implement modal (or disabled) windows
+
 * Add support for importing xml files through xslt?
   (E.g. XUL)
 
