@@ -13,7 +13,7 @@
 
   <author>Magnus Lie Hetland</author>
 
-  <date>September 4, 2001</date>
+  <date>September 7, 2001</date>
 
   <section>
     <title>Introduction</title>
@@ -179,11 +179,23 @@
       packages:</para>
 
       <codelisting>
-	<line>Tkinter   (tkgui)     <url>http://www.python.org/topics/tkinter</url></line>
-	<line>wxPython  (wxgui)     <url>http://www.wxpython.org</url></line>
-	<line>Jython    (javagui)   <url>http://www.jython.org</url></line>
-	<line>Bethon    (beosgui)   <url>http://www.bebits.com/app/1564</url></line>
+	<line>PythonWin  (mswgui)    <url>http://starship.python.net/crew/mhammond/win32</url></line>
+	<line>Tkinter    (tkgui)     <url>http://www.python.org/topics/tkinter</url></line>
+	<line>wxPython   (wxgui)     <url>http://www.wxpython.org</url></line>
+	<line>Java Swing (javagui)   <url>http://www.jython.org</url></line>
+	<line>Bethon     (beosgui)   <url>http://www.bebits.com/app/1564</url></line>
       </codelisting>
+
+      <para>Of these, <name>Tkinter</name> is compiled in by default
+      in the <name>MS Windows</name> distribution of
+      <name>Python</name> (available from
+      <url>http://www.python.org</url>), <name>PythonWin</name> (as
+      well as <name>Tkinter</name>) is included in the
+      <name>ActiveState</name> distribution, <name>ActivePython</name>
+      (available from <url>http://www.activestate.com</url>), and
+      <name>Java Swing</name> is automatically available in
+      <name>Jython</name>, the <name>Java</name> implementation of
+      <name>Python</name>.</para>
 
       <para>In the future <name>Anygui</name> should hopefully work in
       almost any <name>Python</name> installation, even those which do
@@ -191,6 +203,11 @@
       Dynamic HTML together with the standard <code>webbrowser</code>
       module, or by providing some simple text interface which is
       logically equivalent to the GUI version.</para>
+
+      <para>If you don't want to bother with all these backends, you
+      may not have to. Just try to use anygui and see if it works. If
+      you have a usable backend, <name>Anygui</name> will
+      automatically detect it and use it.</para>
 
     </section>
 
@@ -247,6 +264,9 @@
       <codelisting>
 	<line>from anygui.backends.wxgui import *</line>
       </codelisting>
+
+      <para>The same applies when using <code>jythonc</code> with the
+      <code>--deep</code> option or equivalent.</para>
 
     </section>
 
