@@ -48,13 +48,6 @@ class ComponentWrapper(AbstractWrapper):
         self.setConstraints('container','x','y','width','height',
                             'text','selection','geometry','visible')
 
-    def noWidget(self):
-        try:
-            assert(self.widget.isDummy())
-            return 1
-        except (AttributeError,AssertionError):
-            return 0
-    
     def widgetFactory(self,*args,**kws):
         app = application()
         if hasattr(self.proxy.container,'wrapper'):
