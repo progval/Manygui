@@ -45,7 +45,9 @@ class Attrib:
 
     def set(self, *args, **kwds):
         for opt in args:
-            kwds.update(opt.__dict__)
+            #kwds.update(opt.__dict__) # Doesn't work in Jython 2.1a1
+            for key, val in opt.__dict__.items():
+                kwds[key] = val
         for name, value in kwds.items():
             setattr(self, name, value)
 
