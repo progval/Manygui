@@ -25,19 +25,24 @@ __all__ = '''
 import time
 from References import ref, RefKeyDictionary
 registry = RefKeyDictionary()
+source_stack = []
+
+# Internal wildcard key
+class Any: pass
+Any = Any()
 
 def locators(event, weak=0):
-    src = ref(getattr(event, 'source', None), weak)
-    type = getattr(event, 'type', None)
+    src = ref(getattr(event, 'source', Any), weak)
+    type = getattr(event, 'type', Any)
     return src, type
 
 def connect(event, handler, weak=0):
     'Connect an event pattern to an event handler.'
     src, type = locators(event, weak)
     h = ref(handler, weak)
-    if registry.has_key(src):
-        try: registry[src][type].append(h)
-        except KeyError: registry[src][type] = [h]
+    if not registry.has_key(src): registry[src] = {}
+    try: registry[src][type].append(h)
+    except KeyError: registry[src][type] = [h]
 
 def disconnect(event, handler):
     'Disconnect an event handler from an event pattern.'
@@ -56,16 +61,16 @@ def set_time(event):
 def lookup(event):
     source, type = locators(event)
     lists = []
-    for s in source, None:
-        for t in type, None:
+    sources = [source]
+    if source is not Any: sources.append(Any)
+    types = [type]
+    if type is not Any: types.append(Any)
+    for s in sources:
+        for t in types:
             try:
                 lists.append(registry[s][t])
             except KeyError: pass
     return lists
-
-
-# Sources sending events:
-source_stack = []
 
 def dispatch(event):
     'Call the appropriate event handlers with event as the argument. \
@@ -97,6 +102,11 @@ def disconnectSource(source):
 
 def disconnectHandler(handler):
     'Disconnect a handler from the event framework.'
+    h = ref(handler, weak=0)
+    for s in registry.iterkeys():
+        for t in registry[s].iterkeys():
+            try: retistry[s][t].remove(h)
+            except ValueError: pass
 
 def disconnectMethods(obj):
     'Disconnect all the methods of obj that are handlers.'

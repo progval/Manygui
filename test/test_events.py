@@ -1,4 +1,4 @@
-'''
+"""
 >>> from anygui.Events import *
 >>> class Test:
 ...     def handle(self, event):
@@ -98,7 +98,7 @@ Return values from event handlers:
 
 [Exceptions in handlers]
 
-'''
+"""
 
 if __name__ == "__main__":
     print "If you want detailed output, use \"python test_events.py -v\"."
