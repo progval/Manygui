@@ -198,9 +198,9 @@ class TextField(ComponentMixin, AbstractTextField):
 
     def _ensure_events(self):
         EVT_TEXT_ENTER(self._wx_comp, self._wx_id, self._wx_enterkey)
-        EVT_TEXT(self._wx_comp, self._wx_id, self._wx_ontextchanged)
+        EVT_KILL_FOCUS(self._wx_comp, self._wx_killfocus)
 
-    def _wx_ontextchanged(self, event):
+    def _wx_killfocus(self, event):
         self.model.value = self._wx_comp.GetValue()
 
     def _wx_enterkey(self, event):
@@ -220,7 +220,15 @@ class TextArea(ComponentMixin, AbstractTextArea):
 
     def _backend_selection(self):
         if self._wx_comp:
-            return self._wx_comp.GetSelection()
+            start, end = self._wx_comp.GetSelection()
+            if sys.platform[:3] == 'win':
+                # under windows, the natice widget contains
+                # CRLF line separators
+                # XXX Is this a wxPython bug?
+                text = self.model.value
+                start -= text[:start].count('\n')
+                end -= text[:end].count('\n')
+            return start, end
             
     def _ensure_text(self):
         if self._wx_comp:
@@ -232,6 +240,13 @@ class TextArea(ComponentMixin, AbstractTextArea):
     def _ensure_selection(self):
         if self._wx_comp:
             start, end = self._selection
+            if sys.platform[:3] == 'win':
+                # under windows, the natice widget contains
+                # CRLF line separators
+                # XXX Is this a wxPython bug?
+                text = self.model.value
+                start += text[:start].count('\n')
+                end += text[:end].count('\n')
             self._wx_comp.SetSelection(start, end)
 
     def _ensure_editable(self):
@@ -239,9 +254,9 @@ class TextArea(ComponentMixin, AbstractTextArea):
             self._wx_comp.SetEditable(self._editable)
 
     def _ensure_events(self):
-        EVT_TEXT(self._wx_comp, self._wx_id, self._wx_ontextchanged)
+        EVT_KILL_FOCUS(self._wx_comp, self._wx_killfocus)
 
-    def _wx_ontextchanged(self, event):
+    def _wx_killfocus(self, event):
         self.model.value = self._wx_comp.GetValue()
 
     def _get_wx_text(self):

@@ -229,23 +229,44 @@ class TextField(ComponentMixin, AbstractTextField):
                  win32con.WS_CHILD | win32con.WS_BORDER
     _win_style_ex = win32con.WS_EX_CLIENTEDGE
 
+    def _to_native(self, text):
+        return text.replace('\n', '\r\n')
+
+    def _from_native(self, text):
+        return text.replace('\r\n', '\n')
+
+    def _get_text(self):
+        if self._hwnd:
+            return self._from_native(win32gui.GetWindowText(self._hwnd))
+
+    def _set_text(self, text):
+        win32gui.SetWindowText(self._hwnd, self._to_native(text))
+
     def _backend_selection(self):
         if self._hwnd:
             result = win32gui.SendMessage(self._hwnd,
                                           win32con.EM_GETSEL,
                                           0, 0)
             start, end = result & 0xFFFF, result >> 16
+            # under windows, the natice widget contains
+            # CRLF line separators
+            text = self.model.value
+            start -= text[:start].count('\n')
+            end -= text[:end].count('\n')
             return start, end
             
     def _ensure_text(self):
         if self._hwnd:
-            if self._text != win32gui.GetWindowText(self._hwnd):
-                # avoid recursive updates
-                win32gui.SetWindowText(self._hwnd, self._text)
+            # avoid recursive updates
+            if self._text != self._get_text():
+                self._set_text(self._text)
 
     def _ensure_selection(self):
         if self._hwnd:
             start, end = self._selection
+            text = self.model.value
+            start += text[:start].count('\n')
+            end += text[:end].count('\n')
             win32gui.SendMessage(self._hwnd,
                                  win32con.EM_SETSEL,
                                  start, end)
@@ -270,58 +291,18 @@ class TextField(ComponentMixin, AbstractTextField):
 
     def _get_msw_text(self):
         # return the text required for creation
-        return self._text
+        return self._to_native(self._text)
 
     def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
-        # lParam: handle of control (or NULL, if not from a control)
         # HIWORD(wParam): notification code
-        # LOWORD(wParam): id of menu item, control, or accelerator
-        if (wParam >> 16) == win32con.EN_CHANGE:
-            text = win32gui.GetWindowText(self._hwnd)
-            if text != self.model.value:
-                # avoid recursive updates
-                self.model.value = text
+        if (wParam >> 16) == win32con.EN_KILLFOCUS:
+            self.model.value = self._get_text()
+
 
 class TextArea(TextField, AbstractTextArea):
-    _win_style = TextField._win_style | win32con.ES_MULTILINE | win32con.ES_WANTRETURN
+    _win_style = TextField._win_style | win32con.ES_MULTILINE | \
+                 win32con.ES_AUTOVSCROLL | win32con.ES_WANTRETURN
 
-    # XXX The only case that we override these methods
-    # is that we must convert CRLF into LF and vice versa.
-    # Maybe we should do this in TextField???
-
-    def _get_text(self):
-        # internal - call only with valid window handle
-        text = win32gui.GetWindowText(self._hwnd)
-        return self._text.replace('\r\n', '\n')
-
-    def _set_text(self, text):
-        # internal - call only with valid window handle
-        text = self._text.replace('\n', '\r\n')
-        win32gui.SetWindowText(self._hwnd, text)
-
-    def _ensure_text(self):
-        if self._hwnd:
-            if self._get_text() != self.text:
-                self._set_text(text)
-
-    def _get_msw_text(self):
-        # return the text required for creation
-        # XXX Correct? Or must we use self.model.value?
-        # maybe we shouldn't care at all, because IMO
-        # _ensure_text will be called later anyway?
-        # XXX XXX Currently NO: _ensure_text will NOT be called
-        # later!
-        return self._text.replace('\n', '\r\n')
-
-    def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
-        # lParam: handle of control (or NULL, if not from a control)
-        # HIWORD(wParam): notification code
-        # LOWORD(wParam): id of menu item, control, or accelerator
-        if (wParam >> 16) == win32con.EN_CHANGE:
-            text = self._get_text()
-            if text != self.model.value:
-                # avoid recursive updates
-                self.model.value = text
 
 ##################################################################
 
