@@ -13,7 +13,15 @@ after the application has quit simply starts it up again, with the new
 window. Quite odd. In these situations, the Tk main window appears
 too...
 
-----------------------------------------------------------------------
+qtgui:
+
+[mlh@20021101] qtgui windows seem to be displaced by a fixed amount.
+Also, handling of Nond vs. DummyWidget doesn't seem to work properly
+yet. And... After editing the text in a textfield, the cursor seems to
+automatically jump to the end of the text. And defaults don't seem to
+be working properly.
+
+-- Old (0.1.1) problems ----------------------------------------------
 
 The from anygui.backends.foogui import * solution doesn't really work
 as described in the docs...

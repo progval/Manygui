@@ -12,7 +12,10 @@ Short-term Objectives/FIXMEs
 ----------------------------
 
 * Add test suite for Rectangles.py. Change calls to self.set to
-  self.modify to correctly interact with models.
+  self.modify to correctly interact with models
+
+* Either allow the creation of windows before the application object,
+  or rewrite tutorial (and other docs)
 
 * Fix Model classes to work with push/pull mechanism; add 'modified'
   event (or something equivalent) to allow real-time notification to
