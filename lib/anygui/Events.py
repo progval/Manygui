@@ -77,7 +77,7 @@ def disconnectSource(source):
     for cat in [BOTH, SOURCE]:
         for ident, type in categories[cat].keys():
             if ident == id(source):
-                del categories[BOTH][key]
+                del categories[BOTH][ident,type]
 
 def disconnectHandler(handler):
     'Disconnect a handler from the event framework.'
