@@ -21,7 +21,7 @@ from anygui.Wrappers import AbstractWrapper, DummyWidget, isDummy
 from anygui.Events import *
 from anygui import application
 
-ButtonWrapper = 1
+#ButtonWrapper = 1
 TextFieldWrapper = 1
 TextAreaWrapper = 3
 ListBoxWrapper = 4
@@ -45,14 +45,22 @@ class ComponentWrapper(AbstractWrapper):
     #_x = -1
     #_y = -1
 
-    widget = None
     _win_style_ex = 0
 
     _hfont = win32gui.GetStockObject(win32con.ANSI_VAR_FONT)
-    
-    def _is_created(self):
-        return self.widget is not None
 
+    def __init__(self,*args,**kws):
+        AbstractWrapper.__init__(self,*args,**kws)
+        self.setConstraints('container','x','y','width','height',
+                            'text','selection','geometry','visible')
+
+    def noWidget(self):
+        try:
+            assert(self.widget.isDummy())
+            return 1
+        except (AttributeError,AssertionError):
+            return 0
+    
     def widgetFactory(self,*args,**kws):
         app = application()
         if hasattr(self.proxy.container,'wrapper'):
@@ -71,7 +79,7 @@ class ComponentWrapper(AbstractWrapper):
                                          0, # hMenu
                                          0, # hInstance
                                          None)
-        app.widget_map[self.widget] = self
+        app.widget_map[widget] = self
         return widget
 
     def widgetSetUp(self):
@@ -90,50 +98,56 @@ class ComponentWrapper(AbstractWrapper):
         return l,t,w,h
 
     def setX(self,x):
+        if self.noWidget(): return
         ox,y,w,h = self.getGeometry()
         self.setGeometry(x,y,w,h)
 
     def setY(self,y):
+        if self.noWidget(): return
         x,oy,w,h = self.getGeometry()
         self.setGeometry(x,y,w,h)
 
     def setWidth(self,width):
+        if self.noWidget(): return
         x,y,ow,h = self.getGeometry()
         self.setGeometry(x,y,width,h)
 
     def setHeight(self,height):
+        if self.noWidget(): return
         x,y,w,oh = self.getGeometry()
         self.setGeometry(x,y,w,height)
 
     def setSize(self,width,height):
+        if self.noWidget(): return
         x,y,w,h = self.getGeometry()
         self.setGeometry(x,y,width,height)
 
     def setPosition(self,x,y):
+        if self.noWidget(): return
         ox,oy,w,h = self.getGeometry()
         self.setGeometry(x,y,w,h)
 
     def setGeometry(self,x,y,width,height):
-        if self.widget:
-            win32gui.SetWindowPos(self.widget,
-                                  0,
-                                  x, y,
-                                  width, height,
-                                  win32con.SWP_NOACTIVATE | win32con.SWP_NOZORDER)
+        if self.noWidget(): return
+        win32gui.SetWindowPos(self.widget,
+                              0,
+                              x, y,
+                              width, height,
+                              win32con.SWP_NOACTIVATE | win32con.SWP_NOZORDER)
 
     def setVisible(self,visible):
-        if self.widget:
-            if visible:
-                win32gui.ShowWindow(self.widget, win32con.SW_SHOWNORMAL)
-            else:
-                win32gui.ShowWindow(self.widget, win32con.SW_HIDE)
+        if self.noWidget(): return
+        if visible:
+            win32gui.ShowWindow(self.widget, win32con.SW_SHOWNORMAL)
+        else:
+            win32gui.ShowWindow(self.widget, win32con.SW_HIDE)
 
     def setEnabled(self,enabled):
-        if self.widget:
-            if enabled:
-                win32gui.EnableWindow(self.widget, 1)
-            else:
-                win32gui.EnableWindow(self.widget, 0)
+        if self.noWidget(): return
+        if enabled:
+            win32gui.EnableWindow(self.widget, 1)
+        else:
+            win32gui.EnableWindow(self.widget, 0)
 
     def destroy(self):
         if self.proxy.container:
@@ -141,26 +155,30 @@ class ComponentWrapper(AbstractWrapper):
                 del self.proxy.container.wrapper.widget_map[self.widget]
             except:
                 pass
-        if self.widget:
+        if not self.noWidget():
             win32gui.DestroyWindow(self.widget)
-        self.widget = None
+            del self.widget
 
     def setText(self,text):
-        pass
+        if self.noWidget(): return
+        win32gui.SetWindowText(self.widget, str(text))
 
-    def setContainer(self,container):
+    def getText(self):
+        return win32gui.GetWindowText(self.widget)
+
+    def setContainer(self, container):
         if container is None:
             try:
                 self.destroy()
             except:
                 pass
             return
+        parent = container.wrapper.widget
         try:
-            parent = container.wrapper.widget
             assert parent.isDummy()
         except (AttributeError, AssertionError):
             self.destroy()
-            self.create()
+            self.create(parent)
             self.proxy.push(blocked=['container'])
 
     def enterMainLoop(self):
@@ -176,13 +194,22 @@ class LabelWrapper(ComponentWrapper):
     #_text = "mswLabel"
     _win_style = win32con.SS_LEFT | win32con.WS_CHILD
 
-    def setText(self,text):
-        self._text = text
-        if self.widget:
-            win32gui.SetWindowText(self.widget, str(text))
+##################################################################
 
-    def getText(self):
-        return win32gui.GetWindowText(self.widget)
+class ButtonWrapper(ComponentWrapper):
+    _wndclass = "BUTTON"
+    _win_style = win32con.BS_PUSHBUTTON | win32con.WS_CHILD
+    #_text = "mswButton"
+
+    def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
+        #log("Button._WM_COMMAND called, looking for %s==%s"%(wParam>>16,win32con.BN_CLICKED))
+        # lParam: handle of control (or NULL, if not from a control)
+        # HIWORD(wParam): notification code
+        # LOWORD(wParam): id of menu item, control, or accelerator
+        if (wParam >> 16) == win32con.BN_CLICKED:
+            #self.do_action()
+            print "SENDING"
+            send(self.proxy, 'click')
 
 ##################################################################
 
@@ -229,28 +256,6 @@ class ListBox(ComponentMixin, AbstractListBox):
             send(self, 'select')
 
 ##################################################################
-
-class Button(ComponentMixin, AbstractButton):
-    _wndclass = "BUTTON"
-    _win_style = win32con.BS_PUSHBUTTON | win32con.WS_CHILD
-    #_text = "mswButton"
-
-    def _get_msw_text(self):
-        # return the text required for creation
-        return str(self._text)
-
-    def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
-        #log("Button._WM_COMMAND called, looking for %s==%s"%(wParam>>16,win32con.BN_CLICKED))
-        # lParam: handle of control (or NULL, if not from a control)
-        # HIWORD(wParam): notification code
-        # LOWORD(wParam): id of menu item, control, or accelerator
-        if (wParam >> 16) == win32con.BN_CLICKED:
-            #self.do_action()
-            send(self, 'click')
-
-    def _ensure_text(self):
-        if self.widget:
-            win32gui.SetWindowText(self.widget, str(self._text))
 
 
 class ToggleButtonMixin(ComponentMixin):
@@ -486,42 +491,45 @@ class WindowWrapper(ComponentWrapper):
     _win_style_ex = 0
 
     def __init__(self,*args,**kws):
-        self.widget_map = {}
         ComponentWrapper.__init__(self,*args,**kws)
+        self.widget_map = {}
 
     def setGeometry(self,x,y,width,height):
+        if self.noWidget(): return
         # take account for title bar and borders
-        if self.widget:
-            import win32api
-            win32gui.SetWindowPos(self.widget,
-                                  0,
-                                  x, y,
-                                  width \
-                                   + 2*win32api.GetSystemMetrics(win32con.SM_CXFRAME),
-                                  height \
-                                   + win32api.GetSystemMetrics(win32con.SM_CYCAPTION) \
-                                   + 2*win32api.GetSystemMetrics(win32con.SM_CYFRAME),
-                                  win32con.SWP_NOACTIVATE | win32con.SWP_NOZORDER)
+        import win32api
+        win32gui.SetWindowPos(self.widget,
+                              0,
+                              x, y,
+                              width \
+                              + 2*win32api.GetSystemMetrics(win32con.SM_CXFRAME),
+                              height \
+                              + win32api.GetSystemMetrics(win32con.SM_CYCAPTION) \
+                              + 2*win32api.GetSystemMetrics(win32con.SM_CYFRAME),
+                              win32con.SWP_NOACTIVATE | win32con.SWP_NOZORDER)
 
     #def _ensure_events(self):
     #    pass
 
     def setContainer(self,container):
-        res = ComponentWrapper.setContainer(self,container)
-        if res:
-            win32gui.ShowWindow(self.widget, win32con.SW_HIDE)
-            win32gui.UpdateWindow(self.widget)
-            for comp in self.proxy.contents:
-                component.container = self.proxy
+        if not application().isRunning(): return
+        if container is None: return
+        if self.noWidget():
+            self.create()
+        self.proxy.push(blocked=['container'])
+        # Ensure contents are properly created.
+        for comp in self.proxy.contents:
+            comp.container = self.proxy
+        win32gui.ShowWindow(self.widget, win32con.SW_HIDE)
+        win32gui.UpdateWindow(self.widget)
 
 
     def setTitle(self,title):
-        if self.widget:
-            win32gui.SetWindowText(self.widget, title)
+        if self.noWidget(): return
+        win32gui.SetWindowText(self.widget, title)
 
     def getTitle(self):
-        if self.widget:
-            win32gui.GetWindowText(self.widget, title)
+        win32gui.GetWindowText(self.widget, title)
 
     def widgetSetUp(self):
         Application.widget_map[self.widget] = self
@@ -628,6 +636,3 @@ if __name__ == '__main__':
                  width = 300, height = 200)
     win.show()
     application().run()
-
-
-
