@@ -67,6 +67,7 @@ class Attrib:
                 return
         self.__dict__[name] = value
         if name[0]!='_':
+            # self.__dict__['_'+name] = value
             self.update(name=name)
 
     def __getattr__(self, name):
@@ -92,6 +93,7 @@ class Attrib:
         self.__dict__['_all_ensures'] = enset.keys()
         self._all_ensures.sort()
 
+        """
         # handle explicit-attributes
         try: explicit_attributes_names = self.explicit_attributes
         except AttributeError: pass
@@ -100,6 +102,7 @@ class Attrib:
                 external_name = internal_name[1:]
                 if not kwds.has_key(external_name):
                     kwds[external_name] = getattr(self, internal_name)
+        """
 
         self.set(*args, **kwds)
 
