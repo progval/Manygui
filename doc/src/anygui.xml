@@ -970,6 +970,8 @@
   <section>
     <title>API Reference</title>
 
+    <!-- sender() wrapper -->
+
     <para>The following reference describes the full official API of
     the current version (&longversion;) of <name>Anygui</name>.</para>
     
@@ -1184,6 +1186,8 @@
 	<line>>>> send(btn, 'foobar')</line>
 	<line>An event occurred: foobar</line>
       </codelisting>
+
+      <!-- sender() wrapper... -->
 
       <para>If you use <code>send(btn, 'click')</code> in this
       example, you will get <emphasis>two</emphasis> events, since the

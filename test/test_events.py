@@ -114,6 +114,7 @@ Here I am!
 >>> send(s)
 Here I am!
 >>> send(s, 'something')
+>>> unlink(any, globbed_handler)
 
 [Other API functions]
 
@@ -130,6 +131,16 @@ Exception handling:
 ...     print 'Caught something'
 ...
 Caught something
+
+Relaying with sender wrapper:
+
+>>> src = 'foo'
+>>> link(src, sender('relayed_event'))
+>>> def relayed_event_handler(**kwds):
+...     print 'Caught relayed_event'
+>>> link(any, 'relayed_event', relayed_event_handler)
+>>> send(src)
+Caught relayed_event
 
 """
 

@@ -106,8 +106,6 @@ Objectives for version 0.2:
 * Add a combobox with a default implementation in terms of simpler
   components
 
-* Add a relay mechanism to the event framework?
-
 * Add "applets" -- e.g. for the Gnope panel, KDE kpanel, WindowMaker
   dock, MacOS menu, Windows tray, etc. with a small window as
   fallback?

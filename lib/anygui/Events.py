@@ -15,6 +15,7 @@ __all__ = '''
     link
     unlink
     send
+    sender
     unlinkSource
     unlinkHandler
     unlinkMethods
@@ -107,6 +108,15 @@ def send(source, event='default', loop=0, **kw):
         if results: return results
     finally:
         source_stack.pop()
+
+class Sender:
+    def __init__(self, event):
+        self.event = event
+    def __call__(self, source, event, **kwds):
+        send(source, self.event, **kwds)
+        
+def sender(event='default'):
+    return Sender(event)
 
 def unlinkSource(source):
     'Unlink all handlers linked to a given source.'
