@@ -13,14 +13,19 @@ __all__ = '''
   FrameWrapper
   RadioButtonWrapper
   CheckBoxWrapper
+  ProgressBarWrapper
 
 '''.split()
 
-from anygui.Utils import log
+from anygui.Utils import log, logTraceback, setLogFile
 from anygui.Applications import AbstractApplication
 from anygui.Wrappers import AbstractWrapper
 from anygui.Events import *
 from anygui import application
+
+#_verbose=1
+#if _verbose:
+#   setLogFile('/tmp/dbg.txt')
 
 ################################################################
 import win32gui, win32con, win32api
@@ -186,12 +191,23 @@ class ComponentWrapper(AbstractWrapper):
     def enterMainLoop(self):
         self.proxy.push()
 
+    def _WM_PAINT(self, hwnd, msg, wParam, lParam):
+        return win32gui.DefWindowProc(hwnd, msg, wParam, lParam)
 
 ##################################################################
-
 class LabelWrapper(ComponentWrapper):
     _wndclass = "STATIC"
     _win_style = win32con.SS_LEFT | win32con.WS_CHILD
+
+##################################################################
+class ProgressBarWrapper(ComponentWrapper):
+    _wndclass = "msctls_progress32"
+    _win_style = win32con.WS_VISIBLE | win32con.WS_CHILD | 1 #PBS_SMOOTH
+
+    def setPos(self,pos):
+        if not self.widget: return
+        win32gui.SendMessage(self.widget, PBM_SETRANGE, 0, 0xffff0000)
+        return win32gui.SendMessage(self.widget, PBM_SETPOS, int(pos*0xffff), 0)
 
 ##################################################################
 
@@ -377,15 +393,8 @@ class TextFieldWrapper(ComponentWrapper):
                              start, end)
 
     def setEditable(self,editable):
-        if not self.widget: return
-        if editable:
-            win32gui.SendMessage(self.widget,
-                                 win32con.EM_SETREADONLY,
-                                 0, 0)
-        else:
-            win32gui.SendMessage(self.widget,
-                                 win32con.EM_SETREADONLY,
-                                 1, 0)
+        if self.widget:
+            win32gui.SendMessage(self.widget, win32con.EM_SETREADONLY, not editable and 1 or 0, 0)
 
 ##    def _ensure_events(self):
 ##        if self.widget:
@@ -395,7 +404,7 @@ class TextFieldWrapper(ComponentWrapper):
 ##        self.do_action()
 
     def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
-        pass
+        return 0
 
 # FIXME: Inheriting TextField overrides TextArea defaults.
 #        This is a temporary fix. (mlh20011222)
@@ -530,10 +539,38 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
         return 1
 
 ################################################################
+def _dispatch_WM_DESTROY(window,hwnd,msg,wParam,lParam):
+    app = application()
+    app.remove(window)
+    app.internalRemove()
+    return 0
 
+def _dispatch_WM_CLOSE(window,hwnd,msg,wParam,lParam):
+    return window._WM_CLOSE(hwnd, msg, wParam, lParam)
+
+def _dispatch_WM_SIZE(window,hwnd,msg,wParam,lParam):
+    return window._WM_SIZE(hwnd, msg, wParam, lParam)
+
+def _dispatch_WM_COMMAND(window,hwnd,msg,wParam,lParam):
+    return window._WM_COMMAND(hwnd, msg, wParam, lParam)
+
+def _dispatch_WM_PAINT(window,hwnd,msg,wParam,lParam):
+    return window._WM_PAINT(hwnd, msg, wParam, lParam)
+
+def _dispatch_DEFAULT(window,hwnd,msg,wParam,lParam):
+    return win32gui.DefWindowProc(hwnd, msg, wParam, lParam)
+
+_app=None
 class Application(AbstractApplication):
     widget_map = {} # maps top level window handles to window instances
     _wndclass = None
+    _dispatch = {
+                win32con.WM_DESTROY: _dispatch_WM_DESTROY,
+                win32con.WM_CLOSE: _dispatch_WM_CLOSE,
+                win32con.WM_SIZE: _dispatch_WM_SIZE,
+                win32con.WM_COMMAND: _dispatch_WM_COMMAND,
+                win32con.WM_PAINT: _dispatch_WM_PAINT,
+                }
 
     def __init__(self):
         AbstractApplication.__init__(self)
@@ -561,20 +598,12 @@ class Application(AbstractApplication):
         except:
             #log("NO WINDOW TO DISPATCH???")
             return win32gui.DefWindowProc(hwnd, msg, wParam, lParam)
-        # there should probably be a better way to dispatch messages
-        if msg == win32con.WM_DESTROY:
-            app = application()
-            app.remove(window)
-            if not app._windows:
-                win32gui.PostQuitMessage(0)
-        if msg == win32con.WM_CLOSE:
-            return window._WM_CLOSE(hwnd, msg, wParam, lParam)
-        if msg == win32con.WM_SIZE:
-            return window._WM_SIZE(hwnd, msg, wParam, lParam)
-        if msg == win32con.WM_COMMAND:
-            #log("Dispatching command to %s"%window)
-            return window._WM_COMMAND(hwnd, msg, wParam, lParam)
-        return win32gui.DefWindowProc(hwnd, msg, wParam, lParam)
+        try:
+            _dispatch = self._dispatch.get(msg,_dispatch_DEFAULT)
+            x = _dispatch(window,hwnd,msg,wParam,lParam)
+        except:
+            x = -1
+        return x
         
     def internalRun(self):
         win32gui.PumpMessages()
