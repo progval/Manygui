@@ -24,6 +24,7 @@ skitMenu.addSeparator()
 # Enable or disable skit silliness: a checkable menu item.
 enSilly = skitMenu.addCheck(text="Enable Silliness",on=0)
 def enableSilly(ev):
+    print "ENABLESILLY CALLED"
     # Enable or disable the silliness selection based
     # on the value of the enSilly menu item.
     if enSilly.on:
@@ -39,12 +40,16 @@ link(enSilly,enableSilly)
 subMenu = Menu(text="Silliness...",enabled=0)
 silliness = []
 def handleSillySelect(ev):
+    print "Handling silly selection"
     # Enforce mutual exclusion of silliness level.
     for item in silliness:
+        print item,ev.source
         if item != ev.source:
             item.on=0
+            print "\tnow off"
         else:
             item.on = 1
+            print "\tnow on"
 for txt in ["Slight","Moderate","Unbearable"]:
     silliness.append(subMenu.addCheck(text=txt))
     link(silliness[-1],handleSillySelect)
