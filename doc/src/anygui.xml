@@ -189,6 +189,8 @@
     <section>
       <title>Making Sure You Have a GUI Backend</title>
 
+      <!-- document backend() function -->
+
       <para>Once you have <name>Anygui</name> installed, you'll want
       to make sure you have a usable GUI backend. This is easy to
       check: Simply start an interactive <name>Python</name>
@@ -760,6 +762,8 @@ Fixed focus indicator in textgui - it now always shows up.
 
     <section>
       <title>Global Functions</title>
+
+      <!-- document backend() function -->
 
       <para><apiname>application</apiname>()</para>
 

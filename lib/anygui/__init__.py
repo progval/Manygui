@@ -12,7 +12,7 @@ __all__ = ['application', 'Application',
            'BooleanModel', 'ListModel', 'TextModel', 'Options',
            'LayoutManager', 'Placer',
            'send', 'link', 'unlink', 'unlinkSource', 'unlinkHandler',
-           'unlinkMethods', 'Frame', 'Placer',
+           'unlinkMethods', 'Frame', 'Placer', 'backend'
            ] # FIXME: Add stuff from Colors and Fonts
 
 if hasattr(sys, 'registry'):
