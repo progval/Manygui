@@ -7,6 +7,8 @@
 <!ENTITY copyrightholders SYSTEM "copyrightholders.xml">
 ]>
 
+<!-- windows are now visible per default -->
+
 <document version="&longversion;">
 
   <title>Anygui : Generic GUI for Python</title>
@@ -503,6 +505,8 @@
 	  <line>win.place([lab1, lab2], position=(10,10),</line>
 	  <line>          direction='right', space=10)</line>
 	</codelisting>
+
+	<!-- positional arguments -->
 
 	<para><emphasis>Note</emphasis>: When using
         <code>direction</code> and <code>space</code> like this, you

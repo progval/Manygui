@@ -11,6 +11,8 @@ txa = TextArea()
 txf = TextField()
 win = Window()
 
-win.place(btn, cbx, lbl, lst, rdb, txa, txf, direction='down')
+win.place(btn, cbx, lbl, lst, rdb, txa, txf,
+          direction='down',
+          left=10, top=10)
 
 app.run()

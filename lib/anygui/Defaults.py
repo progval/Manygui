@@ -1,5 +1,10 @@
 "Defaults for the anygui package."
 
+# For the Frame.place method:
+
+direction = 'right'
+space = 10
+
 class Button:
 
     _text = 'Button'

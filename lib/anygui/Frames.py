@@ -1,6 +1,7 @@
 from anygui.Components import AbstractComponent
 from types import TupleType, InstanceType, IntType, ListType
 from anygui.Exceptions import ArgumentError, UnimplementedMethod
+from anygui import Defaults
 
 def flatten(seq):
     'Utility function used to flatten sequences'
@@ -60,8 +61,8 @@ class AbstractFrame(AbstractComponent):
         vmove      = kwds.get('vmove',      None)
         hstretch   = kwds.get('hstretch',   None)
         vstretch   = kwds.get('vstretch',   None)
-        direction  = kwds.get('direction',  'right')
-        space      = kwds.get('space',      0)
+        direction  = kwds.get('direction',  Defaults.direction)
+        space      = kwds.get('space',      Defaults.space)
 
         def side(spec, name, self=self):
             if spec:
