@@ -20,6 +20,12 @@ Tentative release date: December 10th, 2001
 * Only import weakrefs when necessary, to allow programs not
   using them to run in earlier versions of Python/Jython
 
+* Adding and removing widgets from frames uses
+  _ensure_created and _ensure_destroyed. It
+  should be checked that this works consistently across
+  backends. Also, reuse of backend widgets might be a
+  nice alternative.
+
 Objectives for version 0.2:
 ---------------------------
 Tentative release date: February 28th, 2002
