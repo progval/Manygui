@@ -139,7 +139,7 @@ class ToggleButtonMixin(ComponentMixin):
         val = self._wx_comp.GetValue()
         if val == self._on:
             return
-        self._on = val
+        self.model.value = val
         self.do_action()
 
     def _get_wx_text(self):

@@ -3,6 +3,7 @@ from anygui.Mixins import Attrib
 from anygui.ToggleButtons import AbstractToggleButton
 
 class AbstractRadioButton(AbstractToggleButton):
+
     _text = "RadioButton"
     _group = None
     _value = None
@@ -23,7 +24,7 @@ class AbstractRadioButton(AbstractToggleButton):
     def _update_state(self):
         group = self._group
         if group:
-            self.on = self._value == group._value
+            self.model.value = self._value == group._value
             self._ensure_state()
 
     def _get_value(self):

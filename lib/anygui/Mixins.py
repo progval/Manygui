@@ -33,6 +33,7 @@ class Attrib:
                 setter(value)
                 return
         self.__dict__[name] = value
+
     def __getattr__(self, name):
         if name[0]=='_': raise GetAttributeError(self, name)
         try:
@@ -41,9 +42,11 @@ class Attrib:
             raise GetAttributeError(self, name)
         else:
             return getter()
+
     def set(self, **kwds):
         for name, value in kwds.items():
             setattr(self, name, value)
+
     def __init__(self, **kwds):
         self.set(**kwds)
 
@@ -58,9 +61,11 @@ class Action:
     The do_action method calls the action (if any) with the args
     (positional and keyword) as specified.
     """
+
     _action = None
     _action_args = ()
     _action_kwds = {}
+
     def _set_action(self, action, args=None, kwds=None):
         if action is not None and not callable(action):
             # ensure action is sequence of 0 to 3 items
@@ -78,8 +83,10 @@ class Action:
             self.__dict__['_action_args']=use_args
             self.__dict__['_action_kwds']=use_kwds
         else: raise TypeError, "action must be callable or sequence"
+
     def _get_action(self):
         return self._action, self._action_args, self._action_kwds
+
     def do_action(self):
         if self._action:
             return self._action(*self._action_args, **self._action_kwds)

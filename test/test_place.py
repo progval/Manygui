@@ -13,7 +13,7 @@ def pushed_it():
   print "Button pushed."
 
 def checked_it():
-  print "Check boxes changed to:", cb1.on, cb2.on
+  print "Check boxes changed to:", cb1.model.value, cb2.model.value
 
 def option_chosen():
   print "Hoopy option %d chosen" % rg.value

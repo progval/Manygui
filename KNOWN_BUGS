@@ -1,3 +1,5 @@
+beosgui does not support BooleanModel yet.
+
 Tabbing between fields and/or other controls doesn't work
 in mswgui.
 

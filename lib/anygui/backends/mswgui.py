@@ -208,7 +208,7 @@ class ToggleButtonMixin(ComponentMixin):
         val = val & win32con.BST_CHECKED
         if val == self._on:
             return
-        self._on = val
+        self.model.value = val
         self.do_action()
 
 

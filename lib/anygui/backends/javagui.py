@@ -265,7 +265,7 @@ class ToggleButtonMixin(ComponentMixin):
         val = self._java_comp.selected
         if val == self._on:
             return
-        self._on = val
+        self.model.value = val
         self.do_action()
 
 class CheckBox(ToggleButtonMixin, AbstractCheckBox):

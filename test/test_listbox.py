@@ -13,7 +13,8 @@ app = Application()
 
 lb = SelectionPrinter()
 
-lb.model.extend('There was a wee cooper of county Fyfe, Nickety, nockety, noo, noo, noo'.split())
+#lb.model.extend('There was a wee cooper of county Fyfe, Nickety, nockety, noo, noo, noo'.split())
+lb.model = ListModel('There was a wee cooper of county Fyfe, Nickety, nockety, noo, noo, noo'.split())
 
 lb.selection = 2
 

@@ -1,22 +1,32 @@
 from anygui.Mixins import Attrib, Observable
 from UserList import UserList
 
-# FIXME: Selection should probably be a widget property
+# TODO: - TextModel
+
+class BooleanModel(Attrib, Observable):
+
+    _value = 0
+
+    def __init__(self, *arg, **kw):
+        # FIXME: Strangeness wrt. order...
+        Observable.__init__(self)
+        Attrib.__init__(self, **kw)
+
+    def _set_value(self, value):
+        self._value = value
+        self.add_hint('_set_value', value)
+        self.notify_views()
+
+    def _get_value(self):
+        return self._value
 
 class ListModel(Attrib, Observable, UserList):
 
     def __init__(self, *arg, **kw):
+        # FIXME: Order correct?
         Attrib.__init__(self, **kw)
         Observable.__init__(self)
         UserList.__init__(self, *arg, **kw)
-        self._selection = -1
-
-    def _set_selection(self, selection):
-        self._selection = selection
-        self.notify_views()
-
-    def _get_selection(self):
-        return self._selection
 
     def __setitem__(self, i, item):
         UserList.__setitem__(self, i, item)
