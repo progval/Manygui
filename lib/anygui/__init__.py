@@ -1,9 +1,9 @@
 #_backends = 'msw gtk java wx tk beos qt curses text'
-_backends = 'pyui'
+_backends = 'tk'
 
 
 def application():
-    'Return the global application object'
+    'Returns the global application object'
     #global _application
     if not _application:
         #_application = factory()._map['Application']()
@@ -11,10 +11,16 @@ def application():
     return _application
 
 def backend():
-    'Return the name of the current backend'
+    'Returns the name of the current backend'
     if not _backend_name:
         raise RuntimeError, 'no backend exists'
     return _backend_name
+
+def backendModule():
+    'Returns the current backend module'
+    if not _backend:
+        raise RuntimeError, 'no backend exists'
+    return _backend
 
 def setup(self, **kwds):
     'Used to configure Anygui'
@@ -100,7 +106,7 @@ if DEBUG:
         pass
 
 _application  = None
-backend      = None
+_backend      = None
 _backend_name = None
 
 def _dotted_import(name):
@@ -135,7 +141,7 @@ def _backend_passthrough():
             continue
         else:
             _backend_name = name
-            backend       = mod
+            _backend      = mod
             return
     # mlh20020321: Temporarily shut off for work on front-end
     #raise RuntimeError, "no usable backend found"

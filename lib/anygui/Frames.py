@@ -12,6 +12,9 @@ class Frame(Component, Defaults.Frame):
         Component.__init__(self, *args, **kw)
         self._layout = None
         self.layout = Placer()
+
+    def wrapperFactory(self):
+        return backend().FrameWrapper(self)
         
     def add(self,items,options=None,**kws):
         """ Add the given items to this container, passing the items and
