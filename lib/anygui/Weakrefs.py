@@ -60,14 +60,17 @@ class WeakMethod:
         else:
             return self.obj
     def __eq__(self, other):
-        if self.weak:
-            self_obj = self.obj()
-        else:
-            self_obj = self.obj
-        if other.weak:
-            other_obj = other.obj()
-        else:
-            other_obj = other.obj
+        self_obj, other_obj = None, None
+        if self.obj is not None:
+            if self.weak:
+                self_obj = self.obj()
+            else:
+                self_obj = self.obj
+        if other.obj is not None:
+            if other.weak:
+                other_obj = other.obj()
+            else:
+                other_obj = other.obj
         if self_obj == other_obj:
             if self.meth == other.meth:
                 return 1

@@ -85,6 +85,7 @@ def dispatch(event):
     As a side-effect, dead handlers are removed from the candidate lists.'
     source_stack.append(id(getattr(event, 'source', None)))
     try:
+        results = []
         set_time(event)
         event.freeze()
         cat1, key = locators(event)
@@ -104,12 +105,15 @@ def dispatch(event):
             live_handlers = []
             for weak_handler in handlers:
                 obj = weak_handler.get_obj()
-                if id(obj) in source_stack: continue
+                if obj is not None and id(obj) in source_stack: continue
+                h = weak_handler()
                 handler = weak_handler()
                 if handler:
                     live_handlers.append(weak_handler)
-                    handler(event)
+                    result = handler(event)
+                    if result is not None: results.append(result)
             registry[cat2][key] = live_handlers
+        if results: return results
     finally:
         source_stack.pop()
 
@@ -149,20 +153,6 @@ class Event:
     def freeze(self):
         if not self.__frozen:
             self.__frozen = 1
-    def match(self, other):
-        """
-        Match another event if it has the same type and source as self.
-        Ignore either type or source or both if self doesn't have them.
-        """
-        try:
-            type_match = self.type == other.type
-        except AttributeError:
-            type_match = not hasattr(self, 'type')
-        try:
-            source_match = self.source == other.source
-        except AttributeError:
-            source_match = not hasattr(self, 'source')
-        return type_match and source_match
 
 class CallbackAdapter:
     def dispatch(self, event):
@@ -176,5 +166,7 @@ class CallbackAdapter:
         event.freeze()
         callback = getattr(self, event.type, None)
         if callback:
-            callback(event)
-        dispatch(event)
+            result = callback(event)
+        results = dispatch(event)
+        if results: return [result] + results
+        else: return result

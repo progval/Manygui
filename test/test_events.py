@@ -79,7 +79,24 @@ Wrapper functions:
 Handled!
 </wrapper>
 
+Return values from event handlers:
+
+>>> def handler1(event): return 1
+...
+>>> def handler2(event): return 2
+...
+>>> def handler3(event): return 3
+...
+>>> evt = Event(type='return-values')
+>>> connect(evt, handler1)
+>>> connect(evt, handler2)
+>>> connect(evt, handler3)
+>>> dispatch(evt)
+[1, 2, 3]
+
 [Other API functions]
+
+[Exceptions in handlers]
 
 '''
 
