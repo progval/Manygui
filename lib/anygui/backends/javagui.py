@@ -141,8 +141,9 @@ class JavaGUILayoutManager(awt.LayoutManager):
 ################################################################
 
 class Canvas(ComponentMixin, AbstractCanvas):
-
+    # FIXME: Needs to be invalidated when resized...
     _java_class = awt.Canvas # Right wrt. swing?
+    _imt_type = awt.image.BufferedImage.TYPE_INT_RGB
 
     def __init__(self):
         self.clear()
@@ -151,12 +152,27 @@ class Canvas(ComponentMixin, AbstractCanvas):
         pass # Draw the offscreen thingy
 
     def clear(self):
-        self._offscreen = None # Create an image with a toolkit...
+        self._offscreen = awt.image.BufferedImage(self._width,
+                                                  self._height,
+                                                  self._img_type)
 
     def drawPolygon(self, pointlist,
                     edgeColor=None, edgeWidth=None, fillColor=None, closed=0):
-        pass # Draw the polygon on the offscreen buffer
-            
+        g2 = self._offscreen.createGraphics()
+        polygon = awt.GeneralPath(awt.GeneralPath.WIND_EVEN_ODD, len(pointlist/2))
+        polygon.moveTo(*pointlist[0])
+        for pt in pointlist[1:]:
+            polygon.lineTo(*pt)
+        if closed:
+            polygon.closePath()
+        # FIXME: Set edge color/edge width
+        g2.draw(polygon)
+        if fillColor is not None:
+            # FIXME: Set fill color
+            g2.fill(polygon)
+        self.repaint()
+
+          
 ################################################################
 
 class Label(ComponentMixin, AbstractLabel):
