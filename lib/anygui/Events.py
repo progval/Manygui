@@ -66,7 +66,7 @@ source_stack = []
 def dispatch(event):
     'Call the appropriate event handlers with event as the argument.'
     global source_stack
-    source_stack.append(getattr(event,'source',None))
+    source_stack.append(id(getattr(event,'source',None)))
     try:
         event.freeze()
         cat1, key = locators(event)
@@ -78,7 +78,7 @@ def dispatch(event):
             for handler in handlers:
                 handler(event)
     finally:
-        del source_stack[-1]
+        source_stack.pop()
 
 def disconnectSource(source):
     'Disconnect all handlers connected to a given source.'
