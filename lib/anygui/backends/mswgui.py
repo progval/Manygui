@@ -213,39 +213,35 @@ class ButtonWrapper(ComponentWrapper):
 
 ##################################################################
 
-'''JKJKJK
-class ListBox(ComponentMixin, AbstractListBox):
+class ListBoxWrapper(ComponentWrapper):
     _wndclass = "LISTBOX"
     _win_style = win32con.WS_CHILD | win32con.WS_VSCROLL | win32con.WS_BORDER | win32con.LBS_NOTIFY
     _win_style_ex = win32con.WS_EX_CLIENTEDGE
 
-    def _get_msw_text(self):
-        return ""
+    def getSelection(self):
+        if self.noWidget(): return
+        return win32gui.SendMessage(self.widget,
+                                    win32con.LB_GETCURSEL,
+                                    0,
+                                    0)
 
-    def _backend_selection(self):
-        if self.widget:
-            return win32gui.SendMessage(self.widget,
-                                        win32con.LB_GETCURSEL,
-                                        0,
-                                        0)
-
-    def _ensure_items(self):
-        if self.widget:
+    def setItems(self,items):
+        if self.noWidget(): return
+        win32gui.SendMessage(self.widget,
+                             win32con.LB_RESETCONTENT, 0, 0)
+        for item in map(str, list(items)):
+            # FIXME: This doesn't work! Items get jumbled...
             win32gui.SendMessage(self.widget,
-                                 win32con.LB_RESETCONTENT, 0, 0)
-            for item in map(str, list(self._items)):
-                # FIXME: This doesn't work! Items get jumbled...
-                win32gui.SendMessage(self.widget,
-                                     win32con.LB_ADDSTRING,
-                                     0,
-                                     item)
+                                 win32con.LB_ADDSTRING,
+                                 0,
+                                 item)
                 
 
-    def _ensure_selection(self):
-        if self.widget:
-            win32gui.SendMessage(self.widget,
-                                 win32con.LB_SETCURSEL,
-                                 self._selection, 0)
+    def setSelection(self,selection):
+        if self.noWidget(): return
+        win32gui.SendMessage(self.widget,
+                             win32con.LB_SETCURSEL,
+                             selection, 0)
 
     def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
         # lParam: handle of control (or NULL, if not from a control)
@@ -253,11 +249,11 @@ class ListBox(ComponentMixin, AbstractListBox):
         # LOWORD(wParam): id of menu item, control, or accelerator
         if wParam >> 16 == win32con.LBN_SELCHANGE:
             #self.do_action()
-            send(self, 'select')
+            send(self.proxy, 'select')
 
 ##################################################################
 
-
+'''
 class ToggleButtonMixin(ComponentMixin):
 
     def _get_msw_text(self):
