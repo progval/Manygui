@@ -4,7 +4,7 @@ __all__ = anygui.__all__
 
 ################################################################
 
-# In serious need of a rehaul
+# In serious need of a overhaul
 
 from javax import swing
 from java import awt
@@ -36,19 +36,10 @@ class ComponentMixin:
                     parent.add(frame)
             if frame.__class__ == swing.JFrame:
                 frame.contentPane.layout = JavaGUILayoutManager(self)
-            elif hasattr(frame, 'layout'):
+            try:
                 frame.layout = JavaGUILayoutManager(self)
-            # Aren't _ensure_text and _ensure_title called?
-            if hasattr(frame, 'title'):
-                frame.title = self._get_java_text()
-            elif hasattr(frame, 'text'):
-                # FIXME: This shouldn't be necessary (especially given the call to
-                # _ensure_text below), but without it, buttons don't get their
-                # text set properly.
-                frame.text = self._get_java_text()
+            except: pass
             self._java_comp = frame
-            #if hasattr(self, '_ensure_text'):
-            #    self._ensure_text() # FIXME: Should be called by anygui
             return 1
         return 0
 
