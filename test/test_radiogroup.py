@@ -29,4 +29,6 @@ for i in xrange(0, 3):
                       action = report1)
     win.add(btn)
 
+grp.value = 1
+
 app.run()
