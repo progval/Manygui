@@ -50,9 +50,3 @@ this is because they are designed for single line use only.
 
 All List- and Text- Views always have scrollbars under BeOS.
 (Similar behaviour in other backends.)
-
-On Windows the selection in TextArea in wxgui and mswgui is off by n
-characters, where n is the number of linefeeds int the text _before_
-the actual selection. This has probably to do with the fact that the
-edit controls contain \r\n line separators, although this is hidden by
-the controls themselves.  (Is this understandable?)
