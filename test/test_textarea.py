@@ -13,7 +13,7 @@ You'd better learn to love them, that's what I say.
 
 I like chinese,
 I like chinese,
-They come from a long way oversease,
+They come from a long way overseas,
 But they're cute, and they're cuddly, and they're ready to please.
 """
 
