@@ -34,6 +34,9 @@ Tentative release date: Mid-December, 2001
 * Make Frames invisible when they are add'ed until their
   components have been laid out
 
+* Make passive attributes (like text selection) active
+  through basic event handling (Move to 0.2?)
+
 Objectives for version 0.2:
 ---------------------------
 Tentative release date: February 28th, 2002
@@ -104,9 +107,6 @@ Longer term goals:
 * Make Anygui more thread-safe
 
 * Add constructive area geometry to Canvas
-
-* Make passive attributes (like text selection) active
-  through basic event handling
 
 Smaller issues:
 ---------------
