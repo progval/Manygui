@@ -8,13 +8,14 @@ Release 0.2: Refactoring, menus, full event set, graphics,
 Release 0.3: Less API change, focus on robustness
              and stability
 
-Short-term Objectives/FIXMEs [mlh]
-----------------------------------
+Short-term Objectives/FIXMEs
+----------------------------
 
 * Add test suite for Rectangles.py
 
 * Fix Model classes to work with push/pull mechanism; add 'modified'
-  event (or something equivalent).
+  event (or something equivalent) to allow real-time notification to
+  models, where needed
 
 * Rewrite AbstractApplication; clear up prodding issue
 
