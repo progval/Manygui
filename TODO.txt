@@ -142,3 +142,5 @@ Smaller issues:
 
 * Add examples on how to implement other types of event systems (with
   an event path etc.) with the Anygui dispatcher to the documentation.
+
+* Document standard way of closing a window programmatically.

@@ -216,7 +216,7 @@ class Attrib:
         state = {}
         for name in attributes:
             state[name] = getattr(self, name)
-        self._dependant.set(**state)
+        self._dependant.stateUpdate(state)
         #for setter_name in self._all_setters:
         #    getattr(self, ensure_name)()
 

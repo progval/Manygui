@@ -87,6 +87,7 @@ class Wrapper:
     
     def __init__(self, proxy):
         if not self in wrappers: wrappers.append(self)
+        #self.makeSetterMap()
         self.proxy = proxy
         if application().running:
             self.prod()
@@ -103,9 +104,9 @@ class Wrapper:
         if self in wrappers: wrappers.remove(self)
         self.widget.destroy()
 
-    def set(self, **kwds):
+    def stateUpdate(self, state):
         # Should be more "intelligent":
-        for key, val in kwds.iteritems():
+        for key, val in state.iteritems():
             setter = getattr(self, 'set'+key[1:].capitalize(), None)
             if setter: setter(val)
 
