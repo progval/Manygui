@@ -255,6 +255,13 @@ class ComponentMixin:
         self._redraw()
 
     def _ensure_enabled_state(self):
+        # UNTESTED!
+        if not self._enabled:
+            self._gets_focus = 0
+            if _focus_control is self:
+                self.focus = 0
+        else:
+            self._gets_focus = 1
         self._redraw()
 
     def _ensure_destroyed(self):
@@ -269,70 +276,10 @@ class ComponentMixin:
     def _ensure_text(self):
         self._redraw()
 
-class Label(ComponentMixin, AbstractLabel):
-
-    _gets_focus = 0
-    _texty = 0
-
-    def __init__(self,*args,**kws):
-        ComponentMixin.__init__(self,*args,**kws)
-        AbstractLabel.__init__(self,*args,**kws)
-        self._LVLINE = ord(' ')
-        self._RVLINE = ord(' ')
-        self._UHLINE = ord(' ')
-        self._LHLINE = ord(' ')
-        self._ULCORNER = ord(' ')
-        self._URCORNER = ord(' ')
-        self._LLCORNER = ord(' ')
-        self._LRCORNER = ord(' ')
-
-class ListBox(ComponentMixin, AbstractListBox):
-    pass
-
-class Button(ComponentMixin, AbstractButton):
-
-    def __init__(self,*args,**kws):
-        ComponentMixin.__init__(self,*args,**kws)
-        AbstractButton.__init__(self,*args,**kws)
-        #self._LVLINE = ord('<')
-        #self._RVLINE = ord('>')
-        #self._UHLINE = ord(' ')
-        #self._LHLINE = ord(' ')
-        #self._ULCORNER = ord('<')
-        #self._URCORNER = ord('>')
-        #self._LLCORNER = ord('<')
-        #self._LRCORNER = ord('>')
-        #self._attr = _support.ATTR_UNDERLINE
-
-    def __str__(self): return "Button "+self._text
-
-    def _event_handler(self,ev):
-        if ev == ' ':
-            send(self, 'click')
-            return 1
-        return 0
-
-#class CheckBox(ToggleButtonMixin, AbstractCheckBox):
-#    pass
-#
-#class RadioButton(ToggleButtonMixin, AbstractRadioButton):
-#    pass
-
-class CheckBox:
-    pass
-
-class RadioButton:
-    pass
-
-class DisabledTextBindings: pass
-
-class TextField(ComponentMixin, AbstractTextField, DisabledTextBindings):
-    pass
-
-class TextArea(ComponentMixin, AbstractTextArea, DisabledTextBindings):
-    pass
-
 class ContainerMixin(ComponentMixin):
+    """ Special handling for containers. These are mostly the
+    same, presentation-wise, as regular components, but they
+    manage their focus differently. """
 
     def __init__(self,*args,**kws):
         ComponentMixin.__init__(self,*args,**kws)
@@ -421,6 +368,106 @@ class ContainerMixin(ComponentMixin):
             self._redraw()
         except ValueError:
             pass
+
+class Label(ComponentMixin, AbstractLabel):
+
+    _gets_focus = 0
+    _texty = 0
+
+    def __init__(self,*args,**kws):
+        ComponentMixin.__init__(self,*args,**kws)
+        AbstractLabel.__init__(self,*args,**kws)
+        self._LVLINE = ord(' ')
+        self._RVLINE = ord(' ')
+        self._UHLINE = ord(' ')
+        self._LHLINE = ord(' ')
+        self._ULCORNER = ord(' ')
+        self._URCORNER = ord(' ')
+        self._LLCORNER = ord(' ')
+        self._LRCORNER = ord(' ')
+
+class ListBox(ComponentMixin, AbstractListBox):
+    pass
+
+class Button(ComponentMixin, AbstractButton):
+
+    def __init__(self,*args,**kws):
+        ComponentMixin.__init__(self,*args,**kws)
+        AbstractButton.__init__(self,*args,**kws)
+        #self._LVLINE = ord('<')
+        #self._RVLINE = ord('>')
+        #self._UHLINE = ord(' ')
+        #self._LHLINE = ord(' ')
+        #self._ULCORNER = ord('<')
+        #self._URCORNER = ord('>')
+        #self._LLCORNER = ord('<')
+        #self._LRCORNER = ord('>')
+        #self._attr = _support.ATTR_UNDERLINE
+
+    def __str__(self): return "Button "+self._text
+
+    def _event_handler(self,ev):
+        if ev == ' ':
+            send(self, 'click')
+            return 1
+        return 0
+
+class ToggleButtonMixin(ComponentMixin):
+
+    _textx = 2
+    _on_ind = '+'
+    _off_ind = '-'
+
+    def __init__(self,value=0,*args,**kws):
+        ComponentMixin.__init__(self,*args,**kws)
+        self._value = value
+
+    def _event_handler(self,ev):
+        if ev == ' ':
+            self._curs_clicked()
+
+    def _curs_clicked(self):
+        self.on = not self.on # FIXME: ??
+        self._redraw()
+        send(self, 'click')
+
+    def _ensure_state(self):
+        self._redraw()
+
+    def _draw_contents(self):
+        ind = self._off_ind
+        if self.on:
+            ind = self._on_ind
+        self._addstr(self._textx-1,1,ind)
+
+class CheckBox(ToggleButtonMixin, AbstractCheckBox):
+
+    def __init__(self,*args,**kws):
+        ToggleButtonMixin.__init__(self,*args,**kws)
+        AbstractCheckBox.__init__(self,*args,**kws)
+    
+class RadioButton(ToggleButtonMixin, AbstractRadioButton):
+
+    _on_ind = '*'
+    _off_ind = '.'
+
+    def __init__(self,*args,**kws):
+        ToggleButtonMixin.__init__(self,*args,**kws)
+        AbstractRadioButton.__init__(self,*args,**kws)
+
+    def _curs_clicked(self):
+        if self.group is not None:
+            self.group.value = self.value
+        self._redraw()
+        send(self, 'click')
+
+class DisabledTextBindings: pass
+
+class TextField(ComponentMixin, AbstractTextField, DisabledTextBindings):
+    pass
+
+class TextArea(ComponentMixin, AbstractTextArea, DisabledTextBindings):
+    pass
 
 class Frame(ContainerMixin, AbstractFrame):
 
