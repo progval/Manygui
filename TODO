@@ -26,15 +26,9 @@ Tentative release date: Mid-December, 2001
   setting attributes directly. (ListBox.selection needs
   some rewriting here)
 
-* _ensure_events should be called by the backends, and not
-  by the front-end
-
 * Decide whether programmatic changes to widgets (e.g. setting
   the selection of a ListBox) should generate the same events
   as when these changes are caused by the user
-
-* Make Frames invisible when they are add'ed until their
-  components have been laid out
 
 * Make passive attributes (like text selection) active
   through basic event handling (Move to 0.2?)
@@ -85,6 +79,13 @@ Tentative release date: February 28th, 2002
 
 * Change add() signature?
 
+* Add support for complex widgets (like wx tree widget,
+  notebook, PMW-style widgets etc) with default
+  implementations in the basic Anygui API (in the vein
+  of the piddle/sping API)
+
+  In other words, give a standardised way of integrating
+  backend-specific features into Anygui programs.
 
 Longer term goals:
 ------------------
@@ -104,14 +105,6 @@ Longer term goals:
 * Add instant model update for text widgets, not just on
   "focus lost"?
 
-* Add support for complex widgets (like wx tree widget,
-  notebook, PMW-style widgets etc) with default
-  implementations in the basic Anygui API (in the vein
-  of the piddle/sping API)
-
-  In other words, give a standardised way of integrating
-  backend-specific features into Anygui programs.
-
 * Make Anygui more thread-safe
 
 * Add constructive area geometry to Canvas
@@ -122,9 +115,3 @@ Smaller issues:
 * Add support for borders?
 
 * Add .txt endings to README etc.
-
-* Remove use of id(), since it doesn't work correctly in
-  Jython.
-
-* _Only_ attempt to use the backends in ANYGUI_WISHLIST,
-  if any?
