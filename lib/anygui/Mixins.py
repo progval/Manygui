@@ -115,7 +115,7 @@ class Observable:
         def notview(v,view=view): return (v[0]() is not view)
         self.views = filter(notview,self.views)
 
-    def notify_views(self,*args,**kw):
+    def raw_notify_views(self,*args,**kw):
         """
         Notify all registered, non-GC'd views of a model change. Any arguments
         and keywords passed to notify_views are passed along intact to the
@@ -147,12 +147,10 @@ class Observable:
         """
         self.hints.append((meth,args,kw))
 
-    def notify_views_with_hints(self):
+    def notify_views(self):
         """
         Notify all registered, non-GC'd views of a model change using
         the recorded hint list, then discard the hints.
-        
-        FIX ME! There are almost certain to be threading issues here.
         """
-        self.notify_views(change=self.hints)
+        self.raw_notify_views(change=self.hints)
         self.hints = []
