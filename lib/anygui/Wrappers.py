@@ -75,6 +75,8 @@ class AbstractWrapper:
         self.setAggregateSetter('size', ('width', 'height'))
         self.setAggregateSetter('geometry', ('x', 'y', 'width', 'height'))
 
+        self.aggregateGetters = {}
+
         self.constraints = []
         self.addConstraint('text', 'selection')
         # 'container' before everything... Handler through added sync call?

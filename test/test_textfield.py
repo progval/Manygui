@@ -21,9 +21,6 @@ def print_contents(event):
     global tf
     log('Enter was pressed. Field contents:', tf.text)
 
-win = Window(title='TextField test', width=200, height=245)
-app.add(win)
-
 tf = TextField(width=150, height=25)
 link(tf, print_contents)
 tf.text = ''
@@ -36,6 +33,9 @@ link(update_btn, update_label)
 
 reset_btn = Button(height=30, text='Reset')
 link(reset_btn, init_field)
+
+win = Window(title='TextField test', width=200, height=245)
+app.add(win)
 
 win.add([tf, tf2, lbl], left=25, right=25, top=40, hstretch=1,
           direction='down', space=20)

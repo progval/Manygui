@@ -9,6 +9,7 @@ __all__ = '''
   LabelWrapper
   TextFieldWrapper
   TextAreaWrapper
+  ListBoxWrapper
 
 '''.split()
 
@@ -334,6 +335,41 @@ class TextAreaWrapper(ComponentWrapper,TkTextMixin):
 
     def setEditable(self,editable):
         self.editable=editable
+
+class ListBoxWrapper(ComponentWrapper):
+
+    def __init__(self,*args,**kws):
+        ComponentWrapper.__init__(self,*args,**kws)
+        self.items = []
+
+    def widgetFactory(self,*args,**kws):
+        theWidge=Tkinter.Listbox(*args,**kws)
+        theWidge.bind('<ButtonRelease-1>', self._tk_clicked)
+        theWidge.bind('<KeyRelease-space>', self._tk_clicked)
+        return theWidge
+
+    def setItems(self,items):
+        self.widget.delete(0, Tkinter.END)
+        self.items = items[:]
+        for item in self.items:
+            self.widget.insert(Tkinter.END, str(item))
+
+    def getItems(self):
+        return self.items
+
+    def setSelection(self,selection):
+        self.widget.select_clear(0,Tkinter.END)
+        self.widget.select_set(selection)
+
+    def getSelection(self):
+        selection = self.widget.curselection()[0]
+        try:
+            selection = int(selection)
+        except ValueError:
+            pass
+        return selection
+    def _tk_clicked(self, event):
+        send(self.proxy, 'select')
 
 class FrameWrapper(ComponentWrapper):
 

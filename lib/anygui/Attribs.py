@@ -15,8 +15,6 @@ class Attrib:
         defaults = getattr(self, 'state', {})
         self.state = defaults.copy()
         self.set(*args, **kwds) # Hm...
-        #self.rawSet(*args, **kwds)
-        #self.push()
 
     def push(self, *names): pass
 
@@ -64,10 +62,14 @@ class Attrib:
             old_val = getattr(self, key, None)
             try: old_val.removed(self, key)
             except: pass
-            self.state[key] = val
-            try: val.assigned(self, key)
-            except: pass
-            names.append(key)
+            meth = getSetter(self,key)
+            if meth:
+                meth(val)
+            else:
+                self.state[key] = val
+                try: val.assigned(self, key)
+                except: pass
+                names.append(key)
         return names
 
     def modify(self, *args, **kwds):

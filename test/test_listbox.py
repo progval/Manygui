@@ -5,7 +5,7 @@ class SelectionPrinter(ListBox):
 
     def __init__(self, lb):
         self._lb = lb
-        link(lb, self.print_selection)
+        link(lb, 'select', self.print_selection)
 
     def print_selection(self, event):
         log('Item selected:', self._lb.selection, '(%s)' % self._lb.items[self._lb.selection])
@@ -16,8 +16,8 @@ lb = ListBox()
 
 sp = SelectionPrinter(lb)
 
-lb.items = ListModel('There was a wee cooper of county Fyfe, Nickety, nockety, noo, noo, noo'.split())
-lb.items.value = 'There was a wee cooper of county Fyfe, Nickety, nockety, noo, noo, noo'.split()
+lb.items = 'There was a wee cooper of county Fyfe, Nickety, nockety, noo, noo, noo'.split()
+#lb.items.value = 'There was a wee cooper of county Fyfe, Nickety, nockety, noo, noo, noo'.split()
 lb.selection = 2
 
 win = Window(title='ListBox test', width=200, height=200)
