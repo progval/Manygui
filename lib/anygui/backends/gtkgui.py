@@ -93,7 +93,10 @@ class Button(ComponentMixin, AbstractButton):
 
     def _ensure_created(self):
         self._init_args = (self._text,)
-        return ComponentMixin._ensure_created(self)
+        ret = ComponentMixin._ensure_created(self)
+        if ret:
+            self._event_connected = 0
+        return ret
 
     def _ensure_events(self):
         if self._gtk_comp and not self._event_connected:
