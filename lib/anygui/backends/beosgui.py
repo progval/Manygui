@@ -13,27 +13,21 @@ This version of beosgui.py (and the anygui it is part of) are a work in progress
 29/08/2001
 """
 
-"""
+TODO = """
 To Do List:
-
-Invisible Windows are still dodgy - make them not crash the app.
-(May need to implement Minimizing in Bethon)
 
 Make Label actually a TextArea - to allow multiple lines.
 
 Make RadioGroups work.
-Stage 1: dodgy system assuming only one group per window
+Stage 1: dodgy system assuming only one group per window [DONE]
 Stage 2: proper system using seperate BViews for each group
 
 Find out why the 2 text areas are on top of one another in
-test/test_textarea.py
+test/test_textarea.py.  Suspect place bug, since changing sizes
+fixes the problem.
 
 Put more comments - with the other available values, ie in
 _beos_mode, _beos_flags, etc.
-
-Email Donn with changes to Bethon (BTextView.dx code, BWindow.dx ?)
-Ask Donn about passing args to C functions that actually store the
-info there.
 
 Read through the BeBook looking for more info that might be useful.
 (May need to work on some more *.dx files...)
@@ -53,7 +47,7 @@ implement ScrollView and make ListView/TextView use the class
 from anygui.backends import *
 __all__ = anygui.__all__
 
-############
+#################################################################
 
 # All Bethon modules are imported.  Not all are used.
 
@@ -61,7 +55,7 @@ import BAlert, BApplication
 import BButton
 import BCheckBox, BControl
 import BFile, BFilePanel, BFont
-import BList, BListItem, BListView                         # BList is NEW! (And Useless!)
+import BListItem, BListView
 import BMenuBar, BMenuItem, BMenu, BMessage
 import BOutlineListView
 import BPath, BPopUpMenu
@@ -69,13 +63,13 @@ import BRadioButton
 import BScrollBar, BScrollView, BSeparatorItem, BSlider, BStatusBar, BStringItem, BStringView
 import BTab, BTabView, BTextControl, BTextView
 import BView, BVolume
-import BWindow
+import BWindow                                             # Version with Minimize()
 
 """
 
 Not used list...:-)
 
- BControl, BFile, BFilePanel, BFont, BList, BListItem,
+ BControl, BFile, BFilePanel, BFont, BListItem,
  BMenuBar, BMenuItem, BMenu, BOutlineListView, BPath,
  BPopUpMenu, BScrollBar, BSeparatorItem, BSlider,
  BStatusBar, BTab, BTabView, BView, BVolume
@@ -90,7 +84,7 @@ from StorageKit import *
 
 ACTION = 6666 # BMessage value
                
-#################
+#################################################################
 
 class WrapThis:
     """Binds instance with BeOS API object.  Objects
@@ -106,7 +100,6 @@ work in Python.  Stolen blatantly from Donn."""
         "For classes with scrollbox surrounding them."
         self._beos_sub = this
         self._beos_sub.bind(self)
-
 
 #################################################################
 
@@ -130,7 +123,7 @@ class ComponentMixin(WrapThis):
     _init_args = None
     	
     def _ensure_created(self):
-        application() # BeOS terminates processes that have no valid BApplication
+        #app = Application() # BeOS terminates processes that have no valid BApplication
         if self._beos_comp is None:
             self._beos_id = str(self._beos_id)
             self._ensure_visibility()
@@ -213,7 +206,10 @@ class Label(ComponentMixin, AbstractLabel):
                            (0.0,0.0,self._beos_bounds[2], self._beos_bounds[3]),
                            self._beos_mode,
                            self._beos_flags)
-        return ComponentMixin._ensure_created(self)
+        result = ComponentMixin._ensure_created(self)
+        self._ensure_text()
+        print self._text
+        return result
     
     def _ensure_text(self):
         if self._beos_comp:
@@ -222,11 +218,10 @@ class Label(ComponentMixin, AbstractLabel):
 
 ##################################################################
 
-                      
 class ListBox(ComponentMixin, AbstractListBox):
     _beos_sub_class = BListView.BListView
     _beos_type = B_SINGLE_SELECTION_LIST
-    _beos_mode = B_WILL_DRAW + B_NAVIGABLE + B_FRAME_EVENTS
+    _beos_mode = B_WILL_DRAW + B_NAVIGABLE + B_FRAME_EVENTS #+ B_FOLLOW_ALL_SIDES #??
     _beos_class = BScrollView.BScrollView
     _beos_flags = 0
     _horizontal = 0
@@ -234,9 +229,10 @@ class ListBox(ComponentMixin, AbstractListBox):
     _beos_border = B_FANCY_BORDER
     
     # BeOS hook function
-    def SelectionChanged(self):
-        if self._action:
-            self._action()
+    #def SelectionChanged(self):
+    #    """Replaced by InvocationMessage."""
+    #    if self._action:
+    #        self._action()
     
     def _ensure_created(self):
         "With Scroll Bars."
@@ -257,6 +253,7 @@ class ListBox(ComponentMixin, AbstractListBox):
             result = ComponentMixin._ensure_created(self)
             self._ensure_items()
             self._ensure_selection()
+            self._ensure_events()
             return result
     
     def _ensure_created2(self):
@@ -271,6 +268,7 @@ class ListBox(ComponentMixin, AbstractListBox):
         result = ComponentMixin._ensure_created(self)
         self._beos_sub = self._beos_comp
         self._ensure_items()
+        self._ensure_events()
         return result
 
         
@@ -294,7 +292,12 @@ class ListBox(ComponentMixin, AbstractListBox):
     def _ensure_selection(self):
         if self._beos_comp:
             self._beos_sub.Select(self._selection)
-
+    
+    def _ensure_events(self):
+        if self._beos_comp:
+            ComponentMixin._ensure_events(self)
+            self._beos_sub.SetInvocationMessage(self._beos_msg)
+            
 ###################################################################
 
 class Button(ComponentMixin, AbstractButton):
@@ -308,11 +311,12 @@ class Button(ComponentMixin, AbstractButton):
         if self._beos_comp:
             self._beos_comp.SetEnabled(self._enabled)
 
+
 class ToggleButtonMixin(ComponentMixin):
 
     def _ensure_state(self):
         if self._beos_comp is not None:
-            self._beos_comp.this.SetValue(self._on)
+            self._beos_comp.SetValue(self._on)
 
     def _ensure_enabled_state(self):
         if self._beos_comp:
@@ -323,33 +327,90 @@ class ToggleButtonMixin(ComponentMixin):
 
      
 class CheckBox(ToggleButtonMixin, AbstractCheckBox):
-    "This I like - subclasses that only redefine 1 value!!"
     _beos_class = BCheckBox.BCheckBox
-    
+
 
 class RadioButton(ToggleButtonMixin, AbstractRadioButton):
-    "Radio Group Not Working - need a seperate BView for each group."
     _beos_class = BRadioButton.BRadioButton
- 
+
+
+class BRadioGroup(RadioGroup):
+    _beos_class = BView.BView #Not yet used :)
+    """ FIXME: forces all buttons into the one group.
+               Selecting a button from another group
+               has the same effect as choosing the button 
+               in that position in the first group.
+    """
+    def _get_value(self):
+        value = 0
+        for item in self._items:
+            if item._beos_class == BRadioButton.BRadioButton:
+                if item._beos_comp.Value() == B_CONTROL_ON:
+                    return value
+            value += 1
     
-class BRadioGroup(RadioGroup, ComponentMixin):
+    def add(self, buttons):
+        for btn in buttons:
+            btn.group = self
+            btn.action = self._action
+            
+'''
+class RadioGroup(ComponentMixin, Attrib, Action):
+    """Needs lots of work."""
     _beos_class = BView.BView
-    _beos_bounds = (0.0,0.0,100.0,100.0)
-    
+    _beos_bounds = (0.0,0.0,260.0,150.0)
+    _items = None
+    _value = None
+    _container = None
+
+    def __init__(self, items=[], **kw):
+        Attrib.__init__(self, **kw)
+        self._items = []
+        self.add(items)
+
+    def _get_value(self):
+        return self._value
+
+    def _set_value(self, value):
+        if self._value != value:
+            self._value = value
+            for item in self._items:
+                item._update_state()
+            self.do_action()
+
+    def add(self, buttons):
+        if buttons and (self._beos_comp is None):
+            self._ensure_created()
+        for btn in buttons:
+            btn.group = self
+            if btn._beos_comp is None:
+                btn._ensure_created()
+            self._beos_comp.AddChild(btn._beos_comp)
+            #self._beos_comp.ResizeToPreferred()
+
+    def remove(self, buttons):
+        for btn in buttons:
+            if btn in self._items:
+                btn.group = None
+        
     def _ensure_created(self):
         self._beos_id = str(self._beos_id)
+        #print application()
         self._init_args = (self._beos_bounds,
                            self._beos_id,
                            self._beos_mode,
                            self._beos_flags)
         return ComponentMixin._ensure_created(self)
         
+ '''           
 #################################################################
 
+#class TextComponentMixin(ComponentMixin, AbstractTextComponent):
+#    _text = ''
+    
 class TextField(ComponentMixin, AbstractTextField):
     _beos_class = BTextControl.BTextControl
     _label = None 
-    _text = "Edit Me..."
     
     def _ensure_created(self):
         self._beos_id = str(self._beos_id)
@@ -364,6 +425,7 @@ class TextField(ComponentMixin, AbstractTextField):
         result = ComponentMixin._ensure_created(self)
         self._ensure_editable()
         self._ensure_enabled_state()
+        self._ensure_text()
         return result
                            
     def _backend_text(self):
@@ -394,6 +456,7 @@ class TextField(ComponentMixin, AbstractTextField):
         if self._beos_comp:
             self._beos_comp.SetEnabled(self._enabled)
 
+
 class TextArea(ComponentMixin, AbstractTextArea):
     _beos_class = BScrollView.BScrollView
     _beos_sub_class = BTextView.BTextView
@@ -420,6 +483,7 @@ class TextArea(ComponentMixin, AbstractTextArea):
         result = ComponentMixin._ensure_created(self)
         self._ensure_editable()
         self._ensure_enabled_state()
+        self._ensure_text()
         return result
     
     def _ensure_created2(self):
@@ -492,13 +556,7 @@ class Window(ComponentMixin, AbstractWindow):
     
     def _ensure_visibility(self):
         if self._beos_comp:
-            if self._visible:
-                self._beos_comp.Show()
-                #self._beos_comp.Minimize(0) # Prefer #
-            else:
-                if not self._beos_comp.IsHidden():
-                    self._beos_comp.Hide()
-                #self._beos_comp.Minimize(1) # Prefer #
+            self._beos_comp.Minimize(not self._visible)
     
     def _ensure_geometry(self):
         self._beos_bounds = (float(self._x)+10.0, # Because these are inside
@@ -511,7 +569,7 @@ class Window(ComponentMixin, AbstractWindow):
     
     def _ensure_style(self):
         try:
-            print self._style
+            #print self._style
             self._beos_style = self._beos_styles[self._style]
         except:
             pass
@@ -545,9 +603,6 @@ class Window(ComponentMixin, AbstractWindow):
                 if item._beos_id == id:
                     #print item._action.__name__
                     item._action()
-        else:
-            pass
-            # Do I need to pass onto the base class?
 
     
     def _ensure_title(self):
@@ -560,9 +615,28 @@ class Window(ComponentMixin, AbstractWindow):
         if object._beos_comp is None:
             object._ensure_geometry()
             object._ensure_created()
+        """
+        if object._beos_class == RadioButton._beos_class: ###HACK CITY
+            if object.group:
+                if object.group._beos_comp is None:
+                    object.group._ensure_created()
+                    self._beos_comp.AddChild(object.group._beos_comp)
+                object.group.add([object])
+                object.group._ensure_geometry()
+            else:
+                self._beos_comp.AddChild(object._beos_comp)
+        else:
+        """
         self._beos_comp.AddChild(object._beos_comp)
         AbstractWindow.add(self, object)
-
+    
+    def show(self):
+        AbstractWindow.show(self)
+        self._ensure_visibility()
+    
+    def hide(self):
+        AbstractWindow.show(self)
+        self._ensure_visibility()
     
 ###################################################################
 
@@ -574,9 +648,8 @@ class Application(WrapThis, AbstractApplication):
         self.wrap(BApplication.BApplication('application/python'))
             
     def ReadyToRun(self):
-        #self.AboutRequested()
         for win in self.windows():
-            win._ensure_visibility()
+            win._beos_comp.Show()
                 
     def OnInit(self):
         return 1
@@ -588,20 +661,17 @@ class Application(WrapThis, AbstractApplication):
     def AboutRequested(self):
         about = BAlert.BAlert("About", __doc__, "Dismiss")
         about.Go()
-
-        
+    
     def _mainloop(self):
         self._beos_comp.Run()
     
-
-
 #####################################################################
 
 class factory:
     _map = {'Window': Window,
             'Button': Button,
             'RadioButton': RadioButton,
-            'RadioGroup': RadioGroup,
+            'RadioGroup': BRadioGroup,
             'CheckBox': CheckBox,
             'Application': Application,
             'Label': Label,
