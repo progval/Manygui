@@ -96,14 +96,14 @@ class _handler_adapter(_weak_callable):
             func = func.__call__
 
         """ WARNING: POTENTIALLY NON-PORTABLE/PYTHON-VERSION-SPECIFIC CODE """
-        if hasattr(func, "im_func"):
-            # method
-            fc = func.im_func.func_code
-            expected = fc.co_varnames[1:fc.co_argcount]
-        elif hasattr(func, "func_code"):
+        if hasattr(func, "func_code"):
             # function
             fc = func.func_code
             expected = fc.co_varnames[0:fc.co_argcount]
+        elif hasattr(func, "im_func"):
+            # method
+            fc = func.im_func.func_code
+            expected = fc.co_varnames[1:fc.co_argcount]
 
         # remove unexpected args - co_flags & 0x08 indicates
         # **kws in use, so no need to remove args.
@@ -566,4 +566,4 @@ class CallbackAdapter:
         if hasattr(self, message):
             meth = getattr(self, message)
             if callable(meth):
-                _handler_adapter(self, meth)(**kwds)
+                _handler_adapter(None, meth)(**kwds)
