@@ -1,12 +1,9 @@
-# FIXME: In need of a major rewrite to match Proxy and Wrapper.
-
-from Exceptions import SetAttributeError, GetAttributeError, UnimplementedMethod, InternalError
+from Exceptions import SetAttributeError, GetAttributeError
 from Events import link, send
 
-# FIXME: Should store state variables in a dictionary called state.
-
 class Attrib:
-    """Attrib: mix-in class to support attribute getting & setting.
+    # REWRITE THIS:
+    TO_BE_REWRITTEN = """Attrib: mix-in class to support attribute getting & setting.
 
 
     Each attribute name may have a setter method _set_name and/or a getter
@@ -35,7 +32,6 @@ class Attrib:
     Method modify has the same interface as set (to modify potentially
     more than one attribute at once) but uses modattr rather than setattr.
 
-    # REWRITE:
     Attrib also supplies a default sync method, which calls all the
     relevant methods named set* in the connected _dependant object if
     flag _inhibit_sync is false.  In this release, all set* are
@@ -50,9 +46,17 @@ class Attrib:
     such "dense" approaches and the resulting "profound" code.
     """
 
-    _dependant = None
-    #_all_setters = []           # no set* called until Attrib.__init__
+    # FIXME: Needed?
     _inhibit_sync = 0        # default Attribs are always sync-enabled
+
+    # FIXME: Fix set() and modify() so they don't call sync repeatedly
+    # for multiple arguments.
+
+    def __init__(self, *args, **kwds):
+        # Default "inheritance":
+        self.state = self.state.copy()
+        self.set(*args, **kwds) # FIXME: Should sync *entire* state, including defaults (but preferrably without
+                                # a second call to sync()...
 
     def __setattr__(self, name, value):
         if name[0]!='_':
@@ -67,11 +71,11 @@ class Attrib:
                 inhibit_sync = setter(value)
                 try: value.assigned(self, name)
                 except: pass
-                if not inhibit_sync: self.sync(assigned=name)
+                if not inhibit_sync: self.sync(name)
                 return
         self.__dict__[name] = value
         if name[0]!='_':
-            self.sync(assigned=name)
+            self.sync(name)
 
     def __getattr__(self, name):
         if name[0]=='_': raise GetAttributeError(self, name)
@@ -107,7 +111,7 @@ class Attrib:
                 inhibit_update = modifier(value)
                 try: getattr(self, name).modified()
                 except: pass
-                if not inhibit_update: self.sync(modified=name)
+                if not inhibit_update: self.sync(name)
                 return
 
         # we need to perform the modification-task directly
@@ -126,36 +130,4 @@ class Attrib:
         try: old_value.modified()
         except: pass
         if name[0]!='_':
-            self.sync(modified=name)
-
-    def __init__(self, *args, **kwds):
-        # _all_setters must be computed exactly once per concrete class
-        #if self._dependant is not None:
-        #    klass = self._dependant.__class__
-        #    if not klass.__dict__.has_key('_all_setters'):
-        #        klass.__dict__['_all_setters'] = _get_all_setters(klass)
-
-        """
-        # handle explicit-attributes -- currently [pre 0.1 beta] disabled
-        # (breaks some top-level window geometry/sizing in tkgui [?])
-        try: explicit_attributes_names = self.explicit_attributes
-        except AttributeError: pass
-        else:
-            for internal_name in explicit_attributes_names:
-                external_name = internal_name[1:]
-                if not kwds.has_key(external_name):
-                    kwds[external_name] = getattr(self, internal_name)
-        """
-
-        self.set(*args, **kwds)
-
-    def sync(self, **ignore_kw):
-        if self._inhibit_sync: return
-        # Temporary hack:
-        attributes = [name for name in dir(self) if name[0] == '_']
-        state = {}
-        for name in attributes:
-            state[name] = getattr(self, name)
-        self._dependant.stateUpdate(state)
-        #for setter_name in self._all_setters:
-        #    getattr(self, ensure_name)()
+            self.sync(name)
