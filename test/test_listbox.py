@@ -13,9 +13,10 @@ app = Application()
 
 lb = SelectionPrinter()
 
-#lb.model.extend('There was a wee cooper of county Fyfe, Nickety, nockety, noo, noo, noo'.split())
+# These are redundant:
+lb.model.extend('There was a wee cooper of county Fyfe, Nickety, nockety, noo, noo, noo'.split())
 lb.model = ListModel('There was a wee cooper of county Fyfe, Nickety, nockety, noo, noo, noo'.split())
-
+lb.model.value = 'There was a wee cooper of county Fyfe, Nickety, nockety, noo, noo, noo'.split()
 lb.selection = 2
 
 win = Window(title='ListBox test', width=200, height=200)

@@ -2,7 +2,7 @@
 
 <!DOCTYPE document SYSTEM "minimal.dtd" [
 <!ENTITY shortversion            "0.1">
-<!ENTITY longversion             "0.1a2">
+<!ENTITY longversion             "0.1a3">
 <!ENTITY copy                    "<copyright/>">
 <!ENTITY copyrightholders SYSTEM "copyrightholders.xml">
 ]>
@@ -13,7 +13,7 @@
 
   <author>Magnus Lie Hetland</author>
 
-  <date>September 9, 2001</date>
+  <date>September 9, 2001, version &longversion;</date>
 
   <section>
     <title>Introduction</title>
@@ -448,19 +448,75 @@
     <section>
       <title>About Models and Views</title>
 
-      <para>In future releases, the <name>Anygui</name> widgets will
-      be <emphasis>Views</emphasis>, connected to one or more
-      <emphasis>Models</emphasis>.  When a model changes, the view
-      will be notified. Thus, the widgets themselves will not store
-      the data of the model directly (such as the text of a
-      <code>TextField</code> or the items of a <code>ListBox</code>),
-      only information related to that specific view, such as the
-      current selection.</para>
+      <para>Some widgets, such as <code>TextField</code> or
+      <code>CheckBox</code>, reflect some state in the program, be it
+      a text value or a binary (Boolean) value. These widgets are
+      called <emphasis>views</emphasis> since they are ways of viewing
+      the underlying state, which is called a
+      <emphasis>model</emphasis>. In the current version of
+      <name>Anygui</name> (&longversion) there are three types of
+      model:</para>
 
-      <para>Since this system is under development, the descriptions
-      of <code>CheckBox</code>, <code>RadioButton</code>,
-      <code>ListBox</code>, <code>TextField</code>, and
-      <code>TextArea</code> below will probably change soon.</para>
+      <para><code>BooleanModel</code>: This represents a Boolean value
+      (true or false), and is the underlying model for
+      <code>CheckBox</code> and <code>RadioButton</code>.</para>
+
+      <para><code>ListModel</code>: This represents a sequence, and
+      supports all the normal list methods. It is the underlying model
+      for <code>ListBox</code>.</para>
+
+      <para><code>TextModel</code>: This represents a mutable string,
+      and also supports standard list methods. (It is, in fact, a
+      subclass of <code>ListModel</code>.) It is the underlying model
+      of <code>TextField</code> and <code>TextArea</code>.</para>
+
+      <para>Each widget which functions as a view, has an attribute
+      called <code>model</code>, which contains its model. The widget
+      will always reflect the current state of the model, and changes
+      in the widget (such as editin the text of a
+      <code>TextField</code>) will automatically be reflected in the
+      model. (Thus, in the terminology of the
+      <emphasis>Model-View-Controller</emphasis> paradigm, these views
+      are actually controllers as well.)</para>
+
+      <para>The models have an attribute called <code>value</code>
+      which is a representation of the model as a primitive value. By
+      assigning to this attribute you will change the model.</para>
+
+      <para><emphasis>Note</emphasis>: The following example is not
+      safe:</para>
+
+      <codelisting>
+	<line>lb = ListBox()</line>
+	<line>some_list = [1, 2, 3]</line>
+	<line>lb.model.value = some_list</line>
+	<line>some_list[1] = 'foo'</line>
+      </codelisting>
+
+      <para>Since <code>some_list</code> is a normal list, changing it
+      (in the last line) will not afect the <code>ListBox</code> in
+      any way. A better version of the last line would be</para>
+
+      <codelisting>
+	<line>lb.model[1] = 'foo'</line>
+      </codelisting>
+
+      <para>The <code>model</code> property will contain a default
+      ("empty") model when the widget is created, so code like this is
+      possible:</para>
+
+      <codelisting>
+	<line>lb = ListBox()</line>
+	<line>lb.model.append('This is the first item')</line>
+      </codelisting>
+
+      <!--
+      <section>
+	<title>About the Observable Pattern</title>
+
+	<para>[To be done]</para>
+      </section>
+      -->
 
     </section>
 
@@ -474,9 +530,7 @@
       associate a callback with it.</para>
 
       <para>Whether a <code>CheckBox</code> is currently on or off is
-      indicated by its boolean <code>on</code> property, which may
-      also be set to change the <code>CheckBox</code> state.</para>
-
+	indicated by its model's <code>value</code>.
     </section>
 
     <section>
@@ -527,13 +581,11 @@
       arrow keys until the item you want to select is underlined; then
       select it by pressing the space bar.</para>
 
-      <para>A <code>ListBox</code>'s items are set by assigning a
-      sequence of objects to its <code>items</code> property. (This
-      sequence will automatically be turned into a tuple.) The
-      sequence can contain any objects, and the text displayed in the
-      widget will be the result of applying the built-in
-      <name>Python</name> function <code>str</code> to each
-      object.</para>
+      <para>A <code>ListBox</code>'s items are set by manipulating its
+      model (a <code>ListModel</code>). The sequence can contain any
+      objects, and the text displayed in the widget will be the result
+      of applying the built-in <name>Python</name> function
+      <code>str</code> to each object.</para>
 
       <codelisting>
 	<line>lbx = ListBox()</line>
