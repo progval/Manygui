@@ -143,7 +143,8 @@ class ListBox(ComponentMixin, AbstractListBox):
         # HIWORD(wParam): notification code
         # LOWORD(wParam): id of menu item, control, or accelerator
         if wParam >> 16 == win32con.LBN_SELCHANGE:
-            self.do_action()
+            #self.do_action()
+            send('action', self)
 
 ##################################################################
 
@@ -161,7 +162,8 @@ class Button(ComponentMixin, AbstractButton):
         # HIWORD(wParam): notification code
         # LOWORD(wParam): id of menu item, control, or accelerator
         if (wParam >> 16) == win32con.BN_CLICKED:
-            self.do_action()
+            #self.do_action()
+            send('action', self)
 
 class ToggleButtonMixin(ComponentMixin):
 
@@ -174,7 +176,8 @@ class ToggleButtonMixin(ComponentMixin):
         # HIWORD(wParam): notification code
         # LOWORD(wParam): id of menu item, control, or accelerator
         if (wParam >> 16) == win32con.BN_CLICKED:
-            self.do_action()
+            #self.do_action()
+            send('action', self)
 
     def _ensure_state(self):
         if not self._hwnd:
@@ -196,7 +199,8 @@ class ToggleButtonMixin(ComponentMixin):
         if val == self._on:
             return
         self.model.value = val
-        self.do_action()
+        #self.do_action()
+        send('action', self)
 
 
 class CheckBox(ToggleButtonMixin, AbstractCheckBox):

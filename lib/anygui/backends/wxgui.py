@@ -111,7 +111,8 @@ class ListBox(ComponentMixin, AbstractListBox):
             EVT_LISTBOX(self._wx_comp, self._wx_id, self._wx_clicked)
 
     def _wx_clicked(self, event):
-        self.do_action()
+        #self.do_action()
+        send('action', self)
 
 ################################################################
 
@@ -123,7 +124,8 @@ class Button(ComponentMixin, AbstractButton):
         EVT_BUTTON(self._wx_comp, self._wx_id, self._wx_clicked)
 
     def _wx_clicked(self, evt):
-        self.do_action()
+        #self.do_action()
+        send('action', self)
 
     def _get_wx_text(self):
         # return the text required for creation
@@ -141,7 +143,8 @@ class ToggleButtonMixin(ComponentMixin):
         if val == self._on:
             return
         self.model.value = val
-        self.do_action()
+        #self.do_action()
+        send('action', self)
 
     def _get_wx_text(self):
         # return the text required for creation
@@ -205,7 +208,8 @@ class TextField(ComponentMixin, AbstractTextField):
         self.model.value = self._wx_comp.GetValue()
 
     def _wx_enterkey(self, event):
-        self.do_action()
+        #self.do_action()
+        send('action', self)
 
     def _get_wx_text(self):
         # return the text required for creation

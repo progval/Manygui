@@ -1,8 +1,8 @@
-from Mixins import Action
+#from Mixins import Action
 from Exceptions import UnimplementedMethod
 import anygui
 
-class AbstractApplication(Action):
+class AbstractApplication:#(Action): # FIXME: Is Action needed here?
     
     def __init__(self):
         self._windows = []

@@ -10,8 +10,11 @@ w1.place(lab)
 
 w2 = Window(title='This Window is visible', size=(200, 100))
 
+def show():
+    w1.visible = 1
+
 b = Button(text='Show other window', position=(5, 5),
-           size=(190, 90), action=w1.show)
+           size=(190, 90), action=show)
 
 w2.place(b)
 

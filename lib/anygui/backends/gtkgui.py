@@ -101,7 +101,8 @@ class Button(ComponentMixin, AbstractButton):
             self._event_connected = 1
 
     def _gtk_clicked(self, *args):
-        self.do_action()
+        #self.do_action()
+        send('action', self)
 
 class ToggleButtonMixin(ComponentMixin):
     def _ensure_state(self):
@@ -113,7 +114,8 @@ class ToggleButtonMixin(ComponentMixin):
         if val == self._on:
             return
         self.model.value = val
-        self.do_action()
+        #self.do_action()
+        send('action', self)
 
 class CheckBox(ToggleButtonMixin, AbstractCheckBox):
     _gtk_class = GtkCheckButton
@@ -158,7 +160,8 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
         self._on = val
         if self._on:
             # XXX: Hack!
-            self.do_action()
+            #self.do_action()
+            send('action', self)
 
 ################################################################
 
@@ -194,7 +197,8 @@ class ListBox(ComponentMixin, AbstractListBox):
             self._event_connected = 1
 
     def _row_selected(self, *args):
-        self.do_action()
+        #self.do_action()
+        send('action', self)
 
     def _ensure_selection(self):
         pass
@@ -247,7 +251,8 @@ class TextField(ComponentMixin, AbstractTextField):
             return self._gtk_comp.get_text()
 
     def _entry_activated(self, *args):
-        self.do_action()
+        #self.do_action()
+        send('action', self)
 
     def _entry_changed(self, *args):
         if not self._ignore_changed:

@@ -186,7 +186,8 @@ class ListBox(ComponentMixin, AbstractListBox):
             self._tk_comp.bind('<KeyRelease-space>',self._tk_clicked)
 
     def _tk_clicked(self, event):
-        self.do_action()
+        #self.do_action()
+        send('action', self)
 
 ################################################################
 
@@ -199,7 +200,8 @@ class Button(ComponentMixin, AbstractButton):
             self._tk_comp.config(command=self._tk_clicked)
 
     def _tk_clicked(self):
-        self.do_action()
+        #self.do_action()
+        send('action', self)
 
 class ToggleButtonMixin(ComponentMixin):
 
@@ -219,7 +221,8 @@ class ToggleButtonMixin(ComponentMixin):
         if val == self._on:
             return
         self.model.value = val
-        self.do_action()
+        #self.do_action()
+        send('action', self)
 
 class CheckBox(ToggleButtonMixin, AbstractCheckBox):
     _tk_class = Checkbutton
@@ -354,9 +357,12 @@ class TextField(ComponentMixin, AbstractTextField, DisabledTextBindings):
     def _ensure_editable(self):
         pass
 
+    def _send_action(self, dummy): # FIXME: dummy...
+        send('action', self)
+
     def _ensure_events(self):
         if self._tk_comp:
-            self._tk_comp.bind('<KeyPress-Return>', self.do_action)
+            self._tk_comp.bind('<KeyPress-Return>', self._send_action) # do_action
             if EXPORTSELECTION == 'false':
                 self._tk_comp.bind('<KeyRelease-Tab>',self._do_ensure_selection)
 

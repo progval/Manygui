@@ -1,12 +1,14 @@
 from anygui.Exceptions import UnimplementedMethod
-from anygui.Mixins import Attrib, Action
+from anygui.Mixins import Attrib
+from anygui.Messages import send, CallbackAdapter
 
-class RadioGroup(Attrib, Action):
+class RadioGroup(Attrib, CallbackAdapter):
     _items = None
     _value = None
 
     def __init__(self, items=[], **kw):
         Attrib.__init__(self, **kw)
+        CallbackAdapter.__init__(self)
         self._items = []
         self.add(items)
 
@@ -18,7 +20,8 @@ class RadioGroup(Attrib, Action):
             self._value = value
             for item in self._items:
                 item._update_state()
-            self.do_action()
+            #self.do_action()
+            #send('action', self)
 
     def add(self, buttons):
         for btn in buttons:

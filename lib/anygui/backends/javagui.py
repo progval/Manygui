@@ -231,7 +231,8 @@ class ListBox(ComponentMixin, AbstractListBox):
             self._java_comp.setMouseReleased(self._java_clicked)
 
     def _java_clicked(self, event):
-        self.do_action()
+        #self.do_action()
+        send('action', self)
 
 ################################################################
 
@@ -253,7 +254,8 @@ class Button(ComponentMixin, AbstractButton):
         self._java_comp.actionPerformed = self._java_clicked
 
     def _java_clicked(self, evt):
-        self.do_action()
+        #self.do_action()
+        send('action', self)
 
 class ToggleButtonMixin(ComponentMixin):
 
@@ -266,7 +268,8 @@ class ToggleButtonMixin(ComponentMixin):
         if val == self._on:
             return
         self.model.value = val
-        self.do_action()
+        #self.do_action()
+        send('action', self)
 
 class CheckBox(ToggleButtonMixin, AbstractCheckBox):
     _java_class = swing.JCheckBox
@@ -323,7 +326,8 @@ class TextField(ComponentMixin, AbstractTextField):
             self._java_comp.focusLost = self._java_focus_lost
 
     def _java_enterkey(self, event):
-        self.do_action()
+        #self.do_action()
+        send('action', self)
 
     def _java_focus_lost(self, event):
         if self.model.value != self._java_comp.text:
