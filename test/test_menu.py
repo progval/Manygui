@@ -4,9 +4,13 @@ app = Application()
 
 win = Window(geometry=(50,50,100,100))
 
+# A menubar for the window.
+mbar = Menu()
+win.addMenu(mbar)
+
 # A menu to choose skits.
 skitMenu = Menu(text="Skit")
-win.add(skitMenu)
+mbar.add(skitMenu)
 
 # Populate the skit menu. The objects returned by the
 # add...() calls are handles that permit us to operate
@@ -44,12 +48,12 @@ def handleSillySelect(ev):
 for txt in ["Slight","Moderate","Unbearable"]:
     silliness.append(subMenu.addCheck(text=txt))
     link(silliness[-1],handleSillySelect)
-skitMenu.addMenu(subMenu)
+skitMenu.add(subMenu)
 
 # And a menu for help...
 helpMenu = Menu(text="Help")
 helpMenu.addCommand(text="About Anygui")
-win.add(helpMenu)
+mbar.add(helpMenu)
 
 lbl = Label(text="No skit selected")
 win.add(lbl)
@@ -57,7 +61,7 @@ win.add(lbl)
 def chooseSkit(ev):
     # Handle a skit choice. A menu event should have a
     # 'text' property containing the text of the menu item.
-    lbl.text = ev['text']
+    lbl.text = ev.text
 
 link(dedPrt,chooseSkit)
 link(pengTv,chooseSkit)
