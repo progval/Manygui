@@ -13,8 +13,8 @@ class Rule:
         self.deps = name_pat.findall(expr)
     def fire(self, scope):
         name = self.name
-        value = eval(self.expr, scope)
-        scope[name] = eval(self.expr, scope)        
+        value = eval(self.expr, globals(), scope)
+        scope[name] = value
 
 class DependencyGraph:
     """
@@ -33,14 +33,13 @@ class DependencyGraph:
     def closure(self, node):
         for dep in self.dependents(node):
             self.addEdge(node, dep)
-    def dependents(self, node, status=None):
-        if status is None: status = {}
-        status[node] = 1
+    def dependents(self, node, visited=None):
+        if visited is None: visited = {}
+        visited[node] = 1
         result = []
         for child in self.children(node):
-            if not status.has_key(child):
-                result.extend(self.dependents(child, status))
-        status[node] = 'finished'
+            if not visited.has_key(child):
+                result.extend(self.dependents(child, visited))
         return result
 
 class RuleEngine:
@@ -82,42 +81,3 @@ class RuleEngine:
                         del undef[name]
                         break
         return undef.keys()
-
-if __name__ == '__main__':
-    eng = RuleEngine()
-    # Hm. What is the "proper" rule set?
-    eng.addRule('position = x, y')
-    eng.addRule('x = position[0]')
-    eng.addRule('y = position[1]')
-    eng.addRule('size = width, height')
-    eng.addRule('width = size[0]')
-    eng.addRule('height = size[1]')
-    eng.addRule('geometry = position + size')
-    eng.addRule('geometry = x, y, width, height')
-    eng.addRule('position = geometry[0], geometry[1]')
-    eng.addRule('size = geometry[2], geometry[3]')
-
-    vals = {}
-    vals['x'] = 10
-    vals['y'] = 20
-    vals['width'] = 9999
-    vals['height'] = 9999
-    vals['size'] = 9999, 9999
-    vals['position'] = 10, 10
-    vals['geometry'] = 10, 10, 9999, 9999
-
-    print eng.adjust(vals, ['y'])
-
-    print vals['position'], vals['geometry']
-    vals['position'] = 42, 42
-    print eng.adjust(vals, ['position'])
-    print (vals['x'], vals['y']), vals['geometry']
-
-    vals['geometry'] = 1, 2, 3, 4
-    print eng.adjust(vals, ['geometry'])
-    print (vals['x'], vals['y'], vals['width'], vals['height']), vals['position']+vals['size']
-
-    # If the "illegal state" actually checked the expression and the
-    # values etc. (no change), this shouldn't raise an exception...
-    try: eng.adjust(vals, ['x', 'position'])
-    except IllegalState: print 'Expected exception received'
