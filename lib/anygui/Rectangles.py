@@ -28,27 +28,29 @@ class Rectangle:
     # FIXME: What about naming? Should we use centerX etc? hCenter?
     # hcenter?  What about hmove etc?
 
+    # FIXME: Rewrite mention of MVC
+
     def setBottom(self, bottom):
         self.set(y=bottom-self.height)
 
     def getBottom(self):
         return self.y + self.height
 
-    def setBottomleft(self, bottomleft):
-        x, y = bottomleft
+    def setBottomLeft(self, bottomLeft):
+        x, y = bottomLeft
         y -= self.height
         self.set(x=x, y=y)
 
-    def getBottomleft(self):
+    def getBottomLeft(self):
         return self.x, self.getBottom()
 
-    def setBottomright(self, bottomright):
-        x, y = bottomright
+    def setBottomRight(self, bottomRight):
+        x, y = bottomRight
         x += self.width
         y += self.height
         self.set(x=x, y=y)
 
-    def getBottomright(self):
+    def getBottomRight(self):
         return self.getRight(), self.getBottom()
 
     def setCenter(self, center):
@@ -58,20 +60,20 @@ class Rectangle:
         self.set(x=x, y=y)
 
     def getCenter(self):
-        return self.getCenterx(), self.getCentery()
+        return self.getCenterX(), self.getCenterY()
 
-    def setCenterx(self, centerx):
-        x = centerx - self.width / 2
+    def setCenterX(self, centerX):
+        x = centerX - self.width / 2
         self.set(x=x)
 
-    def getCenterx(self):
+    def getCenterX(self):
         return self.x + self.width / 2
 
-    def setCentery(self, centery):
-        x = centery - self.height / 2
+    def setCenterY(self, centerY):
+        y = centerY - self.height / 2
         self.set(y=y)
 
-    def getCentery(self):
+    def getCenterY(self):
         return self.y + self.height / 2
 
     def setGeometry(self, geometry):
@@ -87,39 +89,39 @@ class Rectangle:
     def getLeft(self):
         return self.x
 
-    def setMidbottom(self, midbottom):
-        x, y = midbottom
+    def setMidBottom(self, midBottom):
+        x, y = midBottom
         x -= self.width / 2
         y -= self.height
         self.set(x=x, y=y)
 
-    def getMidbottom(self):
-        return self.getCenterx(), self.getBottom()
+    def getMidBottom(self):
+        return self.getCenterX(), self.getBottom()
 
-    def setMidleft(self, midleft):
-        x, y = midleft
+    def setMidLeft(self, midLeft):
+        x, y = midLeft
         y -= self.height / 2
         self.set(x=x, y=y)
 
-    def getMidleft(self):
-        return self.x, self.getCentery()
+    def getMidLeft(self):
+        return self.x, self.getCenterY()
 
-    def setMidright(self, midright):
-        x, y = midright
+    def setMidRight(self, midRight):
+        x, y = midRight
         x -= self.width
         y -= self.height / 2
         self.set(x=x, y=y)
 
-    def getMidright(self):
-        return self.getRight(), self.getCentery()
+    def getMidRight(self):
+        return self.getRight(), self.getCenterY()
 
-    def setMidtop(self, midtop):
-        x, y = midtop
+    def setMidTop(self, midTop):
+        x, y = midTop
         x -= self.width / 2
         self.set(x=x, y=y)
 
-    def getMidtop(self):
-        return self.getCenterx(), self.y
+    def getMidTop(self):
+        return self.getCenterX(), self.y
 
     def setRight(self, right):
         x = right
@@ -142,21 +144,21 @@ class Rectangle:
     def getTop(self):
         return self.y
 
-    def setTopleft(self, topleft):
-        x, y = topleft
+    def setTopLeft(self, topLeft):
+        x, y = topLeft
         self.set(x=x, y=y)
 
-    def getTopleft(self):
+    def getTopLeft(self):
         return self.x, self.y
 
-    setPosition = setTopleft
+    setPosition = setTopLeft
 
-    getPosition = getTopleft
+    getPosition = getTopLeft
 
-    def setTopright(self, topright):
-        x, y = topright
+    def setTopRight(self, topRight):
+        x, y = topRight
         x += self.width
         self.set(x=x, y=y)
 
-    def getTopright(self):
+    def getTopRight(self):
         return self.x + self.width, self.y
