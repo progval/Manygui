@@ -130,11 +130,11 @@ class ComponentWrapper(AbstractWrapper):
 
     def setSize(self,width,height):
         if self.widget is None: return
-        self.widget.SetSize(width,height)
+        self.widget.SetSize((width,height))
 
     def setPosition(self,x,y):
         if self.widget is None: return
-        self.widget.SetPosition(x,y)
+        self.widget.SetPosition((x,y))
 
     def setVisible(self,visible):
         if not self.widget is None:
@@ -401,6 +401,12 @@ class WindowWrapper(ComponentWrapper):
         if not self.widget is None:
             self.widget.SetPosition((int(x), int(y)))
             self.widget.SetClientSize((int(width), int(height)))
+
+    def setSize(self,width,height):
+        # override this to set the CLIENT size (not the window size)
+        # to take account for title bar, borders and so on.
+        if self.widget is None: return
+        self.widget.SetClientSize((int(width), int(height)))
 
     def getGeometry(self):
         x,y = self.widget.GetPosition()
