@@ -53,10 +53,11 @@ def topological_sort(items, constraints):
     followers = {}
     nleaders = {}
     for before, after in constraints:
-        these_followers = followers.setdefault(before,{})
-        if not these_followers.has_key(after):
-            nleaders[after] = 1 + nleaders.get(after, 0)
-            these_followers[after] = before
+        if before in items and after in items:
+            these_followers = followers.setdefault(before,{})
+            if not these_followers.has_key(after):
+                nleaders[after] = 1 + nleaders.get(after, 0)
+                these_followers[after] = before
     # while there are items, pick one with no leaders, append it
     # to result, update list 'items' and mapping 'nleaders'
     result = []
