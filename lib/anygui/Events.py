@@ -49,15 +49,18 @@ def link(*args, **kwds):
         registry[s] = {}
     if not registry[s].has_key(event):
         registry[s][event] = []
-    #if not h in registry[s][event]:
-    #    registry[s][event].append(h)
-    # mlh@20020105: Temporary fix; the previous two lines should work!
-    from References import ref_is
-    in_there = 0
-    for cand in registry[s][event]:
-        if ref_is(h, cand): in_there = 1
-    if not in_there:
+    if not h in registry[s][event]:
         registry[s][event].append(h)
+    else:
+        import sys
+        print >> sys.stderr, h, ':::', registry[s][event]
+    # mlh@20020105: Temporary fix; the previous two lines should work!
+    #from References import ref_is
+    #in_there = 0
+    #for cand in registry[s][event]:
+    #    if ref_is(h, cand): in_there = 1
+    #if not in_there:
+    #    registry[s][event].append(h)
 
 #def unlink(source, event, handler):
 def unlink(*args, **kwds):
