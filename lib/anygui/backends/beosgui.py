@@ -639,7 +639,7 @@ class Window(ComponentMixin, AbstractWindow):
     def remove(self, object):
         if object in self._contents:
             self._beos_remove(object)
-       AbstractWindow.remove(self, object)
+        AbstractWindow.remove(self, object)
         
     
 ###################################################################
