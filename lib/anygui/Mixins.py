@@ -2,47 +2,38 @@
 
 from Exceptions import SetAttributeError, GetAttributeError, UnimplementedMethod, InternalError
 from Events import link, send
-#import weakref
 weakref = None
 
-# One key responsibility of class Mixins.Attrib is dealing with methods
-# called _ensure_* in Attrib subclasses' instances.  There are several
-# supporting data structures and functions for the purpose:
-
-# _ensure_* methods that it might be dangerous to auto-call
-_no_auto_ensures = '_ensure_created _ensure_destroyed _ensure_events'.split()
-
-# _ensure_* methods that must be called no more than once per object
-# (currently, this facility is not being used)
-_ensures_once = ()
+# One key responsibility of class Mixins.Attrib is dealing with
+# methods called set* in backend wrappers.
 
 # pairwise order constraints on _ensure_* method calls
-_ensures_constraints = (
-    ('_ensure_text', '_ensure_selection'),
+_setter_order = (
+    ('setText', 'setSelection'),
     )
 
-# get all names of methods starting with _ensure_ for a class & its bases,
-# except those listed in _no_auto_ensures.  The names are ordered to
-# respect all pairwise constraints (_ensure_before, _ensure_after) in
-# sequence-of-pairs klass._ensures_constraints, if any, defaulting to the
-# global ones in this module's _ensures_constraints variable
-def _get_all_ensures_helper(klass, theset):
-    """ recursively get all methods in klass and bases named _ensure_* """
-    for name in dir(klass):
-        if name.startswith('_ensure_'):
-            if name in _no_auto_ensures: continue
-            value = getattr(klass,name)
-            if callable(value): theset[name]=1
-    for base in klass.__bases__: _get_all_ensures_helper(base, theset)
+# get all names of methods starting with "set" for a class & its
+# bases. The names are ordered to respect all pairwise constraints
+# (before, after) in sequence-of-pairs klass._setter_order, if any,
+# defaulting to the global ones in this module's _setter_order
+# variable
 
-def _get_all_ensures(klass):
-    """ get all methods in klass and its bases named _ensure_*, sorted """
-    enset = {}
-    _get_all_ensures_helper(klass, enset)
-    constraints = getattr(klass, '_ensures_constraints', _ensures_constraints)
-    ensures_names = enset.keys()
-    ensures_names.sort()
-    return topological_sort(ensures_names, constraints)
+def _get_all_setters_helper(klass, theset):
+    """ recursively get all methods in klass and bases named set* """
+    for name in dir(klass):
+        if name.startswith('set'):
+            value = getattr(klass, name)
+            if callable(value): theset[name]=1
+    for base in klass.__bases__: _get_all_setters_helper(base, theset)
+
+def _get_all_setters(klass):
+    """ get all methods in klass and its bases named set*, sorted """
+    setterset = {}
+    _get_all_setters_helper(klass, setterset)
+    constraints = getattr(klass, '_setter_order', _setter_order)
+    setter_names = setterset.keys()
+    setter_names.sort()
+    return topological_sort(setter_names, constraints)
 
 def topological_sort(items, constraints):
     """ topological sort (stable) of list 'items' to respect pairwise
@@ -107,12 +98,11 @@ class Attrib:
 
 
     Attrib also supplies a default refresh method, which calls all the
-    relevant methods named _ensure_* if flag _inhibit_refresh is false.
-    In this release, all _ensure_* are called; eventually, some kind
-    of mechanism will use the hints to be more selective/optimizing.
-    Attrib's responsibilities include calling certain _ensure_* methods
-    only once, enforcing a calling order among _ensure_* methods, and
-    avoiding auto-calls of _ensure_* methods in Mixins._no_auto_ensures.
+    relevant methods named set* in the connected _dependant object if
+    flag _inhibit_refresh is false.  In this release, all set* are
+    called; eventually, some kind of mechanism will use the hints to
+    be more selective/optimizing.  Attrib's responsibilities include
+    enforcing a calling order among set* methods.
 
 
     Note that Attrib embodies two patterns (attribute setting/getting
@@ -121,7 +111,8 @@ class Attrib:
     such "dense" approaches and the resulting "profound" code.
     """
 
-    _all_ensures = []           # no _ensure_* called until Attrib.__init__
+    _dependant = None
+    _all_setters = []           # no set* called until Attrib.__init__
     _inhibit_refresh = 0        # default Attribs are always refresh-enabled
 
     def __setattr__(self, name, value):
@@ -197,11 +188,11 @@ class Attrib:
             self.refresh(modified=name)
 
     def __init__(self, *args, **kwds):
-        # _all_ensures must be computed exactly once per concrete class
-        klass = self.__class__
-        if not klass.__dict__.has_key('_all_ensures'):
-            klass.__dict__['_all_ensures'] = _get_all_ensures(klass)
-        self._ensures_called = []
+        # _all_setters must be computed exactly once per concrete class
+        if self._dependant is not None:
+            klass = self._dependant.__class__
+            if not klass.__dict__.has_key('_all_setters'):
+                klass.__dict__['_all_setters'] = _get_all_setters(klass)
 
         """
         # handle explicit-attributes -- currently [pre 0.1 beta] disabled
@@ -219,12 +210,7 @@ class Attrib:
 
     def refresh(self, **ignore_kw):
         if self._inhibit_refresh: return
-        for ensure_name in self._all_ensures:
-            if ensure_name in _ensures_once:
-                if ensure_name in self._ensures_called:
-                    continue
-                self._ensures_called.append(ensure_name)
-            # obtain and call the bound-method
+        for setter_name in self._all_setters:
             getattr(self, ensure_name)()
 
 
