@@ -1,3 +1,5 @@
+RadioGroups don't work properly in Jython.
+
 The updates in test_textarea and test_textfield
 don't work properly in tkgui.
 
