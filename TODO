@@ -55,3 +55,5 @@ Smaller issues:
 * Merge .add() and .place() and allow several widgets as
   positional arguments?
 
+* Allow multiple widges as positional arguments to place
+  (instead of/in addition to sequence)
