@@ -37,6 +37,9 @@ Longer term goals:
 
 * Add support for importing xml files through xslt?
 
+* Add instant model update for text widgets, not just on
+  "focus lost"?
+
 Smaller issues:
 ---------------
 
