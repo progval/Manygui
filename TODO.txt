@@ -148,6 +148,9 @@ Objectives for version 0.3:
 Longer term goals:
 ------------------
 
+* Extend sync with further hinting capabilities, to allow partial
+  updates (mainly for performance)
+
 * Support accessibility standards
 
 * Add support for styled text
