@@ -7,6 +7,8 @@ In wxgui, RadioButtons need to have a group when they are
 created - otherwise they won't work properly. Thus they cannot
 be moved from RadioGroup to RadioGroup.
 
+_wx_size_handler seems to be causing infinite recursion.
+
 In wxgui, the text cursor doesn't seem to want to leave non-editable
 text areas and text fields... It keeps moving around to the
 correct position (but in the wrong field) if one (after having
