@@ -531,6 +531,7 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
         self._width = w
         self._height = h
         if (dw,dh) == (0,0): return
+        if (w,h) == (0,0): return # when minimized
         self.proxy.resized(dw,dh)
 
     def _WM_CLOSE(self, hwnd, msg, wParam, lParam):
