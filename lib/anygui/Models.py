@@ -1,7 +1,6 @@
 from anygui.Mixins import Attrib, Observable
 from UserList import UserList
-
-# TODO: - TextModel
+from UserString import UserString
 
 class BooleanModel(Attrib, Observable):
 
@@ -19,6 +18,10 @@ class BooleanModel(Attrib, Observable):
 
     def _get_value(self):
         return self._value
+
+    def __repr__(self): return repr(self._value)
+
+    def __str__(self): return str(self._value)
 
 class ListModel(Attrib, Observable, UserList):
 
@@ -93,3 +96,18 @@ class ListModel(Attrib, Observable, UserList):
         UserList.extend(self, other)
         self.add_hint('extend', other)
         self.notify_views()
+
+class TextModel(ListModel):
+
+    def __init__(self, *arg, **kw):
+        # FIXME: Order correct?
+        Attrib.__init__(self, **kw)
+        Observable.__init__(self)
+        # HACK: Make string argument into list:
+        if len(arg) > 0:
+            arg = (list(arg[0]),) + arg[1:]
+        UserList.__init__(self, *arg, **kw)
+
+    def __repr__(self): return repr(''.join(self.data))
+
+    def __str__(self): return ''.join(self.data)
