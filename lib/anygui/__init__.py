@@ -1,6 +1,42 @@
 #_backends = 'msw gtk java wx tk beos qt curses text'
 _backends = 'java msw wx qt tk'
 
+# 20020208:mlh -- starting to experiment with new architecture
+__all__ = """
+
+  Application
+  Frame
+  GroupBox
+  Button
+  CheckBox
+  Options
+  Window
+  Label
+  TextField
+  TextArea
+  ListBox
+  ComboBox
+  RadioButton
+  RadioGroup
+  BooleanModel
+  ListModel
+  TextModel
+  any
+  application
+  backend
+  link
+  send
+  sender
+  setup
+  unlink
+  unlinkHandler
+  unlinkMethods
+  unlinkSource
+  AboutDialog
+  OpenFileDialog
+
+""".split()
+
 def application():
     'Returns the global application object'
     #global _application
@@ -21,10 +57,21 @@ def backendModule():
         raise RuntimeError, 'no backend exists'
     return _backend
 
+def frontEndWrappers():
+    'Returns the list of available frontend widgets'
+    if not _frontend_wrappers:
+        raise RuntimeError, 'no frontend wrappers exists'
+    return _frontend_wrappers
+
 def setup(self, **kwds):
     'Used to configure Anygui'
     raise NotImplementedError
 
+
+########## Get the list of frontend wrappers ##############################
+import anygui.frontend_wrappers as few
+_frontend_wrappers = few
+########## End get list of frontend wrappers ##############################
 
 ########## Begin Imports ##################################################
 
@@ -43,6 +90,7 @@ from anygui.RadioGroups      import RadioGroup
 from anygui.TextFields       import TextField
 from anygui.TextAreas        import TextArea
 from anygui.ListBoxes        import ListBox
+from anygui.ComboBoxes       import ComboBox
 from anygui.Models           import BooleanModel, ListModel, TextModel
 from anygui.Events           import *
 from anygui.Frames           import Frame, GroupBox
@@ -53,42 +101,6 @@ from anygui.Menus            import MenuBar, Menu, MenuCommand, MenuCheck, MenuS
 from anygui.dialogs          import *
 
 ########### End Imports ###################################################
-
-# 20020208:mlh -- starting to experiment with new architecture
-__all__ = """
-
-  Application
-  Frame
-  GroupBox
-  Button
-  CheckBox
-  Options
-  Window
-  Label
-  TextField
-  TextArea
-  ListBox
-  RadioButton
-  RadioGroup
-  BooleanModel
-  ListModel
-  TextModel
-  any
-  application
-  backend
-  link
-  send
-  sender
-  setup
-  unlink
-  unlinkHandler
-  unlinkMethods
-  unlinkSource
-  AboutAnyguiDlg
-  AnyguiOpenFileDlg
-
-""".split()
-
 
 """
 # Original export list:

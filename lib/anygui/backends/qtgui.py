@@ -47,7 +47,7 @@ __all__ = '''
 TRUE = 1
 FALSE = 0
 
-DEBUG = 0
+DEBUG = 1
 TMP_DBG = 0
 
 #==============================================================#
@@ -84,9 +84,6 @@ class Wrapper(AbstractWrapper):
 #==============================================================#
 # Base class for all Widgets
 
-# FIXME: It seems that layout stuff (e.g. hstretch and vmove) is set
-# directly as state variables/attributes... Why is that? (There is a
-# layout_data attribute too... Hm.)
 class ComponentWrapper(Wrapper):
 
     visible=1
@@ -172,8 +169,6 @@ class ComponentWrapper(Wrapper):
     def setupChildWidgets(self):
         pass
 
-
-
 #==============================================================#
 
 class EventFilter(QObject):
@@ -227,7 +222,7 @@ class ListBoxWrapper(ComponentWrapper):
     def widgetSetUp(self):
         if not self.connected:
             qApp.connect(self.widget, SIGNAL('highlighted(int)'),
-                         self.clickHandler)
+                         self.selectHandler)
             self.connected = 1
 
     def setItems(self, items):
@@ -250,7 +245,7 @@ class ListBoxWrapper(ComponentWrapper):
             selection = int(self.widget.currentItem())
             return selection
 
-    def clickHandler(self, index):
+    def selectHandler(self, index):
         # self.selection = int(index)
         send(self.proxy, 'select')
 
@@ -309,8 +304,6 @@ class CheckBoxWrapper(ToggleButtonWrapperBase):
     def widgetFactory(self, *args, **kwds):
         return QCheckBox(*args, **kwds)
 
-
-
 #==============================================================#
 # RadioButton
 
@@ -354,7 +347,7 @@ class TextWrapperBase(ComponentWrapper):
 
     def widgetSetUp(self):
         if not self.connected:
-            events = {QEvent.KeyRelease: self.keyPressHandler.im_func,
+            events = {QEvent.KeyRelease: self.keyReleaseHandler.im_func,
                       QEvent.FocusIn:    self.gotFocusHandler.im_func,
                       QEvent.FocusOut:   self.lostFocusHandler.im_func}
             self.eventFilter = EventFilter(self, events)
@@ -368,13 +361,13 @@ class TextWrapperBase(ComponentWrapper):
     def qtText(self):
         return QString(str(self.text))
 
-    def keyPressHandler(self, event):
-        if DEBUG: print 'in keyPressHandler of: ', self.widget
+    def keyReleaseHandler(self, event):
+        if DEBUG: print 'in keyReleaseHandler of: ', self.widget
         self.proxy.pull('text')
         if int(event.key()) == 0x1004: #Qt Return Key Code
-            send(self, 'enterkey')
+            if DEBUG: print 'enter key was pressed in ', self 
+            send(self.proxy, 'enterkey')
         return 1
-
 
     def gotFocusHandler(self, event):
         if DEBUG: print 'in gotFocusHandler of: ', self.widget

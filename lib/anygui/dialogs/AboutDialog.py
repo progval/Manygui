@@ -8,7 +8,7 @@ Its main feature is that it works transparently with many different \
 GUI packages on most platforms.
 """
 
-class AboutAnyguiDlg(Window):
+class AboutDialog(Window):
 
     def __init__(self):
         Window.__init__(self, title='About Anygui', geometry=(250, 200, 300, 225))

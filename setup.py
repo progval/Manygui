@@ -11,7 +11,7 @@ class uninstall(Command):
 
     def finalize_options(self):
         pass
-        
+
     def run(self):
         self.run_command('build')
         build = self.get_finalized_command('build')
@@ -76,4 +76,5 @@ setup (name               = 'anygui',
        package_dir        = {'': 'lib'},
        packages           = ['anygui', 'anygui.backends',
                              'anygui.backends.txtutils',
-                             'anygui.dialogs'])
+                             'anygui.dialogs',
+                             'anygui.frontend_wrappers'])

@@ -1,6 +1,6 @@
 from anygui import *
 
 app = Application()
-aboutAg = AboutAnyguiDlg()
+aboutAg = AboutDialog()
 app.add(aboutAg)
 app.run()
