@@ -9,14 +9,14 @@ Basic functionality:
 
 >>> s = Test()
 >>> q = Test()
->>> connect(Event(source=s), q.handle)
+>>> connect(Event(source=s), q.handle, weak=1)
 >>> dispatch(Event(source=s))
 Handled!
 
 >>> t = Test()
 >>> evt1 = Event()
 >>> evt1.type = 'something'
->>> connect(evt1, t.handle)
+>>> connect(evt1, t.handle, weak=1)
 >>> evt2 = Event()
 >>> evt2.type = 'something'
 >>> dispatch(evt2)
@@ -27,7 +27,7 @@ Handled!
 Disconnecting:
 
 >>> t = Test()
->>> connect(Event(), t.handle)
+>>> connect(Event(), t.handle, weak=1)
 >>> dispatch(Event())
 Handled!
 >>> disconnect(Event(), t.handle)
@@ -37,12 +37,20 @@ Handled!
 Weak handlers:
 
 >>> t = Test()
->>> connect(Event(), t.handle)
+>>> connect(Event(), t.handle, weak=1)
 >>> dispatch(Event())
 Handled!
 >>> del t
 >>> dispatch(Event())
 >>>
+
+Strong handlers:
+
+>>> t = Test()
+>>> connect(Event(type='strong-handlers'), t.handle)
+>>> del t
+>>> dispatch(Event(type='strong-handlers'))
+Handled!
 
 Weak sources:
 
@@ -52,7 +60,7 @@ Loop blocking:
 
 >>> t = Test()
 >>> s = Test()
->>> connect(Event(), t.handle)
+>>> connect(Event(), t.handle, weak=1)
 >>> dispatch(Event(source=s))
 Handled!
 >>> dispatch(Event(source=t))
@@ -65,7 +73,7 @@ Wrapper functions:
 ...     obj.handle(None)
 ...     print '</wrapper>'
 ...
->>> connect(Event(type='wrapper-event'), (t, wrapper_test))
+>>> connect(Event(type='wrapper-event'), (t, wrapper_test), weak=1)
 >>> dispatch(Event(type='wrapper-event'))
 <wrapper>
 Handled!
