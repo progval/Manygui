@@ -3,7 +3,6 @@ include INSTALL
 include KNOWN_BUGS
 include LICENSE
 include MAINTAINERS
-include MANIFEST
 include README
 include TODO
 include VERSION
