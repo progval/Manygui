@@ -501,9 +501,7 @@ class Window(ComponentMixin, AbstractWindow):
                 self._tk_comp.withdraw()
 
     def _ensure_geometry(self):
-        geometry = "%dx%d%+d%+d" % (self._width, self._height,
-                                    #self._x, self._y)
-                                    0, 0)
+        geometry = "%dx%d+%d+%d" % (self._width, self._height,self._x, self._y)
         if self._tk_comp:
             self._tk_comp.geometry(geometry)
     
