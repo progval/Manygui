@@ -207,7 +207,7 @@ class ToggleButtonMixin(ComponentMixin):
         val = val & win32con.BST_CHECKED
         if val == self.on:
             return
-        self.on = val
+        self.modify(on=val)
         #self.do_action()
         send(self, 'click')
 
@@ -309,7 +309,7 @@ class TextField(ComponentMixin, AbstractTextField):
     def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
         # HIWORD(wParam): notification code
         if (wParam >> 16) == win32con.EN_KILLFOCUS:
-            self.text = self._get_text()
+            self.modify(text=self._get_text())
 
 
 class TextArea(TextField, AbstractTextArea):
@@ -343,8 +343,8 @@ class ContainerMixin(ComponentMixin):
         w, h = lParam & 0xFFFF, lParam >> 16
         dw = w - self._width
         dh = h - self._height
-        self._width = w
-        self._height = h
+        self.modify(width=w)
+        self.modify(height=h)
         self.resized(dw, dh)
 
 

@@ -136,7 +136,7 @@ class CheckBox(ToggleButtonMixin, AbstractCheckBox):
         val = self._wx_comp.GetValue()
         if val == self._on:
             return
-        self._on = val
+        self.modify(on=val)
         send(self, 'click')
 
     def _ensure_events(self):
@@ -148,7 +148,7 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
     def _wx_clicked(self, evt):
         # FIXME: Not correct yet
         if self.group is not None:
-            self.group.value = self.value
+            self.group.modify(value=self.value)
         send(self, 'click')
     
     def _ensure_created(self):
@@ -201,7 +201,7 @@ class TextField(ComponentMixin, AbstractTextField):
         EVT_KILL_FOCUS(self._wx_comp, self._wx_killfocus)
 
     def _wx_killfocus(self, event):
-        self._text = self._wx_comp.GetValue()
+        self.modify(text=self._wx_comp.GetValue())
 
     def _wx_enterkey(self, event):
         send(self, 'enterkey')
@@ -261,7 +261,7 @@ class TextArea(ComponentMixin, AbstractTextArea):
         EVT_KILL_FOCUS(self._wx_comp, self._wx_killfocus)
 
     def _wx_killfocus(self, event):
-        self._text = self._wx_comp.GetValue()
+        self.modify(text=self._wx_comp.GetValue())
 
     def _get_wx_text(self):
         # return the text required for creation
@@ -317,8 +317,8 @@ class Window(ComponentMixin, AbstractWindow):
         self._wx_frame.SetSize((w, h))
         dw = w - self._width
         dh = h - self._height
-        self._width = w
-        self._height = h
+        self.modify(width=w)
+        self.modify(height=h)
         self.resized(dw, dh)
 
     def _get_wx_text(self):

@@ -259,6 +259,9 @@ class ListBox(ComponentMixin, AbstractListBox):
             # changes, and (2) reacts to both mouse-down and
             # mouse-up events:
             # self._java_comp.valueChanged = self._java_clicked
+
+            # mlh20011217: Wouldn't it be OK to generate events
+            # on programmatic changes?
             
             # This works, however:
             self._java_comp.setMouseReleased(self._java_clicked)
@@ -301,7 +304,7 @@ class ToggleButtonMixin(ComponentMixin):
         val = self._java_comp.selected
         if val == self.on: # FIXME: this way or == self._on?
             return
-        self.on = val
+        self.modify(on=val)
         send(self, 'click')
 
 class CheckBox(ToggleButtonMixin, AbstractCheckBox):
@@ -315,9 +318,9 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
         if val == self.on: # FIXME: this way or == self._on?
             return
         if self.group is not None:
-	   self.group.value = self.value
+	   self.group.modify(value=self.value)
 	else: # FIXME: is this branch needed?
-          self.on = val
+          self.modify(on=val)
         send(self, 'click')
 
 ################################################################
@@ -351,8 +354,8 @@ class TextField(ComponentMixin, AbstractTextField):
     def _java_enterkey(self, event):
         send(self, 'enterkey')
 
-    def _java_focus_lost(self, event): #FIXME
-        self._text = self._java_comp.text
+    def _java_focus_lost(self, event):
+        self.modify(text=self._java_comp.text)
         
 class ScrollableTextArea(swing.JPanel):
     # Replacement for swing.JTextArea
@@ -414,8 +417,8 @@ class TextArea(ComponentMixin, AbstractTextArea):
         if self._java_comp and hasattr(self._java_comp, '_jtextarea'):
             self._java_comp._jtextarea.focusLost = self._java_focus_lost
 
-    def _java_focus_lost(self, event): # FIXME
-        self._text = self._java_comp.getText()
+    def _java_focus_lost(self, event):
+        self.modify(text=self._java_comp.getText())
 
 ################################################################
 
@@ -467,8 +470,8 @@ class Window(ComponentMixin, AbstractWindow):
         h -= insets.top + insets.bottom
         dw = w - self._width
         dh = h - self._height
-        self._width = w
-        self._height = h
+        self.modify(width=w)
+        self.modify(height=h)
         self.resized(dw, dh)
 
     def _java_close_handler(self, evt):

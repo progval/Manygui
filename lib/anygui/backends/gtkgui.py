@@ -116,7 +116,7 @@ class ToggleButtonMixin(ComponentMixin):
         val = self._gtk_comp.get_active()
         if val == self.on:
             return
-        self.on = val
+        self.modify(on=val)
         #self.do_action()
         send(self, 'click')
 
@@ -160,12 +160,12 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
         val = self._gtk_comp.get_active()
         if val == self.on:
             return
-        self.on = val
+        self.modify(on=val)
         if self.on:
             # XXX: Hack!
             #self.do_action()
             if self.group is not None:
-                self.group.value = self.value
+                self.group.modify(value=self.value)
             send(self, 'click')
 
 ################################################################
@@ -261,7 +261,7 @@ class TextField(ComponentMixin, AbstractTextField):
 
     def _entry_changed(self, *args):
         if not self._ignore_changed:
-            self.text = self._backend_text()
+            self.modify(text=self._backend_text())
 
 class ScrollableTextArea(GtkScrolledWindow):
     def __init__(self, *args, **kw):
@@ -325,7 +325,7 @@ class TextArea(ComponentMixin, AbstractTextArea):
 
     def _text_changed(self, *args):
         if not self._ignore_changed:
-            self.text = self._backend_text()
+            self.modify(text=self._backend_text())
 
 ################################################################
 

@@ -21,7 +21,8 @@ Tentative release date: Mid-December, 2001
   are acceptable to the backend widgets
 
 * All backends should now use modify() rather than
-  setting attributes directly
+  setting attributes directly. (ListBox.selection needs
+  some rewriting here)
 
 * _ensure_events should be called by the backends, and not
   by the front-end
@@ -65,6 +66,10 @@ Tentative release date: February 28th, 2002
 * Add an optional status bar to Window
 
 * Change add() signature?
+
+* Decide whether programmatic changes to widgets (e.g. setting
+  the selection of a ListBox) should generate the same events
+  as when these changes are caused by the user
 
 Longer term goals:
 ------------------

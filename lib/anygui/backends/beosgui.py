@@ -295,7 +295,7 @@ class ToggleButtonMixin(ComponentMixin):
         val = self._get_on()
         if val == self.on:
             return
-        self.on = val
+        self.modify(on=val)
         send(self, 'click')
 
      
@@ -338,7 +338,7 @@ class RadioGroup(ComponentMixin, Attrib, Action):
 
     def __init__(self, items=[], **kw):
         Attrib.__init__(self, **kw)
-        self._items = []
+        self.modify(_items=[])
         self.add(items)
 
     def _get_value(self):
@@ -346,7 +346,7 @@ class RadioGroup(ComponentMixin, Attrib, Action):
 
     def _set_value(self, value):
         if self._value != value:
-            self._value = value
+            self.modify(_value=value)
             for item in self._items:
                 item._update_state()
             self._beos_clicked()
@@ -403,10 +403,11 @@ class TextField(ComponentMixin, AbstractTextField):
     
     #def _ensure_events(self):
     #    ComponentMixin._ensure_events(self)
-        
+
     def _backend_text(self):
         if self._beos_comp:
-            self.text = self._beos_comp.Text()
+            #self.text = self._beos_comp.Text() # mlh20011217
+            return self._beos_comp.Text()
         
     def _backend_selection(self):
         if self._beos_comp:
@@ -430,7 +431,7 @@ class TextField(ComponentMixin, AbstractTextField):
             self._beos_comp.SetEnabled(self._enabled)
     
     def _lost_focus(self):
-        self.text = self._beos_comp.Text()
+        self.modify(text=self._beos_comp.Text())
 
 
 
@@ -489,7 +490,7 @@ class TextArea(ComponentMixin, AbstractTextArea):
             self._beos_sub.MakeEditable(self._editable)
 
     def _lost_focus(self):
-        self.text = self._beos_sub.Text()
+        self.modify(text=self._beos_sub.Text())
     
     def MakeFocus(self, focus=1):
         """Doesn't seem to Draw properly: clicking in another window then

@@ -120,7 +120,8 @@ class ListBox(ComponentMixin, AbstractListBox):
 
 	def _qt_item_select_handler( self, item ):
 		if DEBUG: print 'in _qt_item_select_handler of: ', self._qt_comp
-		send(self,'select',index=self._qt_comp.index(item),text=str(item.text()))
+		#send(self,'select',index=self._qt_comp.index(item),text=str(item.text()))
+		send(self,'select')
 
 
 ################################################################
@@ -164,7 +165,7 @@ class CheckBox(ToggleButtonBase, AbstractCheckBox):
 		val = self._qt_comp.isChecked()
 		if self.on == val:
 			return
-		self.on = val
+		self.modify(on=val)
 		send(self, 'click')
 
 class RadioButton(ToggleButtonBase, AbstractRadioButton):
@@ -176,7 +177,7 @@ class RadioButton(ToggleButtonBase, AbstractRadioButton):
 		if self._on == val:
 			return
 		if self.group is not None:
-			self.group.value = self.value
+			self.group.modify(value=self.value)
 		send(self, 'click')
 
 ################################################################
@@ -240,7 +241,7 @@ class TextField(TextBase):
 
 	def _qt_key_press_handler(self, newText):
 		if DEBUG: print 'in _qt_key_pressed of: ', self._qt_comp
-		self._text = self._backend_text()
+		self.modify(text=self._backend_text())
 		send(self, 'enterkey')
 
 class TextArea(TextBase):
@@ -315,7 +316,7 @@ class TextArea(TextBase):
 
 	def _qt_key_press_handler(self):
 		if DEBUG: print 'in _qt_key_pressed of: ', self._qt_comp
-		self._text = self._backend_text()
+		self.modify(text=self._backend_text())
 		send(self, 'enterkey')
 
 
@@ -384,8 +385,8 @@ class Window(ComponentMixin, AbstractWindow):
 		h = self._qt_comp.height()
 		dw = w - self._width
 		dh = h - self._height
-		self._width = w
-		self._height = h
+		self.modify(width=w)
+		self.modify(height=h)
 		self.resized(dw, dh)
 
 ################################################################
