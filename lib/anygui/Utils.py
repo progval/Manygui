@@ -19,11 +19,15 @@ class WeakCallable:
             return self.meth(*args, **kwds)
 
 class WeakMethod:
-    def __init__(self, obj, func):
+    def __init__(self, func):
+        try:
+            obj, func = func
+        except TypeError:
+            obj, func = None, func
         if obj and hasattr(func, 'im_self'):
             assert obj is func.im_self
         try:
-            self.obj = ref(fn.im_self)
+            self.obj = ref(func.im_self)
             self.meth = func.im_func
         except AttributeError:
             self.obj = None
@@ -44,7 +48,7 @@ class WeakMethod:
     def dead(self):
         return self.obj is not None and self.obj() is None
 
-class HashableRef:
+class HashableWeakRef:
     def __init__(self, obj):
         if obj is None:
             self.ref = None
@@ -54,6 +58,10 @@ class HashableRef:
         if self.ref is None:
             return None
         return self.ref()
+#    def __cmp__(self, other):
+#        if id(self.ref)<id(other_ref): return 1
+#        if id(self.ref)>id(other_ref): return -1
+#        return 0
     def __hash__(self):
         return id(self.ref)
 
