@@ -9,11 +9,8 @@ win = Window(width = 110, height = 210)
 app.add(win)
 newbtn = None
 
-def printit1(event):
-    log('printit1:',newbtn.text)
-
-def printit2(event):
-    log('printit2:',newbtn.text)
+def printit(event):
+    log('printit:',newbtn.text)
 
 def say_hello(event):
     #log("Hello, world!")
@@ -21,8 +18,7 @@ def say_hello(event):
     if newbtn is None:
         newbtn = TextField(opt, y = g_y)
         newbtn.installTextModel(TextModel('new'))
-        link(newbtn, printit1)
-        link(newbtn.text, printit2)
+        link(newbtn.text, printit)
         win.add(newbtn)
     else:
         newbtn.text.append('x')

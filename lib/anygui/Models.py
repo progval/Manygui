@@ -6,9 +6,11 @@ from UserString import UserString
 # FIXME: Fix link(self, sync) to use the caller() function; deal with
 # unlinking problems.
 
+# TODO: Cleanup the use if both names and objects 
+
 class Assignee:
 
-    _locked = 0
+    _notifyLocked = 0
 
     def __init__(self):
         self.names = []
@@ -19,24 +21,36 @@ class Assignee:
         if push is not None:
             self.names.append(name)
             self.objects.append(object)
-            
+            link(object.proxy, self.eventUpdate)
+
+    def eventUpdate(self, event):
+        val = self.getValue()
+        event.source.pull()
+		# only notify if value has changed
+        if val != self.getValue():
+            send(self)
+
     def removed(self, object, name):
         push = getattr(object, 'push', None)
         if push is not None:
             self.objects.remove(object)
             self.names.remove(name)
+            unlink(object.proxy, self.eventUpdate)
 
-    def lockPush(self):
-        self._locked = 1
+    def lockNotify(self):
+        self._notifyLocked = 1
 
-    def unlockPush(self):
-        self._locked = 0
+    def unlockNotify(self):
+        self._notifyLocked = 0
 
-    def send(self, **kwds):
-        if self._locked == 0:
+    def notify(self, **kwds):
+        if not self._notifyLocked:
             for object in self.objects:
-                object.push(names=self.names)
-        send(self, **kwds)
+                nameDict = {}
+                for name in self.names:
+                    nameDict[name] = self
+            object.push(nameDict)
+            send(self, **kwds)
 
 
 class Model(Assignee):
@@ -51,8 +65,8 @@ class BooleanModel(Model):
     _value = 0
 
     def setValue(self, value):
-        self._value = value
-        self.send()
+        self._value = int(value)
+        self.notify()
 
     def getValue(self):
         return self._value
@@ -63,9 +77,10 @@ class BooleanModel(Model):
 
     def __int__(self): return self._value
 
+    def __nonzero__(self): return self._value
+
 
 class ListModel(Model, UserList):
-
 
     def __init__(self, *arg, **kw):
         Model.__init__(self, **kw)
@@ -73,63 +88,63 @@ class ListModel(Model, UserList):
         
     def setValue(self, value):
         self.data[:] = list(value)
-        self.send()
+        self.notify()
 
     def getValue(self):
         return list(self)
 
     def __setitem__(self, i, item):
         UserList.__setitem__(self, i, item)
-        self.send()
+        self.notify()
 
     def __delitem__(self, i):
         UserList.__delitem__(self, i)
-        self.send()
+        self.notify()
 
     def __setslice__(self, i, j, other):
         UserList.__setslice__(self, i, j, other)
-        self.send()
+        self.notify()
         
     def __delslice__(self, i, j):
         UserList.__delslice__(self, i, j)
-        self.send()
+        self.notify()
         
     def __iadd__(self, other):
         UserList.__iadd__(self, other)
-        self.send()
+        self.notify()
         
     def __imul__(self, n):
         UserList.__imul__(self, n)
-        self.send()
+        self.notify()
         
     def append(self, item):
         UserList.append(self, item)
-        self.send()
+        self.notify()
     
     def insert(self, i, item):
         UserList.insert(self, i, item)
-        self.send()
+        self.notify()
         
     def pop(self, i=-1):
         result = UserList.pop(self, i)
-        self.send()
+        self.notify()
         return result
     
     def remove(self, item):
         UserList.remove(self, item)
-        self.send()
+        self.notify()
         
     def reverse(self):
         UserList.reverse(self)
-        self.send()
+        self.notify()
         
     def sort(self, *args):
         UserList.sort(self, *args)
-        self.send()
+        self.notify()
         
     def extend(self, other):
         UserList.extend(self, other)
-        self.send()
+        self.notify()
 
 
 class TextModel(ListModel):

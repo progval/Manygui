@@ -1,36 +1,3 @@
-"""
-skelgui.py is an empty skeleton waiting for you to implement an
-Anygui back-end.
-
-You should probably read IRFC14 (nondist/irfc/irfc-0014.txt
-in the CVS repository) before trying to implement an
-Anygui backend. Specifically, you should understand the
-terms "proxy", "wrapper", and "(native) widget" as
-they're used in Anygui. The classes implemented in
-a backend (and the classes in this file) are "wrappers"
-around "native widgets".
-
-To use this skeleton, simply copy it to a file in the
-anygui/lib/backends directory called <yourbackend>gui.py,
-and implement all of the methods and event handlers
-described below. Depending on your particular backend, there
-may be some opportunities to combine methods into mixin classes.
-
-The fastest way to resolve any questions or ambiguities
-about this file, is to look at one of the existing
-back-end implementations in the anygui/lib/anygui/backends
-directory. Failing that, post your question to
-the Anygui development list (devel@anygui.org).
-
-If you are implementing an Anygui backend, you should
-be subscribed to the development list. See
-
-http://lists.sourceforge.net/lists/listinfo/anygui-devel
-
-for subscription instructions.
-
-Comments and criticism to jknapka@earthlink.net (Joe Knapka).
-"""
 try:
     # Import Anygui infrastructure. You shouldn't have to change these.
     from anygui.backends import *
@@ -69,31 +36,9 @@ __all__ = '''
 '''.split()
 
 class ComponentWrapper(AbstractWrapper):
-    """
-    The ComponentWrapper class should abstract away all behavior
-    that (nearly) all backend widgets perform similarly. Normally,
-    this will include geometry and visibility management, and in some
-    cases widget creation can be handled here as well (see wxgui.py
-    for example).
-    """
 
     def __init__(self, *args, **kwds):
-        """
-        Common widget wrapper initialization code. The main thing that
-        we would normally do here is set any backend-specific
-        attribute constraints.
-        
-        Whenever the application code alters a widget proxy, the front end
-        will "push" any changed widget attributes into the backend by
-        calling the wrapper.set<Attribute>(self,new_value) method for any
-        attribute that changes. The setContraints() method allows the
-        backend to specify the order in which the set<Attribute>()
-        method calls are made, by specifying the order in which attribute
-        names are set. The constraints set here are just examples.
-        However, it is almost certainly a good idea to ensure that
-        'container' is set before any other attribute, so at minimum
-        you should call "self.setConstraints('container')" here.
-        """
+
         AbstractWrapper.__init__(self, *args, **kwds)
 
         # 'container' before everything, then geometry.
@@ -106,100 +51,39 @@ class ComponentWrapper(AbstractWrapper):
         self.addConstraint('geometry', 'visible')
 
     def widgetFactory(self,*args,**kws):
-        """ Create and return the backend widget for this wrapper. For
-        example, mswgui.py uses the win32gui.CreateWindowEx() call
-        here to create a Windows native widget. The value returned
-        will be immediately assigned to self.widget by the Anygui
-        framework; henceforth you should refer to self.widget. """
         raise NotImplementedError, 'should be implemented by subclasses'
 
     def enterMainLoop(self): # ...
-        """ enterMainLoop() is called when the application event loop is
-        started for the first time. """
         if not self.widget: return
         self.widget.show()
 
     def destroy(self):
-        """
-        destroy() is called when the application needs to destroy the
-        native widget. You can also call it within the wrapper code if
-        you need to destroy your native widget for some reason. You
-        should set self.widget to DummyWidget()
-        here, after destroying the native widget.
-        """
         if self.widget:
             self.widget.destroy()
         self.widget = None
 
-    # From here on, all methods in this class are getters and setters.
-    # Setters must be implemented; they are called automatically in
-    # response to application-code manipulation of the associated
-    # proxy object, and perform the required magic on self.widget
-    # to implement the change.
-    #
-    # Getters need not be implemented unless the backend requires
-    # special handling, or if the attribute in question can be changed
-    # by user actions as well as by application code. Getters are
-    # called automatically during proxy attribute access, if they
-    # exist; otherwise the last value set in the proxy is returned.
-    # This file provides empty getter definitions for those attributes
-    # that will nearly always require special handling for get
-    # operations.
-    #
-    # The setters and getters here are a typical example of
-    # attribute handling that's common to all of a backend's
-    # widgets. For example, getGeometry() and setGeometry() work
-    # the same for any backend widget, thus they're included
-    # here in the common wrapper base class.
-    #
-    # Note that you must implement all the setter and getter
-    # methods in this file in order for your backend to work
-    # properly!
-
+    # getters and setters
     def setContainer(self,container):
-        """
-        setContainer() is called whenever the proxy's container (the
-        Frame or top-level Window) in which the widget will appear is
-        set. It's called implicitly when a widget is added to a
-        container via the container.add(widget) method.
-
-        In most backends, you'll call self.create() here in order to
-        actually create the backend widget. create() is a template
-        method that calls self.widgetFactory() to create the widget,
-        and then performs some bookkeeping for the wrapper.
-
-        When the widget is removed from its container, setContainer()
-        will be called with container==None; you must handle that case
-        correctly, whatever that means for your backend.
-        """
         if container is None:
-            # Handle "removed from container" case.
             self.destroy()
             return
-        parent = container
-        self.create(parent)
-        self.proxy.push(blocked=['container'])
+        parent = container.wrapper.widget
+        if parent is None:
+            self.create(parent)
+            self.proxy.push(blocked=['container'])
+            self.setupChildWidgets()
 
     def setGeometry(self,x,y,width,height):
-        """ Set the native widget's geometry. Note that we call
-        self.noWidget() here to see if the wrapper has a native widget
-        to manage. You should probably use this idiom at the start of
-        all setter and getter methods, unless you have a very good
-        reason not to. """
         if not self.widget: return
         self.widget.set_uposition(int(x), int(y))
         self.widget.set_usize(int(width), int(height))
 
     def getGeometry(self):
-        """ Get the native widget's geometry as an (x,y,w,h) tuple.
-        Since the geometry can be changed by the user dragging the
-        window frame, you must implement this method. """
         if not self.widget: return
         return self.widget.get_uposition(int(x), int(y)) + \
                self.widget.get_usize(int(width), int(height))
 
     def setVisible(self,visible):
-        """ Set/get the native widget's visibility. """
         if not self.widget: return
         if visible:
             self.widget.show()
@@ -207,23 +91,15 @@ class ComponentWrapper(AbstractWrapper):
             self.widget.hide()
 
     def setEnabled(self,enabled):
-        """ Set/get the native widget's enabled/disabled state. """
         if not self.widget: return
         self.widget.set_sensitive(int(enabled))
 
     def setText(self,text):
-        """ Set/get the text associated with the widget. This might be
-        window title, frame caption, label text, entry field text,
-        or whatever.
-        """
         if not self.widget: return
         raise NotImplementedError, 'should be implemented by subclasses'
 
 class LabelWrapper(ComponentWrapper):
-    """
-    Wraps a backend "label" widget - static text.
-    You may need to implement setText() here.
-    """
+
     def widgetFactory(self, *args, **kws):
         print "In LabelWrapper.widgetFactory()"
         return GtkLabel(*args, **kws)
@@ -244,11 +120,7 @@ class ScrollableListBox(GtkScrolledWindow):
         self.add_with_viewport(self._listbox)
 
 class ListBoxWrapper(ComponentWrapper):
-    """
-    Wraps a backend listbox.
 
-    At the moment, Anygui supports only single-select mode.
-    """
     connected = 0
 
     def widgetFactory(self, *args, **kws):
@@ -269,7 +141,7 @@ class ListBoxWrapper(ComponentWrapper):
         Return ths listbox contents, in order, as a list of strings.
         """
         if not self.widget: return
-        return self.widget._listbox.rows
+        return list(self.widget._listbox.rows)
 
     def setSelection(self,selection):
         """
@@ -287,29 +159,12 @@ class ListBoxWrapper(ComponentWrapper):
         return int(self.widget._listbox.selection[0])
 
     def widgetSetUp(self):
-        """
-        widgetSetUp() is called by the Anygui framework immediately after
-        the native widget has been created and assigned to self.widget.
-        The most common use of widgetSetUp() is to register any event
-        handlers necessary to deal with user actions.
-
-        The ListBox widget requires that an Anygui 'select' event be
-        fired whenever the user selects an item of the listbox.
-        self._select() sends the event, so here you should associate
-        the back-end's selection event with the self._select method.
-        """
+        """ Connect ListBox events """
         if not self.connected:
             self.widget._listbox.connect("select_row", self._select)
             self.connected = 1
 
     def _select(self,*args):
-        """
-        Send an Anygui 'select' event when the user clicks or otherwise
-        selects a listbox item. Note that the source of the event is
-        self.proxy, not self; that's because application code only
-        knows about proxies, not wrappers, so the source of the Anygui
-        event must be a proxy.
-        """
         send(self.proxy,'select')
 
 #class CanvasWrapper(ComponentWrapper):
@@ -336,6 +191,7 @@ class ButtonWrapper(ComponentWrapper):
             self.connected = 1
 
     def setText(self, text):
+        if not self.widget: return
         self.widget.children()[0].set_text(str(text))
 
     def _click(self,*args,**kws):
@@ -343,15 +199,6 @@ class ButtonWrapper(ComponentWrapper):
 
 
 class ToggleButtonMixin(ButtonWrapper):
-    """
-    Checkboxes and radio buttons often have common behavior that can
-    be abstracted away; on the other hand, sometimes they don't.
-    Consider this an example only.
-
-    They also should generate 'click' events, so we'll just inherit
-    ButtonWrapper here to get the event setup code. Your backend
-    may not permit this, however; do what needs to be done.
-    """
 
     def getOn(self):
         """ Return the button's state: 1 for checked, 0 for not. """
@@ -419,11 +266,6 @@ class RadioButtonWrapper(ToggleButtonMixin):
         send(self.proxy,'click')
 
 class TextControlMixin:
-    """
-    Single-line entry fields and multiline text controls usually
-    have a lot of common behavior that can be abstracted away. Do
-    that here.
-    """
 
     def setText(self,text):
         """ Set/get the text associated with the widget. This might be

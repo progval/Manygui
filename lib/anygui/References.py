@@ -100,7 +100,11 @@ class CallableReference(Hashable):
     def __init__(self, func, weak):
         obj, func = unwrap(func)
 
-        self.hash = hash((obj, func))
+        # Need to catch cases where obj is not hashable.
+        try:
+            self.hash = hash((obj, func))
+        except (TypeError):
+            self.hash = hash((None ,func))
 
         if obj is not None:
             obj = ref(obj, weak, _plain=1)

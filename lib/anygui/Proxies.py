@@ -70,9 +70,9 @@ class Proxy(Attrib):
                 model = self._installedModels[prop]
                 # locked update of model, this keeps model
                 # from calling proxy.push
-                model.lockPush()
+                model.lockNotify()
                 model.setValue(state[prop])
-                model.unlockPush()
+                model.unlockNotify()
                 state[prop] = model
             except:
                 pass
@@ -113,9 +113,7 @@ class Proxy(Attrib):
                 # if state[prop] is not the model, this means that rawSet
                 # has changed the value, thus we need to sync model
                 if state[prop] is not model:
-                    model.lockPush()
                     model.setValue(state[prop])
-                    model.unlockPush()
                 state[prop] = model
             except:
                 pass
