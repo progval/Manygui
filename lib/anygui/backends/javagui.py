@@ -326,7 +326,8 @@ class TextField(ComponentMixin, AbstractTextField):
         self.do_action()
 
     def _java_focus_lost(self, event):
-        self.model.value = self._java_comp.text # FIXME: Will cause self-update
+        if self.model.value != self._java_comp.text:
+            self.model.value = self._java_comp.text # FIXME: Will cause self-update
 
 class ScrollableTextArea(swing.JPanel):
     # Replacement for swing.JTextArea
