@@ -1,0 +1,12 @@
+<!ELEMENT document       (title, author?, date?, (para|codelisting)*, section*)>
+<!ELEMENT section        (title, (para|codelisting)*, section*)>
+<!ELEMENT title          (#PCDATA|emphasis|name|code|url|strong)*>
+<!ELEMENT para           (#PCDATA|emphasis|name|code|url|strong|copyright)*>
+<!ELEMENT emphasis       (#PCDATA|emphasis|name|code|url|strong)*>
+<!ELEMENT strong         (#PCDATA|emphasis|name|code|url|strong)*>
+<!ELEMENT codelisting    (line)*>
+<!ELEMENT code           (#PCDATA)>
+<!ELEMENT line           (#PCDATA|url)*>
+<!ELEMENT name           (#PCDATA)>
+<!ELEMENT url            (#PCDATA)>
+<!ELEMENT copyright      EMPTY>

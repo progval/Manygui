@@ -1,0 +1,733 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE document SYSTEM "minimal.dtd" [
+<!ENTITY shortversion            "0.1">
+<!ENTITY longversion             "0.1a1">
+<!ENTITY copy                    "<copyright/>">
+<!ENTITY copyrightholders SYSTEM "copyrightholders.xml">
+]>
+
+<document version="&shortversion;">
+
+  <title>Anygui : Generic GUI for Python</title>
+
+  <author>Magnus Lie Hetland</author>
+
+  <date>September 4, 2001</date>
+
+  <section>
+    <title>Introduction</title>
+
+    <para>The <name>Python</name> standard library currently does not
+    contain any platform-independent GUI packages. It is the goal of
+    the <name>Anygui</name> project to change this situation. There
+    are many such packages available, but none has been defined as
+    <emphasis>standard</emphasis>, so when writing GUI programs for
+    <name>Python</name>, you cannot assume that your user has the
+    right package installed.</para>
+
+    <para>The problem is that declaring a GUI package as standard
+    would be quite controversial. There are some packages that are
+    quite commonly available, such as <name>Tkinter</name>; but it
+    would not be practical to require all installations to include it,
+    nor would it be desirable to require all <name>Python</name> GUI
+    programs to use it, since there are many programmers who prefer
+    other packages.</para>
+
+    <para><name>Anygui</name> tries to solve this problem in a manner
+    similar to the standard <code>anydbm</code> package. There is no
+    need to choose <emphasis>one</emphasis> package at the expense of
+    all others. Instead, <name>Anygui</name> gives generic access to
+    several popular packages through a simple API, which makes it
+    possible to write GUI applications that work with all these
+    packages. Thus, one gets a platform-independent GUI module which
+    is written entirely in <name>Python</name>.</para>
+
+
+    <section>
+      <title>Design Goals</title>
+
+      <para><strong>A</strong>. <name>Anygui</name> should be an easy
+      to use GUI package which may be used to create simple graphical
+      programs, or which may serve as the basis for more complex
+      application frameworks.</para>
+
+      <para><strong>B</strong>. <name>Anygui</name> should be a pure
+      <name>Python</name> package which serves as a front-end for as
+      many as possible of the GUI packages available for
+      <name>Python</name>, in a transparent manner.</para>
+
+      <para><strong>C</strong>. <name>Anygui</name> should include
+      functionality needed to perform most GUI tasks, but should
+      remain as simple and basic as possible.</para>
+
+    </section>
+
+  </section>
+
+  <section>
+    <title>Installation</title>
+    
+    <para>The <name>Anygui</name> package comes in the form of a
+    <code>gzip</code> compressed <code>tar</code> archive. To install
+    it you will first have to uncompress the archive. On
+    <name>Windows</name> this can be done with <name>WinZip</name>. On
+    the Mac, you can use <name>StuffIt Expander</name>. In
+    <name>Unix</name>, first move to a directory where you'd like to
+    put <name>Anygui</name>, and then do something like the
+    following:</para>
+
+    <codelisting>
+      <line>foo:~/python$ tar xzvf anygui-&longversion;.tar.gz</line>
+    </codelisting>
+
+    <para>If your version of tar doesn't support the <code>z</code>
+    switch, you can do something like this:</para>
+
+    <codelisting>
+      <line>foo:~/python$ zcat anygui-&longversion;.tar.gz | tar xvf</line>
+    </codelisting>
+
+    <para>Another possibility is:</para>
+
+    <codelisting>
+      <line>foo:~/python$ gunzip anygui-&longversion;.tar.gz</line>
+    </codelisting>
+
+    <para>No matter which version you choose, you should end up with a
+    directory named <code>anygui-&longversion;</code>.</para>
+
+    <section>
+      <title>Running setup.py</title>
+      
+      <para>The simple way of installing <name>Anygui</name> is to use
+      the installation script that's included in the
+      distribution. This requires <name>Distutils</name>
+      (<url>http://www.python.org/sigs/distutils-sig</url>), which is
+      included in <name>Python</name> distributions from version
+      2.0. To install the <name>Anygui</name> package in the default
+      location, simply run the setup script with the
+      <code>install</code> command:</para>
+
+      <codelisting>
+	<line>foo:~$ python setup.py install</line>
+      </codelisting>
+
+      <para>This will install <name>Anygui</name> in your standard
+      <name>Python</name> directory structure. If you haven't
+      installed <name>Python</name> yourself, you'll either have to
+      have root access, or install it somewhere else. You can give a
+      prefix with the <code>--prefix</code> option:</para>
+
+      <codelisting>
+	<line>foo:~$ python setup.py install --prefix=${HOME}/python</line>
+      </codelisting>
+    </section>
+
+    <section>
+      <title>Doing it Manually</title>
+
+      <para>Since <name>Anygui</name> consists of only
+      <name>Python</name> code, nothing needs to be compiled. And the
+      only thing needed to install <name>Python</name> code is to
+      ensure that the packages and modules are found by your
+      <name>Python</name> interpreter. This may be as simple as
+      including the <code>lib</code> directory of the
+      <name>Anygui</name> distribution in your <code>PYTHONPATH</code>
+      environment variable. In <code>bash</code>
+      (<url>http://www.gnu.org/manual/bash/</url>), you could do
+      something like this:</para>
+
+      <codelisting>
+	<line>foo:~$ export PYTHONPATH=$PYTHONPATH:/path/to/anygui/lib</line>
+      </codelisting>
+
+      <para>To make this permanent, you should put it in your
+      <code>.bash_profile</code> file, or something equivalent. If you
+      don't want to mess around with this, and already have a standard
+      directory where you place your <name>Python</name> modules, you
+      can simply copy (or move) the <code>lib/anygui</code>
+      there, or possibly place a symlink in that directory to.</para>
+
+    </section>
+
+    <!--
+    <section>
+      <title>Distribution Layout</title>
+
+      <para>[README, MAINTAINERS, LICENSE, etc.]</para>
+    </section>
+    -->
+
+    <section>
+      <title>Making Sure You Have a GUI Backend</title>
+
+      <para>Once you have <name>Anygui</name> installed, you'll want
+      to make sure you have a usable GUI backend. This is easy to
+      check: Simply start an interactive <name>Python</name>
+      interpreter and try to execute the following:</para>
+
+      <codelisting>
+	<line>>>> from anygui import Application</line>
+	<line>>>> Application()</line>
+      </codelisting>
+
+      <para>If this works, you should be all set for making GUI
+      programs with <name>Anygui</name>. If it raises an exception,
+      however, you will have to install a GUI
+      package. <name>Anygui</name> currently supports the following
+      packages:</para>
+
+      <codelisting>
+	<line>Tkinter                      <url>http://www.python.org/topics/tkinter</url></line>
+	<line>wxPython                     <url>http://www.wxpython.org</url></line>
+	<line>Jython (with Java Swing)     <url>http://www.jython.org</url></line>
+	<line>Bethon                       <url>http://www.bebits.com/app/1564</url></line>
+      </codelisting>
+
+      <para>In the future <name>Anygui</name> should hopefully work in
+      almost any <name>Python</name> installation, even those which do
+      not have a specific GUI package installed, either by using
+      Dynamic HTML together with the standard <code>webbrowser</code>
+      module, or by providing some simple text interface which is
+      logically equivalent to the GUI version.</para>
+
+    </section>
+
+  </section>
+
+  <section>
+    <title>Using Anygui</title>
+
+    <para><emphasis>Note</emphasis>: For some examples of working
+    <name>Anygui</name> code, see the <code>test</code> directory of
+    the distribution.</para>
+
+    <para>Using <name>Anygui</name> is simple; it's simply a matter of
+    importing the widgets (GUI elements) you need from the
+    <code>anygui</code> module, e.g.:</para>
+
+    <codelisting>
+      <line>from anygui import *</line>
+    </codelisting>
+
+    <para>After doing this you must first create an
+    <code>Application</code> object; then you may instantiate the
+    widgets and combine them in various ways. When you're satisfied,
+    you call the <code>run</code> method of your
+    <code>Application</code> instance.</para>
+
+    <codelisting>
+      <line>app = Application()</line>
+      <line># Make widgets here</line>
+      <line>app.run()</line>
+    </codelisting>
+
+    <section>
+      <title>Creating a Window</title>
+
+      <para>One of the most important classes in <name>Anygui</name>
+	is <code>Window</code>. Without a <code>Window</code> you have
+	no GUI; all the other widgets are added to
+	<code>Window</code>s. Knowing this, we may suspect that the
+	following is a minimal <name>Anygui</name> program (and we
+	would be right):</para>
+
+      <codelisting>
+	<line>from anygui import *</line>
+	<line>app = Application()</line>
+	<line>win = Window()</line>
+	<line>app.run()</line>
+      </codelisting>
+
+      <para>The problem with this code is that the window would be
+      invisible. At the time of creation, windows are hidden, so that
+      we may add widgets to them etc. before showing them to the
+      user. To show a window we simply call its
+      <code>show</code> method or set its
+      <code>visible</code> property to true
+      (e.g. <code>1</code>). <code>w.show()</code> is
+      actually just a shortcut for <code>w.visible = 1</code>.
+      (Similarly, <code>w.visible = 0</code> can be written
+      <code>w.hide()</code>.) So, our program becomes:</para>
+
+      <codelisting>
+	<line>from anygui import *</line>
+	<line>app = Application()</line>
+	<line>win = Window()</line>
+	<line>win.show()</line>
+	<line>app.run()</line>
+      </codelisting>
+
+      <para>If you don't mind having your window popping up when it's
+      created (this can be problematic if you create your window after
+      starting your application, because it may be visible before your
+      finished adding other widgets to it), you can simply specify
+      that it should be visible to begin with:</para>
+
+      <codelisting>
+	<line>from anygui import *</line>
+	<line>app = Application()</line>
+	<line>win = Window(visible=1)</line>
+	<line>app.run()</line>
+      </codelisting>
+
+      <para>This example gives us a rather uninteresting default
+      window. You may customise it by setting some of its properties,
+      like <code>title</code> and <code>size</code>
+      (<code>import</code> and <code>show</code> removed
+      in the interest of brevity):</para>
+
+      <codelisting>
+	<line>w = Window(visible=1)</line>
+	<line>w.title = 'Hello, world!'</line>
+	<line>w.size = (200, 100)</line>
+      </codelisting>
+      
+      <para>If we want to, we can supply all the widget properties as
+      keyword arguments to the constructor:</para>
+
+      <codelisting>
+	<line>w = Window(title='Hello, world!', size=(200,100), visible=1)</line>
+      </codelisting>
+      
+    </section>
+
+    <section>
+      <title>Baby Steps: Adding a Label</title>
+
+      <para>Simple (multiline) labels are created with the
+      <code>Label</code> class:</para>
+
+      <codelisting>
+	<line>lab = Label(text='Hello, again!', position=(10,10))</line>
+      </codelisting>
+
+      <para>Here we have specified a position just for fun; we don't
+      really have to. If we add the label to our window, we'll see
+      that it's placed with its left topmost corner at the point
+      <code>(10,10)</code>:</para>
+
+      <codelisting>
+	<line>w.add(lab)</line>
+      </codelisting>
+
+    </section>
+
+    <section>
+      <title>Placing Widgets in a Frame</title>
+
+      <para>We don't have to specify the widget's position like we did
+      with our label. Instead, we can use the <code>place</code>
+      method of <code>Window</code>. (Actually, it's a method of a
+      more generic class, <code>Frame</code>, which isn't currently
+      available to the user of <name>Anygui</name>, but will be in
+      future releases.)</para>
+
+      <para>The <code>place</code> method allows us to specify several
+      constraints (in the form of keyword arguments) that will affect
+      where the widget is placed. Fore detailed information about
+      this, see the API reference. Here are some examples, using only
+      <code>Label</code>s:</para>
+
+      <codelisting>
+	<line>win.place(lab, position=(10,10))</line>
+	<line>win.place(lab, left=10, top=10)</line>
+	<line>win.place(lab, top=10, right=10)</line>
+	<line>win.place(lab, position=(10,10), right=10, hstretch=1)</line>
+      </codelisting>
+
+      <para>In the last example <code>hstretch</code> is a Boolean
+      value indicating whether the widget should be stretched
+      horizontally (to maintain the other specifications) when the
+      containing <code>Frame</code> is resized. (The vertical version
+      is <code>vstretch</code>.)</para>
+
+      <para><emphasis>Note</emphasis>: <code>add</code> and
+      <code>place</code> may be merged in a future release, making
+      <code>add</code> unavailable.</para>
+
+      <section>
+	<title>Placing More Than One Widget</title>
+
+	<para>The <code>place</code> method can also position a
+	<emphasis>list</emphasis> of widgets. The first widget will be
+	placed as before, while the subsequent ones will be placed
+	either to the right or to the left (according to the
+	<code>direction</code> argument), at a given distance
+	(<code>space</code>):</para>
+
+	<codelisting>
+	  <line>win.place([lab1, lab2], position=(10,10),</line>
+	  <line>          direction='right', space=10)</line>
+	</codelisting>
+
+	<para><emphasis>Note</emphasis>: When using
+        <code>direction</code> and <code>space</code> like this, you
+        should explicitly set the size of your widgets, otherwise they
+        will most likely overlap. This will hopefully be fixed (with a
+        decent system of defaults) in future releases.</para>
+
+      </section>
+
+    </section>
+
+    <section>
+      <title>Adding a Button</title>
+
+      <para><code>Button</code>s are quite similar to
+      <code>Label</code>s, except that they may perform an
+      <emphasis>action</emphasis> when clicked. (They also look
+      different, of course.)</para>
+
+      <codelisting>
+	<line>def callback(): print 'Hello, world!'</line>
+	<line>btn = Button(text='Press me', action=callback)</line>
+      </codelisting>
+
+      <para>When this button is pressed, it will execute the function
+      stored in its <code>action</code> property (if there is
+      one).</para>
+
+      <para><emphasis>Note</emphasis>: This system of
+      <emphasis>callbacks</emphasis> in the various widgets is all the
+      event handling which is available in the current version of
+      <name>Anygui</name> (&longversion;). In future releases a more
+      thorough system will be implemented.</para>
+
+    </section>
+
+    <section>
+      <title>About Models and Views</title>
+
+      <para>In future releases, the <name>Anygui</name> widgets will
+      be <emphasis>Views</emphasis>, connected to one or more
+      <emphasis>Models</emphasis>.  When a model changes, the view
+      will be notified. Thus, the widgets themselves will not store
+      the data of the model directly (such as the text of a
+      <code>TextField</code> or the items of a <code>ListBox</code>),
+      only information related to that specific view, such as the
+      current selection.</para>
+
+      <para>Since this system is under development, the descriptions
+      of <code>CheckBox</code>, <code>RadioButton</code>,
+      <code>ListBox</code>, <code>TextField</code>, and
+      <code>TextArea</code> below will probably change soon.</para>
+
+    </section>
+
+    <section>
+      <title>Using CheckBoxes</title>
+
+      <para>A <code>CheckBox</code> is a <emphasis>toggle
+      button</emphasis>, a button which can be in one of two states,
+      "on" or "off". Except for that, it works more or less like any
+      other button in that you can place it, set its text, and
+      associate a callback with it.</para>
+
+      <para>Whether a <code>CheckBox</code> is currently on or off is
+      indicated by its boolean <code>on</code> property, which may
+      also be set to change the <code>CheckBox</code> state.</para>
+
+    </section>
+
+    <section>
+      <title>RadioButtons and RadioGroups</title>
+
+      <para><code>RadioButton</code>s are toggle buttons, just like
+      <code>CheckBox</code>es. The main differences are that they look
+      slightly different, and that they may belong to a
+      <code>RadioGroup</code>.</para>
+
+      <para>A <code>RadioGroup</code> is a set of
+      <code>RadioButton</code>s where only <emphasis>one</emphasis>
+      <code>RadioButton</code> is permitted to be "on" at one
+      time. Thus, when one of the buttons in the group is turned on,
+      the others are automatically turned off. This can be useful for
+      selecting among different alternatives, for instance.</para>
+
+      <para><code>RadioButton</code>s are added to a
+      <code>RadioGroup</code> by setting their <code>group</code>
+      property:</para>
+
+      <codelisting>
+	<line>radiobutton.group = radiogroup</line>
+      </codelisting>
+
+      <para>This may also be done when constructing the button:</para>
+
+      <codelisting>
+	<line>grp = RadioGroup()</line>
+	<line>rbn = RadioButton(group=grp)</line>
+      </codelisting>
+
+    </section>
+
+    <section>
+      <title>ListBox</title>
+
+      <para>A <code>ListBox</code> is a vertical list of items that
+      can be selected, either by clicking on them, or by moving the
+      selection up and down with the arrow keys. (For the arrow keys
+      to work, you must make sure that the <code>ListBox</code> has
+      keyboard focus. In some backends this requires using the
+      <code>tab</code> key.)</para>
+
+      <para><emphasis>Note</emphasis>: When using <name>Anygui</name>
+      with <name>Tkinter</name>, using the arrow keys won't change the
+      selection, only which item is underlined. You'll have to use the
+      arrow keys until the item you want to select is underlined; then
+      select it by pressing the space bar.</para>
+
+      <para>A <code>ListBox</code>'s items are set by assigning a
+      sequence of objects to its <code>items</code> property. (This
+      sequence will automatically be turned into a tuple.) The
+      sequence can contain any objects, and the text displayed in the
+      widget will be the result of applying the built-in
+      <name>Python</name> function <code>str</code> to each
+      object.</para>
+
+      <codelisting>
+	<line>lbx = ListBox()</line>
+	<line>lbx.items = 'This is a test'.split()</line>
+      </codelisting>
+
+      <para>The currently selected item can be queried or set through
+      the <code>selection</code> property (an integer index, counting
+      from zero). Also, when an item is selected, the
+      <code>ListBox</code>'s <code>action</code> callback is activated
+      (if present).</para>
+
+    </section>
+
+    <section>
+      <title>TextField and TextArea</title>
+
+      <para><name>Anygui</name>'s two text widgets,
+      <code>TextField</code> and <code>TextArea</code> are quite
+      similar. The difference between them is that
+      <code>TextField</code> permits neither newlines or tab
+      characters to be typed, while <code>TextArea</code> does. Typing
+      a tab in a <code>TextField</code> will simply move the focus to
+      another widget, while pressing the enter key will activate the
+      <code>TextField</code>'s <code>action</code> callback (if
+      present).</para>
+
+      <para>The text in a text component is queried or set through the
+      <code>text</code> property (a string), and the current selection
+      may be queried or set through the <code>selection</code>
+      property (a tuple of two integer indices).</para>
+
+    </section>
+
+  </section>
+
+  <section>
+    <title>API Reference</title>
+
+    <para>Under construction.</para>
+
+    <!--
+
+    <section>
+      <title>Observable</title>
+    </section>
+
+    <section>
+      <title>Common Widget Behaviour and Properties</title>
+
+      <section>
+	<title>Frames</title>
+
+	<para><code>left</code>, <code>right</code>, <code>top</code>,
+	and <code>bottom</code>: These parameters specify the
+	positioning of the edges of a component. If they are set to
+	<code>None</code>, the widgets current position and size will
+	be used to determine where the edge is placed. If a
+	<emphasis>distance</emphasis> is given, the edge will be
+	positioned at the specified distance from the corresponding
+	edge of the containing <code>Frame</code>. If another widget
+	is supplied, the edge is aligned with the opposite edge of
+	that widget. If a tuple (<emphasis>component</emphasis>,
+	<emphasis>distance</emphasis>) is given, the edge is
+	positioned at the specified distance from the opposite edge of
+	the specified component.</para>
+
+      </section>
+      
+    </section>
+
+    <section>
+      <title>Global Functions and Variables</title>
+
+      <section>
+	<title>wishlist</title>
+	
+	<para>The module variable <code>wishlist</code> determines the
+	order in which the backends are tried; the first one that
+	works will be used by the application. The default order is
+	[...]. If you have a program where you prefer <code>tk</code>,
+	or, in a pinch <code>wx</code>, you can tell
+	<name>Anygui</name> like this:</para>
+
+	<codelisting>
+	  <line>import anygui; anygui.wishlist = ['tk', 'wx']</line>
+	  <line># The rest of the program goes here</line>
+	</codelisting>
+
+	<para>If neither <code>tk</code> nor <code>wx</code> is
+        available, <name>Anygui</name> will go on to search the other
+        available backends, in their default order.</para>
+	
+	<para>An alternative to putting the wishlist in your program
+        is to use the environment variable
+        <code>ANYGUI_WISHLIST</code>, which will override
+        <code>anygui.wishlist</code>, e.g:</para>
+
+	<codelisting>
+	  <line>foo:~$ ANYGUI_WISHLIST="tk wx java mac" python someprogram.py</line>
+	</codelisting>
+
+	<para>Another environment variable that may be useful if you
+	want to know the reason why a certain backend isn't used is
+	<code>ANYGUI_DEBUG</code> if you set this to anythong
+	<emphasis>other</emphasis> than zero or an empty string, the
+	exceptions that occur when <name>Anygui</name> try to import
+	the non-functioning backends will be printed out. For
+	instance:</para>
+
+	<codelisting>
+	  <line>foo:~$ ANYGUI_DEBUG=1 python someprogram.py</line>
+	</codelisting>
+
+	<para>To set these environment variables so they work with
+	<code>jython</code>, you'll have to use the <code>-D</code>
+	switch:</para>
+
+	<codelisting>
+	  <line>foo:~$ jython -DANYGUI_DEBUG=1 someprogram.py</line>
+	</codelisting>
+	
+      </section>
+
+      <section>
+	<title>application</title>
+	
+	<para>When an <code>Application</code> is instantiated, it is
+	automatically set as the current application, overwriting any
+	previous ones. If you ever need to get a hold of this current
+	application object, you may do so by using the
+	<code>application</code> function. Calling
+	<code>application</code> when no <code>Application</code>
+	object has been instantiated will raise an exception.</para>
+
+      </section>
+
+    </section>
+
+    <section>
+      <title>Application</title>
+    </section>
+
+    <section>
+      <title>Button</title>
+    </section>
+
+    <section>
+      <title>CheckBox</title>
+    </section>
+
+    <section>
+      <title>Label</title>
+    </section>
+
+    <section>
+      <title>ListBox</title>
+    </section>
+
+    <section>
+      <title>RadioButton</title>
+    </section>
+
+    <section>
+      <title>RadioGroup</title>
+    </section>
+
+    <section>
+      <title>TextArea</title>
+    </section>
+
+    <section>
+      <title>TextField</title>
+    </section>
+
+    <section>
+      <title>Window</title>
+    </section>
+
+    -->
+    
+  </section>
+
+  <section>
+    <title>Known Problems</title>
+
+    <para>For an overview of known bugs in the current release, see
+    the file <code>KNOWN_BUGS</code> found in the distribution.</para>
+
+  </section>
+
+  <section>
+    <title>Plans for Future Releases</title>
+
+    <para>For an overview of future plans, see the <code>TODO</code>
+    file found in the distribution.</para>
+
+  </section>
+
+  <section>
+    <title>Contributing</title>
+
+    <para>If you want to contribute to the <name>Anygui</name>
+    project, we could certainly use your help. First of all, you
+    should visit the <name>Anygui</name> web site at
+    <url>http://anygui.sf.net</url>, and subscribe to the developer's
+    mailing list (<code>anygui-devel@lists.sf.net</code>) and try to
+    familiarise yourself with how the package works behind the
+    scenes. Then, you may either help develop the currently supported
+    GUI packages, or you may start writing a backend of your
+    own. Several backend targets may be found at
+    <url>http://starbase.neosoft.com/~claird/comp.lang.python/python_GUI.html</url>.
+    </para>
+
+  </section>
+
+  <section>
+    <title>Anygui License</title>
+
+    <para>Copyright &copy; 2001 &copyrightholders;.</para>
+
+    <para>Permission is hereby granted, free of charge, to any person
+    obtaining a copy of this software and associated documentation
+    files (the "Software"), to deal in the Software without
+    restriction, including without limitation the rights to use, copy,
+    modify, merge, publish, distribute, sublicense, and/or sell copies
+    of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:</para>
+
+    <para>The above copyright notice and this permission notice shall
+    be included in all copies or substantial portions of the
+    Software.</para>
+
+    <para>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+    KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+    WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+    AND NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+    HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.</para>
+
+  </section>
+
+</document>
