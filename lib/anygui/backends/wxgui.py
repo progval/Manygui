@@ -122,7 +122,7 @@ class ToggleButtonMixin(ComponentMixin):
 
     def _ensure_state(self):
         if self._wx_comp is not None:
-            self._wx_comp.SetValue(int(self._on)) # FIXME: Does this generate an event?
+            self._wx_comp.SetValue(int(self._on))
 
     def _get_wx_text(self):
         # return the text required for creation

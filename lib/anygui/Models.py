@@ -49,6 +49,8 @@ class BooleanModel(Model):
 
     def __str__(self): return str(self._value)
 
+    def __int__(self): return self._value
+
 
 class ListModel(Model, UserList):
 

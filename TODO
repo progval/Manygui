@@ -48,6 +48,9 @@ Tentative release date: February 28th, 2002
   code, should be lifted to the front-end, and linked to
   event triggers in the backend's _ensure_events.
 
+  Should backends access frontend attributes through their
+  internal or external names? A standard should be decided on.
+
 * Adjust defaults, and improve window staggering
   (needs a mechanism to find the top window)
 
