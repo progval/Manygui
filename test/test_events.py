@@ -56,10 +56,14 @@ Weak sources:
 
 Loop blocking:
 
+>>> q = Test()
 >>> s = Test()
 >>> t = Test()
+>>> link(q, q.handle, loop=1)
 >>> link(s, t.handle)
 >>> link(t, t.handle)
+>>> send(q)
+Handled!
 >>> send(s)
 Handled!
 >>> send(t)
@@ -110,8 +114,6 @@ Here I am!
 >>> send(s)
 Here I am!
 >>> send(s, 'something')
-
-[Tag handling]
 
 [Other API functions]
 

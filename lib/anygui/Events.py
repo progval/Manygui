@@ -35,7 +35,7 @@ class Internal: pass
 any  = Internal()
 void = Internal()
 
-#def link(source, event, handler, tag=void, weak=0, loop=0):
+#def link(source, event, handler,  weak=0, loop=0):
 def link(*args, **kwds):
     'Link a source and event to an event handler.'
     assert len(args) < 4, 'link takes only three positional arguments'
@@ -44,11 +44,10 @@ def link(*args, **kwds):
     else:
         source, event, handler = args
     weak = kwds.get('weak', 0)
-    tag  = kwds.get('tag', void)
-    #loop = kwds.get('loop', 0)
+    loop = kwds.get('loop', 0)
     s = ref(source, weak)
     h = ref(handler, weak)
-    #if tag is not void: h.tag = tag
+    h.loop = loop
     if not registry.has_key(s):
         registry[s] = {}
     if not registry[s].has_key(event):
@@ -56,7 +55,7 @@ def link(*args, **kwds):
     if not h in registry[s][event]:
         registry[s][event].append(h)
 
-#def unlink(source, event, handler, tag=void):
+#def unlink(source, event, handler):
 def unlink(*args, **kwds):
     'Unlink an event handler from a source and event.'
     assert len(args) < 4, 'link takes only three positional arguments'
@@ -64,14 +63,13 @@ def unlink(*args, **kwds):
         source, handler = args; event = 'default'
     else:
         source, event, handler = args
-    tag = kwds.get('tag', void)
     h = ref(handler, weak=0)
-    for lst in lookup(source, event, tag):
+    for lst in lookup(source, event):
         try:
             lst.remove(h)
         except (KeyError, ValueError): pass
 
-def lookup(source, event, tag=void):
+def lookup(source, event):
     source = ref(source, weak=0)
     lists = []
     sources = [source]
@@ -82,22 +80,20 @@ def lookup(source, event, tag=void):
         for e in events:
             try:
                 h = registry[s][e]
-                if tag == void or tag == getattr(h,'tag',void):
-                    lists.append(registry[s][e])
+                lists.append(registry[s][e])
             except KeyError: pass
     return lists
 
-def send(source, event='default', tag=void, loop=0, **kw):
+def send(source, event='default', loop=0, **kw):
     'Call the appropriate event handlers with the supplied arguments. \
     As a side-effect, dead handlers are removed from the candidate lists.'
     args = {'source': source, 'event': event}
     args.update(kw)
-    if tag is not void: args['tag'] = tag
     source_stack.append(id(source))
     try:
         results = []
         args.setdefault('time', time.time())
-        for handlers in lookup(source, event, tag):
+        for handlers in lookup(source, event):
             live_handlers = []
             for r in handlers:
                 if not r.is_dead():
@@ -105,7 +101,8 @@ def send(source, event='default', tag=void, loop=0, **kw):
                     obj = r.obj
                     if obj is not None:
                         obj = obj()
-                        if not loop and id(obj) in source_stack: continue
+                        if not loop and not r.loop \
+                           and id(obj) in source_stack: continue
                     handler = r()
                     result = handler(**args)
                     if result is not None: results.append(result)
