@@ -1,7 +1,17 @@
 "Mixins: mix-in classes for the anygui package"
 
 from Exceptions import SetAttributeError, GetAttributeError
-import weakref
+
+try:
+    import weakref
+except:
+    class ref:
+        def __init__(self,obj):
+            self.obj = obj
+        def __call__(self):
+            return self.obj
+    class weakref:
+        ref = ref
 
 class Attrib:
     """Attrib: mix-in class to support attribute getting & setting
