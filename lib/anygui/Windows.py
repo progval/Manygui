@@ -28,16 +28,14 @@ class AbstractWindow(AbstractFrame, Defaults.Window):
         # in surrounding local scope -- otherwise, just call
         # ensure_created:                               (mlh20011110)
         stack = inspect.stack()
-        if len(stack) > 1:
-            #import pprint
-            #print pprint.pprint(stack)
+        if len(stack) > 2: # Is this check correct?
             scope = stack[1][0].f_locals
             name = 0
             while scope.has_key(`name`): name += 1
             scope[`name`] = self.CreationSentinel(self)
         else:
-            pass
-            #self.ensure_created()
+            pass # Do something here?
+        del stack # Needed to make the sentinel work (odd...)
         
     def destroy(self):
         self._ensure_destroyed()
