@@ -23,4 +23,6 @@ link(dis, say_hello)
 win.add(btn)
 win.add(dis)
 
+#import profile
+#profile.run("app.run()")
 app.run()
