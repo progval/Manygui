@@ -2,14 +2,16 @@
 Goals for version 0.1:
 ----------------------
 
-* Add support for the document/view model
+* Add support for the document/view model, using either
+  the Observer pattern, or the signal/slot architecture
 
 * Add basic support for defaults, including window tiling
 
-* Add Frame class with utility factories e.g. col/row (?)
+* Add Frame class with utility factories e.g. col/row
+  (May be postponed)
 
 * Make new Windows invisible until event loop is entered
-  or re-entered (after a callback)?
+  or re-entered, e.g. after a callback
 
 Goals for version 0.2:
 ----------------------
@@ -20,9 +22,9 @@ Goals for version 0.2:
 
 * Add menus
 
-* Add event system
+* Add full event system
 
-* Add support for borders
+* Add support for borders?
 
 Longer term goals:
 ------------------
@@ -49,3 +51,4 @@ Smaller issues:
 
 * Merge .add() and .place() and allow several widgets as
   positional arguments?
+

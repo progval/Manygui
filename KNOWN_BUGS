@@ -18,7 +18,7 @@ Importing tkgui in jython gives a non-intuitive error message. It
 
 Defaults don't work properly.
 
-Window positioning doesn't work properly in javagui and tkgui.
+Window positioning doesn't work properly in javagui, tkgui and mswgui.
 
 The cursor position and the end marker of the selection should always
 be the same in tkgui. That is not currently the case.
