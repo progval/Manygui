@@ -73,13 +73,17 @@
       <para>The <name>Anygui</name> API is currently very much in flux
       as the <name>Anygui</name> team keeps experimenting with
       it. Because of that, backwards incompatibilities may occur
-      between releases.</para>
+      between releases. The current release should be regarded as a
+      prototype.</para>
 
+      <!--
       <para>Some features that are currently being developed or are
       in the design stage may not be documented here, but described
       in an <emphasis>internal request for comments</emphasis>.
       These IRFCs can be found at <url>http://anygui.sf.net/irfc</url>.
       </para>
+      -->
+
     </section>
 
   </section>
@@ -206,6 +210,7 @@
 	<line>Bethon     (beosgui)   <url>http://www.bebits.com/app/1564</url></line>
 	<!-- PyQt - qtgui -->
 	<!-- curses - cursesgui -->
+	<!-- textgui -->
       </codelisting>
 
       <!--
@@ -980,7 +985,7 @@
       <!-- What about Application.windows()? Why not
       Application._get_windows? -->
 
-      <para><code>Application</code> has the following method:</para>
+      <para><code>Application</code> has the following methods:</para>
 
       <para><apiname>run</apiname>()</para>
 
@@ -994,6 +999,10 @@
 	<line>app.run()</line>
       </codelisting>
     
+      <para>[...]</para>
+
+      <!-- add, remove, and contents attribute -->
+
       <para><strong>class Button</strong></para>
 
       <para>A component which, when pressed, generate a
@@ -1041,6 +1050,8 @@
       be passed to the <code>LayougManager</code> (see below) of the
       <code>Frame</code>, if any. This <code>LayougManager</code> is
       stored in the <code>layoug</code> property.</para>
+
+      <!-- remove() and contents attribute -->
 
       <para><strong>class Label</strong></para>
 
@@ -1146,50 +1157,21 @@
         
       <para><strong>class Window</strong></para>
 
-      <!-- title -->
+      <!-- title attribute -->
 
       <para>A window, plain and simple. <code>Window</code> is a type
       of <code>Frame</code>, so you can add components to it and set
-      its <code>layout</code> property etc.</para>
+      its <code>layout</code> property etc. To make your window
+      appear, you must remember to add it to your
+      <code>Application</code>, just like you add other components to
+      <code>Frame</code>s and <code>Window</code>s:</para>
 
-      <para>One part of <code>Window</code>'s behaviour separates it
-      from the other component classes. When you create a
-      <code>Window</code> object, it's "closed"; it won't show up on
-      your screen, even it has <code>visible=1</code> (which it has by
-      default). To make it appear, you'll have to call the following
-      method:</para>
-
-      <!-- Remove this: -->
-
-      <para><apiname>open</apiname>()</para>
-
-      <para>Opens a <code>Window</code> after it has been created. If
-      the <code>Window</code>'s <code>visible</code> attribute is
-      false, the <code>Window</code> will still be invisible;
-      otherwise it will appear on the screen.</para>
-
-      <para>The <code>open</code> method is called on all windows by
-      the <code>Application</code> object when you call its
-      <code>run</code> method, so you only have to call
-      <code>open</code> explicitly if you create new windows after
-      your program has started running.</para>
-
-      <para><strong>Rationale</strong>: The reason for this method is
-      to avoid so-called "flashing". If a <code>Window</code>
-      automatically appeared when created and you wanted to hide it
-      while you added components to it, it would momentarily "flash"
-      on the screen. One way of avoiding this would be to supply
-      <code>visible=0</code> to the constructor, but then you would
-      have to do that with every <code>Window</code> you created. To
-      fix this, visibility might default to false, but then you would
-      have to explicitly show every window you created. With the
-      current solution, you only have to explicitly open those windows
-      you create after the program has started running. So why
-      couldn't the <code>Application</code> object automatically show
-      all <code>Window</code>s when you started your program? Because
-      you might want to hide some of them while showing others. Using
-      a separate method for opening the windows allows you to do
-      so.</para>
+      <codelisting>
+	<line>win = Window()</line>
+	<line>app = Application()</line>
+	<line>app.add(win)</line>
+	<line>app.run()</line>
+      </codelisting>
 
     </section>
 
