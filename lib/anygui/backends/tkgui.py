@@ -99,7 +99,7 @@ class ComponentWrapper(Wrapper):
         self.widget.place(x=x, y=y, width=width, height=height)
 
     def setVisible(self, visible):
-        print self,"visible=",visible
+        #print self,"visible=",visible
         if not visible:
             self.widget.place_forget()
             self.visible=0
