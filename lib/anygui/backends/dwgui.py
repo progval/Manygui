@@ -490,7 +490,7 @@ class TextFieldWrapper(ComponentWrapper):
 
     def setEditable(self,editable):
         if self.widget:
-            user32.SendMessage(self.widget, EM_SETREADONLY, editable and 1 or 0, 0)
+            user32.SendMessage(self.widget, EM_SETREADONLY, not editable and 1 or 0, 0)
 
 ##    def _ensure_events(self):
 ##        if self.widget:
