@@ -1,5 +1,5 @@
 from Events import link, send
-from string import upper
+from Utils import getGetter,getSetter
 
 # FIXME: Add mechanism for internal attributes (not in state[]). Uses
 # _foo naming convention for now...
@@ -23,7 +23,7 @@ class Attrib:
         if name == 'state' or name[0] == '_':
             self.__dict__[name] = value
         else:
-            method = getattr(self,"set"+upper(name[0])+name[1:],None)
+            method = getSetter(self,name)
             if method:
                 method(value)
             else:
@@ -34,7 +34,7 @@ class Attrib:
         if name == 'state':
             raise AttributeError, name
         if name[:3] != 'set' and name[:3] != 'get':
-            method = getattr(self,"get"+upper(name[0])+name[1:],None)
+            method = getGetter(self,name)
             if method:
                 return method()
         if not self.state.has_key(name):
