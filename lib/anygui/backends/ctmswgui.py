@@ -25,7 +25,7 @@ from anygui import application
 from anygui.Utils import log, setLogFile, logTraceback
 
 ################################################################
-from ctypes import CDLL, _DLLS, _DynFunction, CFunction, c_string, Structure, WinError, byref
+from ctypes import CDLL, _DLLS, _DynFunction, CFunction, c_string, Structure, WinError, byref, GetLastError
 
 _apiMode = 'A'
 def _to_native(text):
@@ -44,9 +44,107 @@ class WinDLL(CDLL):
         setattr(self, name, func)
         return func
 windll = _DLLS(WinDLL)
+
 user32 = windll.user32
 gdi32 = windll.gdi32
 kernel32 = windll.kernel32
+
+def not_null(value):
+    if value == 0: raise WinError()
+    return value
+
+CreateWindowEx = user32.CreateWindowEx
+CreateWindowEx.restype = not_null
+
+DefWindowProc = user32.DefWindowProc
+
+DestroyWindow = user32.DestroyWindow
+DestroyWindow.restype = not_null
+
+DispatchMessage = user32.DispatchMessage
+
+# Error checking code for win32 api functions
+# select one and assign to restype
+
+def check_error(value):
+    """Some functions return 0 which may be an error or not, depending
+    on the outcome of GetLastError()"""
+    if value == 0:
+        code = GetLastError()
+        if code: raise WinError(code)
+    return value
+
+def not_minus_one(value):
+    if value == -1: raise WinError()
+    return value
+
+def not_null_noinfo(value):
+    "Check return code of functions returning 0 on error, but do not set an error code"
+    if value == 0: raise WindowsError, "function failed"
+    return value
+
+def ret_atom(value):
+    "n atom is 16 bit."
+    value = value & 0xFFFF
+    if not value: raise WinError
+    return value
+
+EnableWindow = user32.EnableWindow
+##EnableWindow.restype = check_error # hm, this one doesn't work.
+
+GetDC = user32.GetDC
+GetDC.restype = not_null # stricly, only on NT/2000/XP the error code is set
+
+GetMessage = user32.GetMessage
+GetMessage.restype = not_minus_one
+
+GetSystemMetrics = user32.GetSystemMetrics
+GetSystemMetrics.restype = not_null_noinfo
+
+GetWindowRect = user32.GetWindowRect
+GetWindowRect.restype = not_null
+
+GetWindowText = user32.GetWindowText
+##GetWindowText.restype = not_null # but it will also fail if the title bar is empty
+
+GetWindowTextLength = user32.GetWindowTextLength
+##GetWindowTextLength.restype = not_null # but it will also fail if the text length is zero
+
+LoadCursor = user32.LoadCursor
+LoadCursor.restype = not_null
+
+LoadIcon = user32.LoadIcon
+LoadIcon.restype = not_null
+
+LoadImage = user32.LoadImage
+LoadImage.restype = not_null
+
+PostQuitMessage = user32.PostQuitMessage
+
+RegisterClass = user32.RegisterClass
+RegisterClass.restype = ret_atom
+
+ScreenToClient = user32.ScreenToClient
+ScreenToClient.restype = not_null_noinfo
+
+SendMessage = user32.SendMessage
+SetWindowPos = user32.SetWindowPos
+SetWindowPos.restype = not_null
+
+SetWindowText = user32.SetWindowText
+SetWindowText.restype = not_null
+
+ShowWindow = user32.ShowWindow
+
+TranslateMessage = user32.TranslateMessage
+
+UnregisterClass = user32.UnregisterClass
+UnregisterClass.restype = not_null
+
+UpdateWindow = user32.UpdateWindow
+UpdateWindow.restype = not_null # only on NT/2000/XP the error code is set
+
+################################################################
 
 ANSI_VAR_FONT=12
 BM_GETSTATE=0xf2
@@ -149,28 +247,28 @@ class ComponentWrapper(AbstractWrapper):
             parent = self.proxy.container.wrapper.widget
         else:
             parent = 0
-        widget = user32.CreateWindowEx(self._win_style_ex,
-                                         self._wndclass,
-                                         0,
-                                         self._win_style,
-                                         0,
-                                         0,
-                                         10,
-                                         10,
-                                         parent,
-                                         0, # hMenu
-                                         0, # hInstance
-                                         0)
+        widget = CreateWindowEx(self._win_style_ex,
+                                self._wndclass,
+                                0,
+                                self._win_style,
+                                0,
+                                0,
+                                10,
+                                10,
+                                parent,
+                                0, # hMenu
+                                0, # hInstance
+                                0)
         app.widget_map[widget] = self
         return widget
 
     def widgetSetUp(self):
         if _verbose: log('widgetSetup',str(self))
         self.proxy.container.wrapper.widget_map[self.widget] = self
-        user32.SendMessage(self.widget,
-                             WM_SETFONT,
-                             self._hfont,
-                             0)
+        SendMessage(self.widget,
+                    WM_SETFONT,
+                    self._hfont,
+                    0)
         self.setVisible(1)
 
     def internalProd(self):
@@ -180,7 +278,7 @@ class ComponentWrapper(AbstractWrapper):
     def getGeometry(self):
         if not self.widget: return 0,0,0,0
         r = t_rect()
-        user32.GetWindowRect(self.widget,byref(r))
+        GetWindowRect(self.widget,byref(r))
         l,t,r,b = r.left, r.top, r.right, r.bottom
         w = r-l
         h = b-t
@@ -189,7 +287,7 @@ class ComponentWrapper(AbstractWrapper):
         try:
             p = t_point()
             p.x, p.y = l,t
-            user32.ScreenToClient(self.proxy.container.wrapper.widget,byref(p))
+            ScreenToClient(self.proxy.container.wrapper.widget,byref(p))
             l,t = p.x, p.y
             if _verbose: log('   -->', l,t,w,h)
         except AttributeError:
@@ -231,17 +329,17 @@ class ComponentWrapper(AbstractWrapper):
     def setGeometry(self,x,y,width,height):
         if self.widget:
             if _verbose: log(str(self),'setGeometry', x,y,width,height)
-            user32.SetWindowPos(self.widget, 0, x, y, width, height, SWP_NOACTIVATE | SWP_NOZORDER)
-            user32.UpdateWindow(self.widget)
+            SetWindowPos(self.widget, 0, x, y, width, height, SWP_NOACTIVATE | SWP_NOZORDER)
+            UpdateWindow(self.widget)
 
     def setVisible(self,visible):
         if self.widget:
             if _verbose: log(str(self),'setVisible', visible, self.widget)
-            user32.ShowWindow(self.widget, visible and SW_SHOWNORMAL or SW_HIDE)
+            ShowWindow(self.widget, visible and SW_SHOWNORMAL or SW_HIDE)
 
     def setEnabled(self,enabled):
         if self.widget:
-            user32.EnableWindow(self.widget, enabled and 1 or 0)
+            EnableWindow(self.widget, enabled and 1 or 0)
 
     def destroy(self):
         if getattr(self.proxy,'container',None):
@@ -251,7 +349,7 @@ class ComponentWrapper(AbstractWrapper):
                 pass
         if self.widget:
             try:
-                user32.DestroyWindow(self.widget)
+                DestroyWindow(self.widget)
             except:
                 pass
             self.widget = None
@@ -259,13 +357,13 @@ class ComponentWrapper(AbstractWrapper):
     def setText(self,text):
         if not self.widget: return
         if _verbose: log("%s.SetWindowText('%s'(%s)) hwnd=%s(%s) self=%s" % (self.__class__.__name__,text,type(text),self.widget,type(self.widget),str(self)))
-        user32.SetWindowText(self.widget,c_string(_to_native(text)))
+        SetWindowText(self.widget,c_string(_to_native(text)))
 
     def _getText(self):
         'return native text'
-        n = user32.GetWindowTextLength(self.widget)
+        n = GetWindowTextLength(self.widget)
         t = c_string('\000'*(n+1))
-        user32.GetWindowText(self.widget,t,n+1)
+        GetWindowText(self.widget,t,n+1)
         return t.value
 
     def getText(self):
@@ -288,7 +386,7 @@ class ComponentWrapper(AbstractWrapper):
         self.proxy.push()
 
     def _WM_PAINT(self, hwnd, msg, wParam, lParam):
-        return user32.DefWindowProc(hwnd, msg, wParam, lParam)
+        return DefWindowProc(hwnd, msg, wParam, lParam)
 
 ##################################################################
 class LabelWrapper(ComponentWrapper):
@@ -302,8 +400,8 @@ class ProgressBarWrapper(ComponentWrapper):
 
     def setPos(self,pos):
         if not self.widget: return
-        user32.SendMessage(self.widget, PBM_SETRANGE, 0, 0xffff0000)
-        return user32.SendMessage(self.widget, PBM_SETPOS, int(pos*0xffff), 0)
+        SendMessage(self.widget, PBM_SETRANGE, 0, 0xffff0000)
+        return SendMessage(self.widget, PBM_SETPOS, int(pos*0xffff), 0)
 
 ##################################################################
 class ButtonWrapper(ComponentWrapper):
@@ -324,21 +422,21 @@ class ListBoxWrapper(ComponentWrapper):
     _win_style_ex = WS_EX_CLIENTEDGE
 
     def getSelection(self):
-        if self.widget: return user32.SendMessage(self.widget, LB_GETCURSEL, 0, 0)
+        if self.widget: return SendMessage(self.widget, LB_GETCURSEL, 0, 0)
 
     def setItems(self,items):
         if not self.widget: return
-        user32.SendMessage(self.widget, LB_RESETCONTENT, 0, 0)
+        SendMessage(self.widget, LB_RESETCONTENT, 0, 0)
         for item in map(str, list(items)):
             # FIXME: This doesn't work! Items get jumbled...
-            user32.SendMessage(self.widget, LB_ADDSTRING, 0, c_string(item))
+            SendMessage(self.widget, LB_ADDSTRING, 0, c_string(item))
 
 
     def setSelection(self,selection):
         if not self.widget: return
-        user32.SendMessage(self.widget,
-                             LB_SETCURSEL,
-                             selection, 0)
+        SendMessage(self.widget,
+                    LB_SETCURSEL,
+                    selection, 0)
 
     def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
         # lParam: handle of control (or NULL, if not from a control)
@@ -356,11 +454,11 @@ class ToggleButtonWrapper(ButtonWrapper):
             val = BST_CHECKED
         else:
             val = BST_UNCHECKED
-        user32.SendMessage(self.widget, BM_SETCHECK, val, 0)
+        SendMessage(self.widget, BM_SETCHECK, val, 0)
         self._on = on
 
     def getOn(self):
-        val = user32.SendMessage(self.widget, BM_GETSTATE, 0, 0)
+        val = SendMessage(self.widget, BM_GETSTATE, 0, 0)
         val = val & BST_CHECKED
         if val: return 1
         return 0
@@ -411,7 +509,7 @@ class TextFieldWrapper(ComponentWrapper):
     def getSelection(self):
         #log("TextField._backend_selection")
         if not self.widget: return
-        result = user32.SendMessage(self.widget, EM_GETSEL, 0, 0)
+        result = SendMessage(self.widget, EM_GETSEL, 0, 0)
         start, end = result & 0xFFFF, result >> 16
         #log("TextField.getSelection: start,end=%s,%s"%(start,end))
         # under windows, the native widget contains
@@ -429,13 +527,13 @@ class TextFieldWrapper(ComponentWrapper):
         start += text[:start].count('\n')
         end += text[:end].count('\n')
         #log("    start,end=%s,%s"%(start,end))
-        user32.SendMessage(self.widget,
-                             EM_SETSEL,
-                             start, end)
+        SendMessage(self.widget,
+                    EM_SETSEL,
+                    start, end)
 
     def setEditable(self,editable):
         if self.widget:
-            user32.SendMessage(self.widget, EM_SETREADONLY, not editable and 1 or 0, 0)
+            SendMessage(self.widget, EM_SETREADONLY, not editable and 1 or 0, 0)
 
     def _WM_COMMAND(self, hwnd, msg, wParam, lParam):
         return 0
@@ -511,7 +609,7 @@ class Resource:
     def _fn2handle(self,fn):
         if self.kind=='bitmap':
             try:
-                self._handle = user32.LoadImage(0,c_string(fn),
+                self._handle = LoadImage(0,c_string(fn),
                     IMAGE_BITMAP,0,0,LR_DEFAULTSIZE|LR_LOADFROMFILE)
             except:
                 logTraceback(None)
@@ -556,7 +654,7 @@ class ImageWrapper(ComponentWrapper):
     def draw(self,*arg,**kw):
         if _verbose: log('Image.draw',self.widget,self._image)
         if not self.widget or not self._image: return
-        dc = user32.GetDC(self.widget)
+        dc = GetDC(self.widget)
         memdc = gdi32.CreateCompatibleDC(dc)
         if _verbose: log('Image.draw dc, memdc',dc,memdc)
         old = gdi32.SelectObject(memdc,self._image.handle())
@@ -575,8 +673,8 @@ class ImageWrapper(ComponentWrapper):
 
 class WindowWrapper(ContainerMixin,ComponentWrapper):
     _win_style = WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN
-    _extraWidth = 2*user32.GetSystemMetrics(SM_CXFRAME)
-    _extraHeight = user32.GetSystemMetrics(SM_CYCAPTION) + 2*user32.GetSystemMetrics(SM_CYFRAME)
+    _extraWidth = 2*GetSystemMetrics(SM_CXFRAME)
+    _extraHeight = GetSystemMetrics(SM_CYCAPTION) + 2*GetSystemMetrics(SM_CYFRAME)
 
     def __init__(self,*args,**kws):
         ContainerMixin.__init__(self)
@@ -586,7 +684,7 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
     def getGeometry(self):
         if not self.widget: return 0,0,0,0
         r = t_rect()
-        user32.GetWindowRect(self.widget,byref(r))
+        GetWindowRect(self.widget,byref(r))
         l,t,r,b = r.left, r.top, r.right, r.bottom
         w = r-l-self._extraWidth
         h = b-t-self._extraHeight
@@ -597,21 +695,21 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
         if not self.widget: return
         if _verbose: log('WindowWrapper: setGeometry',str(self),self.widget,x,y,width,height,self._extraWidth,self._extraHeight)
         # take account for title bar and borders
-        user32.SetWindowPos(self.widget,
-                              0,
-                              x, y,
-                              width + self._extraWidth,
-                              height + self._extraHeight,
-                              SWP_NOACTIVATE | SWP_NOZORDER)
-        user32.UpdateWindow(self.widget)
+        SetWindowPos(self.widget,
+                     0,
+                     x, y,
+                     width + self._extraWidth,
+                     height + self._extraHeight,
+                     SWP_NOACTIVATE | SWP_NOZORDER)
+        UpdateWindow(self.widget)
 
     def setContainer(self,container):
         if not application().isRunning(): return
         if container is None: return
         if not self.widget:
             self.create()
-        user32.ShowWindow(self.widget, SW_HIDE)
-        user32.UpdateWindow(self.widget)
+        ShowWindow(self.widget, SW_HIDE)
+        UpdateWindow(self.widget)
         self.proxy.push(blocked=['container'])
         # Ensure contents are properly created.
         for comp in self.proxy.contents:
@@ -619,7 +717,7 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
 
     def setTitle(self,title):
         if self.widget and title:
-            user32.SetWindowText(self.widget, c_string(title))
+            SetWindowText(self.widget, c_string(title))
 
     def getTitle(self):
         if not self.widget: return
@@ -628,7 +726,7 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
     def widgetSetUp(self):
         if _verbose: log('Windowwrapper widgetSetup',str(self),'application()',application(),'isRunning()',application().isRunning(),'widget',getattr(self,'widget',None))
         application().widget_map[self.widget] = self
-        user32.SendMessage(self.widget, WM_SETFONT, self._hfont, 0)
+        SendMessage(self.widget, WM_SETFONT, self._hfont, 0)
 
     def internalProd(self):
         if _verbose: log('internalProd',str(self))
@@ -683,7 +781,7 @@ def _dispatch_WM_PAINT(window,hwnd,msg,wParam,lParam):
     return window._WM_PAINT(hwnd, msg, wParam, lParam)
 
 def _dispatch_DEFAULT(window,hwnd,msg,wParam,lParam):
-    return user32.DefWindowProc(hwnd, msg, wParam, lParam)
+    return DefWindowProc(hwnd, msg, wParam, lParam)
 
 _app=None
 class Application(AbstractApplication):
@@ -736,15 +834,18 @@ class Application(AbstractApplication):
         # register a window class for our windows.
         wc = WNDCLASS()
         wc.hbrBackground = COLOR_BTNFACE + 1
-        wc.hCursor = user32.LoadCursor(0, IDC_ARROW)
-        wc.hIcon = user32.LoadIcon(0, IDI_APPLICATION)
+        wc.hCursor = LoadCursor(0, IDC_ARROW)
+        wc.hIcon = LoadIcon(0, IDI_APPLICATION)
         wc.lpzClassName = "dw.anygui.PythonWindow"
         wc.lpfnWndProc = WINDOWPROC(self._wndproc)
-        wc.hInst = kernel32.GetModuleHandle(None)
+        wc.hInst = kernel32.GetModuleHandleA(None)
         self._wc = wc
-        user32.UnregisterClass(wc.lpzClassName,0)
-        self.__class__._wndclass = user32.RegisterClass(byref(wc)) & 0xFFFF
-        assert self.__class__._wndclass, "RegisterClass --> %s" % WinError()
+        try:
+            UnregisterClass(wc.lpzClassName,0)
+        except WindowsError:
+            pass # class does not exist
+        self.__class__._wndclass = RegisterClass(byref(wc))
+##        assert self.__class__._wndclass, "RegisterClass --> %s" % WinError()
         if _verbose: log('Application._register_class:end',str(self))
 
     def _wndproc(self, hwnd, msg, wParam, lParam):
@@ -753,7 +854,7 @@ class Application(AbstractApplication):
             window = self.widget_map[hwnd]
         except:
             if _verbose: log("\tNO WINDOW TO DISPATCH???")
-            return user32.DefWindowProc(hwnd, msg, wParam, lParam)
+            return DefWindowProc(hwnd, msg, wParam, lParam)
         try:
             _dispatch = self._dispatch.get(msg,_dispatch_DEFAULT)
             x = _dispatch(window,hwnd,msg,wParam,lParam)
@@ -778,11 +879,11 @@ class Application(AbstractApplication):
                 )
 
         msg = MSG()
-        while user32.GetMessage(byref(msg), 0, 0, 0):
+        while GetMessage(byref(msg), 0, 0, 0):
             try:
                 if _verbose: log('internalRun: loopstart',msg)
-                user32.TranslateMessage(byref(msg))
-                user32.DispatchMessage(byref(msg))
+                TranslateMessage(byref(msg))
+                DispatchMessage(byref(msg))
                 if _verbose: log('internalRun: loopend')
             except:
                 logTraceback(None)
@@ -791,7 +892,7 @@ class Application(AbstractApplication):
     def internalRemove(self):
         if not self._windows:
             if _verbose: log('PostQuitMessage(0)')
-            user32.PostQuitMessage(0)
+            PostQuitMessage(0)
             global _app
             _app = None
 
