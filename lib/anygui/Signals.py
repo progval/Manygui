@@ -269,7 +269,7 @@ class _signal_map:
             # No handlers for the signal
             pass
         try:
-            for hdlr in self._sigmap["ALL"]:
+            for hdlr in self._sigmap[None]:
                 hdlr()(signal_source=src,signal_name=signame,**kws)
         except KeyError:
             # No handlers for the signal
