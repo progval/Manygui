@@ -256,6 +256,7 @@ class ScrollableListBox(swing.JPanel):
 
     # FIXME: Constructor doesn't seem to work right, so an explicit
     # method is needed.
+    # mlh20011213: Is this true anymore?
     def init(self):
         self._jlist = swing.JList()
         self.layout = awt.BorderLayout()
@@ -366,7 +367,7 @@ class RadioButton(ToggleButtonMixin, AbstractRadioButton):
     _java_class = swing.JRadioButton
     _text = "JRadioButton"
 
-    # FIXME: Add click handler which interacts with RadioGroup
+    # @@@ FIXME: Add click handler which interacts with RadioGroup
     
     def _ensure_created(self):
         #if self._group and 0 == self._group._items.index(self):
@@ -420,6 +421,7 @@ class ScrollableTextArea(swing.JPanel):
 
     # FIXME: Constructor doesn't seem to work right, so an
     # explicit method is needed. (May not be the case...)
+    # mlh20011213: Is this true anymore?
     def init(self):
         self._jtextarea = swing.JTextArea()
         self.layout = awt.BorderLayout()
