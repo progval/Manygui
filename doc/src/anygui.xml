@@ -84,6 +84,14 @@
 
     </section>
 
+    <section>
+      <title>Tutorial</title>
+
+      <para>There is also a short tutorial available, which is
+      included in the installation (<code>doc/tutorial.txt</code>) and
+      is available from the website
+      (<url>http://www.anygui.org</url>).</para>
+    </section>
   </section>
 
   <section>
