@@ -1,6 +1,6 @@
 "Mixins: mix-in classes for the anygui package"
 
-from Exceptions import SetAttributeError, GetAttributeError, UnimplementedMethod
+from Exceptions import SetAttributeError, GetAttributeError, UnimplementedMethod, InternalError
 from Events import link, send
 #import weakref
 weakref = None
@@ -8,16 +8,56 @@ weakref = None
 # _ensure_* methods that it might be dangerous to auto-call
 _no_auto_ensures = '_ensure_created _ensure_destroyed'.split()
 
+# pairwise order constraints on _ensure_* method calls
+_ensures_constraints = (
+    ('_ensure_text', '_ensure_selection'),
+    )
+
 # get all names of methods starting with _ensure_ for a class & its bases,
-# except those listed in _no_auto_ensures
-def _get_all_ensures(klass, theset):
+# except those listed in _no_auto_ensures.  The names are ordered to
+# respect all pairwise constraints (_ensure_before, _ensure_after) in
+# sequence-of-pairs klass._ensures_constraints, if any, defaulting to the
+# global ones in this module's _ensures_constraints variable
+def _get_all_ensures_helper(klass, theset):
     for name in dir(klass):
         if name.startswith('_ensure_'):
             if name in _no_auto_ensures: continue
             value = getattr(klass,name)
             if callable(value): theset[name]=1
-    for base in klass.__bases__: _get_all_ensures(base, theset)
+    for base in klass.__bases__: _get_all_ensures_helper(base, theset)
 
+def _get_all_ensures(klass):
+    enset = {}
+    _get_all_ensures_helper(klass, enset)
+    constraints = getattr(klass, '_ensures_constraints', _ensures_constraints)
+    return topological_sort(enset.keys(), constraints)
+
+def topological_sort(items, constraints):
+    # prepare followers mapping [item -> set of followers] and
+    # nleaders mapping [item -> number of leaders]
+    followers = {}
+    nleaders = {}
+    for before, after in constraints:
+        these_followers = followers.setdefault(before,{})
+        if not these_followers.has_key(after):
+            nleaders[after] = 1 + nleaders.get(after, 0)
+            these_followers[after] = before
+    # while there are items, pick one with no leaders, append it
+    # to result, update items list and mapping nleaders
+    items.sort()    # for definiteness
+    result = []
+    # print 'sorting:',items
+    while items:
+        for item in items:
+            if nleaders.get(item,0)==0: break
+        else:
+            raise InternalError(items,"dependency loop")
+        items.remove(item)
+        result.append(item)
+        for follower in followers.get(item,{}).keys():
+            nleaders[follower] -= 1
+    # print 'got:',result
+    return result
 
 class Attrib:
     """Attrib: mix-in class to support attribute getting & setting
@@ -88,10 +128,13 @@ class Attrib:
             setattr(self, name, value)
 
     def __init__(self, *args, **kwds):
-        enset = {}
-        _get_all_ensures(self.__class__, enset)
-        self.__dict__['_all_ensures'] = enset.keys()
-        self._all_ensures.sort()
+        # _all_ensures must be computed exactly once per concrete class
+        klass = self.__class__
+        # print "For class",klass
+        if not klass.__dict__.has_key('_all_ensures'):
+            klass.__dict__['_all_ensures'] = _get_all_ensures(klass)
+        # else:
+            # print klass._all_ensures
 
         """
         # handle explicit-attributes -- currently disabled (breaks some
