@@ -1,7 +1,7 @@
 # Curses magic...
 import curses
 
-_debug_messages = 0
+_debug_messages = 1
 if _debug_messages:
     _f = open("curses.txt","w")
 

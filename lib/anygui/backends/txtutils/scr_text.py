@@ -44,7 +44,7 @@ except KeyError:
         _ysize -= 1 # Leave room for the prompt line.
     except KeyError:
         pass
-print 'x,y=',_xsize,_ysize
+#print 'x,y=',_xsize,_ysize
 _line = [' ']*_xsize
 _scrbuf = []
 for ii in range(0,_ysize):

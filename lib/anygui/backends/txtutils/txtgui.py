@@ -4,6 +4,42 @@ import sys
 from anygui.backends import *
 from anygui.Exceptions import Error
 
+# Map of character codes to names.
+_charnames = {ord(' '):'space',
+              258:'down arrow',
+              259:'up arrow',
+              260:'left arrow',
+              261:'right arrow',
+              27:'ESC',
+              127:'backspace',
+              1:'^A',
+              2:'^B',
+              3:'^C',
+              4:'^D',
+              5:'^E',
+              6:'^F',
+              7:'^G',
+              8:'^H',
+              9:'^I',
+              10:'linefeed (^J)',
+              11:'^K',
+              12:'^L',
+              13:'return (^M)',
+              14:'^N',
+              15:'^O',
+              16:'^P',
+              17:'^Q',
+              18:'^R',
+              19:'^S',
+              20:'^T',
+              21:'^U',
+              22:'^V',
+              23:'^W',
+              24:'^X',
+              25:'^Y',
+              26:'^Z'
+              }
+
 # Screen-management package.
 _scr = None
 
@@ -97,6 +133,39 @@ class ComponentMixin:
     _tiny_LLCORNER = ord('<')
     _tiny_LRCORNER = ord('>')
 
+    # Event-handler maps.
+    _event_map = {}
+    _event_range_map = {}
+
+    def _get_event_help(self):
+        items = []
+        evmap = self._event_map
+        kk = evmap.keys()
+        kk.sort()
+        for ch in kk:
+            f = evmap[ch]
+            if f == ComponentMixin._ignore_event:
+                continue
+            doc = f.__doc__
+            try:
+                c = _charnames[ch]
+            except KeyError:
+                try:
+                    c = chr(ch)
+                except (TypeError,ValueError):
+                    c = str(ch)
+            if doc is not None:
+                item = c+": "+str(doc)
+                items.append(item)
+                items.append(' ')
+        try:
+            if self._container:
+                items += self._container._get_event_help()
+        except:
+            a,b,c = sys.exc_info()
+            items.append("*** Exception gathering help data!"+str(b))
+        return items
+
     def __init__(self,*args,**kws):
         ##_scr.dbg("Creating %s"%self)
         self._curses_created = 0
@@ -116,11 +185,11 @@ class ComponentMixin:
         if self._visible: return self._container._is_visible()
 
     def _set_focus(self,val):
-        self._ensure_enabled_state()
+        #self._ensure_enabled_state()
         global _focus_control
         if val:
             _focus_control = self
-            _scr.dbg("_set_focus:",self._gets_focus,self._is_visible(),self._curses_created,_in_focus_purview(self),self)
+            #_scr.dbg("_set_focus:",self._gets_focus,self._is_visible(),self._curses_created,_in_focus_purview(self),self)
             if self._gets_focus and self._is_visible() and self._curses_created \
                and _in_focus_purview(self):
                 return
@@ -278,6 +347,17 @@ class ComponentMixin:
         return 0
 
     def _event_handler(self,ev):
+        try:
+            handled = self._event_map[ev](self,ev)
+            return handled
+        except KeyError:
+            for (lo,hi) in self._event_range_map.keys():
+                if ev>=lo and ev<=hi:
+                    handled = self._event_range_map[(lo,hi)](self,ev)
+                    return handled
+        return 0
+
+    def _ignore_event(self,ev):
         return 0
 
     # backend api
@@ -304,12 +384,15 @@ class ComponentMixin:
         self._redraw()
 
     def _ensure_enabled_state(self):
+        #_scr.dbg("ENSURING ENABLED",self)
         # UNTESTED!
         if not self._enabled:
+            #_scr.dbg("   NOT ENABLED")
             self._gets_focus = 0
             if _focus_control is self:
                 _app._change_focus()
         else:
+            #_scr.dbg("   ENABLED")
             self._gets_focus = self.__class__._gets_focus
 
     def _ensure_destroyed(self):
@@ -322,7 +405,11 @@ class ComponentMixin:
     def _ensure_events(self):
         pass
 
+    def _ensure_editable(self):
+        pass
+
     def _ensure_text(self):
+        self._ensure_editable()
         self._redraw()
 
 class ContainerMixin(ComponentMixin):
@@ -431,23 +518,27 @@ class ListBox(ComponentMixin, AbstractListBox):
             y+=1
             if y>lh: return
 
-    def _event_handler(self,ev):
-        if ev == ord('j'):
-            self._selection += 1
-            if self._selection >= len(self._items):
-                self._selection = 0
-            self._redraw()
-            return 1
-        if ev == ord('k'):
-            self._selection -= 1
-            if self._selection < 0:
-                self._selection = len(self._items)-1
-            self._redraw()
-            return 1
-        if ev == ord(' '):
-            send(self,'select')
-            return 1
-        return 0
+    def _select_down(self,ev):
+        """Move listbox selection down."""
+        self._selection += 1
+        if self._selection >= len(self._items):
+            self._selection = 0
+        self._redraw()
+
+    def _select_up(self,ev):
+        """Move listbox selection up."""
+        self._selection -= 1
+        if self._selection < 0:
+            self._selection = len(self._items)-1
+        self._redraw()
+
+    def _do_click(self,ev):
+        """Click on selected item."""
+        send(self,'select')
+
+    _event_map = { ord('j'):_select_down,
+                   ord('k'):_select_up,
+                   ord(' '):_do_click }
 
 class Button(ComponentMixin, AbstractButton):
 
@@ -466,11 +557,11 @@ class Button(ComponentMixin, AbstractButton):
 
     def __str__(self): return "Button "+self._text
 
-    def _event_handler(self,ev):
-        if ev == ord(' '):
-            send(self, 'click')
-            return 1
-        return 0
+    def _do_click(self,ev):
+        """Click on button."""
+        send(self,'click')
+
+    _event_map = { ord(' '):_do_click }
 
 class ToggleButtonMixin(ComponentMixin):
 
@@ -482,14 +573,13 @@ class ToggleButtonMixin(ComponentMixin):
         ComponentMixin.__init__(self,*args,**kws)
         self._value = value
 
-    def _event_handler(self,ev):
-        if ev == ord(' '):
-            self._curs_clicked()
-
     def _curs_clicked(self):
+        """Click on button."""
         self.on = not self.on # FIXME: ??
         self._redraw()
         send(self, 'click')
+
+    _event_map = { ord(' '):_curs_clicked }
 
     def _ensure_state(self):
         self._redraw()
@@ -539,6 +629,18 @@ class TextMixin(ComponentMixin):
         self._cur_line = 0
         self._cur_col = 0
 
+    def _ensure_editable(self):
+        #_scr.dbg("ENSURING EDITABLE",self)
+        # UNTESTED!
+        if not self._editable:
+            #_scr.dbg("   NOT EDITABLE")
+            self._gets_focus = 0
+            if _focus_control is self:
+                _app._change_focus()
+        else:
+            #_scr.dbg("   EDITABLE")
+            self._gets_focus = self.__class__._gets_focus
+
     def _ensure_focus(self):
         if not self._curses_created: return
         x,y = self._get_screen_coords()
@@ -551,40 +653,61 @@ class TextMixin(ComponentMixin):
             tx,ty = self._cur_pos
             _scr.move_cursor(x+tx,y+ty)
 
-    def _event_handler(self,ev):
-        if ev == 27:
-            _app._change_focus()
-            return 1
-        if ev == 258:
-            self._move_line(1)
-            return 1
-        if ev == 259:
-            self._move_line(-1)
-            return 1
-        if ev == 127:
-            if self._tpos < 1: return 1
-            self._text = self._text[:self._tpos-1] + self._text[self._tpos:]
-            self._tpos -= 1
-            self._redraw()
-            return 1
-        if ev == 260:
-            self._tpos -= 1
-            if self._tpos<0: self._tpos=0
-            self._redraw()
-            _scr.dbg("^H",self._tpos,self)
-            return 1
-        if ev == 261:
-            self._tpos += 1
-            if self._tpos>len(self._text): self._tpos=len(self._text)
-            self._redraw()
-            _scr.dbg("^L",self._tpos,self)
-            return 1
-        if ev < 256 and chr(ev) in string.printable:
-            self._text = self._text[:self._tpos] + chr(ev) + self._text[self._tpos:]
-            self._tpos += 1
-            self._redraw() # FIXME: only really need to redraw current line.
-            return 1
-        return 0
+    ### Event handlers ###
+    def _backspace(self,ev):
+        """Erase character before cursor."""
+        if self._tpos < 1: return 1
+        self._text = self._text[:self._tpos-1] + self._text[self._tpos:]
+        self._tpos -= 1
+        self._redraw()
+        return 1
+
+    def _insert(self,ev):
+        """Insert character before cursor."""
+        if not chr(ev) in string.printable:
+            return 0
+        self._text = self._text[:self._tpos] + chr(ev) + self._text[self._tpos:]
+        self._tpos += 1
+        self._redraw() # FIXME: only really need to redraw current line.
+        return 1
+
+    def _back(self,ev):
+        """Move cursor back one character."""
+        self._tpos -= 1
+        if self._tpos<0: self._tpos=0
+        self._redraw()
+        return 1
+
+    def _fwd(self,ev):
+        """Move cursor forward one character."""
+        self._tpos += 1
+        if self._tpos>len(self._text): self._tpos=len(self._text)
+        self._redraw()
+        return 1
+
+    def _change_focus(self,ev):
+        """Focus on the next control."""
+        _app._change_focus()
+
+    def _down_line(self,ev):
+        """Move cursor up one line."""
+        self._move_line(1)
+        
+    def _up_line(self,ev):
+        """Move cursor down one line."""
+        self._move_line(-1)
+
+    _event_map = {127:_backspace,
+                  258:_down_line,
+                  259:_up_line,
+                  27:_change_focus,
+                  260:_back,
+                  261:_fwd,
+                  15:ComponentMixin._ignore_event
+                  }
+    _event_range_map = {(8,255):_insert}
+
+    ### Event handler end ###
 
     def _move_line(self,n):
         lines = self._text.split('\n')
@@ -616,7 +739,7 @@ class TextMixin(ComponentMixin):
         sh = self._screen_height()
 
         for li in range(0,min(sh,len(lines)-startline)):
-            _scr.dbg("start,line:",startline,li,self)
+            #_scr.dbg("start,line:",startline,li,self)
             line = lines[startline+li]
             self._addstr(x,y,line[startcol:])
             y+=1
@@ -640,7 +763,7 @@ class TextMixin(ComponentMixin):
             if startcol<0: startcol = 0
 
         self._cur_pos = (col-startcol+1, line-startline+1)
-        _scr.dbg("cur_pos:",self._cur_pos,self)
+        #_scr.dbg("cur_pos:",self._cur_pos,self)
 
         return startline,startcol
 
@@ -679,11 +802,10 @@ class TextField(TextMixin, AbstractTextField):
         TextMixin.__init__(self,*args,**kws)
         AbstractTextField.__init__(self,*args,**kws)
 
-    def _event_handler(self,ev):
-        if ev == 10:
-            _app._change_focus()
-            return 1
-        return TextMixin._event_handler(self,ev)
+    _event_map = TextMixin._event_map
+    del _event_map[258] # No line control in TextFields.
+    del _event_map[259]
+    _event_map[ord('\n')] = TextMixin._change_focus
 
 class TextArea(TextMixin, AbstractTextArea):
 
@@ -728,11 +850,12 @@ class Window(ContainerMixin, AbstractWindow):
 
     def _ensure_title(self): self._redraw()
 
-    def _present_winmenu(self):
+    def _present_winmenu(self,ev):
+        """Open window menu"""
         x,y = self._x,self._y
         w,h = int(round(12.1/self._horiz_scale)),int(round(4.1/self._vert_scale))
-        self._omenu = MenuWindow(title="?Window")
-        self._omenu._event_handler = self._winmenu_event_handler
+        self._omenu = WinMenuWindow(title="?Window")
+        self._omenu._pwin = self
         self._omenu.geometry=(x,y,w,h)
         x,y = int(round(1.1/self._horiz_scale)),int(round(1.1/self._vert_scale))
         w,h = int(round(10.1/self._horiz_scale)),int(round(1.1/self._vert_scale))
@@ -752,16 +875,12 @@ class Window(ContainerMixin, AbstractWindow):
         self._redraw()
         self._omenu._redraw()
 
-    def _event_handler(self,ch):
-        # Handle the ^Option command by popping up a
-        # window menu.
-        if ch == 15:
-            self._present_winmenu()
-            return 1
+    _event_map = {15:_present_winmenu}
 
-        return 0
+    def _curs_resized(self,dw,dh):
+        self.resized(dw,dh)
 
-    def _winmenu_event_handler(self,ch):
+    def _handle_wm_event(self,ch):
         hinc = int(round(1.1/self._horiz_scale))
         vinc = int(round(1.1/self._vert_scale))
         
@@ -798,9 +917,7 @@ class Window(ContainerMixin, AbstractWindow):
             self.height -= vinc
             self._curs_resized(0,-vinc)
             return 1
-
-    def _curs_resized(self,dw,dh):
-        self.resized(dw,dh)
+        return 0
 
     def _close(self,*args,**kws):
         ##_scr.dbg("CLOSING %s"%self)
@@ -811,10 +928,30 @@ class Window(ContainerMixin, AbstractWindow):
         self._omenu.destroy()
         self.focus = 1
 
-class MenuWindow(Window):
+class WinMenuWindow(Window):
 
     _gets_focus = 0
 
+    def _handle_wmove_event(self,ev):
+        """Move the window."""
+        _scr.dbg("MOVE",chr(ev))
+        return self._pwin._handle_wm_event(ev)
+
+    def _handle_wconfig_event(self,ev):
+        """Resize the window."""
+        _scr.dbg("RESIZE",chr(ev))
+        return self._pwin._handle_wm_event(ev)
+
+    _event_map = {ord('h'):_handle_wmove_event,
+                  ord('j'):_handle_wmove_event,
+                  ord('k'):_handle_wmove_event,
+                  ord('l'):_handle_wmove_event,
+                  ord('H'):_handle_wconfig_event,
+                  ord('J'):_handle_wconfig_event,
+                  ord('K'):_handle_wconfig_event,
+                  ord('L'):_handle_wconfig_event,
+                  }
+    
 class MenuButton(Button):
 
     _texty = 0
@@ -826,6 +963,50 @@ class MenuButton(Button):
         self._UHLINE = ' '
         self._LHLINE = ' '
 
+class HelpWindow(Window):
+
+    def __init__(self,*args,**kws):
+        Window.__init__(self,*args,**kws)
+        self._prev_ctrl = _focus_control
+        self._prev_focus_capture = _focus_capture_control
+        self._title = "INFORMATION (press 'q' to dismiss)"
+        self._x = 0
+        self._y = 0
+        self._width = 600
+        self._height = 400
+        lb = ListBox(geometry=(10,10,580,380))
+        self.add(lb)
+        self._populate_lb(lb)
+        _app.add(self)
+        self.focus_capture = 1
+
+    def _populate_lb(self,lb):
+        """Add docstrings for _prev_ctrl event handlers to lb."""
+        items = ["This is txtgui, the text/curses binding for Anygui.",
+                 "You can get this help screen at any time by typing ^G.",
+                 "",
+                 "^F and ^B move between controls.",
+                 "Under curses, up and down arrow move between controls,",
+                 "except in text controls, where they move between lines.",
+                 "z and Z can be used to zoom the presentation in and out.",
+                 "",
+                 "The current control is a "+self._prev_ctrl.__class__.__name__+";",
+                 "it supports the following key bindings:",""]
+        items += self._prev_ctrl._get_event_help()
+        lb.items = items
+
+    def _dismiss(self,ev):
+        """Exit help and return to the previous window."""
+        self.focus_capture = 0
+        self.destroy()
+        if self._prev_focus_capture:
+            self._prev_focus_capture.focus_capture = 1
+        self._prev_ctrl.focus = 1
+
+    #def _event_handler(self,ev):
+    #    if ev == ord('q'): self._dismiss(ev)
+
+    _event_map = {ord('q'):_dismiss}
 
 class Application(AbstractApplication):
     def __init__(self):
@@ -876,6 +1057,8 @@ class Application(AbstractApplication):
 
     def _app_event_handler(self,ch):
         #_scr.dbg("APP_EVENT_HANDLER",ch)
+        if ch == 7: # ^G
+            HelpWindow()
         if ch == 17: # ^Q
             return 0
         if ch == 6 or ch == 258:  # ^F,down
