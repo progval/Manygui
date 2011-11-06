@@ -12,7 +12,7 @@ class Quit(Exception):
     """Exception raised to exit the main event loop."""
     pass
 
-class Error(StandardError):
+class Error(Exception):
     """Common base-class of other error-classes."""
     def __init__(self, obj, mess):
         self.obj = obj

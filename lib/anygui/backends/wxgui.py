@@ -198,7 +198,7 @@ class ListBoxWrapper(ComponentWrapper):
         if not self.widget is None:
             for index in range(self.widget.Number()):
                 self.widget.Delete(0)
-            self.widget.InsertItems(map(str, list(items)), 0)
+            self.widget.InsertItems(list(map(str, list(items))), 0)
 
     def setSelection(self,selection):
         if not self.widget is None:

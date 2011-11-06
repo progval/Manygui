@@ -156,7 +156,7 @@ class AbstractWrapper:
         """
         result = []
         names = []
-        candidates = self.aggregateSetters.items()
+        candidates = list(self.aggregateSetters.items())
         attrs = attrs[:]
         def moreSpecific(aggr1, aggr2):
             return cmp(len(aggr1[0]), len(aggr2[0]))
@@ -215,7 +215,7 @@ class AbstractWrapper:
         method are ignored.
         """
         # Use self.dependencies -- document it
-        setters, unhandled = self.getSetters(state.keys())
+        setters, unhandled = self.getSetters(list(state.keys()))
         for setter, params in setters:
             kwds = {}
             for key in params:
@@ -255,7 +255,7 @@ class AbstractWrapper:
         if not unhandled:
             return result,unhandled
 
-        candidates = self.aggregateGetters.items()        
+        candidates = list(self.aggregateGetters.items())        
         def moreSpecific(aggr1, aggr2):
             return cmp(len(aggr1[0]), len(aggr2[0]))
 
@@ -288,7 +288,7 @@ class AbstractWrapper:
         methods. We may not, however, add keys to state, as that
         could lead to unexpected changes to the proxy's state.
         """
-        getters,unhandled = self.getGetters(state.keys())
+        getters,unhandled = self.getGetters(list(state.keys()))
 
         lstate = {}
         for getter,attrs in getters:
@@ -296,10 +296,10 @@ class AbstractWrapper:
                 val = getter()
                 lstate[attrs[0]]= val
             else:
-                vals = zip(attrs,getter())
+                vals = list(zip(attrs,getter()))
                 for name,val in vals:
                     lstate[name] = val
-        for attr in [k for k in state.keys() if k not in unhandled]:
+        for attr in [k for k in list(state.keys()) if k not in unhandled]:
             state[attr] = lstate[attr]
     
     def getPrefs(self):
@@ -336,7 +336,7 @@ class AbstractWrapper:
         create the native widget etc. It will be called the first time
         prod() is called after entering the main event loop.
         """
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
         
     def internalProd(self):
         """
@@ -428,7 +428,7 @@ class AbstractWrapper:
         This method should be implemented in subclasses and should
         invoke the native mechanism for disposing of a widget.
         """
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def widgetFactory(self, *args, **kwds):
         """

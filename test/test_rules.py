@@ -84,7 +84,7 @@ class RectangleTestCase(TestCase):
         self.genericIllegalEmptySyncTest('position', (10, 0))
         self.genericIllegalEmptySyncTest('size', (0, 10))
         self.genericIllegalEmptySyncTest('size', (10, 0))
-        for i in xrange(4):
+        for i in range(4):
             v = [10, 10, 9999, 9999]
             v[i] = 0
             self.genericIllegalEmptySyncTest('geometry', v)

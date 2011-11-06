@@ -2,9 +2,9 @@
 #from anygui.backends import *
 #__all__ = anygui.__all__
 
-from Tkinter import * # A bit risky
+from tkinter import * # A bit risky
 from operator import truth
-import re, Tkinter, os
+import re, tkinter, os
 
 # Figure out proper setting for Tk's "exportselection" option.
 EXPORTSELECTION = 'true'
@@ -38,7 +38,7 @@ class ComponentMixin:
                 component.config(text=self._get_tk_text())
             except: # not all widgets have a 'text' property
                 pass
-            if self._tk_class is Tkinter.Label:
+            if self._tk_class is tkinter.Label:
                 component.config(justify=self._tk_style, anchor=W)
 
         try:
@@ -99,7 +99,7 @@ class Canvas(ComponentMixin, AbstractCanvas):
     # FIXME: Has to store figures until backend component is
     #        created...
 
-    _tk_class = Tkinter.Canvas
+    _tk_class = tkinter.Canvas
 
     def __init__(self, *args, **kwds):
         AbstractCanvas.__init__(self, *args, **kwds)
@@ -115,15 +115,15 @@ class Canvas(ComponentMixin, AbstractCanvas):
     def _call_deferred_methods(self):
         for methcall in self._deferred_methods:
             meth = getattr(self, methcall[0])
-            apply(meth, methcall[1:])
+            meth(*methcall[1:])
 
     def clear(self):
         if self._tk_comp:
-            map(self._tk_comp.delete, self._item_ids)
+            list(map(self._tk_comp.delete, self._item_ids))
 
     def flush(self):
         if self._tk_comp:
-            Tkinter.Canvas.update(self._tk_comp)
+            tkinter.Canvas.update(self._tk_comp)
 
     def drawPolygon(self, pointlist,
                     edgeColor=None, edgeWidth=None, fillColor=None, closed=0):
@@ -167,7 +167,7 @@ def _convert_color(c):
 class Label(ComponentMixin, AbstractLabel):
     #_width = 100 # auto ?
     #_height = 32 # auto ?
-    _tk_class = Tkinter.Label
+    _tk_class = tkinter.Label
     _tk_style = LEFT
 
     def _ensure_text(self):
@@ -178,7 +178,7 @@ class Label(ComponentMixin, AbstractLabel):
 
 ################################################################
 
-class ScrollableListBox(Tkinter.Frame):
+class ScrollableListBox(tkinter.Frame):
 
     # Replacement for Tkinter.Listbox
 
@@ -186,12 +186,12 @@ class ScrollableListBox(Tkinter.Frame):
     select_clear select_set""".split()
 
     def __init__(self, *args, **kw):
-        Tkinter.Frame.__init__(self, *args, **kw)
+        tkinter.Frame.__init__(self, *args, **kw)
 
-        self._yscrollbar = Tkinter.Scrollbar(self)
+        self._yscrollbar = tkinter.Scrollbar(self)
         self._yscrollbar.pack(side=RIGHT, fill=Y)
 
-        self._listbox = Tkinter.Listbox(self,
+        self._listbox = tkinter.Listbox(self,
                                         yscrollcommand=self._yscrollbar.set,
                                         selectmode="single")
         self._listbox.pack(side=LEFT, expand=YES, fill=BOTH)
@@ -364,7 +364,7 @@ class DisabledTextBindings:
         pass
 
 class TextField(ComponentMixin, AbstractTextField, DisabledTextBindings):
-    _tk_class = Tkinter.Entry
+    _tk_class = tkinter.Entry
 
     def _backend_text(self):
         if self._tk_comp:
@@ -414,7 +414,7 @@ class TextField(ComponentMixin, AbstractTextField, DisabledTextBindings):
     def _update_model(self, ev):
         self.modify(text=self._backend_text())
 
-class ScrollableTextArea(Tkinter.Frame):
+class ScrollableTextArea(tkinter.Frame):
 
     # Replacement for Tkinter.Text
 
@@ -422,15 +422,15 @@ class ScrollableTextArea(Tkinter.Frame):
     mark_set tag_add tag_remove tag_names configure""".split()
 
     def __init__(self, *args, **kw):
-        Tkinter.Frame.__init__(self, *args, **kw)
+        tkinter.Frame.__init__(self, *args, **kw)
         
-        self._yscrollbar = Tkinter.Scrollbar(self)
+        self._yscrollbar = tkinter.Scrollbar(self)
         self._yscrollbar.pack(side=RIGHT, fill=Y)
 
-        self._xscrollbar = Tkinter.Scrollbar(self, orient=HORIZONTAL)
+        self._xscrollbar = tkinter.Scrollbar(self, orient=HORIZONTAL)
         self._xscrollbar.pack(side=BOTTOM, fill=X)
         
-        self._textarea = Tkinter.Text(self,
+        self._textarea = tkinter.Text(self,
                                       yscrollcommand=self._yscrollbar.set,
                                       xscrollcommand=self._xscrollbar.set)
         self._textarea.pack(side=TOP, expand=YES, fill=BOTH)
@@ -505,7 +505,7 @@ class TextArea(ComponentMixin, AbstractTextArea, DisabledTextBindings):
 ################################################################
 
 class Frame(ComponentMixin, AbstractFrame):
-    _tk_class = Tkinter.Frame
+    _tk_class = tkinter.Frame
     #_tk_opts = {'relief':'raised','borderwidth':2}
 
 #from anygui.Frames import FakeFrame

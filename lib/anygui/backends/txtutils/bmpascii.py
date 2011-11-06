@@ -12,7 +12,8 @@
 # by-bit comparison of each character.
 
 import sys
-from graycode import *
+from .graycode import *
+from functools import reduce
 
 def flatten(seq):
     '''Flatten a sequence. If seq is not a sequence, return [seq].
@@ -1034,17 +1035,17 @@ def countBitsOn(n):
         n = n >> 1
     return result
 
-for ch in char2grayStr.keys():
+for ch in list(char2grayStr.keys()):
     char2gray[ch] = []
     for bitmap in flatten(char2grayStr[ch]):
         char2gray[ch].append(stringbits(bitmap))
-for ch in char2gray.keys():
+for ch in list(char2gray.keys()):
     if ch == ' ':
         #print "char2gray[ ] is [%s]"%char2gray[ch]
         pass
     for bits in char2gray[ch]:
         gray2char[bits] = ch
-for num in gray2char.keys():
+for num in list(gray2char.keys()):
     charGrayNums.append(inversegray(num))
     bits = countBitsOn(num)
     charBitCountMap[bits].append(num)
@@ -1160,26 +1161,26 @@ def bmp2ascii(bmp):
     return result
 
 def string2bmp(str,width):
-    print "string2bmp..."
+    print("string2bmp...")
     xtra = ""
     xtra = xtra + '0'*(width%4)
     ls = len(str)
     where = 0
     result = []
     while where<ls:
-        print '.',
+        print('.', end=' ')
         sys.stdout.flush()
         line = str[where:where+width]+xtra
         result.append(line)
         where += width
     for i in range(len(result)):
-        result[i] = map(int,result[i])
+        result[i] = list(map(int,result[i]))
     xtra_lines = len(result)%6
     if xtra_lines:
         xline = [0] * len(result[0])
         for i in range(xtra_lines):
             result.append(xline[:])
-    print "...done."
+    print("...done.")
     sys.stdout.flush()
     return result
 
@@ -1199,17 +1200,17 @@ def loadPbm(fname):
     result = []
     line = f.readline().split()
     while line:
-        print '.',
+        print('.', end=' ')
         sys.stdout.flush()
         result += line
         line = f.readline().split()
-    print "Reducing..."
+    print("Reducing...")
     rc = reduce(op.add,result),width
-    print "...done."
+    print("...done.")
     return rc
 
 if __name__ == "__main__":
-    print "OK"
+    print("OK")
     ok = \
        "01101001"\
        "10011010"\
@@ -1218,7 +1219,7 @@ if __name__ == "__main__":
        "10011010"\
        "01101001"
     bmp = string2bmp(ok,8)
-    print bmp2ascii(bmp)
+    print(bmp2ascii(bmp))
 
     ok = \
        "11101000"\
@@ -1228,7 +1229,7 @@ if __name__ == "__main__":
        "10111010"\
        "01111001"
     bmp = string2bmp(ok,8)
-    print bmp2ascii(bmp)
+    print(bmp2ascii(bmp))
 
     ok = \
        "11111111"\
@@ -1238,7 +1239,7 @@ if __name__ == "__main__":
        "11111111"\
        "11111111"
     bmp = string2bmp(ok,8)
-    print bmp2ascii(bmp)
+    print(bmp2ascii(bmp))
 
     ok = \
        "00000000"\
@@ -1248,14 +1249,14 @@ if __name__ == "__main__":
        "00000000"\
        "00000000"
     bmp = string2bmp(ok,8)
-    print bmp2ascii(bmp)
+    print(bmp2ascii(bmp))
 
 
-    print "Loading..."
+    print("Loading...")
     ok,width = loadPbm('/home/joe/src/wolf.pbm')
     #print "Inverting..."
     #ok = invertString(ok)
-    print "Done"
+    print("Done")
     bmp = string2bmp(ok,width)
-    print bmp2ascii(bmp)
+    print(bmp2ascii(bmp))
     

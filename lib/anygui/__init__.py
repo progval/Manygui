@@ -41,19 +41,19 @@ def application():
     #global _application
     if not _application:
         #_application = backendModule().Application()
-        raise RuntimeError, 'no application exists'
+        raise RuntimeError('no application exists')
     return _application
 
 def backend():
     'Returns the name of the current backend'
     if not _backend_name:
-        raise RuntimeError, 'no backend exists'
+        raise RuntimeError('no backend exists')
     return _backend_name
 
 def backendModule():
     'Returns the current backend module'
     if not _backend:
-        raise RuntimeError, 'no backend exists'
+        raise RuntimeError('no backend exists')
     return _backend
 
 def setup(self, **kwds):
@@ -157,7 +157,7 @@ def _backend_passthrough():
             _backend_name = name
             _backend      = mod
             return
-    raise RuntimeError, "no usable backend found"
+    raise RuntimeError("no usable backend found")
 
 # Pass the backend namespace through:
 _backend_passthrough()

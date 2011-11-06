@@ -1,6 +1,6 @@
-from Exceptions import UnimplementedMethod
-from Attribs import Attrib
-from Utils import flatten
+from .Exceptions import UnimplementedMethod
+from .Attribs import Attrib
+from .Utils import flatten
 from anygui.Utils import log
 import anygui
 
@@ -20,7 +20,7 @@ class AbstractApplication(Attrib,anygui.Defaults.Application):
         anygui._application = self
 
     def parseKwds(self, **kwds):
-        keys = kwds.keys()
+        keys = list(kwds.keys())
         if 'name' in keys:
             self._name = kwds['name']
         if 'version' in keys:
@@ -70,7 +70,7 @@ class AbstractApplication(Attrib,anygui.Defaults.Application):
         self._running = 0
 
     def internalRun(self):
-        raise UnimplementedMethod, (self, "mainloop")
+        raise UnimplementedMethod(self, "mainloop")
 
     def isRunning(self):
         return self._running
@@ -95,4 +95,4 @@ class AbstractApplication(Attrib,anygui.Defaults.Application):
         except ValueError: pass
 
     def quit(self):
-        raise UnimplementedMethod, (self, 'quit')
+        raise UnimplementedMethod(self, 'quit')

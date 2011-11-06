@@ -97,7 +97,7 @@ class ComponentWrapper(AbstractWrapper):
         self.addConstraint('geometry', 'visible')
 
     def widgetFactory(self,*args,**kws):
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def enterMainLoop(self): # ...
         if not self.widget: return
@@ -532,7 +532,7 @@ class FrameWrapper(ContainerMixin,ComponentWrapper):
         Frame or a Window).
         """
         #container.wrapper.widget.add(self.widget)
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def setContainer(self, *args, **kws):
         """
@@ -573,7 +573,7 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
         """
         Add self to the backend application, if required.
         """
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def widgetSetUp(self):
         """

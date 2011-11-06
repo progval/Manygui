@@ -72,13 +72,13 @@ class Frame(Component, Defaults.Frame):
                 except:
                     pass
         except:
-            print "Layout error, please contact Anygui team:"
+            print("Layout error, please contact Anygui team:")
             traceback.print_exc()
             pass
 
     def setLayout(self,lo):
         """ Special handling for setting the layout manager. """
-        if 'layout' in self.state.keys():
+        if 'layout' in list(self.state.keys()):
             self.layout.container = None
             ct = self.contents
             for item in ct:

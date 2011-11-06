@@ -9,7 +9,7 @@ else:
     dir='C:\\'
 
 def openFileDlgCallback(event):
-    print '>> file chosen -> ', event.file
+    print('>> file chosen -> ', event.file)
 
 app = Application(name='Test OpenFileDlg', version='1.0')
 filedlg = OpenFileDialog(dir,'*')

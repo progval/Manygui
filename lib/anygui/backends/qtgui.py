@@ -79,7 +79,7 @@ class Wrapper(AbstractWrapper):
         self.proxy.push()
 
     def internalDestroy(self):
-        if DEBUG: print "in internalDestroy of: ", self
+        if DEBUG: print("in internalDestroy of: ", self)
         if self.widget:
             self.widget.destroy()
 
@@ -195,7 +195,7 @@ class EventFilter(QObject):
     def eventFilter(self, object, event):
         #if DEBUG: print 'in eventFilter of: ', self._window_obj().widget
         type = event.type()
-        if not type in self._events.keys():
+        if not type in list(self._events.keys()):
             return 0
         return self._events[type](self._comp(), event)
 
@@ -339,9 +339,9 @@ class TextWrapperBase(ComponentWrapper):
 
     def widgetSetUp(self):
         if not self.connected:
-            events = {QEvent.KeyRelease: self.keyReleaseHandler.im_func,
-                      QEvent.FocusIn:    self.gotFocusHandler.im_func,
-                      QEvent.FocusOut:   self.lostFocusHandler.im_func}
+            events = {QEvent.KeyRelease: self.keyReleaseHandler.__func__,
+                      QEvent.FocusIn:    self.gotFocusHandler.__func__,
+                      QEvent.FocusOut:   self.lostFocusHandler.__func__}
             self.eventFilter = EventFilter(self, events)
             self.widget.installEventFilter(self.eventFilter)
             self.connected = 1
@@ -354,20 +354,20 @@ class TextWrapperBase(ComponentWrapper):
         return QString(str(self.text))
 
     def keyReleaseHandler(self, event):
-        if DEBUG: print 'in keyReleaseHandler of: ', self.widget
+        if DEBUG: print('in keyReleaseHandler of: ', self.widget)
         self.proxy.pull('text')
         if int(event.key()) == 0x1004: #Qt Return Key Code
-            if DEBUG: print 'enter key was pressed in ', self
+            if DEBUG: print('enter key was pressed in ', self)
             send(self.proxy, 'enterkey')
         return 1
 
     def gotFocusHandler(self, event):
-        if DEBUG: print 'in gotFocusHandler of: ', self.widget
+        if DEBUG: print('in gotFocusHandler of: ', self.widget)
         return 1
         #   send(self.proxy, 'gotfocus')
 
     def lostFocusHandler(self, event):
-        if DEBUG: print 'in lostFocusHandler of: ', self.widget
+        if DEBUG: print('in lostFocusHandler of: ', self.widget)
         return 1
         #   send(self.proxy, 'lostfocus')
 
@@ -392,13 +392,13 @@ class TextFieldWrapper(TextWrapperBase):
 
     def setSelection(self, selection):
         if self.widget:
-            if DEBUG: print 'in setSelection of: ', self.widget
+            if DEBUG: print('in setSelection of: ', self.widget)
             start, end = selection
             self.widget.setSelection(start, end-start)
 
     def getSelection(self):
         if self.widget:
-            if DEBUG: print 'in getSelection of: ', self.widget
+            if DEBUG: print('in getSelection of: ', self.widget)
             pos = self.widget.cursorPosition()
             if self.widget.hasSelectedText():
                 return self.widget.getSelection()[1:] #ignore bool
@@ -414,7 +414,7 @@ class TextAreaWrapper(TextWrapperBase):
         return QTextEdit(*args, **kwds)
 
     def setSelection(self, selection):
-        if DEBUG: print 'in setSelection of: ', self.widget
+        if DEBUG: print('in setSelection of: ', self.widget)
         if self.widget is not None:
             start, end = selection
             spara, sidx = self.qtTranslateParaIdx(start)
@@ -422,11 +422,11 @@ class TextAreaWrapper(TextWrapperBase):
             self.widget.setSelection(spara, sidx, epara, eidx)
 
     def getSelection(self):
-        if DEBUG: print 'in getSelection of: ', self.widget
+        if DEBUG: print('in getSelection of: ', self.widget)
         para, idx = self.widget.getCursorPosition()
-        if DEBUG: print 'cursor -> para: %s| idx: %s' %(para,idx)
+        if DEBUG: print('cursor -> para: %s| idx: %s' %(para,idx))
         pos = self.qtTranslatePosition(para, idx)
-        if DEBUG: print 'pos of cursor is: ', pos
+        if DEBUG: print('pos of cursor is: ', pos)
         if self.widget.hasSelectedText():
             spara, sidx, epara, eidx = self.widget.getSelection()
             spos = self.qtTranslatePosition(spara, sidx)
@@ -441,28 +441,28 @@ class TextAreaWrapper(TextWrapperBase):
             for n in range(self.widget.paragraphs()):
                 paras.append(str(self.widget.text(n)))
         if DEBUG:
-            print 'paragraphs are: \n'
+            print('paragraphs are: \n')
             for para in paras:
-                print para
+                print(para)
         return paras
 
     def qtTranslateParaIdx(self, pos):
-        if DEBUG: print 'translating pos to para/idx...'
+        if DEBUG: print('translating pos to para/idx...')
         para, idx, currPara, totLen = 0, 0, 0, 0
         for prg in self.qtGetParagraphs():
             if pos <= len(prg) + totLen:
                 para = currPara
                 idx  = pos - totLen
-                if DEBUG: print 'returning => para: %s| idx: %s' %(para,idx)
+                if DEBUG: print('returning => para: %s| idx: %s' %(para,idx))
                 return para, idx
             else:
                 currPara += 1
                 totLen   += len(prg)
-        if DEBUG: print 'returning => para: %s| idx: %s' %(para,idx)
+        if DEBUG: print('returning => para: %s| idx: %s' %(para,idx))
         return para, idx
 
     def qtTranslatePosition(self, para, idx):
-        if DEBUG: print 'translating para/idx to pos...'
+        if DEBUG: print('translating para/idx to pos...')
         paras = self.qtGetParagraphs()
         pos = 0
         for n in range(len(paras)):
@@ -471,7 +471,7 @@ class TextAreaWrapper(TextWrapperBase):
             else:
                 pos += idx
                 break
-        if DEBUG: print 'returning pos => ', pos
+        if DEBUG: print('returning pos => ', pos)
         return pos
 
 #==============================================================#
@@ -513,18 +513,18 @@ class WindowWrapper(ComponentWrapper):
 
     def widgetSetUp(self):
         if not self.connected:
-            events = {QEvent.Resize: self.resizeHandler.im_func,
-                      QEvent.Move:   self.moveHandler.im_func}
+            events = {QEvent.Resize: self.resizeHandler.__func__,
+                      QEvent.Move:   self.moveHandler.__func__}
             self.eventFilter = EventFilter(self, events)
             self.widget.installEventFilter(self.eventFilter)
             self.mainWinEventFilter = EventFilter(self,
                                                   {QEvent.Close:
-                                                   self.closeHandler.im_func})
+                                                   self.closeHandler.__func__})
             self.mainWindow.installEventFilter(self.mainWinEventFilter)
             self.connected = 1
 
     def resizeHandler(self, event):
-        if DEBUG: print 'in resizeHandler of: ', self.widget
+        if DEBUG: print('in resizeHandler of: ', self.widget)
 
         x, y, w, h = self.getGeometry()
         dw = w - self.proxy.state['width'] # @@@ With lazy semantics, these will be fetched from the widget!
@@ -537,7 +537,7 @@ class WindowWrapper(ComponentWrapper):
         return 1
 
     def moveHandler(self, event):
-        if DEBUG: print 'in moveHandler of: ', self.widget
+        if DEBUG: print('in moveHandler of: ', self.widget)
         nx = self.widget.x()
         ny = self.widget.y()
         dx = nx - self.proxy.state['x']
@@ -550,7 +550,7 @@ class WindowWrapper(ComponentWrapper):
         return 1
 
     def closeHandler(self, event):
-        if DEBUG: print 'in closeHandler of: ', self.widget
+        if DEBUG: print('in closeHandler of: ', self.widget)
         # What follows is a dirty hack, but PyQt will seg-fault the
         # interpreter if a call onto QWidget.destroy() is made after
         # the Widget has been closed. It is also necessary to inform
@@ -595,7 +595,7 @@ class WindowWrapper(ComponentWrapper):
             component.container = self.proxy
 
     def internalDestroy(self):
-        if DEBUG: print "in internalDestroy of: ", self
+        if DEBUG: print("in internalDestroy of: ", self)
         self.mainWindow.destroy()
         application().remove(self.proxy)
 
@@ -714,7 +714,7 @@ class MenuWrapper(MenuItemMixin, ComponentWrapper):
         if self.proxy.container is not None and \
            self.proxy.container.wrapper.widget is not None:
             parent = self.proxy.container.wrapper.widget
-            if DEBUG: print "\nREBUILDING: ", self,self.proxy.contents
+            if DEBUG: print("\nREBUILDING: ", self,self.proxy.contents)
             if self.widget is not None:
                 self.widget.clear()
             else:
@@ -752,7 +752,7 @@ class MenuCommandWrapper(MenuItemMixin, AbstractWrapper):
         self.itemId = widget.insertItem(self.proxy.text, self.clickHandler)
 
     def clickHandler(self,*args,**kws):
-        if DEBUG: print "CLICKED: ", self
+        if DEBUG: print("CLICKED: ", self)
         send(self.proxy,'click',text=self.proxy.text)
 
 class MenuCheckWrapper(MenuCommandWrapper):

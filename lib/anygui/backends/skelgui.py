@@ -104,12 +104,12 @@ class ComponentWrapper(AbstractWrapper):
         here to create a Windows native widget. The value returned
         will be immediately assigned to self.widget by the Anygui
         framework; henceforth you should refer to self.widget. """
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def enterMainLoop(self): # ...
         """ enterMainLoop() is called when the application event loop is
         started for the first time. """
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def destroy(self):
         """
@@ -120,7 +120,7 @@ class ComponentWrapper(AbstractWrapper):
         native widget.
         """
         self.widget = None
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     # From here on, all methods in this class are getters and setters.
     # Setters must be implemented; they are called automatically in
@@ -179,7 +179,7 @@ class ComponentWrapper(AbstractWrapper):
         # Ensure native widget is brought up to date wrt the proxy
         # state.
         self.proxy.push(blocked=['container'])
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def setGeometry(self,x,y,width,height):
         """ Set the native widget's geometry. Note that we call
@@ -188,24 +188,24 @@ class ComponentWrapper(AbstractWrapper):
         all setter and getter methods, unless you have a very good
         reason not to. """
         if self.noWidget(): return
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def getGeometry(self):
         """ Get the native widget's geometry as an (x,y,w,h) tuple.
         Since the geometry can be changed by the user dragging the
         window frame, you must implement this method. """
         if self.noWidget(): return
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def setVisible(self,visible):
         """ Set/get the native widget's visibility. """
         if self.noWidget(): return
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def setEnabled(self,enabled):
         """ Set/get the native widget's enabled/disabled state. """
         if self.noWidget(): return
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def setText(self,text):
         """ Set/get the text associated with the widget. This might be
@@ -213,7 +213,7 @@ class ComponentWrapper(AbstractWrapper):
         or whatever.
         """
         if self.noWidget(): return
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
 class LabelWrapper(ComponentWrapper):
     """
@@ -234,14 +234,14 @@ class ListBoxWrapper(ComponentWrapper):
         strings, or of str()-able objects.
         """
         if self.noWidget(): return
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def getItems(self):
         """
         Return ths listbox contents, in order, as a list of strings.
         """
         if self.noWidget(): return
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def setSelection(self,selection):
         """
@@ -249,14 +249,14 @@ class ListBoxWrapper(ComponentWrapper):
         item to be selected.
         """
         if self.noWidget(): return
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def getSelection(self):
         """
         Return the selected listbox item index as an integer.
         """
         if self.noWidget(): return
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def widgetSetUp(self):
         """
@@ -270,7 +270,7 @@ class ListBoxWrapper(ComponentWrapper):
         self._select() sends the event, so here you should associate
         the back-end's selection event with the self._select method.
         """
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def _select(self,*args):
         """
@@ -297,7 +297,7 @@ class ButtonWrapper(ComponentWrapper):
         Register a backend event handler to call self.click when
         the user clicks the button.
         """
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def _click(self,*args,**kws):
         send(self.proxy,'click')
@@ -317,12 +317,12 @@ class ToggleButtonMixin(ButtonWrapper):
     def getOn(self):
         """ Return the button's state: 1 for checked, 0 for not. """
         if self.noWidget(): return
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def setOn(self,on):
         """ Set the button's state. """
         if self.noWidget(): return
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
 class CheckBoxWrapper(ToggleButtonMixin):
     """
@@ -378,7 +378,7 @@ class TextControlMixin:
         or whatever.
         """
         if self.noWidget(): return
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def getText(self):
         """
@@ -387,7 +387,7 @@ class TextControlMixin:
         from ComponentWrapper (almost) certainly won't work.
         """
         if self.noWidget(): return
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def setEditable(self,editable):
         """
@@ -396,7 +396,7 @@ class TextControlMixin:
         but should not accept user input.
         """
         if self.noWidget(): return
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def getSelection(self):
         """
@@ -404,7 +404,7 @@ class TextControlMixin:
         selection, as a tuple; or (0,0) if there's no selection.
         """
         if self.noWidget(): return
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def setSelection(self,selection):
         """
@@ -413,7 +413,7 @@ class TextControlMixin:
         the widget text that should be covered by the selection.
         """
         if self.noWidget(): return
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
 class TextFieldWrapper(TextControlMixin,ComponentWrapper):
     """
@@ -424,7 +424,7 @@ class TextFieldWrapper(TextControlMixin,ComponentWrapper):
         """
         Arrange for a press of the "Enter" key to call self._return.
         """
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def _return(self,*args,**kws):
         send(self.proxy, 'enterkey')
@@ -488,7 +488,7 @@ class FrameWrapper(ContainerMixin,ComponentWrapper):
         Frame or a Window).
         """
         #container.wrapper.widget.add(self.widget)
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
 class WindowWrapper(ContainerMixin,ComponentWrapper):
     """
@@ -503,14 +503,14 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
         """
         Add self to the backend application, if required.
         """
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def widgetSetUp(self):
         """
         Arrange for self.resize() to be called whenever the user
         interactively resizes the window.
         """
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def resize(self,dw,dh):
         """
@@ -536,4 +536,4 @@ class Application(AbstractApplication):
         Do whatever is necessary to start your backend's event-
         handling loop.
         """
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')

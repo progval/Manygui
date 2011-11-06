@@ -1,8 +1,8 @@
 
-from Components import Component
-from Colors import *
-from Fonts import *
-import Defaults
+from .Components import Component
+from .Colors import *
+from .Fonts import *
+from . import Defaults
 
 figureLine = 1
 figureArc = 2
@@ -29,7 +29,7 @@ class Canvas(Component, Defaults.Canvas):
 
     def clear(self):
         "Call this to clear and reset the graphics context."
-        raise NotImplementedError, 'clear'
+        raise NotImplementedError('clear')
 
     def drawLine(self, x1, y1, x2, y2, color=None, width=None):
         "Draw a straight line between x1,y1 and x2,y2."
@@ -115,7 +115,7 @@ class Canvas(Component, Defaults.Canvas):
         pointlist: a list of (x,y) tuples defining vertices
         closed: if 1, adds an extra segment connecting the last point to the first
         """
-        raise NotImplementedError, 'drawPolygon'
+        raise NotImplementedError('drawPolygon')
 	
     def drawFigure(self, partList,
                    edgeColor=None, edgeWidth=None, fillColor=None, closed=0):
@@ -133,11 +133,11 @@ class Canvas(Component, Defaults.Canvas):
             if op == figureLine:
                 pointList.extend( [args[:2], args[2:]] )
             elif op == figureArc:
-                pointList.extend(apply(arcPoints,args))
+                pointList.extend(arcPoints(*args))
             elif op == figureCurve:
-                pointList.extend(apply(curvePoints,args))
+                pointList.extend(curvePoints(*args))
             else:
-                raise TypeError, "unknown figure operator: "+op
+                raise TypeError("unknown figure operator: "+op)
 	
             self.drawPolygon(pointList, edgeColor, edgeWidth, fillColor, closed=closed)
 

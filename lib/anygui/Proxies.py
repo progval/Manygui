@@ -1,5 +1,5 @@
-from Attribs import Attrib
-from Models  import Model
+from .Attribs import Attrib
+from .Models  import Model
 
 class Proxy(Attrib):
 
@@ -24,7 +24,7 @@ class Proxy(Attrib):
         Button class, this method would return an instance of the
         class anygui.backend.ButtonWrapper.
         """
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
     def _partialState(self, *names, **kwds):
         """
@@ -65,7 +65,7 @@ class Proxy(Attrib):
         # ==== MODEL SUPPORT ==== #
         # After we have pulled the actual values from the widget,
         # We need to update all installed models with them.
-        for prop in state.keys():
+        for prop in list(state.keys()):
             try:
                 model = self._installedModels[prop]
                 # locked update of model, this keeps model
@@ -107,7 +107,7 @@ class Proxy(Attrib):
         
         # ==== MODEL SUPPORT ==== #
         state = self._partialState(*names,**kwds)
-        for prop in state.keys():
+        for prop in list(state.keys()):
             try:
                 model = self._installedModels[prop]
                 # if state[prop] is not the model, this means that rawSet
@@ -160,7 +160,7 @@ class Proxy(Attrib):
         # @@@ do we need del self.wrapper here ?
 
     def installModel(self, obj, name, model):
-        if self._installedModels.has_key(name):
+        if name in self._installedModels:
             self.removeModel(obj, name)
         self._installedModels[name] = model
         # need to call rawSet to avoid use of default when

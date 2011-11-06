@@ -13,7 +13,7 @@ opt = Options(geometry=(10,45,260,145), visible=0)
 fms = [Frame(opt) for i in range(num)]
 #fms = [Button(opt, text='Button %s' % i) for i in range(num)] # Debugging
 n = 0
-for frm, i in zip(fms,range(num)):
+for frm, i in zip(fms,list(range(num))):
     lbl = Label(text='This is Frame number %s.' % i)
     lbl.geometry = 10, 10, 200, 15
     btn = Button(text = 'A button')

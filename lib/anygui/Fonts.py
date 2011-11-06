@@ -32,4 +32,4 @@ class Font:
                                          self.underline, repr(self.face))
 
     def __setattr__(self, name, value):
-        raise TypeError, "anygui.Font has read-only attributes"
+        raise TypeError("anygui.Font has read-only attributes")

@@ -1,6 +1,6 @@
 #==============================================================#
 # Imports
-from __future__ import nested_scopes
+
 
 # For Widgets
 import anygui
@@ -11,7 +11,7 @@ from time import sleep
 # For Dialogs
 from anygui.Models import ListModel
 from anygui.LayoutManagers import SimpleGridManager
-from UserList import UserList
+from collections import UserList
 import re
 import sys, glob, os
 import traceback
@@ -661,8 +661,8 @@ class OpenFileDialog(anygui.Window):
         self._updating = 0
 
     def changeDirs(self, event):
-        print ">> Got event: ", event
-        print ">> event dict: ", event.__dict__
+        print(">> Got event: ", event)
+        print(">> event dict: ", event.__dict__)
 
     def applyFilter(self, event):
         #print ">> Got event: ", event

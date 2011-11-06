@@ -52,13 +52,13 @@ def shake_using(comp,aggr1,aggr2):
         g1 = GET[aggr2](comp)
         if g0 != g or g1 != g:
             kind = comp.__class__.__name__
-            print "!%s: %s<-%s => %s=%s %s=%s" % (kind,set_aggr,g,aggr1,g0,aggr2,g1)            
+            print("!%s: %s<-%s => %s=%s %s=%s" % (kind,set_aggr,g,aggr1,g0,aggr2,g1))            
             fail += 1
     return fail
 
 def shake_comp(comp):
     fail = 0
-    K = GET.keys()
+    K = list(GET.keys())
     for g in K:
         for s in K:
             fail += shake_using(comp,g,s)
@@ -69,9 +69,9 @@ def shake(event):
     for comp in [win,btn,cbx,lbl,lst,rdb,txa,txf]:
         fail += shake_comp(comp)
     if not fail:
-        print "test passed"
+        print("test passed")
     else:
-        print 'test failed',fail
+        print('test failed',fail)
 
 
 link(btn,shake)

@@ -37,7 +37,7 @@ def _from_native(text):
 class LocalWinDLL(WinDLL):
     def __getattr__(self, name):
         if name[:2] == '__' and name[-2:] == '__':
-            raise AttributeError, name
+            raise AttributeError(name)
         try:
             func = self._StdcallFuncPtr(name, self)
         except:
@@ -82,7 +82,7 @@ def not_minus_one(value):
 
 def not_null_noinfo(value):
     "Check return code of functions returning 0 on error, but do not set an error code"
-    if value == 0: raise WindowsError, "function failed"
+    if value == 0: raise WindowsError("function failed")
     return value
 
 def ret_atom(value):
@@ -806,7 +806,7 @@ class Application(AbstractApplication):
     def __str__(self):
         return '<%s.Application 0x%s>' % (__file__,id(self))
 
-    def __nonzero__(self):
+    def __bool__(self):
         return _app is not None
 
     def _register_class(self):

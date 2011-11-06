@@ -1,9 +1,9 @@
 
-import UserList, UserDict, sys, types
+import collections, UserDict, sys, types
 
 weakref = None
 
-from Utils import generic_hash
+from .Utils import generic_hash
 
 # Possible additions:
 # - Add callbacks to CallableReference
@@ -20,9 +20,9 @@ def ref(obj, weak, _plain=0):
 def mapping(init={}): return RefKeyDictionary(init)
 
 def is_callable(obj):
-    if callable(obj): return 1
+    if isinstance(obj, collections.Callable): return 1
     try:
-        return callable(obj[1])
+        return isinstance(obj[1], collections.Callable)
     except:
         return 0
 
@@ -89,10 +89,10 @@ def unwrap(func):
     if is_callable_instance(func):
         func = func.__call__
     if is_method(func):
-        if func.im_self is not None:
-            if obj is None: obj = func.im_self
-            else: assert obj is func.im_self
-        func = func.im_func
+        if func.__self__ is not None:
+            if obj is None: obj = func.__self__
+            else: assert obj is func.__self__
+        func = func.__func__
     return obj, func
 
 class CallableReference(Hashable):
@@ -147,7 +147,7 @@ class RefKeyDictionary(UserDict.UserDict):
 
     def copy(self):
         new = RefKeyDictionary()
-        for key, value in self.data.items():
+        for key, value in list(self.data.items()):
             obj = key()
             if obj is not None:
                 new[obj] = value
@@ -155,7 +155,7 @@ class RefKeyDictionary(UserDict.UserDict):
 
     def items(self):
         L = []
-        for key, value in self.data.items():
+        for key, value in list(self.data.items()):
             obj = key()
             if obj is not None:
                 L.append((key, value))
@@ -169,11 +169,11 @@ class RefKeyDictionary(UserDict.UserDict):
     __iter__ = iterkeys
 
     def itervalues(self):
-        return self.data.itervalues()
+        return iter(self.data.values())
 
     def keys(self):
         L = []
-        for key in self.data.keys():
+        for key in list(self.data.keys()):
             obj = key()
             if obj is not None:
                 L.append(key)
@@ -187,7 +187,7 @@ class RefKeyDictionary(UserDict.UserDict):
                 return key, value
 
     def update(self, dict):
-        for key, value in dict.items():
+        for key, value in list(dict.items()):
             self[key] = value
 
 class BaseIter:
@@ -197,9 +197,9 @@ class BaseIter:
 
 class RefKeyedKeyIterator(BaseIter):
     def __init__(self, refdict):
-        self._next = refdict.data.iterkeys().next
+        self._next = iter(refdict.data.keys()).__next__
 
-    def next(self):
+    def __next__(self):
         while 1:
             key = self._next()
             obj = key()
@@ -209,14 +209,14 @@ class RefKeyedKeyIterator(BaseIter):
 
 class RefKeyedItemIterator(BaseIter):
     def __init__(self, refdict):
-        self._next = refdict.data.iteritems().next
+        self._next = iter(refdict.data.items()).__next__
 
-    def next(self):
+    def __next__(self):
         while 1:
             key, value = self._next()
             obj = key()
             if obj is not None:
                 return key, value
 
-class RefValueList(UserList.UserList):
+class RefValueList(collections.UserList):
     pass # TBD

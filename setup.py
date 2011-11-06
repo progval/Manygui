@@ -38,7 +38,7 @@ class uninstall(Command):
                 if not self.dry_run:
                     try:
                         os.remove(name)
-                    except OSError, details:
+                    except OSError as details:
                         self.warn("Could not remove file: %s" % details)
                     if os.path.splitext(name)[1] == '.py':
                         # Try to remove .pyc and -pyo files also
@@ -55,7 +55,7 @@ class uninstall(Command):
                 if not self.dry_run:
                     try:
                         os.rmdir(name)
-                    except OSError, details:
+                    except OSError as details:
                         self.warn("Are there additional user files?\n"\
                               "  Could not remove directory: %s" % details)
             else:

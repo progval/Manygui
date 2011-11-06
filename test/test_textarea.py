@@ -30,7 +30,7 @@ def update_label(event=None):
     global ta, lbl
     sel = ta.selection
     text = ta.text
-    print "############## selection = ", sel
+    print("############## selection = ", sel)
     lbl.text = text[:sel[0]] + \
                '[' + text[sel[0]:sel[1]] + ']' + \
                 text[sel[1]:]

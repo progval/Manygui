@@ -16,7 +16,7 @@ class MenuCommand(Proxy,DefaultEventMixin,Defaults.MenuCommand):
     def __init__(self, *args, **kw):
         DefaultEventMixin.__init__(self)
         Proxy.__init__(self, *args, **kw)
-        if 'command' in kw.keys():
+        if 'command' in list(kw.keys()):
             link(self,kw['command'])
 
     def wrapperFactory(self):
@@ -26,7 +26,7 @@ class MenuCheck(Proxy,DefaultEventMixin,Defaults.MenuCheck):
     def __init__(self, *args, **kw):
         DefaultEventMixin.__init__(self)
         Proxy.__init__(self, *args, **kw)
-        if 'command' in kw.keys():
+        if 'command' in list(kw.keys()):
             link(self,kw['command'])
 
     def wrapperFactory(self):

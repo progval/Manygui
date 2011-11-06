@@ -22,7 +22,7 @@ __all__ = '''
 
 ################################################################
 
-import Tkinter, re
+import tkinter, re
 from anygui.Applications import AbstractApplication
 from anygui.Wrappers import AbstractWrapper
 from anygui.Events import *
@@ -34,7 +34,7 @@ class Application(AbstractApplication):
 
     def __init__(self, **kwds):
         AbstractApplication.__init__(self, **kwds)
-        self._root = Tkinter.Tk()
+        self._root = tkinter.Tk()
         self._root.withdraw()
     
     def internalRun(self):
@@ -162,10 +162,10 @@ class ComponentWrapper(Wrapper):
 
     def setEnabled(self, enabled):
         if not self.widget: return
-        if enabled: newstate = Tkinter.NORMAL
-        else: newstate = Tkinter.DISABLED
+        if enabled: newstate = tkinter.NORMAL
+        else: newstate = tkinter.DISABLED
         try: self.widget.config(state=newstate)
-        except Tkinter.TclError:
+        except tkinter.TclError:
             # Widget doesn't support -state
             pass
 
@@ -199,7 +199,7 @@ class ButtonWrapper(ComponentWrapper):
         self.widget.configure(command=self.clickHandler)
 
     def widgetFactory(self, *args, **kwds):
-        return Tkinter.Button(*args, **kwds)
+        return tkinter.Button(*args, **kwds)
 
     def setText(self, text):
         if not self.widget: return
@@ -208,7 +208,7 @@ class ButtonWrapper(ComponentWrapper):
 class LabelWrapper(ComponentWrapper):
 
     def widgetFactory(self, *args, **kws):
-        return Tkinter.Label(*args, **kws)
+        return tkinter.Label(*args, **kws)
 
     def setText(self, text):
         if not self.widget: return
@@ -294,7 +294,7 @@ class TkTextMixin:
 class TextFieldWrapper(ComponentWrapper, TkTextMixin):
 
     def widgetFactory(self, *args, **kws):
-        widget=Tkinter.Entry(*args, **kws)
+        widget=tkinter.Entry(*args, **kws)
         self.install_bindings(widget)
         return widget
 
@@ -308,13 +308,13 @@ class TextFieldWrapper(ComponentWrapper, TkTextMixin):
     def setText(self, text):
         if not self.widget: return
         disabled=0
-        if self.widget.cget('state') != Tkinter.NORMAL:
-            self.widget.configure(state=Tkinter.NORMAL)
+        if self.widget.cget('state') != tkinter.NORMAL:
+            self.widget.configure(state=tkinter.NORMAL)
             disabled=1
-        self.widget.delete(0, Tkinter.END)
+        self.widget.delete(0, tkinter.END)
         self.widget.insert(0, text)
         if disabled:
-            self.widget.configure(state=Tkinter.DISABLED)
+            self.widget.configure(state=tkinter.DISABLED)
 
     def getText(self):
         assert self.widget,"?! wrapper getXxx w/o widget"
@@ -337,7 +337,7 @@ class TextFieldWrapper(ComponentWrapper, TkTextMixin):
             start = end = self.widget.index('insert')
         return start, end
 
-class ScrollableTextArea(Tkinter.Frame):
+class ScrollableTextArea(tkinter.Frame):
 
     # Replacement for Tkinter.Text
 
@@ -345,18 +345,18 @@ class ScrollableTextArea(Tkinter.Frame):
     mark_set tag_add tag_remove tag_names configure""".split()
 
     def __init__(self, *args, **kw):
-        Tkinter.Frame.__init__(self, *args, **kw)
+        tkinter.Frame.__init__(self, *args, **kw)
         
-        self._yscrollbar = Tkinter.Scrollbar(self)
-        self._yscrollbar.pack(side=Tkinter.RIGHT, fill=Tkinter.Y)
+        self._yscrollbar = tkinter.Scrollbar(self)
+        self._yscrollbar.pack(side=tkinter.RIGHT, fill=tkinter.Y)
 
-        self._xscrollbar = Tkinter.Scrollbar(self, orient=Tkinter.HORIZONTAL)
-        self._xscrollbar.pack(side=Tkinter.BOTTOM, fill=Tkinter.X)
+        self._xscrollbar = tkinter.Scrollbar(self, orient=tkinter.HORIZONTAL)
+        self._xscrollbar.pack(side=tkinter.BOTTOM, fill=tkinter.X)
         
-        self._textarea = Tkinter.Text(self,
+        self._textarea = tkinter.Text(self,
                                       yscrollcommand=self._yscrollbar.set,
                                       xscrollcommand=self._xscrollbar.set)
-        self._textarea.pack(side=Tkinter.TOP, expand=Tkinter.YES, fill=Tkinter.BOTH)
+        self._textarea.pack(side=tkinter.TOP, expand=tkinter.YES, fill=tkinter.BOTH)
 
         self._yscrollbar.config(command=self._textarea.yview)
         self._xscrollbar.config(command=self._textarea.xview)
@@ -373,7 +373,7 @@ class TextAreaWrapper(ComponentWrapper, TkTextMixin):
 
     def getText(self):
         assert self.widget,"?! wrapper getXxx w/o widget"
-        return self.widget.get(1.0, Tkinter.END)[:-1] # Remove the extra newline. (Always?)
+        return self.widget.get(1.0, tkinter.END)[:-1] # Remove the extra newline. (Always?)
 
     def _to_char_index(self, idx):
         # This is no fun, but there doesn't seem to be an easier way than
@@ -394,7 +394,7 @@ class TextAreaWrapper(ComponentWrapper, TkTextMixin):
         try:
             start = self.widget.index('sel.first')
             end = self.widget.index('sel.last')
-        except Tkinter.TclError:
+        except tkinter.TclError:
             start = end = self.widget.index('insert')
             # Convert to character positions...
         # This could be more efficient if _to_char_index() took
@@ -406,13 +406,13 @@ class TextAreaWrapper(ComponentWrapper, TkTextMixin):
     def setText(self, text):
         if not self.widget: return
         disabled=0
-        if self.widget.cget('state') != Tkinter.NORMAL:
-            self.widget.config(state=Tkinter.NORMAL) # Make sure we can change the text
+        if self.widget.cget('state') != tkinter.NORMAL:
+            self.widget.config(state=tkinter.NORMAL) # Make sure we can change the text
             disabled=1
-        self.widget.delete(1.0, Tkinter.END)
+        self.widget.delete(1.0, tkinter.END)
         self.widget.insert(1.0, text)
         if disabled:
-            self.widget.config(state=Tkinter.DISABLED)
+            self.widget.config(state=tkinter.DISABLED)
 
     def setSelection(self, selection):
         if not self.widget: return
@@ -440,17 +440,17 @@ class ListBoxWrapper(ComponentWrapper):
 
     def widgetFactory(self, *args, **kws):
         kws.setdefault('exportselection', 0)
-        widget=Tkinter.Listbox(*args, **kws)
+        widget=tkinter.Listbox(*args, **kws)
         widget.bind('<ButtonRelease-1>', self.clickHandler)
         widget.bind('<KeyRelease-space>', self.clickHandler)
         return widget
 
     def setItems(self, items):
         if not self.widget: return
-        self.widget.delete(0, Tkinter.END)
+        self.widget.delete(0, tkinter.END)
         self.items = items[:]
         for item in self.items:
-            self.widget.insert(Tkinter.END, str(item))
+            self.widget.insert(tkinter.END, str(item))
 
     def getItems(self):
         assert self.widget,"?! wrapper getXxx w/o widget"
@@ -458,7 +458,7 @@ class ListBoxWrapper(ComponentWrapper):
 
     def setSelection(self, selection):
         if not self.widget: return
-        self.widget.select_clear(0, Tkinter.END)
+        self.widget.select_clear(0, tkinter.END)
         self.widget.select_set(selection)
 
     def getSelection(self):
@@ -477,7 +477,7 @@ class ListBoxWrapper(ComponentWrapper):
 class ToggleButtonMixin:
 
     def __init__(self):
-        self._var = Tkinter.IntVar()
+        self._var = tkinter.IntVar()
         self._var.set(0)
 
     def initArgs(self):
@@ -512,7 +512,7 @@ class RadioButtonWrapper(ToggleButtonMixin, ComponentWrapper):
 
     def widgetFactory(self, *args, **kws):
         kws.update(self.initArgs())
-        return Tkinter.Radiobutton(*args, **kws)
+        return tkinter.Radiobutton(*args, **kws)
 
     def getOn(self):
         assert self.widget,"?! wrapper getXxx w/o widget"
@@ -521,7 +521,7 @@ class RadioButtonWrapper(ToggleButtonMixin, ComponentWrapper):
     def setGroup(self, group):
         if not self.widget: return
         if group is None:
-            self._var = Tkinter.IntVar()
+            self._var = tkinter.IntVar()
             self.widget.configure(variable=self._var)
             return
         if self.proxy not in group._items:
@@ -529,7 +529,7 @@ class RadioButtonWrapper(ToggleButtonMixin, ComponentWrapper):
         try:
             var = RadioButtonWrapper.groupMap[group]
         except KeyError:
-            var = Tkinter.IntVar()
+            var = tkinter.IntVar()
             RadioButtonWrapper.groupMap[group] = var
         self._var = var
         self.widget.configure(variable=self._var)
@@ -558,7 +558,7 @@ class CheckBoxWrapper(ToggleButtonMixin, ComponentWrapper):
 
     def widgetFactory(self, *args, **kws):
         kws.update(self.initArgs())
-        return Tkinter.Checkbutton(*args, **kws)
+        return tkinter.Checkbutton(*args, **kws)
 
     def getOn(self):
         assert self.widget,"?! wrapper getXxx w/o widget"
@@ -569,7 +569,7 @@ class FrameWrapper(ComponentWrapper):
     def widgetFactory(self, *args, **kws):
         #kws['relief'] = 'sunken'
         kws['borderwidth'] = 2
-        widget=Tkinter.Frame(*args, **kws)
+        widget=tkinter.Frame(*args, **kws)
         return widget
 
     def setContainer(self, *args, **kws):
@@ -696,7 +696,7 @@ class WindowWrapper(ComponentWrapper):
         else: self.widget.withdraw()
 
     def widgetFactory(self, *args, **kwds):
-        return Tkinter.Toplevel(*args, **kwds)
+        return tkinter.Toplevel(*args, **kwds)
 
 class MenuItemMixin:
 
@@ -762,7 +762,7 @@ class MenuWrapper(MenuItemMixin,AbstractWrapper):
 
     def widgetFactory(self,*args,**kws):
         kws.update({'tearoff':0})
-        return Tkinter.Menu(*args,**kws)
+        return tkinter.Menu(*args,**kws)
 
     def setContainer(self,container):
         if container is None:
@@ -829,7 +829,7 @@ class MenuCheckWrapper(MenuCommandWrapper):
 
     def __init__(self,*args,**kws):
         MenuCommandWrapper.__init__(self,*args,**kws)
-        self.var = Tkinter.IntVar()
+        self.var = tkinter.IntVar()
 
     def itemAddTo(self,parent):
         #print "Adding checkbutton",item.wrapper,"to",self

@@ -72,7 +72,7 @@ def checkWin():
 
 def doMove(the_btn = -1):
     if the_btn == -1:
-        print "Something's wrong..."
+        print("Something's wrong...")
         return
 
     btns[the_btn].text = 'x'

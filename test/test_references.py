@@ -151,7 +151,7 @@ RefKeyDictionary:
 """
 
 if __name__ == "__main__":
-    print "If you want detailed output, use \"python test_references.py -v\"."
-    print "No output after this line indicates success."
+    print("If you want detailed output, use \"python test_references.py -v\".")
+    print("No output after this line indicates success.")
     import doctest, test_references
     doctest.testmod(test_references)

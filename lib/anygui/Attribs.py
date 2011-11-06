@@ -1,6 +1,7 @@
-from __future__ import nested_scopes # Support for 2.1
-from Events import link, send
-from Utils import getGetter,getSetter,getterName,uncapitalizeAttribute
+ # Support for 2.1
+from .Events import link, send
+from .Utils import getGetter,getSetter,getterName,uncapitalizeAttribute
+import collections
 
 # DONE: Add mechanism for internal attributes (not in state[]). Uses
 # _foo naming convention for now...::
@@ -33,7 +34,7 @@ class Attrib:
         self.__dict__[name] = value
 
     def __setattr__(self, name, value):
-        if name == 'state' or name[0] == '_'or self.__dict__.has_key(name):
+        if name == 'state' or name[0] == '_'or name in self.__dict__:
             self.__dict__[name] = value
         else:
             method = getSetter(self,name)
@@ -43,9 +44,9 @@ class Attrib:
                 self.set(**{name: value})
 
     def __getattr__(self, name):
-        if name[0] == '_': raise AttributeError, name
+        if name[0] == '_': raise AttributeError(name)
         if name == 'state':
-            raise AttributeError, name
+            raise AttributeError(name)
         if name[:3] != 'set' and name[:3] != 'get':
             method = getGetter(self,name)
             if method:
@@ -63,8 +64,8 @@ class Attrib:
         # === END FOR MODELS === #
 
         
-        if not self.state.has_key(name):
-            raise AttributeError, name
+        if name not in self.state:
+            raise AttributeError(name)
         try:
             # Lazy update.
             if name not in self._getstack:
@@ -112,9 +113,9 @@ class Attrib:
 
 
 def optsAndKwdsItems(args, kwds):
-    items = kwds.items()
+    items = list(kwds.items())
     for opt in args:
-        items.extend(opt.__dict__.items())
+        items.extend(list(opt.__dict__.items()))
     return items
 
 
@@ -129,7 +130,7 @@ def modattr(obj, name, value):
             # no in-place mod, so, just set it (bind or re-bind)
             # Use rawSet() if available:
             setter = getattr(obj, 'rawSet', None)
-            if callable(setter):
+            if isinstance(setter, collections.Callable):
                 setter(**{name: value})
             else: setattr(obj, name, value)
             return

@@ -106,7 +106,7 @@ class Wrapper:
 
     def stateUpdate(self, state):
         # Should be more "intelligent":
-        for key, val in state.iteritems():
+        for key, val in state.items():
             setter = getattr(self, 'set'+key[1:].capitalize(), None)
             if setter: setter(val)
 

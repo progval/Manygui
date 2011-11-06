@@ -727,7 +727,7 @@ class Application(AbstractApplication):
     def __str__(self):
         return '<%s.Application 0x%s>' % (__file__,id(self))
 
-    def __nonzero__(self):
+    def __bool__(self):
         return _app is not None
 
     def _register_class(self):
@@ -831,7 +831,7 @@ if  1 and _verbose:
         s('\t\traise')
         s('setattr(C,oldmethodname,oldmethod)')
         s('setattr(C,methodname,new.instancemethod(%s,None,C))' % methodname)
-        exec '\n'.join(S) + '\n' in locals()
+        exec('\n'.join(S) + '\n', locals())
         n += 1
 
     for a in __all__:

@@ -95,6 +95,7 @@ def inversegray(i):
     return result
 
 import operator
+from functools import reduce
 def bitstring(i):
     if i == 0: return '0'
     result = []
@@ -121,7 +122,7 @@ if __name__ == "__main__":
     for i in range(0,32):
         g = gray(i)
         ig = inversegray(g)
-        print "%s --> %s <-- %s"%(bitstring(i),bitstring(g),bitstring(ig))
+        print("%s --> %s <-- %s"%(bitstring(i),bitstring(g),bitstring(ig)))
         bsi = bitstring(i)
         ibsi = stringbits(bsi)
-        print "%d --> %s <-- %d"%(i,bsi,ibsi)
+        print("%d --> %s <-- %d"%(i,bsi,ibsi))

@@ -15,7 +15,7 @@ class Color:
         d["blue"] = _float(blue)
 
     def __setattr__(self, name, value):
-        raise TypeError, "piddle.Color has read-only attributes"
+        raise TypeError("piddle.Color has read-only attributes")
 
     def __mul__(self,x):
         return Color(self.red*x, self.green*x, self.blue*x)

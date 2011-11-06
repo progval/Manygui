@@ -1,4 +1,4 @@
-from Components import Component
+from .Components import Component
 from anygui import Defaults, backendModule
 
 class Label(Component, Defaults.Label):

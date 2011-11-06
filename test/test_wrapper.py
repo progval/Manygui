@@ -60,7 +60,7 @@ class WrapperWithAggregatesTestCase(TestCase):
         self.failUnless(len(u) == 0, 'There should be no unhandled attributes')
         self.failUnless(len(s) == 1, 'Exactly one setter should be returned')
         self.failUnless(s[0][0].__name__ == settername, 'The setter should '+settername+'()')
-        self.failUnless(len(s[0][1]) == len(attrs), 'The setter should cover '+`len(attrs)`+' attributes')
+        self.failUnless(len(s[0][1]) == len(attrs), 'The setter should cover '+repr(len(attrs))+' attributes')
         for attr in attrs:
             self.failUnless(attr in s[0][1], attr + ' should be covered')
 
@@ -105,7 +105,7 @@ class WrapperWithoutAggregatesTestCase(TestCase):
     def genericAggregateTest(self, attrs):
         s, u = self.wrapper.getSetters(attrs)
         self.failUnless(len(u) == 0, 'There should be no unhandled attributes')
-        self.failUnless(len(s) == len(attrs), 'Exactly ' + `len(attrs)` + 'setters should be returned')
+        self.failUnless(len(s) == len(attrs), 'Exactly ' + repr(len(attrs)) + 'setters should be returned')
         handled_attrs = []
         for x in s:
             self.failUnless(len(x[1]) == 1, 'There should be no aggregates')

@@ -18,10 +18,10 @@ setLogFile("txtgui.log")
 
 def setScreenPackage(pkg):
     if pkg == "curses":
-        import scr_curses
+        from . import scr_curses
         tw._scr = scr_curses
     else:
-        import scr_text
+        from . import scr_text
         tw._scr = scr_text
     setScale()
 

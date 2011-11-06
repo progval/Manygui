@@ -133,7 +133,7 @@ class CircleManager(LayoutManager):
             csize = int(radius*sin(rads))/2
             radius -= csize
 
-        for (item,n) in zip(cts,range(len(cts))):
+        for (item,n) in zip(cts,list(range(len(cts)))):
             # Find center of component.
             ix = cx + sin(n*rads)*radius
             iy = cy + cos(n*rads)*radius
@@ -195,18 +195,18 @@ class SimpleGridManager(LayoutManager):
 
     def add_components(self, *items, **kwds):
         # Record each item's grid location and span.
-        if 'row' in kwds.keys():
+        if 'row' in list(kwds.keys()):
             self.cur_row = kwds['row']
-        if 'col' in kwds.keys():
+        if 'col' in list(kwds.keys()):
             self.cur_col = kwds['col']
         rs = 1
         cs = 1
-        if 'rowspan' in kwds.keys():
+        if 'rowspan' in list(kwds.keys()):
             rs = kwds['rowspan']
-        if 'colspan' in kwds.keys():
+        if 'colspan' in list(kwds.keys()):
             cs = kwds['colspan']
         insets = (0,0)
-        if 'insets' in kwds.keys():
+        if 'insets' in list(kwds.keys()):
             insets = kwds['insets']
         for comp in items:
             ld = self.getLayoutData(comp)
@@ -322,22 +322,22 @@ class GridManager(LayoutManager):
     def add_components(self, *items, **kwds):
 
         # Which row+col do we start with?
-        if 'row' in kwds.keys():
+        if 'row' in list(kwds.keys()):
             self.cur_row = kwds['row']
-        if 'col' in kwds.keys():
+        if 'col' in list(kwds.keys()):
             self.cur_col = kwds['col']
 
         # What's the column and row span of the component(s)?
         rs = 1
         cs = 1
-        if 'rowspan' in kwds.keys():
+        if 'rowspan' in list(kwds.keys()):
             rs = kwds['rowspan']
-        if 'colspan' in kwds.keys():
+        if 'colspan' in list(kwds.keys()):
             cs = kwds['colspan']
 
         # Are insets specified?
         insets = (0,0)
-        if 'insets' in kwds.keys():
+        if 'insets' in list(kwds.keys()):
             insets = kwds['insets']
 
         # Ensure the row and column arrays are large enough.
@@ -471,10 +471,10 @@ class GridManager(LayoutManager):
         # a particular row/column wins.
         xw = 1
         yw = 1
-        if 'xweight' in kwds.keys():
+        if 'xweight' in list(kwds.keys()):
             xw = kwds['xweight']
             self.colinfo[self.cur_col].weight = xw
-        if 'yweight' in kwds.keys():
+        if 'yweight' in list(kwds.keys()):
             yw = kwds['yweight']
             self.rowinfo[self.cur_row].weight = yw
 
@@ -483,11 +483,11 @@ class GridManager(LayoutManager):
         # added component by default.
         xsize = 0
         ysize = 0
-        if 'xsize' in kwds.keys():
+        if 'xsize' in list(kwds.keys()):
             xsize = kwds['xsize']
             if self.colinfo[self.cur_col].size < xsize:
                 self.colinfo[self.cur_col].size = xsize
-        if 'ysize' in kwds.keys():
+        if 'ysize' in list(kwds.keys()):
             ysize = kwds['ysize']
             if self.rowinfo[self.cur_row].size < ysize:
                 self.rowinfo[self.cur_row].size = ysize
@@ -496,11 +496,11 @@ class GridManager(LayoutManager):
         # specified for a particular row or column wins.
         xmsize = 0
         ymsize = 0
-        if 'minwidth' in kwds.keys():
+        if 'minwidth' in list(kwds.keys()):
             xmsize = kwds['minwidth']
             if self.colinfo[self.cur_col].minsize < xmsize:
                 self.colinfo[self.cur_col].minsize = xmsize
-        if 'minheight' in kwds.keys():
+        if 'minheight' in list(kwds.keys()):
             ymsize = kwds['minheight']
             if self.rowinfo[self.cur_row].minsize < ymsize:
                 self.rowinfo[self.cur_row].minsize = ymsize

@@ -1,7 +1,8 @@
 'Anygui utilities.'
 
 import sys
-from Exceptions import InternalError
+from .Exceptions import InternalError
+import collections
 
 # for debugging...
 
@@ -135,7 +136,7 @@ def getSetters(obj, attrs):
     cands.reverse()
     for cand in cands:
         setter = getattr(obj, cand)
-        if not callable(setter): continue
+        if not isinstance(setter, collections.Callable): continue
         reqs = splitAccessorName(cand)
         for req in reqs:
             if not req in attrs: break
@@ -144,7 +145,7 @@ def getSetters(obj, attrs):
             reqs = [uncapitalizeAttribute(req) for req in reqs]
             reqs.sort()
             result.append((setter, reqs))
-    return result, map(uncapitalizeAttribute, attrs)
+    return result, list(map(uncapitalizeAttribute, attrs))
 
 def getGetter(obj, attr):
     return getattr(obj, getterName(attr), None)
@@ -239,7 +240,7 @@ def topologicalSort(items, payload, constraints):
     for before, after in constraints:
         if before in items and after in items:
             these_followers = followers.setdefault(before,{})
-            if not these_followers.has_key(after):
+            if after not in these_followers:
                 nleaders[after] = 1 + nleaders.get(after, 0)
                 these_followers[after] = before
     # while there are items, pick one with no leaders, append it
@@ -248,7 +249,7 @@ def topologicalSort(items, payload, constraints):
     result2 = []
     while items:
         # find first item left that has no 'leaders'
-        for i in xrange(len(items)):
+        for i in range(len(items)):
             if nleaders.get(items[i], 0)==0: break
         else:
             raise InternalError(items, "dependency loop")
@@ -259,7 +260,7 @@ def topologicalSort(items, payload, constraints):
         result1.append(item)
         result2.append(piggyback)
         # update the mapping 'nleaders'
-        for follower in followers.get(item,{}).keys():
+        for follower in list(followers.get(item,{}).keys()):
             nleaders[follower] -= 1
     items[:] = result1
     payload[:] = result2

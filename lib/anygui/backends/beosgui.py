@@ -165,7 +165,7 @@ class ComponentWrapper(AbstractWrapper):
         else:
             parent = None
         if self._beos_class is None:
-            raise NotImplementedError, 'Not Implemented in beosgui yet'
+            raise NotImplementedError('Not Implemented in beosgui yet')
         else:
             self._beos_id = str(self._beos_id)
             if self._init_args is None:
@@ -178,9 +178,9 @@ class ComponentWrapper(AbstractWrapper):
                                    self._beos_mode,
                                    self._beos_flags)
             widget = self._beos_class(*self._init_args)
-            print widget
-            print '\t', widget.Frame()
-            print '\t', self._beos_bounds
+            print(widget)
+            print('\t', widget.Frame())
+            print('\t', self._beos_bounds)
             ComponentWrapper._beos_id += 1
             return widget
 
@@ -307,7 +307,7 @@ class ComponentWrapper(AbstractWrapper):
         or whatever.
         """
         if self.widget is None: return
-        raise NotImplementedError, 'should be implemented by subclasses'
+        raise NotImplementedError('should be implemented by subclasses')
 
 #==========================================================================#
 # Label
@@ -831,7 +831,7 @@ class WindowWrapper(ContainerMixin,ComponentWrapper):
     
     def widgetFactory(self,*args,**kwds):
         self._beos_bounds = self.getGeometry()
-        if self.proxy.state.has_key('title'):
+        if 'title' in self.proxy.state:
             self._title = self.proxy.state['title']
         self._init_args = (self._beos_bounds,
                            self._title,

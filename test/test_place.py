@@ -41,7 +41,7 @@ def main():
     link(cb2, checked_it)
 
     rbs = []
-    for i in xrange(1, 4):
+    for i in range(1, 4):
       rbs.append(RadioButton(
         width = 150, height = 20,
         text = "Hoopy Option %d" % i,

@@ -11,15 +11,15 @@ if skip_tests:
     log('skipping %d tests:'%len(skip_tests),)
     for test in skip_tests:
         log(test,)
-    print
+    print()
 
 run_tests = [test for test in glob('test_*.py') if test not in skip_tests]
 run_tests.sort()
 log('running %d tests:'%len(run_tests),)
 for test in run_tests:
     log(test,)
-print
+print()
 
 for filename in run_tests:
     log("Running", filename)
-    execfile(filename, {})
+    exec(compile(open(filename).read(), filename, 'exec'), {})

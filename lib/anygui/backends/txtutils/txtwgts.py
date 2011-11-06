@@ -223,7 +223,8 @@ class ComponentMixin:
         if self.resize_command:
             self.resize_command(dw,dh)
 
-    def set_geometry(self,(x,y,w,h),event=0):
+    def set_geometry(self, xxx_todo_changeme,event=0):
+        (x,y,w,h) = xxx_todo_changeme
         self.x = x
         self.y = y
         dw = w-self.width
@@ -245,7 +246,7 @@ class ComponentMixin:
     def get_event_help(self):
         items = []
         evmap = self._event_map
-        kk = evmap.keys()
+        kk = list(evmap.keys())
         kk.sort()
         for ch in kk:
             f = evmap[ch]
@@ -465,7 +466,7 @@ class ComponentMixin:
             handled = self._event_map[ev](self,ev)
             return handled
         except KeyError:
-            for (lo,hi) in self._event_range_map.keys():
+            for (lo,hi) in list(self._event_range_map.keys()):
                 if ev>=lo and ev<=hi:
                     handled = self._event_range_map[(lo,hi)](self,ev)
                     return handled
@@ -973,7 +974,8 @@ class TextMixin(ComponentMixin):
             tx,ty = self._cur_pos
             _scr.move_cursor(x+tx+1,y+ty+1)
 
-    def set_selection(self,(start,end)):
+    def set_selection(self, xxx_todo_changeme1):
+        (start,end) = xxx_todo_changeme1
         self.selection=(start,end)
         #st,en = self.selection
         #self._curs_selection = (st,en)
@@ -1519,7 +1521,7 @@ _escape_sequence_map = {
 
     }
 
-for seq in _escape_sequence_map.keys():
+for seq in list(_escape_sequence_map.keys()):
     for i in range(1,len(seq)):
         _escape_sequence_map[seq[:i]] = None
 
@@ -1568,8 +1570,8 @@ class Application:
             # Pass the exception upwards
             (exc_type, exc_value, exc_traceback) = sys.exc_info()
             if hasattr(exc_value,"value"):
-                print "Exception value:",exc_value.value
-            raise exc_type, exc_value, exc_traceback
+                print("Exception value:",exc_value.value)
+            raise exc_type(exc_value).with_traceback(exc_traceback)
         else:
             # In the event of an error, restore the terminal
             # to a sane state.
@@ -1782,7 +1784,7 @@ def showHide3(*args,**kws):
 
 
 if __name__ == "__main__":
-    import scr_curses
+    from . import scr_curses
     global _scr
     _scr = scr_curses
     app = Application()
@@ -1794,7 +1796,7 @@ if __name__ == "__main__":
         win.add(btn)
     fms = [Frame(geometry=(10,45,420,230), visible=0) for i in range(num)]
     n = 0
-    for frm, i in zip(fms,range(num)):
+    for frm, i in zip(fms,list(range(num))):
         lbl = Label(text='This is Frame number %s.' % i, geometry=(30, 30, 200, 30))
         btn = Button(text = 'A button',geometry=(230,30,100,40))
     

@@ -25,8 +25,8 @@ link(cvs, 'click', click)
 
 cvs.defaultLineColor = Color(0.7,0.7,1.0)    # light blue
 if not backend() in 'text curses'.split():
-    cvs.drawLines(map(lambda i:(i*10,0,i*10,300), range(30)))
-    cvs.drawLines(map(lambda i:(0,i*10,300,i*10), range(30)))
+    cvs.drawLines([(i*10,0,i*10,300) for i in range(30)])
+    cvs.drawLines([(0,i*10,300,i*10) for i in range(30)])
 cvs.defaultLineColor = black         
 
 cvs.drawLine(10, 200, 20, 190, color=red)
