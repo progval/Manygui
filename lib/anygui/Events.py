@@ -21,7 +21,7 @@ __all__ = '''
 import time
 from .References import ref, mapping
 import collections
-registry = mapping()
+registry = {}
 from .Utils import IdentityStack, Bunch
 source_stack = IdentityStack()
 
@@ -40,15 +40,15 @@ def link(*args, **kwds):
         source, event, handler = args
     weak = kwds.get('weak', 0)
     loop = kwds.get('loop', 0)
-    s = ref(source, weak)
-    h = ref(handler, weak)
-    h.loop = loop
-    if s not in registry:
-        registry[s] = {}
-    if event not in registry[s]:
-        registry[s][event] = []
-    if not h in registry[s][event]:
-        registry[s][event].append(h)
+    #s = ref(source, weak)
+    #h = ref(handler, weak)
+    handler.__dict__['loop'] = loop
+    if source not in registry:
+        registry[source] = {}
+    if event not in registry[source]:
+        registry[source][event] = []
+    if not handler in registry[source][event]:
+        registry[source][event].append(handler)
     prodder = getattr(source, 'enableEvent', None)
     if isinstance(prodder, collections.Callable): prodder(event)
 
@@ -60,17 +60,16 @@ def unlink(*args, **kwds):
         source, handler = args; event = 'default'
     else:
         source, event, handler = args
-    h = ref(handler, weak=0)
+    #h = ref(handler, weak=0)
     for lst in lookup(source, event):
         try:
-            lst.remove(h)
+            lst.remove(handler)
         except (KeyError, ValueError): pass
 
 def lookup(source, event):
-    source = ref(source, weak=0)
     lists = []
     sources = [source]
-    if source() is not any: sources.append(ref(any, weak=0))
+    if source is not any: sources.append(ref(any, weak=0))
     events = [event]
     if event is not any: events.append(any)
     for s in sources:
@@ -91,19 +90,12 @@ def send(source, event='default', loop=0, **kw):
     try:
         results = []
         for handlers in lookup(source, event):
-            live_handlers = []
-            for r in handlers:
-                if not r.is_dead():
-                    live_handlers.append(r)
-                    obj = r.obj
-                    if obj is not None:
-                        obj = obj()
-                        if not loop and not r.loop \
-                           and obj in source_stack: continue
-                    handler = r()
-                    result = handler(Event(**args))
-                    if result is not None: results.append(result)
-            handlers[:] = live_handlers
+            for handler in handlers:
+                if handler is not None:
+                    if not loop and not handler.loop \
+                       and handler in source_stack: continue
+                result = handler(Event(**args))
+                if result is not None: results.append(result)
         if results: return results
     finally:
         source_stack.pop()

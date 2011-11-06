@@ -161,7 +161,7 @@ class ComponentWrapper(Wrapper):
     def setText(self, text):
         if self.widget:
             try:
-                self.widget.setText(QString(str(text)))
+                self.widget.setText(str(text))
             except:
                 pass
 
@@ -237,7 +237,7 @@ class ListBoxWrapper(ComponentWrapper):
             self.widget.clear()
             self.items = items[:]
             for item in self.items:
-                self.widget.insertItem(QString(str(item)),-1)
+                self.widget.insertItem(str(item),-1)
 
     def getItems(self):
         if self.widget:
@@ -352,7 +352,7 @@ class TextWrapperBase(ComponentWrapper):
             self.widget.setReadOnly(not editable)
 
     def qtText(self):
-        return QString(str(self.text))
+        return str(self.text)
 
     def keyReleaseHandler(self, event):
         if DEBUG: print('in keyReleaseHandler of: ', self.widget)
@@ -395,7 +395,10 @@ class TextFieldWrapper(TextWrapperBase):
         if self.widget:
             if DEBUG: print('in setSelection of: ', self.widget)
             start, end = selection
-            self.widget.setSelection(start, end-start)
+            cursor = self.widget.textCursor()
+            cursor.setPosition(start)
+            cursor.setPosition(end, QTextCursor.KeepAnchor)
+            self.widget.setTextCursor(cursor)
 
     def getSelection(self):
         if self.widget:
@@ -414,14 +417,6 @@ class TextAreaWrapper(TextWrapperBase):
     def widgetFactory(self, *args, **kwds):
         return QTextEdit(*args, **kwds)
 
-    def setSelection(self, selection):
-        if DEBUG: print('in setSelection of: ', self.widget)
-        if self.widget is not None:
-            start, end = selection
-            spara, sidx = self.qtTranslateParaIdx(start)
-            epara, eidx = self.qtTranslateParaIdx(end)
-            self.widget.setSelection(spara, sidx, epara, eidx)
-
     def getSelection(self):
         if DEBUG: print('in getSelection of: ', self.widget)
         para, idx = self.widget.getCursorPosition()
@@ -439,8 +434,9 @@ class TextAreaWrapper(TextWrapperBase):
     def qtGetParagraphs(self):
         paras = []
         if self.widget is not None:
-            for n in range(self.widget.paragraphs()):
-                paras.append(str(self.widget.text(n)))
+            document = self.widget.document()
+            for n in range(0, document.blockCount()):
+                paras.append(str(document.findBlockByNumber(n).text()))
         if DEBUG:
             print('paragraphs are: \n')
             for para in paras:
@@ -500,14 +496,14 @@ class WindowWrapper(ComponentWrapper):
 
     def setText(self, text):
         if self.widget:
-            self.mainWindow.setCaption(QString(str(text)))
+            self.mainWindow.setWindowTitle(str(text))
 
     def getText(self):
         return str(self.widget.title())
 
     def setTitle(self, title):
         if self.widget:
-            self.mainWindow.setCaption(QString(str(title)))
+            self.mainWindow.setWindowTitle(str(title))
 
     def getTitle(self):
         return str(self.widget.title())
@@ -790,7 +786,7 @@ class Application(AbstractApplication, QApplication):
         QApplication.__init__(self,[])
 
     def internalRun(self):
-        qApp.exec_loop()
+        qApp.exec_()
 
     def internalRemove(self):
         if not self._windows:

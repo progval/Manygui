@@ -80,6 +80,7 @@ class ComboBoxWrapper(Wrapper):
     _btnWidth = 0
     _lbxHeight = 0
     _cbxHeight = 0
+    geometry = (0, 0, 0, 0)
 
     def _getLbxY(self):
         # ----------------------------------------
@@ -231,6 +232,7 @@ class ComboBoxWrapper(Wrapper):
 
     def setGeometry(self, x, y, width, height):
         if self._comps:
+            self.geometry = (x, y, width, height)
             self._loop = 1
             self._textFld.geometry  = (x,
                                        y,
@@ -395,6 +397,26 @@ def sort_files_first(x, y):
 SORT_RULES={ALPHABETICAL: cmp, DIRS_FIRST: sort_dirs_first,\
             FILES_FIRST:  sort_files_first}
 
+# From http://wiki.python.org/moin/HowTo/Sorting
+def cmp_to_key(mycmp):
+    'Convert a cmp= function into a key= function'
+    class K(object):
+        def __init__(self, obj, *args):
+            self.obj = obj
+        def __lt__(self, other):
+            return mycmp(self.obj, other.obj) < 0
+        def __gt__(self, other):
+            return mycmp(self.obj, other.obj) > 0
+        def __eq__(self, other):
+            return mycmp(self.obj, other.obj) == 0
+        def __le__(self, other):
+            return mycmp(self.obj, other.obj) <= 0
+        def __ge__(self, other):
+            return mycmp(self.obj, other.obj) >= 0
+        def __ne__(self, other):
+            return mycmp(self.obj, other.obj) != 0
+    return K
+
 # == END SORT_RULES == #
 
 class DirManager:
@@ -443,7 +465,7 @@ class DirManager:
         for i in range(len(cache)):
             if os.path.isdir(cache[i]):
                 objCache[i] += PATH_SEPAR
-        objCache.sort(SORT_RULES[self.sortRule])
+        objCache.sort(key=cmp_to_key(SORT_RULES[self.sortRule]))
         return objCache
 
     def _genDirCaches(self):

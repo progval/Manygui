@@ -59,13 +59,15 @@ class Model(Assignee):
         Assignee.__init__(self)
         #Attrib.__init__(self, **kw)
 
+    __hash__ = object.__hash__
+
 
 class BooleanModel(Model):
 
-    _value = 0
+    _value = False
 
     def setValue(self, value):
-        self._value = int(value)
+        self._value = bool(value)
         self.notify()
 
     def getValue(self):
