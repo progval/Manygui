@@ -100,7 +100,7 @@ class JavaCanvasWrapper(awt.Canvas):
 class Canvas(ComponentMixin, AbstractCanvas):
 
     # TODO: Implement native versions of other drawing methods,
-    #       e.g. Béziers etc.
+    #       e.g. Beziers etc.
     
     # FIXME: Needs to be invalidated when resized,
     #        while retaining the graphics...
