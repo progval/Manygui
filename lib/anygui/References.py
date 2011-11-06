@@ -64,6 +64,9 @@ class StrongReference(Reference):
     def deref(self, obj):
         return obj
 
+# FIXME: Remove this
+WeakReference = StrongReference
+
 class CallableWrapper:
     def __init__(self, obj, func):
         self.obj = obj
@@ -92,7 +95,8 @@ def unwrap(func):
         if func.__self__ is not None:
             if obj is None: obj = func.__self__
             else: assert obj is func.__self__
-        func = func.__self__
+        # FIXME: Find a way to make this work with Python 3
+        #func = func.__func__
     return obj, func
 
 class CallableReference:
