@@ -16,6 +16,9 @@ import re
 import sys, glob, os
 import traceback
 
+# http://docs.python.org/release/3.0.1/whatsnew/3.0.html#ordering-comparisons
+cmp = lambda a,b: (a > b) - (a < b)
+
 # End Imports
 #==============================================================#
 

@@ -1,5 +1,7 @@
 
-import collections, UserDict, sys, types
+import collections
+import sys
+import types
 
 weakref = None
 
@@ -33,11 +35,7 @@ def ref_is(ref1,ref2):
     if o1 is None or o2 is None: return 0
     return o1 is o2
 
-class Hashable:
-    def __hash__(self):
-        return self.hash
-
-class Reference(Hashable):
+class Reference:
     def callback(self, obj):
         for cb in self.callbacks:
             cb(obj, self)
@@ -49,6 +47,8 @@ class Reference(Hashable):
     def __call__(self):
         return self.deref(self.obj)
     __eq__ = ref_is
+    def __hash__(self):
+        return self.hash
 
 class WeakReference(Reference):
     def ref(self, obj, cb):
@@ -75,11 +75,11 @@ class CallableWrapper:
             return self.func(self.obj, *args, **kwds)
 
 def is_callable_instance(obj):
-    return type(obj) is types.InstanceType and \
+    return isinstance(obj, object) and \
            hasattr(obj, '__call__')
 
 def is_method(obj):
-    return hasattr(obj, 'im_self')
+    return hasattr(obj, '__self__')
 
 def unwrap(func):
     try:
@@ -92,10 +92,10 @@ def unwrap(func):
         if func.__self__ is not None:
             if obj is None: obj = func.__self__
             else: assert obj is func.__self__
-        func = func.__func__
+        func = func.__self__
     return obj, func
 
-class CallableReference(Hashable):
+class CallableReference:
     
     def __init__(self, func, weak):
         obj, func = unwrap(func)
@@ -127,8 +127,10 @@ class CallableReference(Hashable):
         if self.__class__ != other.__class__: return 0
         return (ref_is(self.obj,other.obj) and
                 ref_is(self.func,other.func))
+    def __hash__(self):
+        return self.hash
 
-class RefKeyDictionary(UserDict.UserDict):
+class RefKeyDictionary(collections.UserDict):
 
     def __repr__(self):
         return "<RefKeyDictionary at %s>" % id(self)

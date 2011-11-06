@@ -535,13 +535,12 @@ class Placer(LayoutManager):
 
         def side(spec, name, self=self):
             if spec is not None:
-                t = type(spec)
-                if t == TupleType:
+                if isinstance(spec, tuple):
                     return spec
-                elif t == InstanceType:
-                    return spec, 0
-                elif t == IntType:
+                elif isinstance(spec, int):
                     return None, spec
+                elif isinstance(spec, object):
+                    return spec, 0
                 else:
                     raise ArgumentError(self, 'place', name, spec)
             else:

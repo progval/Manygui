@@ -1,5 +1,4 @@
 
-from types import StringType, IntType, InstanceType
 import string # TODO: Change use of string to string methods
 
 class Color:
@@ -66,7 +65,7 @@ def HexColor(val):
     """This class converts a hex string, or an actual integer number,
     into the corresponding color.  E.g., in "AABBCC" or 0xAABBCC,
     AA is the red, BB is the green, and CC is the blue (00-FF)."""
-    if type(val) == StringType:
+    if isinstance(val, str):
         val = string.atoi(val,16)
     factor = 1.0 / 255
     return Color(factor * ((val >> 16) & 0xFF), 

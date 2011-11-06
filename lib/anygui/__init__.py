@@ -128,7 +128,7 @@ def _dotted_import(name):
     # copied from python docs for __import__
     import string
     mod = __import__(name, globals(), locals(), [])
-    components = string.split(name, '.')
+    components = name.split('.')
     for comp in components[1:]:
         mod = getattr(mod, comp)
     return mod

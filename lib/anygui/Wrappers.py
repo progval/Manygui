@@ -161,8 +161,7 @@ class AbstractWrapper:
         def moreSpecific(aggr1, aggr2):
             return cmp(len(aggr1[0]), len(aggr2[0]))
         # Get the setaggregates:
-        candidates.sort(moreSpecific)
-        candidates.reverse()
+        candidates.sort(key=lambda x:len(x[0]))
         for candidate in candidates:
             for attr in candidate[0]:
                 if not attr in attrs: break
@@ -256,11 +255,9 @@ class AbstractWrapper:
             return result,unhandled
 
         candidates = list(self.aggregateGetters.items())        
-        def moreSpecific(aggr1, aggr2):
-            return cmp(len(aggr1[0]), len(aggr2[0]))
 
         # Get the aggregates:
-        candidates.sort(moreSpecific)
+        candidates.sort(key=lambda x:len(x[0]))
         candidates.reverse()
         for candidate in candidates:
 

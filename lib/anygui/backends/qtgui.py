@@ -19,7 +19,8 @@ from anygui.Menus import Menu, MenuCommand, MenuCheck, MenuSeparator
 # qtgui specific imports
 import sys
 from weakref import ref as wr
-from qt import *
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
 #except:
 #    import traceback
 #    traceback.print_exc()
