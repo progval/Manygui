@@ -487,6 +487,7 @@ class ToggleButtonMixin:
                 
     def setOn(self, on):
         if not self.widget: return
+        self._var = on
         if on:
             self.widget.select()
         else:
@@ -512,10 +513,11 @@ class RadioButtonWrapper(ToggleButtonMixin, ComponentWrapper):
 
     def widgetFactory(self, *args, **kws):
         kws.update(self.initArgs())
-        return tkinter.Radiobutton(*args, **kws)
+        return tkinter.Radiobutton(value=0, *args, **kws)
 
     def getOn(self):
         assert self.widget,"?! wrapper getXxx w/o widget"
+        print(repr(self.widget.cget('value')))
         return self._var.get() == int(self.widget.cget('value'))
 
     def setGroup(self, group):
