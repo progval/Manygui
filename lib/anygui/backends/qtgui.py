@@ -53,7 +53,7 @@ __all__ = '''
 TRUE = 1
 FALSE = 0
 
-DEBUG = 0
+from manygui import DEBUG
 TMP_DBG = 0
 
 #==============================================================#
@@ -224,7 +224,7 @@ class ListBoxWrapper(ComponentWrapper):
         self.items = []
 
     def widgetFactory(self, *args, **kws):
-        return QListBox(*args, **kws)
+        return QListWidget(*args, **kws)
 
     def widgetSetUp(self):
         if not self.connected:
@@ -395,10 +395,8 @@ class TextFieldWrapper(TextWrapperBase):
         if self.widget:
             if DEBUG: print('in setSelection of: ', self.widget)
             start, end = selection
-            cursor = self.widget.textCursor()
-            cursor.setPosition(start)
-            cursor.setPosition(end, QTextCursor.KeepAnchor)
-            self.widget.setTextCursor(cursor)
+            self.widget.setSelection(start, end-start)
+            self.widget.setCursorPosition(end)
 
     def getSelection(self):
         if self.widget:
@@ -780,10 +778,12 @@ class MenuSeparatorWrapper(MenuItemMixin, AbstractWrapper):
 #==============================================================#
 
 class Application(AbstractApplication, QApplication):
+    _created = False
 
     def __init__(self, **kwds):
         AbstractApplication.__init__(self, **kwds)
-        QApplication.__init__(self,[])
+        if not Application._created:
+            QApplication.__init__(self,[])
 
     def internalRun(self):
         qApp.exec_()
