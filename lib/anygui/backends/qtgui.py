@@ -395,8 +395,18 @@ class TextWrapperBase(ComponentWrapper):
 
 class TextFieldWrapper(TextWrapperBase):
 
+    connected = 0
+
     def widgetFactory(self, *args, **kwds):
         return QLineEdit(*args, **kwds)
+
+    def widgetSetUp(self):
+        if not self.connected:
+            self.widget.returnPressed.connect(self.returnHandler)
+            self.connected = 1
+
+    def returnHandler(self):
+        send(self.proxy)
 
     def setSelection(self, selection):
         if self.widget:
