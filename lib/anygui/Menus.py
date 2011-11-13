@@ -1,7 +1,6 @@
 from anygui.Exceptions import UnimplementedMethod
 from anygui.Utils import flatten
 from anygui.Proxies import Proxy
-from anygui.Events import DefaultEventMixin
 import anygui.Defaults as Defaults
 from anygui import backendModule, link
 
@@ -12,9 +11,8 @@ from anygui import backendModule, link
 #       Add items to defaults...
 
 
-class MenuCommand(Proxy,DefaultEventMixin,Defaults.MenuCommand):
+class MenuCommand(Proxy,Defaults.MenuCommand):
     def __init__(self, *args, **kw):
-        DefaultEventMixin.__init__(self)
         Proxy.__init__(self, *args, **kw)
         if 'command' in list(kw.keys()):
             link(self,kw['command'])
@@ -22,9 +20,8 @@ class MenuCommand(Proxy,DefaultEventMixin,Defaults.MenuCommand):
     def wrapperFactory(self):
         return backendModule().MenuCommandWrapper(self)
 
-class MenuCheck(Proxy,DefaultEventMixin,Defaults.MenuCheck):
+class MenuCheck(Proxy,Defaults.MenuCheck):
     def __init__(self, *args, **kw):
-        DefaultEventMixin.__init__(self)
         Proxy.__init__(self, *args, **kw)
         if 'command' in list(kw.keys()):
             link(self,kw['command'])
@@ -32,18 +29,16 @@ class MenuCheck(Proxy,DefaultEventMixin,Defaults.MenuCheck):
     def wrapperFactory(self):
         return backendModule().MenuCheckWrapper(self)
 
-class MenuSeparator(Proxy,DefaultEventMixin,Defaults.MenuSeparator):
+class MenuSeparator(Proxy,Defaults.MenuSeparator):
     def __init__(self, *args, **kw):
-        DefaultEventMixin.__init__(self)
         Proxy.__init__(self, *args, **kw)
 
     def wrapperFactory(self):
         return backendModule().MenuSeparatorWrapper(self)
 
-class Menu(Proxy, DefaultEventMixin, Defaults.Menu):
+class Menu(Proxy, Defaults.Menu):
     
     def __init__(self, *args, **kwds):
-        DefaultEventMixin.__init__(self)
         Proxy.__init__(self, *args, **kwds)
         self.contents = []
 
@@ -90,10 +85,9 @@ class Menu(Proxy, DefaultEventMixin, Defaults.Menu):
             self.contents.remove(item)
             self.push()
 
-class MenuBar(Proxy, DefaultEventMixin, Defaults.MenuBar):
+class MenuBar(Proxy, Defaults.MenuBar):
     
     def __init__(self, *args, **kwds):
-        DefaultEventMixin.__init__(self)
         Proxy.__init__(self, *args, **kwds)
         self.contents = []
 

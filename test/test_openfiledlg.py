@@ -13,6 +13,6 @@ def openFileDlgCallback(event):
 
 app = Application(name='Test OpenFileDlg', version='1.0')
 filedlg = OpenFileDialog(dir,'*')
-link(filedlg, 'open', openFileDlgCallback)
+link(filedlg, Events.OpenFileEvent, openFileDlgCallback)
 app.add(filedlg)
 app.run()

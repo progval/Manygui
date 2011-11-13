@@ -6,6 +6,7 @@
 import anygui
 from anygui.Wrappers import AbstractWrapper
 from anygui.Events import link, send
+import anygui.Events as Events
 from time import sleep
 
 # For Dialogs
@@ -191,7 +192,7 @@ class ComboBoxWrapper(Wrapper):
             self._itemLbx.visible = 0
             sleep(0.1)
             self._popupOpen = 0
-            send(self.proxy, 'select')
+            send(self.proxy, Events.SelectEvent())
             self._loop = 0
 
     def setX(self, x):
@@ -564,7 +565,7 @@ class OpenFileDialog(anygui.Window):
         link(cbxFilter, self.applyFilter)
 
     def open(self, event):
-        send(self, 'open', file=self.txtLocation.text)
+        send(self, Events.OpenFileEvent(), file=self.txtLocation.text)
         self.destroy()
 
     def close(self, event):

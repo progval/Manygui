@@ -11,7 +11,7 @@ win = Window(width = 160, height = 90)
 app.add(win)
 btn = RadioButton(x = 30, y = 30, width = 100, height = 30, 
 		  title = "Radio Button")
-link(btn, 'click', report)
+link(btn, Events.LeftClickEvent, report)
 win.add(btn)
 
 app.run()

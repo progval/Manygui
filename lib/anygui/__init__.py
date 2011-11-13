@@ -10,6 +10,7 @@ __all__ = """
   Button
   CheckBox
   Options
+  Events
   Window
   Label
   TextField

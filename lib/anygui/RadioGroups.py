@@ -1,14 +1,12 @@
 from anygui.Exceptions import UnimplementedMethod
 from anygui.Attribs import Attrib
-from anygui.Events import send, DefaultEventMixin
 from anygui import Defaults
 from .Utils import flatten,log
 
-class RadioGroup(Attrib, Defaults.RadioGroup, DefaultEventMixin):
+class RadioGroup(Attrib, Defaults.RadioGroup):
 
     def __init__(self, buttons=[], **kw):
         Attrib.__init__(self, **kw)
-        DefaultEventMixin.__init__(self)
         self._items = []
         self.add(buttons)
 

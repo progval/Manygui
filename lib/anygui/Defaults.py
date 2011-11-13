@@ -11,6 +11,8 @@ that lists the attributes which need to be set explicitly per instance
 
 # For the Frame.place method:
 
+import anygui.Events as events
+
 direction = 'right'
 space = 10
 
@@ -21,7 +23,7 @@ class Application:
     state = {}
 
 class Button:
-    _defaultEvent = 'click'
+    _defaultEvent = events.ToggleEvent
     state = {
         'text': 'Button',
         'x': 0,
@@ -52,6 +54,7 @@ class Frame:
     }
 
 class Window:
+    _defaultEvent = events.CloseEvent
     state = {
         'text': 'Window',
         'x': 30,
@@ -83,7 +86,7 @@ class Label:
         }
 
 class TextField:
-    _defaultEvent = 'enterkey'
+    _defaultEvent = events.PressEnterEvent
     state = {
         'text' : '',
         'x' : 0,
@@ -111,6 +114,7 @@ def shift_window():
     winY %= 360
 
 class Canvas:
+    _defaultEvent = events.LeftClickEvent
     state = {
         'text' : 'Canvas', # Hardly needed...,
         'x' : 0,
@@ -126,7 +130,7 @@ class Canvas:
         }
 
 class CheckBox:
-    _defaultEvent = 'click'
+    _defaultEvent = events.ToggleEvent
     state = {
         'text' : 'CheckBox',
         'x' : 0,
@@ -143,7 +147,7 @@ class CheckBox:
         }
 
 class ListBox:
-    _defaultEvent = 'select'
+    _defaultEvent = events.SelectEvent
     state = {
         'text' : 'ListBox',
         'x' : 0,
@@ -161,7 +165,7 @@ class ListBox:
         }
 
 class ComboBox:
-    _defaultEvent = 'select'
+    _defaultEvent = events.SelectEvent
     state = {
         'text' : '',
         'x' : 0,
@@ -180,7 +184,7 @@ class ComboBox:
         }
 
 class RadioButton:
-    _defaultEvent = 'click'
+    _defaultEvent = events.ToggleEvent
     state = {
         'text' : 'RadioButton',
         'x' : 0,
@@ -198,7 +202,7 @@ class RadioButton:
         }
 
 class RadioGroup:
-    _defaultEvent = 'select'
+    _defaultEvent = events.SelectEvent
     state = {
         'items' : None,
         'value' : None,
@@ -228,20 +232,20 @@ class MenuBar:
         }
 
 class Menu:
-    _defaultEvent = 'click'
+    _defaultEvent = events.LeftClickEvent
     state = {
         'contents' : [],
         'enabled': 1
         }
 
 class MenuCommand:
-    _defaultEvent = 'click'
+    _defaultEvent = events.LeftClickEvent
     state = {
         'enabled': 1
         }
 
 class MenuCheck:
-    _defaultEvent = 'click'
+    _defaultEvent = events.ToggleEvent
     state = {
         'enabled': 1
         }

@@ -1,5 +1,4 @@
 from anygui.Proxies import Proxy
-from anygui.Events import DefaultEventMixin
 from anygui.Exceptions import SyncError
 from anygui.LayoutManagers import LayoutData
 from anygui.Rectangles import Rectangle
@@ -11,7 +10,7 @@ from anygui.Rectangles import Rectangle
 #rules.define('size = width, height')
 #rules.define('geometry = x, y, width, height')
 
-class Component(Proxy, DefaultEventMixin, Rectangle):    
+class Component(Proxy, Rectangle):    
     """
     Component is an abstract base class representing a visual
     component of the graphical user interface. A Component owns a
@@ -26,7 +25,6 @@ class Component(Proxy, DefaultEventMixin, Rectangle):
     #    }
     
     def __init__(self, *args, **kw):
-        DefaultEventMixin.__init__(self)
         Proxy.__init__(self, *args, **kw)
 
     #def internalSync(self, names):

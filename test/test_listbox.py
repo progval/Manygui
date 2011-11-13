@@ -5,7 +5,7 @@ class SelectionPrinter:
 
     def __init__(self, lb):
         self._lb = lb
-        link(lb, 'select', self.print_selection)
+        link(lb, Events.SelectEvent, self.print_selection)
 
     def print_selection(self, event):
         log('Item selected:', self._lb.selection, '(%s)' % self._lb.items[self._lb.selection])

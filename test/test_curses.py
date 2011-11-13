@@ -44,7 +44,7 @@ def change_b3(*args,**kws):
 link(b2,change_b3)
 
 def toggle_b2(*args,**kws):
-    if b2 in win2._contents:
+    if b2 in win2.contents:
         win2.remove(b2)
     else:
         win2.add(b2)

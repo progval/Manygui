@@ -19,7 +19,7 @@ def click(e):
     if 30 <= x <= 100 and 30 <= y <= 100:
         log('Yay! You clicked the round rect!')
 
-link(cvs, 'click', click)
+link(cvs, Events.LeftClickEvent, click)
 
 # Taken from http://piddle.sourceforge.net/sample1.html
 

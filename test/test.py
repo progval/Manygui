@@ -1,6 +1,7 @@
 from glob import glob
 import sys, os
 from anygui.Utils import log
+import subprocess
 
 try:
     skip_tests = os.environ['ANYGUI_SKIP'].split()
@@ -22,4 +23,4 @@ print()
 
 for filename in run_tests:
     log("Running", filename)
-    exec(compile(open(filename).read(), filename, 'exec'), {})
+    subprocess.call(['python3', filename])

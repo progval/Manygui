@@ -145,7 +145,10 @@ class ComponentWrapper(Wrapper):
                 self.widget.hide()
 
     def setContainer(self, container):
-        if container is None: return
+        if container is None:
+            if self.widget is not None:
+                self.widget.hide()
+            return
         parent = container.wrapper.widget
         try:
             assert parent is None
@@ -231,8 +234,7 @@ class ListBoxWrapper(ComponentWrapper):
 
     def widgetSetUp(self):
         if not self.connected:
-            qApp.connect(self.widget, SIGNAL('highlighted(int)'),
-                         self.selectHandler)
+            self.widget.itemSelectionChanged.connect(self.selectHandler)
             self.connected = 1
 
     def setItems(self, items):
@@ -252,12 +254,14 @@ class ListBoxWrapper(ComponentWrapper):
 
     def getSelection(self):
         if self.widget:
-            selection = int(self.widget.currentItem())
+            selection = self.widget.currentRow()
+            print(repr(selection))
+            print(self.widget.count())
             return selection
 
-    def selectHandler(self, index):
+    def selectHandler(self):
         # self.selection = int(index)
-        send(self.proxy, 'select')
+        send(self.proxy)
 
 #==============================================================#
 # Base class for Button widgets
@@ -270,11 +274,11 @@ class ButtonWrapperBase(ComponentWrapper):
 
     def widgetSetUp(self):
         if not self.connected:
-            qApp.connect(self.widget,SIGNAL('clicked()'),self.clickHandler)
+            self.widget.clicked.connect(self.clickHandler)
             self.connected = 1
 
     def clickHandler(self):
-        send(self.proxy,'click')
+        send(self.proxy)
 
 #==============================================================#
 # Button
@@ -322,11 +326,11 @@ class RadioButtonWrapper(ToggleButtonWrapperBase):
                     container = self.proxy.container
                     btnGroup = QButtonGroup(container.wrapper.widget)
                     RadioButtonWrapper.groupMap[group] = btnGroup
-                    btnGroup.insert(self.widget) # What if widget is None?
+                    btnGroup.addButton(self.widget) # What if widget is None?
             elif self.proxy not in group._items:
                 group._items.append(self.proxy)
                 btnGroup = RadioButtonWrapper.groupMap[group]
-                btnGroup.insert(self.widget)
+                btnGroup.addButton(self.widget)
 
     def setValue(self, value):
         if self.widget:
@@ -362,7 +366,7 @@ class TextWrapperBase(ComponentWrapper):
         self.proxy.pull('text')
         if int(event.key()) == 0x1004: #Qt Return Key Code
             if DEBUG: print('enter key was pressed in ', self)
-            send(self.proxy, 'enterkey')
+            send(self.proxy)
         return 1
 
     def gotFocusHandler(self, event):
@@ -617,10 +621,11 @@ class WindowWrapper(ComponentWrapper):
 #==============================================================#
 # GroupBox
 
-class GroupBoxWrapper(ComponentWrapper):
+class GroupBoxWrapper(FrameWrapper, ComponentWrapper):
 
     def widgetFactory(self, *args, **kws):
-        widget = QButtonGroup(*args, **kws)
+        widget = FrameWrapper.widgetFactory(self, *args, **kws)
+        self.widget2 = QButtonGroup(*args, **kws)
         # widget.setFrameStyle(QFrame.Plain)
         return widget
 
@@ -754,7 +759,7 @@ class MenuCommandWrapper(MenuItemMixin, AbstractWrapper):
 
     def clickHandler(self,*args,**kws):
         if DEBUG: print("CLICKED: ", self)
-        send(self.proxy,'click',text=self.proxy.text)
+        send(self.proxy, self.proxy._defaultEvent(text=self.proxy.text))
 
 class MenuCheckWrapper(MenuCommandWrapper):
     checked = 0
@@ -787,14 +792,18 @@ class MenuSeparatorWrapper(MenuItemMixin, AbstractWrapper):
 
 class Application(AbstractApplication, QApplication):
     _created = False
+    _running = False
 
     def __init__(self, **kwds):
         AbstractApplication.__init__(self, **kwds)
         if not Application._created:
+            Application._created = True
             QApplication.__init__(self,[])
 
     def internalRun(self):
-        qApp.exec_()
+        if not Application._running:
+            Application._running = True
+            qApp.exec_()
 
     def internalRemove(self):
         if not self._windows:

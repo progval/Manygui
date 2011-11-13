@@ -1,5 +1,5 @@
 from .Attribs import Attrib
-from .Events import link, unlink, send, caller
+from .Events import link, unlink, send, caller, UpdateEvent
 from collections import UserList
 from collections import UserString
 
@@ -9,6 +9,8 @@ from collections import UserString
 # TODO: Cleanup the use if both names and objects 
 
 class Assignee:
+
+    _defaultEvent = UpdateEvent
 
     _notifyLocked = 0
 

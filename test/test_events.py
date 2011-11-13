@@ -9,12 +9,6 @@ Basic functionality:
 
 >>> s = Test()
 >>> q = Test()
->>> link(s, 'default', q.handle)
->>> send(s, 'default')
-Handled!
->>> unlink(s, 'default', q.handle)
->>> send(s, 'default')
-
 >>> link(s, q.handle)
 >>> send(s)
 Handled!

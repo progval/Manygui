@@ -1,5 +1,4 @@
  # Support for 2.1
-from .Events import link, send
 from .Utils import getGetter,getSetter,getterName,uncapitalizeAttribute
 import collections
 
