@@ -8,10 +8,12 @@ from anygui import backendModule
 
 class Frame(Component, Defaults.Frame):
 
-    def __init__(self, *args, **kw):
+    def __init__(self, *args, layout=None, **kw):
         self.contents = []
         Component.__init__(self, *args, **kw)
-        self.layout = Placer()
+        if layout is None:
+            layout = Placer()
+        self.layout = layout
 
     def wrapperFactory(self):
         return backendModule().FrameWrapper(self)
