@@ -672,7 +672,7 @@ class MenuItemMixin:
 class MenuWrapper(MenuItemMixin, ComponentWrapper):
 
     def widgetFactory(self,*args,**kws):
-        return QPopupMenu(*args,**kws)
+        return QMenu(self.proxy.text, *args,**kws)
 
     def setContainer(self,container):
         if container is None:
@@ -722,7 +722,7 @@ class MenuWrapper(MenuItemMixin, ComponentWrapper):
                 item.wrapper.createIfNeeded()
                 item.wrapper.insertInto(self.widget)
                 if item.wrapper.itemId != -1:
-                    self.widget.setItemEnabled(item.wrapper.itemId, item.enabled)
+                    self.widget.actions()[item.wrapper.itemId-1].setEnabled(item.enabled)
 
     def enterMainLoop(self): # ...
         self.proxy.push() # FIXME: Why is this needed when push
@@ -730,7 +730,8 @@ class MenuWrapper(MenuItemMixin, ComponentWrapper):
 
     def insertInto(self, widget):
         self.rebuild()
-        self.itemId = widget.insertItem(self.proxy.text, self.widget)
+        widget.addMenu(self.widget)
+        self.itemId = len(widget.actions())
 
 class MenuBarWrapper(MenuWrapper):
     def widgetFactory(self,*args,**kws):
@@ -744,7 +745,9 @@ class MenuCommandWrapper(MenuItemMixin, AbstractWrapper):
 
     def insertInto(self, widget):
         self.parentWidget = widget
-        self.itemId = widget.insertItem(self.proxy.text, self.clickHandler)
+        self.widget = widget.addAction(self.proxy.text)
+        self.itemId = len(widget.actions())
+        self.widget.triggered.connect(self.clickHandler)
 
     def clickHandler(self,*args,**kws):
         if DEBUG: print("CLICKED: ", self)
@@ -755,7 +758,7 @@ class MenuCheckWrapper(MenuCommandWrapper):
 
     def insertInto(self, widget):
         MenuCommandWrapper.insertInto(self, widget)
-        self.parentWidget.setItemChecked(self.itemId, self.checked)
+        self.widget.setChecked(self.checked)
 
     def setOn(self,on):
         self.checked = on
@@ -773,7 +776,9 @@ class MenuCheckWrapper(MenuCommandWrapper):
 class MenuSeparatorWrapper(MenuItemMixin, AbstractWrapper):
 
     def insertInto(self, widget):
-        widget.insertSeparator()
+        if len(widget.actions()) > 0:
+            widget.insertSeparator(widget.actions()[-1])
+        # FIXME: does not add a seperator if no action.
 
 #==============================================================#
 
