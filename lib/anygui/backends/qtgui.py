@@ -224,7 +224,8 @@ class ListBoxWrapper(ComponentWrapper):
         self.items = []
 
     def widgetFactory(self, *args, **kws):
-        return QListWidget(*args, **kws)
+        widget = QListWidget(*args, **kws)
+        return widget
 
     def widgetSetUp(self):
         if not self.connected:
@@ -237,7 +238,7 @@ class ListBoxWrapper(ComponentWrapper):
             self.widget.clear()
             self.items = items[:]
             for item in self.items:
-                self.widget.insertItem(str(item),-1)
+                self.widget.addItem(QListWidgetItem(item))
 
     def getItems(self):
         if self.widget:
@@ -245,7 +246,7 @@ class ListBoxWrapper(ComponentWrapper):
 
     def setSelection(self, selection):
         if self.widget:
-            self.widget.setCurrentItem(int(selection))
+            self.widget.setCurrentItem(self.widget.item(int(selection)))
 
     def getSelection(self):
         if self.widget:
