@@ -225,6 +225,8 @@ class ListBoxWrapper(ComponentWrapper):
 
     def widgetFactory(self, *args, **kws):
         widget = QListWidget(*args, **kws)
+        widget.addItem('foo') # Don't ask me why, but without that line,
+                              # ListBoxes are invisible.
         return widget
 
     def widgetSetUp(self):
