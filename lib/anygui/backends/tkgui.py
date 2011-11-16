@@ -193,7 +193,7 @@ class ComponentWrapper(Wrapper):
 class ButtonWrapper(ComponentWrapper):
 
     def clickHandler(self): 
-        send(self.proxy, 'click')
+        send(self.proxy)
 
     def widgetSetUp(self):
         self.widget.configure(command=self.clickHandler)
@@ -471,7 +471,7 @@ class ListBoxWrapper(ComponentWrapper):
         return selection
 
     def clickHandler(self, event):
-        send(self.proxy, 'select')
+        send(self.proxy)
 
 
 class ToggleButtonMixin:
@@ -501,7 +501,7 @@ class ToggleButtonMixin:
         self.widget.configure(command=self.clickHandler)
 
     def clickHandler(self, *args, **kws): # Should perhaps be in a ButtonMixin superclass?
-        send(self.proxy, 'click')
+        send(self.proxy)
 
 class RadioButtonWrapper(ToggleButtonMixin, ComponentWrapper):
 
@@ -820,7 +820,7 @@ class MenuCommandWrapper(MenuItemMixin,AbstractWrapper):
 
     def clickHandler(self,*args,**kws):
         #print "CLICKED",self
-        send(self.proxy,'click',text=self.proxy.text)
+        send(self.proxy, self.proxy._defaultEvent(text=self.proxy.text))
 
     def itemAddTo(self,parent):
         #print "Adding command",item.wrapper,"to",self
