@@ -13,6 +13,7 @@ Laura Creighton             tkgui, core
 Dallas T. Johnston          qtgui, gtkgui
 Patrick K. O'Brien          wxgui, core
 Phil Cook                   qtgui, core
+Valentin Lorentz            admin, core, qtgui
 
 (* backend not yet implemented)
 
@@ -33,4 +34,4 @@ Sebastien Keim
 Andrew McKenzie
 François Granger
 Lalo Martins
-Other members of the Anygui development mailing list
+Other members of the Manygui development mailing list

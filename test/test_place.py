@@ -1,6 +1,6 @@
-from anygui import *
-from anygui.Utils import log
-##from anygui import Window, View, CheckBox, Button, Label, \
+from manygui import *
+from manygui.Utils import log
+##from manygui import Window, View, CheckBox, Button, Label, \
 ##     RadioButton, RadioGroup, application
 ##from TestViews import TestView, BigTestView
 

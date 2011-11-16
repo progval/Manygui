@@ -2,29 +2,29 @@
 import sys
 sys.exit('test_interface is not currently pertinent')
 
-from anygui.Utils import log
+from manygui.Utils import log
 
-import anygui
+import manygui
 
 backends = []
 
 log("Checking backend __all__ attributes:")
 
-for b in anygui._backends:
+for b in manygui._backends:
     try:
-        mod = anygui._dotted_import('anygui.backends.%sgui' % b)
+        mod = manygui._dotted_import('manygui.backends.%sgui' % b)
         backends.append((mod, b))
     except:
         log("[%sgui ignored]" % b)
 
 for mod, name in backends:
-    if mod.__all__ != anygui.__all__:
+    if mod.__all__ != manygui.__all__:
         log('Export error for %sgui' % name )
-        log('anygui exports:')
-        for exp in anygui.__all__:
+        log('manygui exports:')
+        for exp in manygui.__all__:
             log('\t -%s' % exp)
         log('%sgui exports:' % name)
         for exp in mod.__all__:
             log('\t- %s' % exp)
-    raise AssertionError('%sgui should export the same API as anygui!' % name)
+    raise AssertionError('%sgui should export the same API as manygui!' % name)
     log('%sgui OK' % name)

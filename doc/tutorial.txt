@@ -1,23 +1,23 @@
-Title: Anygui Tutorial
+Title: Mmanygui Tutorial
 Author: Magnus Lie Hetland
 Date: 2003-02-16
 
 1. Introduction
 
-   Anygui is a GUI package for Python that lets you write GUI programs
+   Mmanygui is a GUI package for Python that lets you write GUI programs
    that will run in any Python installation, using the available
    backend packages (such as Tkinter or wxPython) and resort to
    text-based GUI emulation (using curses or plain standard
    input/output) when no known GUI backend is available.
 
-   This tutorial will show you how to use Anygui to build a simple
+   This tutorial will show you how to use Mmanygui to build a simple
    application which has a single window with a text field and a
    button.  Pressing the button will insert a random sentence into the
    text field.
 
    To follow this tutorial, you'll need a Python interpreter and the
-   latest Anygui distribution. Python can be downloaded from the
-   Python website[1] and Anygui can be downloaded from the Anygui
+   latest Mmanygui distribution. Python can be downloaded from the
+   Python website[1] and Mmanygui can be downloaded from the Mmanygui
    website[2].
 
 2. Creating Random Sentences
@@ -52,7 +52,7 @@ Date: 2003-02-16
    Now we need an application with a single window. How do we do that?
    It's really intuitive:
 
-      from anygui import *
+      from mmanygui import *
       
       app = Application()
       win = Window()
@@ -61,7 +61,7 @@ Date: 2003-02-16
    There; we've created a Window object, an Application object, and
    added the Window to the Application (otherwise it wouldn't show up
    anywhere). You should create your Application object before your
-   other Anygui components (including Windows).
+   other Mmanygui components (including Windows).
 
    This won't do anything by itself; we need to tell the Application
    to start running, which will "freeze" the script and start up a
@@ -99,7 +99,7 @@ Date: 2003-02-16
 
 5. Attributes
 
-   The clue to customising objects in Anygui is attributes. Most
+   The clue to customising objects in Mmanygui is attributes. Most
    properties of any object can be modified simply by setting an
    attribute; for instance, to set the text of our Button object, we
    can simply do
@@ -208,7 +208,7 @@ Date: 2003-02-16
 
 7. Handling Events
 
-   When certain events occur, Anygui may send a signal to your program
+   When certain events occur, Mmanygui may send a signal to your program
    which you can choose to react to. (We also call this "sending an
    event".)
 
@@ -242,7 +242,7 @@ Date: 2003-02-16
    Note: Event handlers receive information about the event through
    Event objects. We ignore the specifics of these objects here. In
    version 0.1.1 and earlier, event handlers received information
-   through keyword arguments. So, if you're using Anygui 0.1.1, the
+   through keyword arguments. So, if you're using Mmanygui 0.1.1, the
    event handler should be:
 
       def handler(**kwds):
@@ -254,7 +254,7 @@ Date: 2003-02-16
 9. Further Exploration
 
    After this short tutorial you should be able to write quite complex
-   Anygui programs. To aid you in your exploration here is some more
+   Mmanygui programs. To aid you in your exploration here is some more
    information:
 
    Common attributes:
@@ -302,14 +302,14 @@ Date: 2003-02-16
       win.title     -- the title of the window
 
    For more information about these classes, and about such things as
-   the Anygui Model-View-Controller mechanism, please consult the
-   Anygui Reference Manual, available in the disribution or from the
-   Anygui website[2].
+   the Mmanygui Model-View-Controller mechanism, please consult the
+   Mmanygui Reference Manual, available in the disribution or from the
+   Mmanygui website[2].
 
 A. The Program
 
    from random import choice
-   from anygui import *
+   from mmanygui import *
 
    nouns = ['can of spam', 'cardinal', 'machine that goes "ping"']
    adjectives = ['big', 'little', 'pink', 'tasty']
@@ -337,7 +337,7 @@ A. The Program
 
    win.height = txt.height + btn.height + 30
 
-   # Remember to use keyword arguments in Anygui 0.1.1
+   # Remember to use keyword arguments in Mmanygui 0.1.1
    def handler(event): txt.text = sentence()
    link(btn, 'click', handler)
 
@@ -347,4 +347,4 @@ A. The Program
 B. References
 
    [1] http://www.python.org
-   [2] http://www.anygui.org
+   [2] http://www.mmanygui.org

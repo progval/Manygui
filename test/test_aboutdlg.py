@@ -1,5 +1,5 @@
-from anygui import *
-from anygui.backends.genericgui import AboutDialog
+from manygui import *
+from manygui.backends.genericgui import AboutDialog
 
 app = Application()
 aboutAg = AboutDialog()

@@ -1,4 +1,4 @@
-from anygui import *
+from manygui import *
 
 # Tests stretching when distances are zero
 

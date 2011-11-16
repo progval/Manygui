@@ -7,7 +7,7 @@ from unittest import TestCase, main
 import warnings
 warnings.filterwarnings('ignore')
                     
-from anygui.Components import Component
+from manygui.Components import Component
 
 class DummyWrapper:
     def push(self, *args, **kwds): pass

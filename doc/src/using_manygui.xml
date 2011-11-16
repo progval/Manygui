@@ -1,0 +1,714 @@
+  <section>
+    <title>Using Manygui</title>
+
+    <para><emphasis>Note</emphasis>: For some examples of working
+    <name>Manygui</name> code, see the <code>test</code> and
+    <code>demo</code> directories of the distribution. Remember that
+    the test scripts are written to test certain features of
+    <name>Manygui</name>, not to represent recommended coding
+    practices.</para>
+
+    <para>Using <name>Manygui</name> is simple; it's simply a matter of
+    importing the classes and functions you need from the
+    <code>manygui</code> module, e.g.:</para>
+
+    <codelisting>
+      <line>from manygui import *</line>
+    </codelisting>
+
+    <para>After doing this you must create an <code>Application</code>
+    object, at least one <code>Window</code>, and probably a few
+    components such as <code>Button</code>s and
+    <code>TextField</code>s. The <code>Window</code>s are added to the
+    <code>Application</code> (through its <code>add</code> method),
+    and the various components are added to the
+    <code>Window</code>. When you have done this, you call the
+    <code>run</code> method of your <code>Application</code>
+    instance.</para>
+
+    <codelisting>
+      <line># Make components here</line>
+      <line>win = Window()</line>
+      <line># Add components to the Window</line>
+      <line>app = Application()</line>
+      <line>app.add(win)</line>
+      <line>app.run()</line>
+    </codelisting>
+
+    <section>
+      <title>Avoiding Namespace Pollution</title>
+      
+      <para>Importing everything from <name>Manygui</name> (as in
+      <code>from manygui import *</code>) is fine for small programs,
+      where you're certain that there will be no name clashes. You may
+      also simply import the names you need:</para>
+
+      <codelisting>
+	<line>from manygui import Application, Window</line>
+      </codelisting>
+
+      <para>The preferred way to use modules like this is usually to
+      avoid cluttering your namespace, by using simply
+      <code>import manygui</code>. However, if you are going to create a lot of
+      widgets, the <code>manygui</code> prefix may be
+      cumbersome. Therefore, I suggest renaming it to
+      <code>gui</code>, either with a simple assignment...</para>
+
+      <codelisting>
+	<line>import manygui; gui = manygui</line>
+      </codelisting>
+
+      <para>... or, in recent versions of <name>Python</name>:</para>
+
+      <codelisting>
+	<line>import manygui as gui</line>
+      </codelisting>
+
+      <para>Then you can instantiate widgets like this:</para>
+
+      <codelisting>
+	<line>win = gui.Window()</line>
+      </codelisting>
+
+      <para>The examples in this documentation use the starred import,
+      for simplicity.</para>
+
+    </section>
+
+    <section>
+      <title>Importing the Backends Directly</title>
+
+      <para>If you wish to import a backend directly (and "hardwire
+      it" into your program), you may do so. For instance, if you
+      wanted to use the <name>wxPython</name> backend,
+      <code>wxgui</code>, you'd replace
+      </para>
+
+      <codelisting>
+	<line>from manygui import *</line>
+      </codelisting>
+
+      <para>with</para>
+
+      <codelisting>
+	<line>from manygui.backends.wxgui import *</line>
+      </codelisting>
+
+    <!-- This doesn't seem to be correct:
+
+      <para>This way you may use <name>Manygui</name> in standalone
+      executables built with tools like <code>py2exe</code>
+      (<url>http://starship.python.net/crew/theller/py2exe/</url>) or
+      the McMillan installer
+      (<url>http://www.mcmillan-inc.com/install1.html</url>), or with
+      <code>jythonc</code> with the <code>-</code><code>-deep</code>
+      option or equivalent.</para>
+
+      <para><strong>Note:</strong> Compiling <code>jar</code> files of
+      <name>Manygui</name> programs with <name>Jython</name> may not
+      work in the current version.</para>
+    -->
+
+      <para>Note that the namespace handling still works just fine:</para>
+
+      <codelisting>
+	<line>import manygui.backends.tkgui as gui</line>
+      </codelisting>
+
+    </section>
+
+    <section>
+      <title>Creating a Window</title>
+
+      <para>One of the most important classes in <name>Manygui</name>
+      is <code>Window</code>. Without a <code>Window</code> you have
+      no GUI; all the other widgets are added to
+      <code>Window</code>s. Knowing this, we may suspect that the
+      following is a minimal <name>Manygui</name> program (and we would
+      be right):</para>
+
+      <codelisting>
+	<line>from manygui import *</line>
+	<line>app = Application()</line>
+	<line>win = Window()</line>
+	<line>app.add(win)</line>
+	<line>app.run()</line>
+      </codelisting>
+ 
+      <para>This example gives us a rather uninteresting default
+      window. You may customise it by setting some of its properties,
+      like <code>title</code> and <code>size</code>:</para>
+
+      <codelisting>
+	<line>w = Window()</line>
+	<line>w.title = 'Hello, world!'</line>
+	<line>w.size = (200, 100)</line>
+      </codelisting>
+      
+      <para>If we want to, we can supply the widget properties as
+      keyword arguments to the constructor:</para>
+
+      <codelisting>
+	<line>w = Window(title='Hello, world!', size=(200,100))</line>
+      </codelisting>
+    </section>
+
+    <section>
+      <title>The set Method and the Options Class</title>
+
+      <para>If you want to change some attributes of a widget, you can
+      either just set them directly, or (if you'd like to set several
+      at once), use the <code>set</code> method, just like the
+      constructor:</para>
+
+      <codelisting>
+	<line>w.set(title='Hello, again', size=(300,200))</line>
+      </codelisting>
+
+      <para>Supplying the same attributes with the same values to a
+      lot of widgets (if you are making several buttons with the same
+      size, for instance) can be a bit impractical (you'll learn more
+      about buttons in a little while):</para>
+
+      <codelisting>
+	<line>bt1 = Button(left=10, width=50, height=30, text='Button 1')</line>
+	<line>bt2 = Button(left=10, width=50, height=30, text='Button 2')</line>
+	<line>bt3 = Button(left=10, width=50, height=30, text='Button 3')</line>
+      </codelisting>
+
+      <para>To deal with this, the widget constructors (and the
+      <code>set</code> method) can take <code>Options</code> objects
+      as positional parameters:</para>
+
+      <codelisting>
+	<line>opt = Options(left=10, width=50, height=30)</line>
+	<line>bt1 = Button(opt, text='Button 1')</line>
+	<line>bt2 = Button(opt, text='Button 2')</line>
+	<line>bt3 = Button(opt, text='Button 3')</line>
+      </codelisting>
+
+      <para>As you can see, this saves quite a lot of typing. You can
+      use as many <code>Options</code> arguments as you like.</para>
+    </section>
+
+    <section>
+      <title>The modify Method</title>
+
+      <para>Just like <code>set</code> can be used to set the
+      attributes of a <code>Component</code>, the <code>modify</code>
+      method can be used to <emphasis>modify</emphasis> them, without
+      rebinding them to another value. To show the difference,
+      consider the following example (where <code>foo</code> is an
+      attribute that does nothing special):</para>
+
+      <codelisting>
+	<line>>>> from manygui import *</line>
+	<line>>>> btn = Button()</line>
+	<line>>>> some_list = [1, 2, 3]</line>
+	<line>>>> btn.foo = some_list</line>
+	<line>>>> btn.modify(foo=[4, 5, 6])</line>
+	<line>>>> btn.foo</line>
+	<line>[4, 5, 6]</line>
+	<line>>>> some_list</line>
+	<line>[4, 5, 6]</line>
+	<line>>>> btn.set(foo=[7, 8, 9])</line>
+	<line>>>> btn.foo</line>
+	<line>[7, 8, 9]</line>
+	<line>>>> some_list</line>
+	<line>[4, 5, 6]</line>
+      </codelisting>
+
+      <para>As you can see, using <code>modify</code> modifies the
+      list, while <code>set</code> replaces it. The
+      <code>modify</code> method is used for (among other things)
+      implementing Model-View-Controller systems. (More about that
+      later.)</para>
+
+      <para>The <code>modify</code> method works as follows: If there
+      is a specific internal method for modifying an attribute, that
+      is called. Otherwise, the supplied value will be assigned to
+      <code>self.name[:]</code> (where <code>name</code> is the
+      attribute in question). If that doesn't work (a
+      <code>TypeError</code> exception is raised), the value will be
+      assigned to <code>self.name.value</code>. If that doesn't work
+      either, the attribute will be rebound to the new value, with the
+      same result as using <code>set</code>. So, to avoid any in-place
+      modification, all you need to do is use immutable values:
+      </para>
+
+      <codelisting>
+	<line>>>> from manygui import *</line>
+	<line>>>> btn = Button()</line>
+	<line>>>> some_list = [1, 2, 3]</line>
+	<line>>>> btn.foo = tuple(some_list)</line>
+	<line>>>> btn.modify(foo=[4, 5, 6])</line>
+	<line>>>> btn.foo</line>
+	<line>[4, 5, 6]</line>
+	<line>>>> some_list</line>
+	<line>[1, 2, 3]</line>
+      </codelisting>
+
+    </section>
+
+    <section>
+      <title>The sync Method</title>
+
+      <para>The <code>modify</code> method is used to modify
+      attributes in-place, e.g. to keep them in sync with a
+      widget. This is done automatically when you change a widget
+      through the graphical interface. In a way, the
+      <code>sync</code> method works the other way: If you modify an
+      attribute, you can call the <code>sync</code> method to keep
+      the widget's appearance in sync with its state. When you assign
+      to an attribute, <code>sync</code> is called automatically;
+      you only have to call it yourself if you have an attribute which
+      is a mutable object, and you modify that object.</para>
+
+      <para>For more info about the use of <code>sync</code>, see
+      the section "About Models, Views, and Controllers",
+      below.</para>
+
+    </section>
+
+    <section>
+      <title>Adding a Label</title>
+
+      <para>Simple labels are created with the <code>Label</code>
+      class:</para>
+
+      <codelisting>
+	<line>lab = Label(text='Hello, again!', position=(10,10))</line>
+      </codelisting>
+
+      <para>Here we have specified a position just for fun; we don't
+      really have to. If we add the label to our window, we'll see
+      that it's placed with its left topmost corner at the point
+      <code>(10,10)</code>:</para>
+
+      <codelisting>
+	<line>w.add(lab)</line>
+      </codelisting>
+
+    </section>
+
+    <section>
+      <title>Layout: Placing Widgets in a Frame</title>
+
+      <para>This section goves a simple example of positioning
+      <code>Components</code>; for more information about the
+      <name>Manygui</name> layout mechanism, please refer to the API
+      Reference (below).</para>
+
+      <codelisting>
+	<line>win.add(lab, position=(10,10))</line>
+	<line>win.add(lab, left=10, top=10)</line>
+	<line>win.add(lab, top=10, right=10)</line>
+	<line>win.add(lab, position=(10,10), right=10, hstretch=1)</line>
+      </codelisting>
+
+      <para>In the last example <code>hstretch</code> is a Boolean
+      value indicating whether the widget should be stretched
+      horizontally (to maintain the other specifications) when the
+      containing <code>Frame</code> is resized. (The vertical version
+      is <code>vstretch</code>.)</para>
+
+      <para>Just like in component constructors, you can use
+      <code>Options</code> objects in the <code>add</code> method,
+      after the component to be added:</para>
+
+      <codelisting>
+	<line>win.add(lab, opt, left=10)</line>
+      </codelisting>
+
+      <section>
+	<title>Placing More Than One Widget</title>
+
+	<para>The <code>add</code> method can also position a
+	<emphasis>sequence</emphasis> of widgets. The first widget
+	will be placed as before, while the subsequent ones will be
+	placed either to the <code>right</code>, to the
+	<code>left</code>, above (<code>up</code>), or below
+	(<code>down</code>), according to the <code>direction</code>
+	argument, at a given distance (<code>space</code>):</para>
+
+	<codelisting>
+	  <line>win.add((lab1, lab2), position=(10,10),</line>
+	  <line>        direction='right', space=10)</line>
+	</codelisting>
+
+	<para><strong>Note:</strong> Remember to enclose your
+	components in a sequence (such as a tuple or a list), since
+	<code>add</code> allows you to use more positional arguments,
+	but will treat them differently. If you want to use
+	<code>Options</code> objects, place them outside (after) the
+	sequence. For more information see the section about the
+	<code>Frame</code> class in the API Reference below.</para>
+
+      </section>
+
+    </section>
+
+    <section>
+      <title>Buttons and Event Handling</title>
+
+      <para><code>Buttons</code> (as most components) work more or
+      less the same way as <code>Labels</code>. You can set their
+      <code>size</code>, their <code>position</code>, their
+      <code>text</code>, etc. and then <code>add</code> them to a
+      <code>Frame</code> (such as a <code>Window</code>). The thing
+      that makes them interesting is that they emit
+      <emphasis>events</emphasis>. Each time the user clicks a button,
+      it sends out a <code>click</code> event. You can catch these
+      events by linking your button to one or more <emphasis>event
+      handlers</emphasis>. It's really simple:</para>
+
+      <codelisting>
+	<line>btn = Button(text='Greet Environment')</line>
+	<line>def greeting(event):</line>
+	<line>    print 'Hello, World!'</line>
+	<line>link(btn, greeting)</line>
+      </codelisting>
+
+      <para>The event handling is taken care of by the call to
+      <code>link</code>. An event handler receives a single
+      <code>Event</code> object as its parameter. (For information
+      about these, see the API Reference, below.)</para>
+
+    </section>
+
+    <section>
+      <title>About Models, Views, and Controllers</title>
+
+      <para>The <name>Manygui</name> MVC mechanism (based on the
+      <code>sync</code> method and the <code>Assignee</code>
+      protocol) is described in the API Reference below. Here is a
+      short overview on how to use it.</para>
+
+      <para>A <emphasis>model</emphasis> is an object that can be
+      modified, and that can notify other objects, called
+      <code>views</code>, when it has been modified. A
+      <emphasis>controller</emphasis> is an object that can modify the
+      model, in particular as a direct response to a user action (such
+      as clicking the mouse or typing some text). In
+      <name>Manygui</name>, <code>Component</code>s double as both
+      views (showing a model's state to the user) and controllers
+      (letting the user modify the model). Even though
+      <name>Manygui</name> supports using models this way, you can also
+      create complete applications without using them (or, at least,
+      without thinking about them) .</para>
+      
+      <para>Models are in general instances of some subclass of the
+      <code>Model</code> class, although they don't have to be; see
+      the API Reference below for a description of how they work. (The
+      <code>Model</code> class is currently internal to the
+      <code>Manygui</code> package, but it can be found in the
+      <code>manygui.Models</code> module.) The <code>Model</code>s that
+      are included in <name>Manygui</name> are:</para>
+
+      <codelisting>
+	<line>BooleanModel     -- represents a Boolean value</line>
+	<line>ListModel        -- behaves like a list</line>
+	<line>NumberModel      -- represents a numerical value</line>
+	<line>TextModel        -- acts like a mutable string</line>
+      </codelisting>
+
+      <para>These all have a <code>value</code> attribute which may be
+      used to change their internal value. They also support other
+      operations, such as indexing and slicing etc. for
+      <code>ListModel</code>. These are very easy to use: Just assign
+      them to an attribute of a <code>Component</code>:</para>
+
+      <codelisting>
+	<line># You'll learn about CheckBoxes in a minute</line>
+	<line>cbx = CheckBox(text='Simple model test')</line>
+	<line>state = BooleanModel(value=1)</line>
+	<line>cbx.on = state</line>
+      </codelisting>
+
+      <para>Now, if you change <code>state</code> (e.g. with the
+      statement <code>state.value=0</code>) this will automatically be
+      reflected in the <code>CheckBox</code> (which will be acting
+      like a view). If the user clicks the <code>CheckBox</code>, the
+      model will be changed.</para>
+
+      <para>To keep a view up-to-date manually you can call its
+      <code>sync</code> method. This can be useful if you use a
+      simple (non-<code>Model</code>) mutable value such as a list in
+      an attribute:</para>
+
+      <codelisting>
+	<line>btn = Button()</line>
+	<line>rect = [0, 0, 10, 10]</line>
+	<line>btn.geometry = rect</line>
+	<line>rect[3] = 20</line>
+	<line>btn.sync('geometry')</line>
+      </codelisting>
+
+      <para>After modifying <code>rect</code>, the button will not
+      have changed, since it can't detect the change by
+      itself. (That's only possible when you use a real model.)
+      Therefore, you call <code>btn.sync</code> to tell it to update
+      itself.</para>
+
+      <para><strong>Note:</strong> When modifying either
+      <code>x</code>, <code>y</code>, <code>width</code>,
+      <code>height</code>, <code>position</code>, <code>size</code>,
+      or <code>geometry</code> in place like this, you should supply
+      the name of the attribute as an argument to <code>sync</code>,
+      to avoid confusing <name>Manygui</name>. That is because these
+      attributes mirror each other in various ways, and if you don't
+      supply a name, <name>Manygui</name> won't know which one you
+      modified.</para>
+
+      <para>If you assign a value to an attribute, the
+      <code>sync</code> method will be called automatically, so
+      another way of doing the same thing is:</para>
+
+      <codelisting>
+	<line>btn = Button()</line>
+	<line>rect = [0, 0, 10, 10]</line>
+	<line>btn.geometry = rect</line>
+	<line>rect[3] = 20</line>
+	<line>btn.geometry = rect</line>
+      </codelisting>
+
+      <para><strong>Caution:</strong> Because of the controller behaviour
+      of <code>Component</code>s, if the <code>Button</code> is
+      resized, <code>rect</code> will be modified. If you don't want
+      this behaviour, use a tuple instead of a list, since tuples
+      can't be modified.</para>
+
+      <para>If you want another object to monitor a
+      <code>Model</code>, you can simply use the <code>link</code>
+      method, since all <code>Model</code>s generate an event (of the
+      type <code>default</code>) when they are modified.</para>
+
+      <para>Example:</para>
+
+      <codelisting>
+	<line>>>> from manygui import *</line>
+	<line>>>> mdl = BooleanModel()</line>
+	<line>>>> mdl.value = 1</line>
+	<line>>>> def model_changed(event):</line>
+	<line>>>>     print 'The model has changed!'</line>
+	<line></line>
+	<line>>>> link(mdl, model_changed)</line>
+	<line>>>> mdl.value = 0</line>
+	<line>The model has changed</line>
+	<line>>>> mdl.value = 0</line>
+	<line>The model has changed</line>
+      </codelisting>
+
+      <para>Note the last two lines: We haven't really changed the
+      model, but the event handler is called nonetheless. If you want
+      to know whether the model really changed, you must retain a copy
+      of its state, and compare it with the new value.</para>
+
+    </section>
+
+    <section>
+      <title>Using CheckBoxes</title>
+
+      <para>A <code>CheckBox</code> is a <emphasis>toggle
+      button</emphasis>, a button which can be in one of two states,
+      "on" or "off". Except for that, it works more or less like any
+      other button in that you can place it, set its text, and
+      link an event handler to it.</para>
+
+      <para>Whether a <code>CheckBox</code> is currently on or off is
+      indicated by its <code>on</code> attribute.</para>
+
+    </section>
+
+    <section>
+      <title>RadioButtons and RadioGroups</title>
+
+      <para><code>RadioButton</code>s are toggle buttons, just like
+      <code>CheckBox</code>es. The main differences are that they look
+      slightly different, and that they should belong to a
+      <code>RadioGroup</code>.</para>
+
+      <para>A <code>RadioGroup</code> is a set of
+      <code>RadioButton</code>s where only <emphasis>one</emphasis>
+      <code>RadioButton</code> is permitted to be "on" at one
+      time. Thus, when one of the buttons in the group is turned on,
+      the others are automatically turned off. This can be useful for
+      selecting among different alternatives.</para>
+
+      <para><code>RadioButton</code>s are added to a
+      <code>RadioGroup</code> by setting their <code>group</code>
+      property:</para>
+
+      <codelisting>
+	<line>radiobutton.group = radiogroup</line>
+      </codelisting>
+
+      <para>This may also be done when constructing the button:</para>
+
+      <codelisting>
+	<line>grp = RadioGroup()</line>
+	<line>rbn = RadioButton(group=grp)</line>
+      </codelisting>
+
+      <para><strong>Caution:</strong> The behaviour of a
+      <code>RadioButton</code> when it does not belong to a
+      <code>RadioGroup</code> is not defined by the
+      <name>Manygui</name> API, and may vary between
+      backends. Basically, a <code>RadioButton</code> without a
+      <code>RadioGroup</code> is meaningless; use a
+      <code>CheckBox</code> instead.</para>
+
+      <para><code>RadioGroups</code> also support an <code>add</code>
+      method, as all other <name>Manygui</name> container-like
+      objects:</para>
+
+      <para><apiname>add</apiname>(<var>button</var>)</para>
+
+      <para>Adds the <var>button</var> to the group, including setting
+      <var>button</var><code>.group</code> to the group. As with the
+      other <code>add</code> methods, the argument may be either a
+      single object, or a sequence of objects.</para>
+      
+      <!-- both add and binding group isn't necessary... -->
+
+    </section>
+
+    <section>
+      <title>ListBox</title>
+
+      <para>A <code>ListBox</code> is a vertical list of items that
+      can be selected, either by clicking on them, or by moving the
+      selection up and down with the arrow keys. (For the arrow keys
+      to work, you must make sure that the <code>ListBox</code> has
+      keyboard focus. In some backends this requires using the
+      <code>tab</code> key.)</para>
+
+      <para><emphasis>Note</emphasis>: When using <name>Manygui</name>
+      with <name>Tkinter</name>, using the arrow keys won't change the
+      selection, only which item is underlined. You'll have to use the
+      arrow keys until the item you want to select is underlined; then
+      select it by pressing the space bar.</para>
+
+      <para>A <code>ListBox</code>'s items are stored in its attribute
+      <code>items</code>, a sequence of arbitrary objects. The
+      text displayed in the widget will be the result of applying the
+      built-in <name>Python</name> function <code>str</code> to each
+      object.</para>
+
+      <codelisting>
+	<line>lbx = ListBox()</line>
+	<line>lbx.items = 'This is a test'.split()</line>
+      </codelisting>
+
+      <para>The currently selected item can be queried or set through
+      the <code>selection</code> property (an integer index, counting
+      from zero). Also, when an item is selected, a
+      <code>select</code> event is generated, which is the default
+      event type for a <code>ListBox</code>. This means that you can
+      either do</para>
+
+      <codelisting>
+	<line>link(lbx, 'select', handler)</line>
+      </codelisting>
+
+      <para>or</para>
+
+      <codelisting>
+	<line>link(lbx, handler)</line>
+      </codelisting>
+
+      <para>with the same result. (This is similar to the
+      <code>click</code> event, which is default for
+      <code>Buttons</code>; for more information, see the API
+      Reference below.)</para>
+
+    </section>
+
+    <section>
+      <title>TextField and TextArea</title>
+
+      <para><name>Manygui</name>'s two text widgets,
+      <code>TextField</code> and <code>TextArea</code> are quite
+      similar. The difference between them is that
+      <code>TextField</code> permits neither newlines or tab
+      characters to be typed, while <code>TextArea</code> does. Typing
+      a tab in a <code>TextField</code> will simply move the focus to
+      another widget, while pressing the enter key will send an
+      <code>enterkey</code> event (which is the
+      <code>TextField</code>'s default event type).</para>
+
+      <para>The text in a text component is stored in its
+      <code>text</code> property (a string or equivalent), and the
+      current selection is stored in its <code>selection</code>
+      property (a tuple of two integer indices).</para>
+    </section>
+
+    <section>
+      <title>Making Your Own Components and LayoutManagers</title>
+
+      <para>Currently, you can create your own components by combining
+      others in <code>Frame</code>s, and wrapping the whole thing up
+      as a class. One of the main reasons for doing this would be to
+      emulate a feature (such as a tabbed pane) available in some
+      backends, but not in others. One could then actually
+      <emphasis>use</emphasis> the native version in the backends
+      where it is available (such as <code>wx</code>, in this case),
+      and use the "emulation" in the others. There is some limited
+      support for this in the <code>backend</code> function (which
+      will allow you to check whether you are currently using the
+      correct backend), but in the future, a more complete API will be
+      developed for this, allowing you access to the coolest features
+      of your favorite GUI package, while staying "package
+      independent".</para>
+
+      <para>You can already create your own layout managers, by
+      properly supporting the methods <code>add</code>,
+      <code>remove</code>, and <code>resized</code>. The simplest way
+      of doing this is to subclass <code>LayoutManager</code>, which
+      gives you the <code>add</code> and <code>remove</code> methods
+      for free. You can then concentrate on the method
+      <code>resized</code> which takes two positional arguments,
+      <code>dw</code>, and <code>dh</code> (change in width and change
+      in height) and is responsible for changing the geometries of all
+      the components in the <code>Frame</code> the
+      <code>LayoutManager</code> is managing. (This frame is available
+      through the attribute <code>self.container</code>.)
+      </para>
+      <!-- Change _container to container in implementation -->
+
+      <!-- Why only allow one Options object?
+      Check with generic add() API -->
+
+      <!-- Change add_component and remove_component to internalAdd
+      and internalRemove in implementation -->
+
+      <para>To get more control over things, you should probably also
+      override the two internal methods <code>internalAdd</code>
+      and <code>internalRemove</code>:</para>
+
+      <para><code>internalAdd</code>(self, *<var>items</var>,
+      **<var>kws</var>)</para>
+
+      <para>Should add all the components in <var>items</var>, and
+      associate them with the options in <code>kws</code>, for later
+      resizing.</para>
+
+      <!-- What about obj.layout_info here? -->
+
+      <para><code>internalRemove</code>(self,
+      <var>item</var>)</para>
+
+      <para>Should remove the given item.</para>
+
+      <!-- configure? -->
+
+    </section>
+
+    <section>
+      <title>More Stuff</title>
+
+      <para>More stuff to come... See the API reference.</para>
+
+    </section>
+
+  </section>

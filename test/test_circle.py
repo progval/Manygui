@@ -1,9 +1,9 @@
-import anygui
-app = anygui.Application()
-win = anygui.Window()
-frame=anygui.Frame(layout=anygui.LayoutManagers.CircleManager())
+import manygui
+app = manygui.Application()
+win = manygui.Window()
+frame=manygui.Frame(layout=manygui.LayoutManagers.CircleManager())
 for i in range(1, 10):
-    frame.add(anygui.Button(text='Button %i' % i))
+    frame.add(manygui.Button(text='Button %i' % i))
 win.add(frame)
 app.add(win)
 app.run()

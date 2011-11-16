@@ -1,5 +1,5 @@
-from anygui import *
-from anygui.Utils import log
+from manygui import *
+from manygui.Utils import log
 app = Application()
 win = Window(width = 100, height = 100)
 app.add(win)

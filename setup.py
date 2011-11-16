@@ -63,16 +63,16 @@ class uninstall(Command):
                               name)
 
 
-setup (name               = 'anygui',
+setup (name               = 'manygui',
        version            = open('VERSION.txt').read().strip(),
-       maintainer         = 'Magnus Lie Hetland',
-       maintainer_email   = 'magnus@hetland.org',
+       maintainer         = 'Valentin Lorentz',
+       maintainer_email   = 'progval@gmail.com',
        description        = 'Generic GUI Package for Python',
        long_description   = 'Generic GUI Package for Python',
        license            = 'MIT License',
-       url                = 'http://anygui.sf.net',
+       url                = 'https://github.com/ProgVal/Manygui',
        platforms          = ['Any'],
        cmdclass           = {'uninstall': uninstall},
        package_dir        = {'': 'lib'},
-       packages           = ['anygui', 'anygui.backends',
-                             'anygui.backends.txtutils'])
+       packages           = ['manygui', 'manygui.backends',
+                             'manygui.backends.txtutils'])

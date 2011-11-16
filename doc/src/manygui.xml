@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE document SYSTEM "minimal.dtd" [
+<!ENTITY shortversion            "0.2">
+<!ENTITY longversion             "0.2">
+<!ENTITY copy                    "<copyright/>">
+<!ENTITY introduction     SYSTEM "introduction.xml">
+<!ENTITY installation     SYSTEM "installation.xml">
+<!ENTITY using_manygui     SYSTEM "using_manygui.xml">
+<!ENTITY api_reference    SYSTEM "api_reference.xml">
+<!ENTITY copyrightholders SYSTEM "copyrightholders.xml">
+]>
+
+<!-- TODO: - Add special tags for API reference
+           - Add script for version
+           - Describe new send() behaviour - no longer uses **kwds, but event object;
+             (Add this description to the tutorial as well).
+           - Document sender() and caller()
+	   - Document the new push/pull mechanism
+
+     Remember to keep backend-list up to date
+-->
+
+<!-- container attribute -->
+
+<document version="&longversion;">
+
+  <title>Manygui: Generic GUI for Python</title>
+
+  <author>Magnus Lie Hetland</author>
+
+  <date>...</date>
+
+  &introduction;
+
+  &installation;
+
+  &using_manygui;
+
+  &api_reference;
+
+  <section>
+    <title>Known Problems</title>
+    
+    <para>For an overview of known bugs in the current release, see
+    the file <code>KNOWN_BUGS</code> found in the distribution.</para>
+
+  </section>
+
+  <section>
+    <title>Plans for Future Releases</title>
+
+    <para>For an overview of future plans, see the <code>TODO</code>
+    file found in the distribution. <!-- Some plans are also described in
+    the IRFCs (<url>http://manygui.sf.net/irfc</url>). --></para>
+
+  </section>
+
+  <section>
+    <title>Contributing</title>
+
+    <para>If you want to contribute to the <name>Manygui</name>
+    project, we could certainly use your help. First of all, you
+    should visit the <name>Manygui</name> web site at
+    <url>http://www.manygui.org</url>, subscribe to the developer's mailing
+    list (<code>devel@manygui.org</code>) and the user's list
+    (<code>users@manygui.org</code>), and try to familiarise yourself
+    with how the package works behind the scenes. Then, you may either
+    help develop the currently supported GUI packages, or you may
+    start writing a backend of your own. Several potential backend
+    targets may be found at
+    <url>http://starbase.neosoft.com/~claird/comp.lang.python/python_GUI.html</url>.
+    </para>
+
+  </section>
+
+  <section>
+    <title>Manygui License</title>
+
+    <para>Copyright &copy; 2001, 2002 &copyrightholders;.</para>
+
+    <para>Permission is hereby granted, free of charge, to any person
+    obtaining a copy of this software and associated documentation
+    files (the "Software"), to deal in the Software without
+    restriction, including without limitation the rights to use, copy,
+    modify, merge, publish, distribute, sublicense, and/or sell copies
+    of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:</para>
+
+    <para>The above copyright notice and this permission notice shall
+    be included in all copies or substantial portions of the
+    Software.</para>
+
+    <para>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+    KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+    WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
+    AND NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+    HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.</para>
+  </section>
+
+</document>

@@ -1,10 +1,10 @@
-# Lame but functional Tic-Tac-Toe game using Anygui.
+# Lame but functional Tic-Tac-Toe game using Manygui.
 # This version demonstrates the use of the SimpleGridManager,
 # a layout manager approximately equivalent to Java's
 # GridLayout.
 
-from anygui import Window, Label, Application, Button, Frame, link
-from anygui.LayoutManagers import SimpleGridManager, SimpleGridException
+from manygui import Window, Label, Application, Button, Frame, link
+from manygui.LayoutManagers import SimpleGridManager, SimpleGridException
 from random import uniform
 
 # The "strategy" is to let the user (X) go first, and then

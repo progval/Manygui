@@ -1,5 +1,5 @@
 import sys, os
-from anygui import *
+from manygui import *
 
 filename = sys.argv[1]
 

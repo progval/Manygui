@@ -1,5 +1,5 @@
 """
->>> from anygui.Events import *
+>>> from manygui.Events import *
 >>> class Test:
 ...     def handle(self, event):
 ...         print 'Handled!'

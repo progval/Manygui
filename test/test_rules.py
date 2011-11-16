@@ -1,6 +1,6 @@
 from unittest import TestCase, main
-from anygui.Rules import RectEngine, IllegalState
-from anygui.Attribs import Attrib
+from manygui.Rules import RectEngine, IllegalState
+from manygui.Attribs import Attrib
 
 class RectangleTestCase(TestCase):
 

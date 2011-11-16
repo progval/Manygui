@@ -8,7 +8,7 @@
 
     <para>The <name>Python</name> standard library currently does not
     contain any platform-independent GUI packages. It is the goal of
-    the <name>Anygui</name> project to change this situation. There
+    the <name>Manygui</name> project to change this situation. There
     are many such packages available, but none has been defined as
     <emphasis>standard</emphasis>, so when writing GUI programs for
     <name>Python</name>, you cannot assume that your user has the
@@ -22,34 +22,34 @@
     programs to use it, since there are many programmers who prefer
     other packages.</para>
 
-    <para><name>Anygui</name> tries to solve this problem in a manner
+    <para><name>Manygui</name> tries to solve this problem in a manner
     similar to the standard <code>anydbm</code> package. There is no
     need to choose <emphasis>one</emphasis> package at the expense of
-    all others. Instead, <name>Anygui</name> gives generic access to
+    all others. Instead, <name>Manygui</name> gives generic access to
     several popular packages through a simple API, which makes it
     possible to write GUI applications that work with all these
     packages. Thus, one gets a platform-independent GUI module which
     is written entirely in <name>Python</name>.</para>
 
-    <para>To get the latest <name>Anygui</name> distribution, or to
+    <para>To get the latest <name>Manygui</name> distribution, or to
     get in touch with the developers, please visit the
-    <name>Anygui</name> website:
-    <url>http://www.anygui.org</url>.</para>
+    <name>Manygui</name> website:
+    <url>http://www.manygui.org</url>.</para>
 
     <section>
       <title>Design Goals</title>
 
-      <para><strong>A</strong>. <name>Anygui</name> should be an easy
+      <para><strong>A</strong>. <name>Manygui</name> should be an easy
       to use GUI package which may be used to create simple graphical
       programs, or which may serve as the basis for more complex
       application frameworks.</para>
 
-      <para><strong>B</strong>. <name>Anygui</name> should be a pure
+      <para><strong>B</strong>. <name>Manygui</name> should be a pure
       <name>Python</name> package which serves as a front-end for as
       many as possible of the GUI packages available for
       <name>Python</name>, in a transparent manner.</para>
 
-      <para><strong>C</strong>. <name>Anygui</name> should include
+      <para><strong>C</strong>. <name>Manygui</name> should include
       functionality needed to perform most GUI tasks, but should
       remain as simple and basic as possible.</para>
 
@@ -58,8 +58,8 @@
     <section>
       <title>Warning</title>
 
-      <para>The <name>Anygui</name> API is currently very much in flux
-      as the <name>Anygui</name> team keeps experimenting with
+      <para>The <name>Manygui</name> API is currently very much in flux
+      as the <name>Manygui</name> team keeps experimenting with
       it. Because of that, incompatibilities may occur between
       releases. The current release (&longversion;) should be regarded
       as a prototype.</para>
@@ -72,6 +72,6 @@
       <para>There is also a short tutorial available, which is
       included in the installation (<code>doc/tutorial.txt</code>) and
       is available from the website
-      (<url>http://www.anygui.org</url>).</para>
+      (<url>http://www.manygui.org</url>).</para>
     </section>
   </section>

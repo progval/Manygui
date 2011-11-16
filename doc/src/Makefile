@@ -1,12 +1,12 @@
 all: pdf ps html text
 
-pdf: ../anygui.pdf
+pdf: ../manygui.pdf
 
-ps: ../anygui.ps
+ps: ../manygui.ps
 
-html: ../anygui.html
+html: ../manygui.html
 
-text: ../anygui.txt
+text: ../manygui.txt
 
 clean:
 	rm -f *.aux *.toc *.log *~
@@ -14,28 +14,28 @@ clean:
 distclean: clean
 	rm -f ../*.html ../*.pdf ../*.ps *.tex ../*.txt temp.xml
 
-../anygui.pdf: anygui.tex anygui.sty
-	pdflatex anygui
-	pdflatex anygui
-	mv anygui.pdf ..
+../manygui.pdf: manygui.tex manygui.sty
+	pdflatex manygui
+	pdflatex manygui
+	mv manygui.pdf ..
 
-../anygui.ps: ../anygui.pdf
-	pdf2ps ../anygui.pdf ../anygui.ps
+../manygui.ps: ../manygui.pdf
+	pdf2ps ../manygui.pdf ../manygui.ps
 
-anygui.tex: temp.xml min2tex.xsl
-	xalan -IN temp.xml -XSL min2tex.xsl -OUT anygui.tex
+manygui.tex: temp.xml min2tex.xsl
+	xalan -IN temp.xml -XSL min2tex.xsl -OUT manygui.tex
 
-../anygui.html: temp.xml min2html.xsl
-	xalan -IN temp.xml -XSL min2html.xsl -OUT anygui.html
-	mv anygui.html ..
+../manygui.html: temp.xml min2html.xsl
+	xalan -IN temp.xml -XSL min2html.xsl -OUT manygui.html
+	mv manygui.html ..
 
-anygui.lynx.html: temp.xml min2lynx.xsl
-	xalan -IN temp.xml -XSL min2lynx.xsl -OUT anygui.lynx.html
+manygui.lynx.html: temp.xml min2lynx.xsl
+	xalan -IN temp.xml -XSL min2lynx.xsl -OUT manygui.lynx.html
 
-../anygui.txt: anygui.lynx.html
-	lynx -dump -nolist anygui.lynx.html > anygui.txt
-	rm anygui.lynx.html
-	mv anygui.txt ..
+../manygui.txt: manygui.lynx.html
+	lynx -dump -nolist manygui.lynx.html > manygui.txt
+	rm manygui.lynx.html
+	mv manygui.txt ..
 
-temp.xml: anygui.xml api_reference.xml copyrightholders.xml installation.xml introduction.xml using_anygui.xml
-	python insertdate.py anygui.xml > temp.xml
+temp.xml: manygui.xml api_reference.xml copyrightholders.xml installation.xml introduction.xml using_manygui.xml
+	python insertdate.py manygui.xml > temp.xml

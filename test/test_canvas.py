@@ -1,9 +1,9 @@
-from anygui import *
-from anygui.Utils import log
-from anygui.Colors import *
+from manygui import *
+from manygui.Utils import log
+from manygui.Colors import *
 
 # Not all backends support this -- it is not a part of 0.1:
-from anygui import Canvas
+from manygui import Canvas
 
 app = Application()
 win = Window(size=(300,300))

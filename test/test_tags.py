@@ -1,4 +1,4 @@
-from anygui import *
+from manygui import *
 
 app = Application()
 

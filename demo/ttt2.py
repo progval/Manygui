@@ -1,4 +1,4 @@
-# Lame but functional Tic-Tac-Toe game using Anygui.
+# Lame but functional Tic-Tac-Toe game using Manygui.
 # This version demonstrates the use of the GridManager,
 # a layout manager with approximately the same functionality
 # as Java's GridBagLayout or Tk's "grid" manager. Compared
@@ -8,8 +8,8 @@
 # size and expansion of the board rows and columns, just
 # for fun.
 
-from anygui import Window, Label, Application, Button, link
-from anygui.LayoutManagers import GridManager, GridException
+from manygui import Window, Label, Application, Button, link
+from manygui.LayoutManagers import GridManager, GridException
 from random import uniform
 
 # The "strategy" is to let the user (X) go first, and then

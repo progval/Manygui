@@ -1,7 +1,7 @@
   <section>
     <title>Installation</title>
     
-    <para>The <name>Anygui</name> package comes in the form of a
+    <para>The <name>Manygui</name> package comes in the form of a
     <code>gzip</code> compressed <code>tar</code> archive, a binary
     Windows installer and as an RPM package. The Windows installer and
     RPM package should be fairly easy to install. To install the
@@ -9,39 +9,39 @@
     archive. On <name>Windows</name> this can be done with
     <name>WinZip</name>. in <name>Mac OS</name>, you can use
     <name>StuffIt Expander</name>. In <name>Unix</name>, first move to
-    a directory where you'd like to put <name>Anygui</name>, and then
+    a directory where you'd like to put <name>Manygui</name>, and then
     do something like the following:</para>
 
     <codelisting>
-      <line>foo:~/python$ tar xzvf anygui-&longversion;.tar.gz</line>
+      <line>foo:~/python$ tar xzvf manygui-&longversion;.tar.gz</line>
     </codelisting>
 
     <para>If your version of tar doesn't support the <code>z</code>
     switch, you can do something like this:</para>
 
     <codelisting>
-      <line>foo:~/python$ zcat anygui-&longversion;.tar.gz | tar xvf</line>
+      <line>foo:~/python$ zcat manygui-&longversion;.tar.gz | tar xvf</line>
     </codelisting>
 
     <para>Another possibility is:</para>
 
     <codelisting>
-      <line>foo:~/python$ gunzip anygui-&longversion;.tar.gz</line>
-      <line>foo:~/python$ tar -xvf anygui-&longversion;.tar</line>
+      <line>foo:~/python$ gunzip manygui-&longversion;.tar.gz</line>
+      <line>foo:~/python$ tar -xvf manygui-&longversion;.tar</line>
     </codelisting>
 
     <para>No matter which version you choose, you should end up with a
-    directory named <code>anygui-&longversion;</code>.</para>
+    directory named <code>manygui-&longversion;</code>.</para>
 
     <section>
       <title>Running setup.py</title>
       
-      <para>The simple way of installing <name>Anygui</name> is to use
+      <para>The simple way of installing <name>Manygui</name> is to use
       the installation script that's included in the
       distribution. This requires <name>Distutils</name>
       (<url>http://www.python.org/sigs/distutils-sig</url>), which is
       included in <name>Python</name> distributions from version
-      2.0. To install the <name>Anygui</name> package in the default
+      2.0. To install the <name>Manygui</name> package in the default
       location, simply run the setup script with the
       <code>install</code> command:</para>
 
@@ -49,7 +49,7 @@
 	<line>foo:~$ python setup.py install</line>
       </codelisting>
 
-      <para>This will install <name>Anygui</name> in your standard
+      <para>This will install <name>Manygui</name> in your standard
       <name>Python</name> directory structure. If you don't have
       access to this directory (e.g. because <name>Python</name> was
       installed by a sysadmin, and you don't have root access) you can
@@ -64,28 +64,28 @@
     <section>
       <title>Doing it Manually</title>
 
-      <para>Since <name>Anygui</name> consists of only
+      <para>Since <name>Manygui</name> consists of only
       <name>Python</name> code, nothing needs to be compiled. And the
       only thing needed to install <name>Python</name> code is to
       ensure that the packages and modules are found by your
       <name>Python</name> interpreter. This is as simple as including
-      the <code>lib</code> directory of the <name>Anygui</name>
+      the <code>lib</code> directory of the <name>Manygui</name>
       distribution in your <code>PYTHONPATH</code> environment
       variable. In <code>bash</code>
       (<url>http://www.gnu.org/manual/bash/</url>), you could do
       something like this:</para>
 
       <codelisting>
-	<line>foo:~$ export PYTHONPATH=$PYTHONPATH:/path/to/anygui/lib</line>
+	<line>foo:~$ export PYTHONPATH=$PYTHONPATH:/path/to/manygui/lib</line>
       </codelisting>
 
       <para>To make this permanent, you should put it in your
       <code>.bash_profile</code> file, or something equivalent. If you
       don't want to mess around with this, and already have a standard
       directory where you place your <name>Python</name> modules, you
-      can simply copy (or move) the <code>anygui</code> package (found
-      in <code>anygui-&longversion;/lib</code>) there, or possibly
-      place a symlink in that directory to the <code>anygui</code>
+      can simply copy (or move) the <code>manygui</code> package (found
+      in <code>manygui-&longversion;/lib</code>) there, or possibly
+      place a symlink in that directory to the <code>manygui</code>
       package.</para>
 
     </section>
@@ -101,23 +101,23 @@
     <section>
       <title>Making Sure You Have a Usable GUI Package</title>
 
-      <para>Once you have <name>Anygui</name> installed, you'll want
+      <para>Once you have <name>Manygui</name> installed, you'll want
       to make sure you have a usable GUI package. This is easy to
       check: Simply start an interactive <name>Python</name>
       interpreter and try to execute the following:</para>
 
       <codelisting>
-	<line>>>> from anygui import *</line>
+	<line>>>> from manygui import *</line>
 	<line>>>> backend()</line>
       </codelisting>
 
       <para>The <code>backend</code> function will return the name of
       the backend in use. If it is neither <code>'curses'</code> nor
       <code>'text'</code> you should be all set for making GUI
-      programs with <name>Anygui</name>. (The <code>'curses'</code>
+      programs with <name>Manygui</name>. (The <code>'curses'</code>
       and <code>'text'</code> backends use plain text to emulate
       graphical interfaces on platforms that don't have them.)
-      <name>Anygui</name> currently supports the following
+      <name>Manygui</name> currently supports the following
       packages:</para>
 
       <codelisting>
@@ -134,15 +134,15 @@
 
       <para>Add <code>gui</code> to name returned by the
       <code>backend</code> function to get the full name of the
-      backend module (in the <code>anygui.backends</code>
+      backend module (in the <code>manygui.backends</code>
       package). For instance, the <code>msw</code> backend is found in
-      <code>anygui.backends.mswgui</code> module.</para>
+      <code>manygui.backends.mswgui</code> module.</para>
 
       <para>In general, if you end up with a text-based solution,
       <code>cursesgui</code> will be preferred over
       <code>textgui</code>if your <name>Python</name>-installation has
       a wrorking <code>curses</code> module. The exception is if you
-      are using <name>Anygui</name> in the interactive interpreter, in
+      are using <name>Manygui</name> in the interactive interpreter, in
       which <code>textgui</code> will be preferred, to avoid
       interfering with the terminal and locking up the interpreter
       prompt. (If you'd like to, for some reason, you can override
@@ -160,7 +160,7 @@
       http://www.chariot.net.au/~jaq/matt/BWindow.dx
       http://www.chariot.net.au/~jaq/matt/BTextView.dx
 
-      Also available at anygui.sf.net/files
+      Also available at manygui.sf.net/files
 
       Rebuild Bethon with these.
       -->
@@ -177,7 +177,7 @@
       <name>Python</name>.</para>
 
       <para><strong>Note:</strong> In <name>Mac OS</name> 9,
-      <name>Anygui</name> (using <name>Tkinter</name>) works with with
+      <name>Manygui</name> (using <name>Tkinter</name>) works with with
       <name>Python Classic</name> and recent versions of <name>Python
       Carbon</name>, but older versions have problems with
       <name>Tkinter</name>.</para>

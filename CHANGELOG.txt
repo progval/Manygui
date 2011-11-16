@@ -6,6 +6,14 @@ Version 0.2     (...)
    * A layout bug (affecting the Placer when supplied with 0 for
      either left, right, top, or bottom) has been fixed
 
+Version 0.1.1   (...)
+
+   * Port to Python 3
+   * Port to PyQt 4
+   * Class-based event framework
+   * Remove References.py
+   * Renamed to Manygui
+
 Version 0.1     (06 February 2002)
 
    * Initial release

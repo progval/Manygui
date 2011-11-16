@@ -1,5 +1,5 @@
-from anygui import Window,TextField,Application,Button,Label,link
-from anygui.Utils import log
+from manygui import Window,TextField,Application,Button,Label,link
+from manygui.Utils import log
 
 app = Application()
 

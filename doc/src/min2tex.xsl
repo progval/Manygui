@@ -10,7 +10,7 @@
 
   <xsl:template match="/">
     <xsl:text>\documentclass[a4paper]{article}&#x000A;</xsl:text>
-    <xsl:text>\usepackage{anygui}&#x000A;</xsl:text>
+    <xsl:text>\usepackage{manygui}&#x000A;</xsl:text>
     <xsl:apply-templates/>
   </xsl:template>
 

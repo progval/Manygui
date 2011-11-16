@@ -1,6 +1,6 @@
 from glob import glob
 import sys, os
-from anygui.Utils import log
+from manygui.Utils import log
 import subprocess
 
 try:

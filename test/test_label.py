@@ -1,5 +1,5 @@
-from anygui import Window, Label, Application
-from anygui.Utils import log
+from manygui import Window, Label, Application
+from manygui.Utils import log
 
 app = Application()
 

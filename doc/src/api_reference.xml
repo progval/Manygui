@@ -5,11 +5,11 @@
 
   <!--
   <para>The following reference describes the full official API of
-  the current version (&longversion;) of <name>Anygui</name>.</para>
+  the current version (&longversion;) of <name>Manygui</name>.</para>
   -->
 
   <para>The following reference will describe the full official API of
-  the current version (&longversion;) of <name>Anygui</name> but is
+  the current version (&longversion;) of <name>Manygui</name> but is
   currently under development.</para>
   
   <section>
@@ -20,8 +20,8 @@
     <code>setup</code> function instead.</para>
 
     <para>Some environment variables affect the behaviour of the
-    <name>Anygui</name> package. These must be set in the environment
-    of the program using <name>Anygui</name>. They may either be set
+    <name>Manygui</name> package. These must be set in the environment
+    of the program using <name>Manygui</name>. They may either be set
     permanently through normal operating system channels (check your
     OS documentation for this), or possibly just set temporarily when
     running your program. In <name>Unix</name> shells like
@@ -33,7 +33,7 @@
     </codelisting>
 
     <para>where <code>ANYGUI_SOMEVAR</code> is some environment
-    variable used by <name>Anygui</name>.</para>
+    variable used by <name>Manygui</name>.</para>
 
     <para>Since <name>Jython</name> doesn't support OS environment
     variables, you'll have to supply them with the command-line switch
@@ -45,7 +45,7 @@
 
     <para>You can also set these environment variables in your own
     program, by using code like the following before you import
-    <name>Anygui</name>:</para>
+    <name>Manygui</name>:</para>
 
     <codelisting>
       <line>import os</line>
@@ -54,11 +54,11 @@
 
     <para>This will probably not work well in <name>Jython</name>, though.</para>
       
-    <para>The environment variables used by <name>Anygui</name>
+    <para>The environment variables used by <name>Manygui</name>
     are:</para>
 
     <para><code>ANYGUI_WISHLIST</code>: A whitespace separated list of
-    backend names in the order you wish for <name>Anygui</name> to try
+    backend names in the order you wish for <name>Manygui</name> to try
     to use them. The backends are identified with a short prefix such
     as <code>wx</code> for <code>wxgui</code>, or <code>tk</code> for
     <code>tkgui</code>. For a full list of available backends, see the
@@ -93,7 +93,7 @@
       <line>foo:~$ ANYGUI_WISHLIST='tk wx qt' python someprogram.py</line>
     </codelisting>
       
-    <para><code>ANYGUI_DEBUG</code>: When <name>Anygui</name> tries to
+    <para><code>ANYGUI_DEBUG</code>: When <name>Manygui</name> tries to
     import a backend, it hides all exceptions, assuming they are
     caused by the fact that a given backend doesn't work in your
     installation (because you don't have it installed or something
@@ -102,7 +102,7 @@
     bug, set the <code>ANYGUI_DEBUG</code> to some true (in a
     <name>Python</name> sense) value. (If the value supplied can be
     converted to an integer, it will. Otherwise, it will be treated as
-    a string.) This will make <name>Anygui</name> print out the stack
+    a string.) This will make <name>Manygui</name> print out the stack
     traces from each backend it tries to import.</para>
 
     <para>There is one exception to this rule: If the true value
@@ -144,7 +144,7 @@
     will ignore all other backends.</para>
 
     <para><code>ANYGUI_CURSES_NOHELP</code>: If you don't want the
-    help-screen that appears when an <name>Anygui</name> application
+    help-screen that appears when an <name>Manygui</name> application
     is started using <code>cursesgui</code> (or <code>textgui</code>),
     you can set this variable to a true value.</para>
 
@@ -182,7 +182,7 @@
     [<var>event</var>,] <var>handler</var>, <var>weak</var>=0,
     <var>loop</var>=0)</para> <!-- change to []? -->
 
-    <para>Creates a link in the <name>Anygui</name> event system,
+    <para>Creates a link in the <name>Manygui</name> event system,
     between the <code>source</code> (any object) and the
     <code>handler</code> (any callable, or a <code>(obj,func)</code>
     pair, where <code>func</code> is an unbound method or function,
@@ -220,7 +220,7 @@
     <para>Example:</para>
 
     <codelisting>
-      <line>from anygui import *</line>
+      <line>from manygui import *</line>
       <line>>>> def monitor_events(event):</line>
       <line>...     print 'An event occurred:', event.event</line>
       <line>...</line>
@@ -439,7 +439,7 @@
     attributes are modified <emphasis>in place</emphasis>. That means
     the following (for an attribute named <code>foo</code>): (1) If
     there exists an internal method (implemented in
-    <name>Anygui</name>) for modifying the attribute inplace (called
+    <name>Manygui</name>) for modifying the attribute inplace (called
     <code>_modify_foo</code>), use that; otherwise (2) try to use
     slice assignment to change the value (will work for lists and
     <code>ListModels</code> etc.); if that doesn't work, (3) assign to
@@ -517,7 +517,7 @@
     each other, you need to specify which one(s) you have
     modified.</para>
 
-    <para>For instance, the following will confuse <name>Anygui</name>
+    <para>For instance, the following will confuse <name>Manygui</name>
     and will raise an exception:</para>
 
     <codelisting>
@@ -528,7 +528,7 @@
 
     <para>The first line is fine, since it will automatically lead to
     an internal call to <code>btn.sync('geometry')</code>. The last
-    line, however, will have <name>Anygui</name> trying to synchronise
+    line, however, will have <name>Manygui</name> trying to synchronise
     <code>btn.geometry</code>, <code>btn.position</code>, and
     <code>btn.y</code> without knowing which one was modified. It
     refuses to guess, and raises an exception. This could be solved by
@@ -571,7 +571,7 @@
 
     <para>Now, if we call <code>lbx.items.append('fourth')</code>,
     <code>lbx.sync</code> will automatically be called. To make your
-    life easier, <name>Anygui</name> already contains some classes
+    life easier, <name>Manygui</name> already contains some classes
     that send signals whend they are modified; these classes are
     called <code>Model</code>s.</para>
 
@@ -582,13 +582,13 @@
     currently correct.</para>
 
 
-    <para>The <name>Anygui</name> models (<code>BooleanModel</code>,
+    <para>The <name>Manygui</name> models (<code>BooleanModel</code>,
     <code>ListModel</code>, <code>TextModel</code>, and
     <code>NumberModel</code>) are objects that call <code>send</code>
     (with the <code>'default'</code> event) when they are
     modified.</para>
 
-    <para>An <code>Assignee</code> (part of the <name>Anygui</name>
+    <para>An <code>Assignee</code> (part of the <name>Manygui</name>
     Model-View-Controller mechanism) is an object that supports the
     methods <code>assigned</code> and <code>removed</code>. These are
     automatically called (if present) when the object is assigned to
@@ -648,7 +648,7 @@
     that you <code>add</code> your <code>Window</code> to your running
     <code>Application</code> after all the <code>Components</code>
     have been added to your <code>Window</code>; otherwise, you may
-    see them appearing and moving about as <name>Anygui</name> takes
+    see them appearing and moving about as <name>Manygui</name> takes
     care of the layout. (Before <code>Application.run</code> is
     called, this is not an issue, since no <code>Window</code>s will
     be appear before that time.)</para>

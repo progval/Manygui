@@ -1,5 +1,5 @@
-from anygui import Application, Window, MenuBar, Menu, MenuCheck, Label, link, TextField
-from anygui.LayoutManagers import SimpleGridManager
+from manygui import Application, Window, MenuBar, Menu, MenuCheck, Label, link, TextField
+from manygui.LayoutManagers import SimpleGridManager
 
 app = Application()
 
@@ -79,7 +79,7 @@ addCmd = skitMenu.addCommand(text="Add Skit",command=addSkit)
 
 # And a menu for help...
 helpMenu = Menu(text="Help")
-helpMenu.addCommand(text="About Anygui")
+helpMenu.addCommand(text="About Manygui")
 mbar.add(helpMenu)
 
 entry = TextField(text="Enter new skit",selection=(0,15))

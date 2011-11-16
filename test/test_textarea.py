@@ -1,5 +1,5 @@
-from anygui import *
-from anygui.Utils import log
+from manygui import *
+from manygui.Utils import log
 
 the_text = """\
 I like chinese,

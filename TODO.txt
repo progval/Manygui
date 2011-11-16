@@ -99,11 +99,11 @@ Objectives for version 0.2a2:
   functions as an event-relaying container.
 
 * Add support for complex widgets ("megawidgets") with default
-  implementations in the basic Anygui API (in the vein of the
+  implementations in the basic Manygui API (in the vein of the
   piddle/sping API)
 
   In other words, give a standardised way of integrating
-  backend-specific features into Anygui programs.
+  backend-specific features into Manygui programs.
 
 * Flesh out the event list
 
@@ -189,7 +189,7 @@ Longer term goals:
 * Add instant model update for text widgets, not just on
   "focus lost"?
 
-* Make Anygui more thread-safe
+* Make Manygui more thread-safe
 
 * Add constructive area geometry to Canvas
 
@@ -210,7 +210,7 @@ Smaller issues:
 * Add more distribution types (e.g. windows installers, rpms etc.)
 
 * Add examples on how to implement other types of event systems (with
-  an event path etc.) with the Anygui dispatcher to the documentation.
+  an event path etc.) with the Manygui dispatcher to the documentation.
 
 * Document standard way of closing a window programmatically.
 

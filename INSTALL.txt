@@ -1,9 +1,9 @@
-To install Anygui, simply run the included setup script with the
+To install Manygui, simply run the included setup script with the
 "install" command:
 
    python setup.py install
 
-To uninstall Anygui, run the setup script with the "uninstall"
+To uninstall Manygui, run the setup script with the "uninstall"
 command:
 
    python setup.py uninstall
@@ -13,4 +13,4 @@ For information on the various options available, use:
    python setup.py --help
 
 If you'd rather do the installation manually, simply move or copy the
-directory lib/anygui to a location found in your PYTHON_PATH.
+directory lib/manygui to a location found in your PYTHON_PATH.

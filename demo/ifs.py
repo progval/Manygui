@@ -2,14 +2,14 @@
 # NOTE: This demonstration should not be expected to work
 #       in release 0.1
 
-from anygui import *
-from anygui.Utils import log
-from anygui.Colors import *
+from manygui import *
+from manygui.Utils import log
+from manygui.Colors import *
 
 # Only javagui implements this so far:
-#from anygui.backends.javagui import Canvas
-#from anygui.backends.tkgui import Canvas
-#from anygui.backends.txtutils.txtgui import Canvas
+#from manygui.backends.javagui import Canvas
+#from manygui.backends.tkgui import Canvas
+#from manygui.backends.txtutils.txtgui import Canvas
 
 app = Application()
 win = Window(size=(300,320),title="Iterated Function System Viewer")

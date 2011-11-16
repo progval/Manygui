@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>The Anygui Manual</title>
+<title>The Manygui Manual</title>
 <style type="text/css">
 body                    { color: #000000;
                           background-color: #ffffff;
@@ -66,7 +66,7 @@ dfn                     { color: maroon }
 </head>
 <body>
 
-<h1>The Anygui Manual</h1>
+<h1>The Manygui Manual</h1>
 <div class="author">Magnus Lie Hetland</div>
 <div class="date">August 2002</div>
 
@@ -80,7 +80,7 @@ itself.
 
 <p>The <span class="name">Python</span> standard library currently
 does not contain any platform-independent GUI packages. It is the goal
-of the <span class="name">Anygui</span> project to change this
+of the <span class="name">Manygui</span> project to change this
 situation. There are many such packages available, but none has been
 defined as standard, so when writing GUI programs for <span
 class="name">Python</span>, you cannot assume that your user has the
@@ -95,40 +95,40 @@ all <span class="name">Python</span> GUI programs to use it, since
 there are many programmers who prefer other packages.
 </p>
 
-<p><span class="name">Anygui</span> tries to solve this problem in a
+<p><span class="name">Manygui</span> tries to solve this problem in a
 manner similar to the standard anydbm package. There is no need to
 choose one package at the expense of all others. Instead, <span
-class="name">Anygui</span> gives generic access to several popular
+class="name">Manygui</span> gives generic access to several popular
 packages through a simple API, which makes it possible to write GUI
 applications that work with all these packages. Thus, one gets a
 platform-independent GUI module which is written entirely in <span
 class="name">Python</span>.
 </p>
 
-<p>To get the latest <span class="name">Anygui</span> distribution, or
+<p>To get the latest <span class="name">Manygui</span> distribution, or
 to get in touch with the developers, please visit the <span
-class="name">Anygui</span> website, at <code><a
-href="http://anygui.org">anygui.org</a></code>.
+class="name">Manygui</span> website, at <code><a
+href="http://manygui.org">manygui.org</a></code>.
 </p>
 
-<p class="note">Although the <span class="name">Anygui</span> API is
+<p class="note">Although the <span class="name">Manygui</span> API is
 stabilising, it is not yet completely frozen.</p>
 
 <h3>Design Goals</h3>
 
 <ul>
-<li><span class="name">Anygui</span> should be an easy to use GUI
+<li><span class="name">Manygui</span> should be an easy to use GUI
 package that may be used to create simple graphical programs, or that
 may serve as the basis for more complex application frameworks.
 </li>
 
-<li><span class="name">Anygui</span> should be a pure <span
+<li><span class="name">Manygui</span> should be a pure <span
 class="name">Python</span> package that serves as a front-end for as
 many as possible of the GUI packages available for <span
 class="name">Python</span>, in a transparent manner.
 </li>
 
-<li><span class="name">Anygui</span> should include functionality
+<li><span class="name">Manygui</span> should include functionality
 needed to perform most GUI tasks, but should remain as simple and
 basic as possible.
 </li>
@@ -137,18 +137,18 @@ basic as possible.
 <h3>Structure of this Manual</h3>
 
 <p>This manual first gives you some short instructions on installing
-<span class="name">Anygui</span>. It then gives a thorough description
-of how to use <span class="name">Anygui</span> to build GUI
+<span class="name">Manygui</span>. It then gives a thorough description
+of how to use <span class="name">Manygui</span> to build GUI
 applications in <span class="name">Python</span>. Following the
-tutorial is a description of how <span class="name">Anygui</span>
+tutorial is a description of how <span class="name">Manygui</span>
 functions internally, and after that comes an API reference, which
 describes all classes and functions available in the
-<code>anygui</code> package.
+<code>manygui</code> package.
 </p>
 
 <h2>Installation</h2>
 
-<p>The <span class="name">Anygui</span> package comes in the form of a
+<p>The <span class="name">Manygui</span> package comes in the form of a
 <code>gzip</code> compressed <code>tar</code> archive, a binary
 Windows installer and as an RPM package. The Windows installer and RPM
 package should be fairly easy to install. To install the
@@ -157,38 +157,38 @@ archive. On <span class="name">Windows</span> this can be done with
 <span class="name">WinZip</span>. in <span class="name">Mac OS</span>,
 you can use <span class="name">StuffIt Expander</span>. In <span
 class="name">Unix</span>, first move to a directory where you'd like
-to put <span class="name">Anygui</span>, and then do something like
+to put <span class="name">Manygui</span>, and then do something like
 the following:</p>
 
-<pre>foo:~/python$ tar xzvf anygui-0.2.tar.gz</pre>
+<pre>foo:~/python$ tar xzvf manygui-0.2.tar.gz</pre>
 
 <p>If your version of tar doesn't support the <code>z</code> switch,
 you can do something like this:</p>
 
-<pre>foo:~/python$ zcat anygui-0.2.tar.gz | tar xvf</pre>
+<pre>foo:~/python$ zcat manygui-0.2.tar.gz | tar xvf</pre>
 
 <p>Another possibility is:</p>
 
-<pre>foo:~/python$ gunzip anygui-0.2.tar.gz
-foo:~/python$ tar -xvf anygui-0.2.tar</pre>
+<pre>foo:~/python$ gunzip manygui-0.2.tar.gz
+foo:~/python$ tar -xvf manygui-0.2.tar</pre>
 
 <p>No matter which version you choose, you should end up with a
-directory named <code>anygui-0.2</code>.</p>
+directory named <code>manygui-0.2</code>.</p>
 
 <h3>Running setup.py</h3>
 
-<p>The simple way of installing <span class="name">Anygui</span> is to
+<p>The simple way of installing <span class="name">Manygui</span> is to
 use the installation script that's included in the distribution. This
 requires <span class="name">Distutils</span> (<code><a
 href="http://www.python.org/sigs/distutils-sig">http://www.python.org/sigs/distutils-sig</a></code>),
 which is included in <span class="name">Python</span> distributions
-from version 2.0. To install the <span class="name">Anygui</span>
+from version 2.0. To install the <span class="name">Manygui</span>
 package in the default location, simply run the setup script with the
 <code>install</code> command:</p>
 
 <pre>foo:~$ python setup.py install</pre>
 
-<p>This will install <span class="name">Anygui</span> in your standard
+<p>This will install <span class="name">Manygui</span> in your standard
 <span class="name">Python</span> directory structure. If you don't
 have access to this directory (e.g. because <span
 class="name">Python</span> was installed by a sysadmin, and you don't
@@ -199,44 +199,44 @@ have root access) you can install it somewhere else with the
 
 <h3>Doing it Manually</h3>
 
-<p>Since <span class="name">Anygui</span> consists of only <span
+<p>Since <span class="name">Manygui</span> consists of only <span
 class="name">Python</span> code, nothing needs to be compiled. And the
 only thing needed to install <span class="name">Python</span> code is
 to ensure that the packages and modules are found by your <span
 class="name">Python</span> interpreter. This is as simple as including
-the <code>lib</code> directory of the <span class="name">Anygui</span>
+the <code>lib</code> directory of the <span class="name">Manygui</span>
 distribution in your <code>PYTHONPATH</code> environment variable. In
 <code>bash</code> (<code><a
 href="http://www.gnu.org/manual/bash/">http://www.gnu.org/manual/bash/</a></code>),
 you could do something like this:</p>
 
-<pre>foo:~$ export PYTHONPATH=$PYTHONPATH:/path/to/anygui/lib</pre>
+<pre>foo:~$ export PYTHONPATH=$PYTHONPATH:/path/to/manygui/lib</pre>
 
 <p>To make this permanent, you should put it in your
 <code>.bash_profile</code> file, or something equivalent. If you don't
 want to mess around with this, and already have a standard directory
 where you place your <span class="name">Python</span> modules, you can
-simply copy (or move) the <code>anygui</code> package (found in
-<code>anygui-0.2/lib</code>) there, or possibly place a symlink in
-that directory to the <code>anygui</code> package.</p>
+simply copy (or move) the <code>manygui</code> package (found in
+<code>manygui-0.2/lib</code>) there, or possibly place a symlink in
+that directory to the <code>manygui</code> package.</p>
 
 <h3>Making Sure You Have a Usable GUI Toolkit</h3>
 
-<p>Once you have <span class="name">Anygui</span> installed, you'll
+<p>Once you have <span class="name">Manygui</span> installed, you'll
 want to make sure you have a usable GUI toolkit. This is easy to
 check: Simply start an interactive <span class="name">Python</span>
 interpreter and try to execute the following:</p>
 
-<pre>&gt;&gt;&gt; from anygui import *
+<pre>&gt;&gt;&gt; from manygui import *
 &gt;&gt;&gt; backend()</pre>
 
 <p>The <code>backend</code> function will return the name of the
 backend in use. If it is neither <code>'curses'</code> nor
 <code>'text'</code> you should be all set for making GUI programs with
-<span class="name">Anygui</span>. (The <code>'curses'</code> and
+<span class="name">Manygui</span>. (The <code>'curses'</code> and
 <code>'text'</code> backends use plain text to emulate graphical
 interfaces on platforms that don't have them.)  <span
-class="name">Anygui</span> currently supports the following
+class="name">Manygui</span> currently supports the following
 packages:</p>
 
 <pre class="verbatim">PythonWin  (mswgui)    <code><a href="http://starship.python.net/crew/mhammond/win32">http://starship.python.net/crew/mhammond/win32</a></code>
@@ -251,15 +251,15 @@ Plain text (textgui)   -- used if curses is not available</pre>
 
 <p>Add <code>gui</code> to name returned by the <code>backend</code>
 function to get the full name of the backend module (in the
-<code>anygui.backends</code> package). For instance, the
+<code>manygui.backends</code> package). For instance, the
 <code>msw</code> backend is found in
-<code>anygui.backends.mswgui</code> module.</p>
+<code>manygui.backends.mswgui</code> module.</p>
 
 <p>In general, if you end up with a text-based solution,
 <code>cursesgui</code> will be preferred over <code>textgui</code>if
 your <span class="name">Python</span>-installation has a wrorking
 <code>curses</code> module. The exception is if you are using <span
-class="name">Anygui</span> in the interactive interpreter, in which
+class="name">Manygui</span> in the interactive interpreter, in which
 <code>textgui</code> will be preferred, to avoid interfering with the
 terminal and locking up the interpreter prompt. (If you'd like to, for
 some reason, you can override this behaviour with the environment
@@ -283,18 +283,18 @@ and <span class="name">Java Swing</span> is automatically available in
 implementation of <span class="name">Python</span>.</p>
 
 <p class="note">In <span class="name">Mac OS</span> 9, <span
-class="name">Anygui</span> (using <span class="name">Tkinter</span>)
+class="name">Manygui</span> (using <span class="name">Tkinter</span>)
 works with with <span class="name">Python Classic</span> and recent
 versions of <span class="name">Python Carbon</span>, but older
 versions have problems with <span class="name">Tkinter</span>.</p>
 
-<h2>Using Anygui</h2>
+<h2>Using Manygui</h2>
 
-<p>Using <span class="name">Anygui</span> is simple; it's simply a
+<p>Using <span class="name">Manygui</span> is simple; it's simply a
 matter of importing the classes and functions you need from the
-<code>anygui</code> module, e.g.:</p>
+<code>manygui</code> module, e.g.:</p>
 
-<pre class="verbatim">from anygui import *</pre>
+<pre class="verbatim">from manygui import *</pre>
 
 <p>After doing this you must create an <code>Application</code>
 object, at least one <code>Window</code>, and probably a few
@@ -313,33 +313,33 @@ app.add(win)
 app.run()</pre>
 
 <p class="note">For some examples of working <span
-class="name">Anygui</span> code, see the <code>test</code> and
+class="name">Manygui</span> code, see the <code>test</code> and
 <code>demo</code> directories of the distribution. Remember that the
 test scripts are written to test certain features of <span
-class="name">Anygui</span>, not to represent recommended coding
+class="name">Manygui</span>, not to represent recommended coding
 practices.</p>
 
 <h3>Avoiding Namespace Pollution</h3>
 
-<p>Importing everything from <span class="name">Anygui</span> (as in
-<code>from anygui import *</code>) is fine for small programs, where
+<p>Importing everything from <span class="name">Manygui</span> (as in
+<code>from manygui import *</code>) is fine for small programs, where
 you're certain that there will be no name clashes. You may also simply
 import the names you need:</p>
 
-<pre class="verbatim">from anygui import Application, Window</pre>
+<pre class="verbatim">from manygui import Application, Window</pre>
 
 <p>The preferred way to use modules like this is usually to avoid
 cluttering your namespace, by using simply <code>import
-anygui</code>. However, if you are going to create a lot of widgets,
-the <code>anygui</code> prefix may be cumbersome. Therefore, I suggest
+manygui</code>. However, if you are going to create a lot of widgets,
+the <code>manygui</code> prefix may be cumbersome. Therefore, I suggest
 renaming it to <code>gui</code>, either with a simple
 assignment...</p>
 
-<pre class="verbatim">import anygui; gui = anygui</pre>
+<pre class="verbatim">import manygui; gui = manygui</pre>
 
 <p>... or, in recent versions of <span class="name">Python</span>:</p>
 
-<pre class="verbatim">import anygui as gui</pre>
+<pre class="verbatim">import manygui as gui</pre>
 
 <p>Then you can instantiate widgets like this:</p>
 
@@ -355,27 +355,27 @@ your program), you may do so. For instance, if you wanted to use the
 <span class="name">wxPython</span> backend, <code>wxgui</code>, you'd
 replace</p>
 
-<pre class="verbatim">from anygui import *</pre>
+<pre class="verbatim">from manygui import *</pre>
 
 <p>with</p>
 
-<pre class="verbatim">from anygui.backends.wxgui import *</pre>
+<pre class="verbatim">from manygui.backends.wxgui import *</pre>
 
 <p>Note that the namespace handling still works just fine:</p>
 
-<pre class="verbatim">import anygui.backends.tkgui as gui</pre>
+<pre class="verbatim">import manygui.backends.tkgui as gui</pre>
 
 <h3>Creating a Window</h3>
 
 <p>One of the most important classes in <span
-class="name">Anygui</span> is <code>Window</code>.  Without a
+class="name">Manygui</span> is <code>Window</code>.  Without a
 <code>Window</code> you have no GUI; all the other widgets are added
 to <code>Window</code>s. Knowing this, we may suspect that the
-following is a minimal <span class="name">Anygui</span> program (and
+following is a minimal <span class="name">Manygui</span> program (and
 we would be right):</p>
 
 
-<pre class="verbatim">from anygui import *
+<pre class="verbatim">from manygui import *
 app = Application()
 win = Window()
 app.add(win)
@@ -432,7 +432,7 @@ many <code>Options</code> arguments as you like.</p>
 the difference, consider the following example (where <code>foo</code>
 is an attribute that does nothing special):</p>
 
-<pre class="verbatim">&gt;&gt;&gt; from anygui import *
+<pre class="verbatim">&gt;&gt;&gt; from manygui import *
 &gt;&gt;&gt; btn = Button()
 &gt;&gt;&gt; some_list = [1, 2, 3]
 &gt;&gt;&gt; btn.foo = some_list
@@ -463,7 +463,7 @@ attribute will be rebound to the new value, with the same result as
 using <code>set</code>. So, to avoid any in-place modification, all
 you need to do is use immutable values:</p>
 
-<pre class="verbatim">&gt;&gt;&gt; from anygui import *
+<pre class="verbatim">&gt;&gt;&gt; from manygui import *
 &gt;&gt;&gt; btn = Button()
 &gt;&gt;&gt; some_list = [1, 2, 3]
 &gt;&gt;&gt; btn.foo = tuple(some_list)
@@ -508,7 +508,7 @@ with its left topmost corner at the point <code>(10,10)</code>:</p>
 
 <p>This section goves a simple example of positioning
 <code>Components</code>; for more information about the <span
-class="name">Anygui</span> layout mechanism, please refer to the API
+class="name">Manygui</span> layout mechanism, please refer to the API
 Reference (below).</p>
 
 <pre class="verbatim">win.add(lab, position=(10,10))
@@ -574,7 +574,7 @@ these, see the API Reference, below.)</p>
 <p class="note">This section is currently inconsistent with the way
 things work in version 0.2. Will be rewritten shortly.</p>
 
-<p>The <span class="name">Anygui</span> MVC mechanism (based on the
+<p>The <span class="name">Manygui</span> MVC mechanism (based on the
 <code>sync</code> method and the <code>Assignee</code> protocol) is
 described in the API Reference below. Here is a short overview on how
 to use it.</p>
@@ -584,10 +584,10 @@ notify other objects, called <code>views</code>, when it has been
 modified. A <em>controller</em> is an object that can modify the
 model, in particular as a direct response to a user action (such as
 clicking the mouse or typing some text). In <span
-class="name">Anygui</span>, <code>Component</code>s double as both
+class="name">Manygui</span>, <code>Component</code>s double as both
 views (showing a model's state to the user) and controllers (letting
 the user modify the model). Even though <span
-class="name">Anygui</span> supports using models this way, you can
+class="name">Manygui</span> supports using models this way, you can
 also create complete applications without using them (or, at least,
 without thinking about them).</p>
 
@@ -595,9 +595,9 @@ without thinking about them).</p>
 <code>Model</code> class, although they don't have to be; see the API
 Reference below for a description of how they work. (The
 <code>Model</code> class is currently internal to the
-<code>Anygui</code> package, but it can be found in the
-<code>anygui.Models</code> module.) The <code>Model</code>s that are
-included in <span class="name">Anygui</span> are:</p>
+<code>Manygui</code> package, but it can be found in the
+<code>manygui.Models</code> module.) The <code>Model</code>s that are
+included in <span class="name">Manygui</span> are:</p>
 
 <pre class="verbatim">BooleanModel     -- represents a Boolean value
 ListModel        -- behaves like a list
@@ -640,9 +640,9 @@ possible when you use a real model.)  Therefore, you call
 <code>size</code>, or <code>geometry</code> in place like this, you
 should supply the name of the attribute as an argument to
 <code>sync</code>, to avoid confusing <span
-class="name">Anygui</span>. That is because these attributes mirror
+class="name">Manygui</span>. That is because these attributes mirror
 each other in various ways, and if you don't supply a name, <span
-class="name">Anygui</span> won't know which one you modified.</p>
+class="name">Manygui</span> won't know which one you modified.</p>
 
 <p>If you assign a value to an attribute, the <code>sync</code> method
 will be called automatically, so another way of doing the same thing
@@ -668,7 +668,7 @@ modified.</p>
 
 <p>Example:</p>
 
-<pre class="verbatim">&gt;&gt;&gt; from anygui import *
+<pre class="verbatim">&gt;&gt;&gt; from manygui import *
 &gt;&gt;&gt; mdl = BooleanModel()
 &gt;&gt;&gt; mdl.value = 1
 &gt;&gt;&gt; def model_changed(event):
@@ -721,13 +721,13 @@ rbn = RadioButton(group=grp)</pre>
 <!-- This was a caution... -->
 <p class="note"> The behaviour of a <code>RadioButton</code> when it
 does not belong to a <code>RadioGroup</code> is not defined by the
-<span class="name">Anygui</span> API, and may vary between
+<span class="name">Manygui</span> API, and may vary between
 backends. Basically, a <code>RadioButton</code> without a
 <code>RadioGroup</code> is meaningless; use a <code>CheckBox</code>
 instead.</p>
 
 <p><code>RadioGroups</code> also support an <code>add</code> method,
-as all other <span class="name">Anygui</span> container-like
+as all other <span class="name">Manygui</span> container-like
 objects:</p>
 
 <!-- Fix the API markup -->
@@ -751,7 +751,7 @@ objects:</p>
       <code>tab</code> key.)</p>
 
 <p>
-<em>Note</em>: When using <span class="name">Anygui</span>
+<em>Note</em>: When using <span class="name">Manygui</span>
       with <span class="name">Tkinter</span>, using the arrow keys won't change the
       selection, only which item is underlined. You'll have to use the
       arrow keys until the item you want to select is underlined; then
@@ -789,7 +789,7 @@ lbx.items = 'This is a test'.split()</pre>
 <h3>TextField and TextArea</h3>
 
 <p>
-<span class="name">Anygui</span>'s two text widgets,
+<span class="name">Manygui</span>'s two text widgets,
       <code>TextField</code> and <code>TextArea</code> are quite
       similar. The difference between them is that
       <code>TextField</code> permits neither newlines or tab
@@ -853,22 +853,22 @@ lbx.items = 'This is a test'.split()</pre>
 
 <p>Should remove the given item.</p>
 
-<h2>Anygui Internals</h2>
+<h2>Manygui Internals</h2>
 
 <p>In this section I will give a broad overview of how <span
-class="name">Anygui</span> works behind the scenes. This information will
+class="name">Manygui</span> works behind the scenes. This information will
 be useful if you're trying to understand the source code, or using the
 library in advanced ways. If you are an ordinary user, simply using
-<span class="name">Anygui</span> to create relatively simple GUI
+<span class="name">Manygui</span> to create relatively simple GUI
 applications, this section may not be for you.</p>
 
 <h3>The Big Picture</h3>
 
-<p>The <span class="name">Anygui</span> architecture is based on a
+<p>The <span class="name">Manygui</span> architecture is based on a
 division between the <dfn>front-end</dfn>, various
 <dfn>back-ends</dfn>, and, for each back-end, a <dfn>native
 toolkit</dfn>. The front-end is the part of <span
-class="name">Anygui</span> you use in your GUI programs. It is
+class="name">Manygui</span> you use in your GUI programs. It is
 designed to appear as a simple GUI toolkit, such as <span
 class="name">Tkinter</span> or <span class="name">wxPython</span>. The
 truth is, however, that the front-end does not implement any GUI
@@ -877,14 +877,14 @@ to the back-end that is currently in use.
 </p>
 
 <p>There are several back-ends to choose from. When <span
-class="name">Anygui</span> is imported, an attempt will be made to
+class="name">Manygui</span> is imported, an attempt will be made to
 import each of these back-ends in turn, in a given order (as described
 in the API reference later in this document). Once a back-end is
 imported without raising any exceptions (indicating that it can be
 used in the current Python installation), that back-end will be used.
 </p>
 
-<p><span class="name">Anygui</span> is mainly a library of
+<p><span class="name">Manygui</span> is mainly a library of
 <dfn>components</dfn>, but for each component there are actually three
 objects at work: The <dfn>proxy</dfn> is the front-end object that is
 instantiated and manipulated by the application programmer, the
@@ -1002,7 +1002,7 @@ scenes.
 
 <h3>Proxies</h3>
 
-<h3>The Model-View-Controller Architecture in Anygui</h3>
+<h3>The Model-View-Controller Architecture in Manygui</h3>
 
 <h4>In-Place Modification</h4>
 
@@ -1021,7 +1021,7 @@ scenes.
 <h2>API Reference</h2>
 
 <p>The following reference will describe the full official API of
-  the current version (0.2) of <span class="name">Anygui</span> but is
+  the current version (0.2) of <span class="name">Manygui</span> but is
   currently under development.</p>
 
 <h3>Environment Variables</h3>
@@ -1032,8 +1032,8 @@ scenes.
     <code>setup</code> function instead.</p>
 
 <p>Some environment variables affect the behaviour of the
-    <span class="name">Anygui</span> package. These must be set in the environment
-    of the program using <span class="name">Anygui</span>. They may either be set
+    <span class="name">Manygui</span> package. These must be set in the environment
+    of the program using <span class="name">Manygui</span>. They may either be set
     permanently through normal operating system channels (check your
     OS documentation for this), or possibly just set temporarily when
     running your program. In <span class="name">Unix</span> shells like
@@ -1043,7 +1043,7 @@ scenes.
 <pre class="verbatim">foo:~$ ANYGUI_SOMEVAR='some value' python someprogram.py</pre>
 
 <p>where <code>ANYGUI_SOMEVAR</code> is some environment
-    variable used by <span class="name">Anygui</span>.</p>
+    variable used by <span class="name">Manygui</span>.</p>
 
 <p>Since <span class="name">Jython</span> doesn't support OS environment
     variables, you'll have to supply them with the command-line switch
@@ -1053,18 +1053,18 @@ scenes.
 
 <p>You can also set these environment variables in your own
     program, by using code like the following before you import
-    <span class="name">Anygui</span>:</p>
+    <span class="name">Manygui</span>:</p>
 
 <pre class="verbatim">import os
 os.environ['ANYGUI_SOMEVAR'] = 'some value'</pre>
 
 <p>This will probably not work well in <span class="name">Jython</span>, though.</p>
-<p>The environment variables used by <span class="name">Anygui</span>
+<p>The environment variables used by <span class="name">Manygui</span>
     are:</p>
 
 <p>
 <code>ANYGUI_WISHLIST</code>: A whitespace separated list of
-    backend names in the order you wish for <span class="name">Anygui</span> to try
+    backend names in the order you wish for <span class="name">Manygui</span> to try
     to use them. The backends are identified with a short prefix such
     as <code>wx</code> for <code>wxgui</code>, or <code>tk</code> for
     <code>tkgui</code>. For a full list of available backends, see the
@@ -1090,7 +1090,7 @@ os.environ['ANYGUI_SOMEVAR'] = 'some value'</pre>
 <pre class="verbatim">foo:~$ ANYGUI_WISHLIST='tk wx qt' python someprogram.py</pre>
 
 <p>
-<code>ANYGUI_DEBUG</code>: When <span class="name">Anygui</span> tries to
+<code>ANYGUI_DEBUG</code>: When <span class="name">Manygui</span> tries to
     import a backend, it hides all exceptions, assuming they are
     caused by the fact that a given backend doesn't work in your
     installation (because you don't have it installed or something
@@ -1099,7 +1099,7 @@ os.environ['ANYGUI_SOMEVAR'] = 'some value'</pre>
     bug, set the <code>ANYGUI_DEBUG</code> to some true (in a
     <span class="name">Python</span> sense) value. (If the value supplied can be
     converted to an integer, it will. Otherwise, it will be treated as
-    a string.) This will make <span class="name">Anygui</span> print out the stack
+    a string.) This will make <span class="name">Manygui</span> print out the stack
     traces from each backend it tries to import.</p>
 
 <p>There is one exception to this rule: If the true value
@@ -1142,7 +1142,7 @@ os.environ['ANYGUI_SOMEVAR'] = 'some value'</pre>
 
 <p>
 <code>ANYGUI_CURSES_NOHELP</code>: If you don't want the
-    help-screen that appears when an <span class="name">Anygui</span> application
+    help-screen that appears when an <span class="name">Manygui</span> application
     is started using <code>cursesgui</code> (or <code>textgui</code>),
     you can set this variable to a true value.</p>
 
@@ -1169,7 +1169,7 @@ else:
     [<i>event</i>,] <i>handler</i>, <i>weak</i>=0,
     <i>loop</i>=0)</p>
 
-<p>Creates a link in the <span class="name">Anygui</span> event system,
+<p>Creates a link in the <span class="name">Manygui</span> event system,
     between the <code>source</code> (any object) and the
     <code>handler</code> (any callable, or a <code>(obj,func)</code>
     pair, where <code>func</code> is an unbound method or function,
@@ -1204,7 +1204,7 @@ else:
 
 <p>Example:</p>
 
-<pre class="verbatim">from anygui import *
+<pre class="verbatim">from manygui import *
 &gt;&gt;&gt; def monitor_events(event):
 ...     print 'An event occurred:', event.event
 ...
@@ -1464,7 +1464,7 @@ lbx.items.append('fourth')</pre>
     each other, you need to specify which one(s) you have
     modified.</p>
 
-<p>For instance, the following will confuse <span class="name">Anygui</span>
+<p>For instance, the following will confuse <span class="name">Manygui</span>
     and will raise an exception:</p>
 
 <pre class="verbatim">btn.geometry = [10, 10, 50, 50]
@@ -1473,7 +1473,7 @@ btn.sync()</pre>
 
 <p>The first line is fine, since it will automatically lead to
     an internal call to <code>btn.sync('geometry')</code>. The last
-    line, however, will have <span class="name">Anygui</span> trying to synchronise
+    line, however, will have <span class="name">Manygui</span> trying to synchronise
     <code>btn.geometry</code>, <code>btn.position</code>, and
     <code>btn.y</code> without knowing which one was modified. It
     refuses to guess, and raises an exception. This could be solved by
@@ -1512,7 +1512,7 @@ link(lbx.items, lbx.sync)</pre>
 
 <p>Now, if we call <code>lbx.items.append('fourth')</code>,
     <code>lbx.sync</code> will automatically be called. To make your
-    life easier, <span class="name">Anygui</span> already contains some classes
+    life easier, <span class="name">Manygui</span> already contains some classes
     that send signals whend they are modified; these classes are
     called <code>Model</code>s.</p>
 
@@ -1523,13 +1523,13 @@ link(lbx.items, lbx.sync)</pre>
 <p class="note">The following section is not
     currently correct.</p>
 
-<p>The <span class="name">Anygui</span> models (<code>BooleanModel</code>,
+<p>The <span class="name">Manygui</span> models (<code>BooleanModel</code>,
     <code>ListModel</code>, <code>TextModel</code>, and
     <code>NumberModel</code>) are objects that call <code>send</code>
     (with the <code>'default'</code> event) when they are
     modified.</p>
 
-<p>An <code>Assignee</code> (part of the <span class="name">Anygui</span>
+<p>An <code>Assignee</code> (part of the <span class="name">Manygui</span>
     Model-View-Controller mechanism) is an object that supports the
     methods <code>assigned</code> and <code>removed</code>. These are
     automatically called (if present) when the object is assigned to
@@ -1586,7 +1586,7 @@ app.run()</pre>
     that you <code>add</code> your <code>Window</code> to your running
     <code>Application</code> after all the <code>Components</code>
     have been added to your <code>Window</code>; otherwise, you may
-    see them appearing and moving about as <span class="name">Anygui</span> takes
+    see them appearing and moving about as <span class="name">Manygui</span> takes
     care of the layout. (Before <code>Application.run</code> is
     called, this is not an issue, since no <code>Window</code>s will
     be appear before that time.)</p>
@@ -1951,13 +1951,13 @@ app.run()</pre>
 
 <h2>Contributing</h2>
 
-<p>If you want to contribute to the <span class="name">Anygui</span>
+<p>If you want to contribute to the <span class="name">Manygui</span>
 project, we could certainly use your help. First of all, you should
-visit the <span class="name">Anygui</span> web site at <code><a
-href="http://www.anygui.org">http://www.anygui.org</a></code>,
+visit the <span class="name">Manygui</span> web site at <code><a
+href="http://www.manygui.org">http://www.manygui.org</a></code>,
 subscribe to the developer's mailing list
-(<code>devel@anygui.org</code>) and the user's list
-(<code>users@anygui.org</code>), and try to familiarise yourself with
+(<code>devel@manygui.org</code>) and the user's list
+(<code>users@manygui.org</code>), and try to familiarise yourself with
 how the package works behind the scenes. Then, you may either help
 develop the currently supported GUI packages, or you may start writing
 a backend of your own. Several potential backend targets may be found
@@ -1965,7 +1965,7 @@ at <code><a
 href="http://starbase.neosoft.com/~claird/comp.lang.python/python_GUI.html">http://starbase.neosoft.com/~claird/comp.lang.python/python_GUI.html</a></code>.
 </p>
 
-<h2>Anygui License</h2>
+<h2>Manygui License</h2>
 
 <p>Copyright &copy; 2001, 2002 Magnus Lie Hetland, Thomas Heller, Alex
 Martelli, Greg Ewing, Joseph A. Knapka, Matthew Schinckel, Kalle

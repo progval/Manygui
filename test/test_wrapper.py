@@ -17,7 +17,7 @@ class Stub:
     def __getitem__(self, key):
         return Stub()
                     
-from anygui.Wrappers import AbstractWrapper
+from manygui.Wrappers import AbstractWrapper
 
 class TestWrapperWithAggregates(AbstractWrapper):
     def setPosition(self, x, y):

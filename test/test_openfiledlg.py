@@ -1,5 +1,5 @@
-from anygui import *
-from anygui.backends.genericgui import OpenFileDialog
+from manygui import *
+from manygui.backends.genericgui import OpenFileDialog
 import sys
 
 dir=''

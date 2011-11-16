@@ -2,7 +2,7 @@
 
 Setup
 
->>> from anygui.References import *
+>>> from manygui.References import *
 >>> class Object:
 ...     def __repr__(self):
 ...         return '<Object>'
